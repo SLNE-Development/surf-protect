@@ -1,8 +1,6 @@
-package dev.slne.protect.bukkit.utils;
+package dev.slne.protect.bukkit.region;
 
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -22,18 +20,32 @@ import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
 import com.sk89q.worldguard.protection.regions.RegionQuery;
-import com.sk89q.worldguard.util.profile.Profile;
-import com.sk89q.worldguard.util.profile.cache.ProfileCache;
 
 import dev.slne.protect.bukkit.message.MessageManager;
-import dev.slne.protect.bukkit.regions.RegionInfo;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
+import dev.slne.protect.bukkit.region.flags.ProtectionFlags;
+import dev.slne.protect.bukkit.region.info.RegionInfo;
+import dev.slne.protect.bukkit.user.ProtectionUser;
 
+/**
+ * Represents the protection utils
+ */
 public class ProtectionUtils {
 
-	private static final WorldGuard worldGuard = WorldGuard.getInstance();
-	private static final RegionContainer container = worldGuard.getPlatform().getRegionContainer();
+	/**
+	 * Utility class
+	 */
+	private ProtectionUtils() {
+		throw new IllegalStateException("Utility class");
+	}
+
+	/**
+	 * Gets the {@link RegionContainer}
+	 *
+	 * @return the {@link RegionContainer}
+	 */
+	private static RegionContainer getRegionContainer() {
+		return WorldGuard.getInstance().getPlatform().getRegionContainer();
+	}
 
 	/**
 	 * Gets the {@link RegionManager} for the given world
@@ -42,79 +54,29 @@ public class ProtectionUtils {
 	 * @return the {@link RegionManager}
 	 */
 	public static RegionManager getRegionManager(World world) {
-		RegionManager manager = container.get(BukkitAdapter.adapt(world));
-		return manager;
+		return getRegionContainer().get(BukkitAdapter.adapt(world));
 	}
 
-	public static Component getRegionUsersComponent(List<LocalPlayer> regionUsers) {
-		TextComponent.Builder memberComponentBuilder = Component.text();
-		Iterator<LocalPlayer> memberIterator = regionUsers.iterator();
-
-		memberComponentBuilder.append(Component.text("[", MessageManager.SPACER));
-
-		ProfileCache cache = WorldGuard.getInstance().getProfileCache();
-		while (memberIterator.hasNext()) {
-			LocalPlayer memberUser = memberIterator.next();
-			String userName = memberUser.getName();
-			if (userName == null) {
-				Profile profile = cache.getIfPresent(memberUser.getUniqueId());
-
-				if (profile != null) {
-					userName = profile.getName();
-				}
-			}
-
-			memberComponentBuilder.append(Component.text(userName, MessageManager.VARIABLE_VALUE));
-
-			if (memberIterator.hasNext()) {
-				memberComponentBuilder.append(Component.text(", ", MessageManager.SPACER));
-			}
-
-		}
-
-		memberComponentBuilder.append(Component.text("]", MessageManager.SPACER));
-
-		return memberComponentBuilder.build();
-	}
-
-	public static Component getRegionOwnersMembersComponent(RegionInfo regionInfo) {
-		TextComponent.Builder builder = Component.text();
-
-		List<LocalPlayer> regionOwners = regionInfo.getOwners();
-		List<LocalPlayer> regionMembers = regionInfo.getMembers();
-
-		if (regionOwners != null) {
-			builder.append(Component.text("Besitzer: ", MessageManager.VARIABLE_KEY));
-			builder.append(getRegionUsersComponent(regionOwners));
-		}
-
-		if (regionOwners != null && regionMembers != null) {
-			builder.append(Component.text(", ", MessageManager.SPACER));
-		}
-
-		if (regionMembers != null) {
-			builder.append(Component.text("Mitglieder: ", MessageManager.VARIABLE_KEY));
-			builder.append(getRegionUsersComponent(regionMembers));
-		}
-
-		return builder.build();
-	}
-
-	public static Set<Map.Entry<String, ProtectedRegion>> getRegionsFor(LocalPlayer lp) {
+	/**
+	 * Gets all regions for the given {@link LocalPlayer}
+	 *
+	 * @param localPlayer the {@link LocalPlayer}
+	 * @return the {@link Set} of {@link Map.Entry}
+	 */
+	public static Set<Map.Entry<String, ProtectedRegion>> getRegionsFor(LocalPlayer localPlayer) {
 		Set<Map.Entry<String, ProtectedRegion>> regions = new HashSet<>();
 
 		for (World world : Bukkit.getWorlds()) {
 			com.sk89q.worldedit.world.World adaptedWorld = BukkitAdapter.adapt(world);
 
-			RegionManager manager = container.get(adaptedWorld);
+			RegionManager manager = getRegionContainer().get(adaptedWorld);
 
 			if (manager == null) {
-				return new HashSet<Map.Entry<String, ProtectedRegion>>();
+				return new HashSet<>();
 			}
 
-			regions.addAll(manager.getRegions().entrySet().stream().filter((entry) -> {
-				return entry.getValue().getOwners().contains(lp);
-			}).collect(Collectors.toSet()));
+			regions.addAll(manager.getRegions().entrySet().stream().filter(entry -> entry.getValue().getOwners()
+					.contains(localPlayer)).collect(Collectors.toSet()));
 		}
 
 		return regions;
@@ -123,16 +85,16 @@ public class ProtectionUtils {
 	/**
 	 * Tries to get a {@link RegionInfo} for a given {@link LocalPlayer} and
 	 * regionName
-	 * 
+	 *
 	 * @param localPlayer the {@link LocalPlayer}
 	 * @param regionName  the {@link String} regionName
 	 * @return the {@link RegionInfo} or <code>null</code>
 	 */
 	public static RegionInfo getRegionInfo(LocalPlayer localPlayer, String regionName) {
 		return getRegionsFor(localPlayer).stream().map(regionPredicate -> new RegionInfo(regionPredicate.getValue()))
-				.filter(regionInfo -> {
-					return regionInfo != null && regionInfo.getName().equals(regionName);
-				}).findFirst().orElse(null);
+				.filter(regionInfo -> regionInfo != null
+						&& regionInfo.getName().equals(regionName))
+				.findFirst().orElse(null);
 	}
 
 	/**
@@ -142,14 +104,14 @@ public class ProtectionUtils {
 	 * @return true if in region
 	 */
 	public static boolean isInProtectionRegion(Location location) {
-		RegionManager manager = container.get(BukkitAdapter.adapt(location.getWorld()));
+		RegionManager manager = getRegionManager(location.getWorld());
 
 		if (manager == null) {
 			return true;
 		}
 
 		ApplicableRegionSet regions = manager.getApplicableRegions(BukkitAdapter.asBlockVector(location));
-		return regions.testState(null, ProtectionSettings.SURVIVAL_PROTECT);
+		return regions.testState(null, ProtectionFlags.SURVIVAL_PROTECT);
 	}
 
 	/**
@@ -159,7 +121,7 @@ public class ProtectionUtils {
 	 * @return true if in global region
 	 */
 	public static boolean isGlobalRegion(Location location) {
-		RegionManager manager = container.get(BukkitAdapter.adapt(location.getWorld()));
+		RegionManager manager = getRegionManager(location.getWorld());
 
 		if (manager == null) {
 			return true;
@@ -172,38 +134,57 @@ public class ProtectionUtils {
 	/**
 	 * Checks if the given {@link Player} currently stands in the given
 	 * {@link ProtectedRegion}
-	 * 
+	 *
 	 * @param player          the {@link Player} to check
 	 * @param protectedRegion the {@link ProtectedRegion} to check
 	 * @return if in {@link ProtectedRegion}
 	 */
 	public static boolean standsInProtectedRegion(Player player, ProtectedRegion protectedRegion) {
-		ProtectedRegion currentRegion = getProtectedRegionByLocation(player.getLocation());
-		return currentRegion != null && protectedRegion.equals(currentRegion);
+		for (ProtectedRegion region : getProtectedRegionsByLocation(player.getLocation())) {
+			if (region != null && protectedRegion.equals(region)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
 	 * Gets a {@link ProtectedRegion} by {@link com.sk89q.worldedit.util.Location}
 	 * without including the {@link ProtectedRegion#GLOBAL_REGION}
-	 * 
+	 *
 	 * @param location the {@link com.sk89q.worldedit.util.Location}
-	 * @return the {@link ProtectedRegion} or <code>null</code>
+	 * @return the Set of {@link ProtectedRegion} or an empty list
 	 */
-	public static ProtectedRegion getProtectedRegionByLocation(Location location) {
-		com.sk89q.worldedit.util.Location worldEditLocation = BukkitAdapter.adapt(location);
-		RegionContainer regionContainer = WorldGuard.getInstance().getPlatform().getRegionContainer();
-		RegionQuery regionQuery = regionContainer.createQuery();
+	public static Set<ProtectedRegion> getProtectedRegionsByLocation(Location location) {
+		return getProtectedRegionsByLocation(location, false);
+	}
 
+	/**
+	 * Returns the protected region by the given location
+	 *
+	 * @param location         the {@link com.sk89q.worldedit.util.Location}
+	 * @param withGlobalRegion if the global region should be included
+	 * @return the Set of {@link ProtectedRegion} or an empty list
+	 */
+	public static Set<ProtectedRegion> getProtectedRegionsByLocation(Location location, boolean withGlobalRegion) {
+		com.sk89q.worldedit.util.Location worldEditLocation = BukkitAdapter.adapt(location);
+		RegionContainer regionContainer = getRegionContainer();
+		RegionQuery regionQuery = regionContainer.createQuery();
 		ApplicableRegionSet applicableRegionSet = regionQuery.getApplicableRegions(worldEditLocation);
-		return applicableRegionSet.getRegions().stream().filter(region -> {
-			return !region.getId().equals(ProtectedRegion.GLOBAL_REGION);
-		}).findFirst().orElse(null);
+
+		if (withGlobalRegion) {
+			return applicableRegionSet.getRegions();
+		} else {
+			return applicableRegionSet.getRegions().stream().filter(region -> !region.getId()
+					.equals(ProtectedRegion.GLOBAL_REGION)).collect(Collectors.toSet());
+		}
 	}
 
 	/**
 	 * Returns the distance between a location and the teleport location of the
 	 * given {@link ProtectedRegion} if set
-	 * 
+	 *
 	 * @param protectedRegion the {@link ProtectedRegion}
 	 * @param location        the {@link Location}
 	 * @return the {@link Double} distance
@@ -225,10 +206,34 @@ public class ProtectionUtils {
 	 * @return the area
 	 */
 	public static long getArea(ProtectedRegion region) {
-		Polygonal2DRegion weRegion = new Polygonal2DRegion(null, region.getPoints(),
+		Polygonal2DRegion worldEditRegion = new Polygonal2DRegion(null, region.getPoints(),
 				region.getMinimumPoint().getBlockY(), region.getMaximumPoint().getBlockY());
-		weRegion.setMaximumY(0);
-		weRegion.setMinimumY(0);
-		return weRegion.getVolume();
+
+		worldEditRegion.setMaximumY(0);
+		worldEditRegion.setMinimumY(0);
+
+		return worldEditRegion.getVolume();
+	}
+
+	/**
+	 * Returns the region info for the given {@link ProtectionUser} and region name
+	 *
+	 * @param protectionUser the {@link ProtectionUser}
+	 * @param regionName     the region name
+	 * @return the {@link RegionInfo}
+	 */
+	public static RegionInfo getRegionInfo(ProtectionUser protectionUser, String regionName) {
+		RegionInfo regionInfo = ProtectionUtils.getRegionsFor(protectionUser.getLocalPlayer()).stream()
+				.filter(region -> {
+					RegionInfo regionInfoItem = new RegionInfo(region.getValue());
+					return regionInfoItem != null && regionInfoItem.getName().equals(regionName);
+				}).map(region -> new RegionInfo(region.getValue())).findFirst().orElse(null);
+
+		if (regionInfo == null) {
+			protectionUser.sendMessage(MessageManager.getProtectionDoesntExistComponent());
+			return null;
+		}
+
+		return regionInfo;
 	}
 }

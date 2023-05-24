@@ -8,6 +8,9 @@ loader: dev.slne.protect.bukkit.BukkitLoader
 main: dev.slne.protect.bukkit.BukkitMain
 
 dependencies:
+    - name: SurfData
+      required: true
+      bootstrap: true
     - name: WorldGuard
       required: true
       bootstrap: false

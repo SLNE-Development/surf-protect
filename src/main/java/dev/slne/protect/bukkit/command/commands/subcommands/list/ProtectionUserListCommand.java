@@ -7,9 +7,9 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 
 import dev.jorel.commandapi.executors.CommandArguments;
 import dev.slne.protect.bukkit.message.MessageManager;
-import dev.slne.protect.bukkit.regions.RegionInfo;
+import dev.slne.protect.bukkit.region.ProtectionUtils;
+import dev.slne.protect.bukkit.region.info.RegionInfo;
 import dev.slne.protect.bukkit.user.ProtectionUser;
-import dev.slne.protect.bukkit.utils.ProtectionUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent.Builder;
 import net.kyori.adventure.text.event.ClickEvent;

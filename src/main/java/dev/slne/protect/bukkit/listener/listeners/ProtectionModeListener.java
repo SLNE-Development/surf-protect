@@ -6,7 +6,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.player.PlayerAttemptPickupItemEvent;
@@ -18,9 +17,10 @@ import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.util.Vector;
 
 import dev.slne.protect.bukkit.message.MessageManager;
-import dev.slne.protect.bukkit.regions.RegionCreation;
+import dev.slne.protect.bukkit.region.ProtectionRegion;
+import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
 import dev.slne.protect.bukkit.user.ProtectionUser;
-import net.kyori.adventure.text.Component;
+import io.papermc.paper.event.player.PrePlayerAttackEntityEvent;
 
 public class ProtectionModeListener implements Listener {
 
@@ -37,36 +37,20 @@ public class ProtectionModeListener implements Listener {
 	@EventHandler
 	public void onMove(PlayerMoveEvent event) {
 		ProtectionUser protectionUser = ProtectionUser.getProtectionUser(event.getPlayer());
-		RegionCreation regionCreation = protectionUser.getRegionCreation();
+		ProtectionRegion regionCreation = protectionUser.getRegionCreation();
 
 		if (regionCreation != null) {
-			int maxRange = 100, teleportMaxRange = maxRange + 20;
-			float throwbackForce = .2f;
-
 			Player player = event.getPlayer();
-			Location playerLocation = player.getLocation();
 			Location protectionModeLocation = regionCreation.getStartLocation();
 
-			double currentDistance = playerLocation.distance(protectionModeLocation);
-
-			if (currentDistance >= maxRange && currentDistance <= teleportMaxRange) {
-				throwbackPlayer(player, throwbackForce, protectionModeLocation);
-				protectionUser.getBukkitPlayer()
-						.sendMessage(Component.text().append(MessageManager.prefix())
-								.append(Component.text(
-										"Du darfst dich nicht weiter von deinem Ausgangspunkt entfernen.",
-										MessageManager.ERROR))
-								.build());
-			} else if (currentDistance > teleportMaxRange) {
-				player.teleport(protectionModeLocation);
-			}
+			throwbackPlayer(player, protectionModeLocation);
 		}
 	}
 
 	@EventHandler
 	public void onItemDrop(PlayerDropItemEvent event) {
 		ProtectionUser protectionUser = ProtectionUser.getProtectionUser(event.getPlayer());
-		RegionCreation regionCreation = protectionUser.getRegionCreation();
+		ProtectionRegion regionCreation = protectionUser.getRegionCreation();
 
 		if (regionCreation != null) {
 			event.setCancelled(true);
@@ -76,7 +60,7 @@ public class ProtectionModeListener implements Listener {
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onPortal(PlayerPortalEvent event) {
 		ProtectionUser protectionUser = ProtectionUser.getProtectionUser(event.getPlayer());
-		RegionCreation regionCreation = protectionUser.getRegionCreation();
+		ProtectionRegion regionCreation = protectionUser.getRegionCreation();
 
 		if (regionCreation != null || protectionUser.hasRegionCreation()) {
 			event.setCancelled(true);
@@ -91,7 +75,7 @@ public class ProtectionModeListener implements Listener {
 
 		Player player = (Player) event.getEntity();
 		ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
-		RegionCreation regionCreation = protectionUser.getRegionCreation();
+		ProtectionRegion regionCreation = protectionUser.getRegionCreation();
 
 		if (regionCreation != null) {
 			event.setCancelled(true);
@@ -101,7 +85,7 @@ public class ProtectionModeListener implements Listener {
 	@EventHandler
 	public void onItemPickup(PlayerAttemptPickupItemEvent event) {
 		ProtectionUser protectionUser = ProtectionUser.getProtectionUser(event.getPlayer());
-		RegionCreation regionCreation = protectionUser.getRegionCreation();
+		ProtectionRegion regionCreation = protectionUser.getRegionCreation();
 
 		if (regionCreation != null) {
 			event.setCancelled(true);
@@ -111,7 +95,7 @@ public class ProtectionModeListener implements Listener {
 	@EventHandler
 	public void onHandSwap(PlayerSwapHandItemsEvent event) {
 		ProtectionUser protectionUser = ProtectionUser.getProtectionUser(event.getPlayer());
-		RegionCreation regionCreation = protectionUser.getRegionCreation();
+		ProtectionRegion regionCreation = protectionUser.getRegionCreation();
 
 		if (regionCreation != null) {
 			event.setCancelled(true);
@@ -119,14 +103,13 @@ public class ProtectionModeListener implements Listener {
 	}
 
 	@EventHandler
-	public void onEntityAttack(EntityDamageByEntityEvent event) {
-		if (event.getDamager() instanceof Player) {
-			ProtectionUser protectionUser = ProtectionUser.getProtectionUser((Player) event.getDamager());
-			RegionCreation regionCreation = protectionUser.getRegionCreation();
+	public void onEntityAttack(PrePlayerAttackEntityEvent event) {
+		Player player = event.getPlayer();
+		ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
+		ProtectionRegion regionCreation = protectionUser.getRegionCreation();
 
-			if (regionCreation != null) {
-				event.setCancelled(true);
-			}
+		if (regionCreation != null) {
+			event.setCancelled(true);
 		}
 	}
 
@@ -138,21 +121,39 @@ public class ProtectionModeListener implements Listener {
 
 		Player player = (Player) event.getTarget();
 		ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
-		RegionCreation regionCreation = protectionUser.getRegionCreation();
+		ProtectionRegion regionCreation = protectionUser.getRegionCreation();
 
 		if (regionCreation != null) {
 			event.setCancelled(true);
 		}
 	}
 
-	private void throwbackPlayer(Player player, float force, Location protectionModeLocation) {
+	/**
+	 * Throwback the player with a given force
+	 */
+	private void throwbackPlayer(Player player, Location protectionModeLocation) {
+		int maxRange = ProtectionSettings.MAX_DISTANCE_FROM_PROTECTION_START;
+		int teleportMaxRange = ProtectionSettings.MAX_DISTANCE_FROM_PROTECTION_START_TELEPORT;
+		double throwbackForce = ProtectionSettings.MAX_DISTANCE_FROM_PROTECTION_START_FORCE;
+
 		Location playerLocation = player.getLocation();
 
 		Vector playerLocationVector = playerLocation.toVector();
 		Vector protectionModeLocationVector = protectionModeLocation.toVector();
-		Vector throwbackVector = protectionModeLocationVector.subtract(playerLocationVector).multiply(force).setY(0);
+		Vector throwbackVector = protectionModeLocationVector.subtract(playerLocationVector).multiply(
+				throwbackForce).setY(0);
 
+		double currentDistance = playerLocation.distance(protectionModeLocation);
+		double currentDistanceSquared = playerLocation.distanceSquared(protectionModeLocation);
+		player.sendMessage(currentDistanceSquared + "");
+
+		if (currentDistance >= maxRange && currentDistance < teleportMaxRange) {
+			player.setVelocity(throwbackVector);
+		} else if (currentDistance >= teleportMaxRange) {
+			player.teleport(protectionModeLocation);
+		}
+
+		player.sendMessage(MessageManager.getTooFarAwayFromStartComponent());
 		player.playSound(playerLocation, Sound.ENTITY_ENDER_DRAGON_FLAP, 3, 2);
-		player.setVelocity(throwbackVector);
 	}
 }

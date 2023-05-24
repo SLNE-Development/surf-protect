@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Manages all users
+ */
 public class ProtectionUserManager {
 
     private List<ProtectionUser> users;
@@ -17,7 +20,7 @@ public class ProtectionUserManager {
 
     /**
      * Get all users
-     * 
+     *
      * @return All users
      */
     public List<ProtectionUser> getUsers() {
@@ -26,20 +29,17 @@ public class ProtectionUserManager {
 
     /**
      * Get a user by their UUID
-     * 
+     *
      * @param uuid The UUID of the user
      * @return The user
      */
     public ProtectionUser getProtectionUser(UUID uuid) {
-        for (ProtectionUser user : users) {
-            if (user.getUuid().equals(uuid)) {
-                return user;
-            }
-        }
+        return this.users.stream().filter(user -> user.getUuid().equals(uuid)).findFirst().orElseGet(() -> {
+            ProtectionUser user = new ProtectionUser(uuid);
+            users.add(user);
 
-        ProtectionUser user = new ProtectionUser(uuid);
-        users.add(user);
-        return user;
+            return user;
+        });
     }
 
 }

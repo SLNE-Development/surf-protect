@@ -1,7 +1,5 @@
 package dev.slne.protect.bukkit.command.commands.subcommands;
 
-import java.util.concurrent.ExecutionException;
-
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -14,10 +12,10 @@ import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.StringArgument;
 import dev.slne.protect.bukkit.message.MessageManager;
-import dev.slne.protect.bukkit.regions.RegionInfo;
+import dev.slne.protect.bukkit.region.ProtectionUtils;
+import dev.slne.protect.bukkit.region.info.RegionInfo;
 import dev.slne.protect.bukkit.user.ProtectionUser;
 import dev.slne.protect.bukkit.user.ProtectionUserFinder;
-import dev.slne.protect.bukkit.utils.ProtectionUtils;
 import net.kyori.adventure.text.Component;
 
 public class ProtectionRemoveMemberCommand extends CommandAPICommand {
@@ -58,18 +56,17 @@ public class ProtectionRemoveMemberCommand extends CommandAPICommand {
 				return new String[0];
 			}
 
-			try {
-				regionInfo.get();
-			} catch (InterruptedException | ExecutionException e) {
-				e.printStackTrace();
-			}
-
 			ProfileCache cache = WorldGuard.getInstance().getProfileCache();
 
 			return regionInfo.getMembers().stream().map(member -> {
 				String userName = member.getName();
 				if (userName == null) {
 					Profile profile = cache.getIfPresent(member.getUniqueId());
+
+					if (profile == null) {
+						return null;
+					}
+
 					userName = profile.getName();
 				}
 

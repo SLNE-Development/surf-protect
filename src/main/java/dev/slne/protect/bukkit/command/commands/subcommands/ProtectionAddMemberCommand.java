@@ -10,10 +10,10 @@ import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.StringArgument;
 import dev.slne.protect.bukkit.message.MessageManager;
-import dev.slne.protect.bukkit.regions.RegionInfo;
+import dev.slne.protect.bukkit.region.ProtectionUtils;
+import dev.slne.protect.bukkit.region.info.RegionInfo;
 import dev.slne.protect.bukkit.user.ProtectionUser;
 import dev.slne.protect.bukkit.user.ProtectionUserFinder;
-import dev.slne.protect.bukkit.utils.ProtectionUtils;
 import net.kyori.adventure.text.Component;
 
 public class ProtectionAddMemberCommand extends CommandAPICommand {

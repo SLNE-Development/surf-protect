@@ -15,10 +15,10 @@ import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.StringArgument;
 import dev.slne.protect.bukkit.message.MessageManager;
-import dev.slne.protect.bukkit.regions.RegionInfo;
+import dev.slne.protect.bukkit.region.ProtectionUtils;
+import dev.slne.protect.bukkit.region.flags.ProtectionFlags;
+import dev.slne.protect.bukkit.region.info.RegionInfo;
 import dev.slne.protect.bukkit.user.ProtectionUser;
-import dev.slne.protect.bukkit.utils.ProtectionSettings;
-import dev.slne.protect.bukkit.utils.ProtectionUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -38,13 +38,12 @@ public class ProtectionSellCommand extends CommandAPICommand {
 					RegionInfo regionInfo = getRegionInfo(protectionUser, (String) args.get("protectionName2"));
 
 					if (regionInfo == null) {
-						protectionUser.sendMessage(MessageManager.prefix()
-								.append(Component.text("Das Grundstück existiert nicht.", MessageManager.ERROR)));
+						protectionUser.sendMessage(MessageManager.getProtectionDoesntExistComponent());
 						return;
 					}
 
 					ProtectedRegion protectedRegion = regionInfo.getRegion();
-					State canSellState = protectedRegion.getFlag(ProtectionSettings.SURVIVAL_CAN_SELL_FLAG);
+					State canSellState = protectedRegion.getFlag(ProtectionFlags.SURVIVAL_CAN_SELL_FLAG);
 					boolean canSell = canSellState == State.ALLOW || canSellState == null;
 
 					if (!canSell) {
@@ -79,10 +78,7 @@ public class ProtectionSellCommand extends CommandAPICommand {
 
 					RegionInfo regionInfo2 = getRegionInfo(protectionUser, (String) args.get("protectionName2"));
 					if (regionInfo2 == null) {
-						// customSurvivalUser.getBukkitPlayer()
-						// .addTransaction(new Transaction(null, customSurvivalUser.getUser(),
-						// Currency.getDefaultCurrency(), regionInfo.getRetailPrice(),
-						// ProtectionTransactionCause.SOLD_PROTECTION.name()));
+						protectionUser.addTransaction(regionInfo.getRetailPrice());
 					} else {
 						protectionUser.sendMessage(MessageManager.prefix()
 								.append(Component.text("Fehler: Das Grundstück konnte nicht verkauft werden.",
@@ -149,9 +145,7 @@ public class ProtectionSellCommand extends CommandAPICommand {
 		return ProtectionUtils.getRegionsFor(protectionUser.getLocalPlayer()).stream().filter(region -> {
 			RegionInfo regionInfoItem = new RegionInfo(region.getValue());
 			return regionInfoItem != null && regionInfoItem.getName().equals(regionName);
-		}).map(region -> {
-			return new RegionInfo(region.getValue());
-		}).findFirst().orElse(null);
+		}).map(region -> new RegionInfo(region.getValue())).findFirst().orElse(null);
 	}
 
 }

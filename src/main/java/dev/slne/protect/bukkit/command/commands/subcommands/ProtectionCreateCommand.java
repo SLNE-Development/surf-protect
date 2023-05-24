@@ -2,9 +2,9 @@ package dev.slne.protect.bukkit.command.commands.subcommands;
 
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.slne.protect.bukkit.message.MessageManager;
-import dev.slne.protect.bukkit.regions.RegionCreation;
+import dev.slne.protect.bukkit.region.ProtectionRegion;
+import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
 import dev.slne.protect.bukkit.user.ProtectionUser;
-import dev.slne.protect.bukkit.utils.ProtectionSettings;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent.Builder;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -19,7 +19,7 @@ public class ProtectionCreateCommand extends CommandAPICommand {
 
 		withSubcommand(new CommandAPICommand("confirm").executesPlayer((player, args) -> {
 			ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
-			RegionCreation regionCreation = new RegionCreation(protectionUser, null);
+			ProtectionRegion regionCreation = new ProtectionRegion(protectionUser, null);
 			protectionUser.startRegionCreation(regionCreation);
 		}));
 

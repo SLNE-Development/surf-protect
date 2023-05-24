@@ -2,7 +2,6 @@ package dev.slne.protect.bukkit.command.commands.subcommands;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -18,9 +17,9 @@ import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.StringArgument;
 import dev.slne.protect.bukkit.message.MessageManager;
-import dev.slne.protect.bukkit.regions.RegionInfo;
+import dev.slne.protect.bukkit.region.ProtectionUtils;
+import dev.slne.protect.bukkit.region.info.RegionInfo;
 import dev.slne.protect.bukkit.user.ProtectionUser;
-import dev.slne.protect.bukkit.utils.ProtectionUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent.Builder;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -62,12 +61,6 @@ public class ProtectionInfoCommand extends CommandAPICommand {
 				return;
 			}
 
-			try {
-				regionInfo.get();
-			} catch (InterruptedException | ExecutionException e) {
-				e.printStackTrace();
-			}
-
 			Builder header = Component.text();
 			header.append(Component.text("<", MessageManager.SECONDARY));
 			header.append(Component.text("--------------", MessageManager.SPACER));
@@ -76,13 +69,17 @@ public class ProtectionInfoCommand extends CommandAPICommand {
 			header.append(Component.text(">", MessageManager.SECONDARY));
 			header.append(Component.newline());
 
-			Location teleLoc = regionInfo.getRegion().getFlag(Flags.TELE_LOC);
-			Builder postion = Component.text();
-			postion.append(Component.text(teleLoc.getBlockX(), MessageManager.VARIABLE_VALUE));
-			postion.append(Component.text(", ", MessageManager.SPACER));
-			postion.append(Component.text(teleLoc.getBlockY(), MessageManager.VARIABLE_VALUE));
-			postion.append(Component.text(", ", MessageManager.SPACER));
-			postion.append(Component.text(teleLoc.getBlockZ(), MessageManager.VARIABLE_VALUE));
+			Location teleportLocation = regionInfo.getRegion().getFlag(Flags.TELE_LOC);
+			Builder positionBuilder = null;
+
+			if (teleportLocation != null) {
+				positionBuilder = Component.text();
+				positionBuilder.append(Component.text(teleportLocation.getBlockX(), MessageManager.VARIABLE_VALUE));
+				positionBuilder.append(Component.text(", ", MessageManager.SPACER));
+				positionBuilder.append(Component.text(teleportLocation.getBlockY(), MessageManager.VARIABLE_VALUE));
+				positionBuilder.append(Component.text(", ", MessageManager.SPACER));
+				positionBuilder.append(Component.text(teleportLocation.getBlockZ(), MessageManager.VARIABLE_VALUE));
+			}
 
 			Builder size = Component.text();
 			size.append(Component.text(regionInfo.getArea(), MessageManager.VARIABLE_VALUE));
@@ -90,7 +87,7 @@ public class ProtectionInfoCommand extends CommandAPICommand {
 			size.append(Component.text("[Vergrößern]", MessageManager.SUCCESS)
 					.clickEvent(ClickEvent.runCommand("/protect expand " + regionInfo.getName()))
 					.hoverEvent(HoverEvent.showText(
-							Component.text("Klicke hier um das Grundstück zu vergößern", MessageManager.SPACER))));
+							Component.text("Klicke hier um das Grundstück zu vergrößern", MessageManager.SPACER))));
 
 			Builder members = Component.text();
 			List<LocalPlayer> membersList = regionInfo.getMembers();
@@ -104,12 +101,16 @@ public class ProtectionInfoCommand extends CommandAPICommand {
 				String userName = memberUser.getName();
 				if (userName == null) {
 					Profile profile = cache.getIfPresent(memberUser.getUniqueId());
-					userName = profile.getName();
+
+					if (profile != null) {
+						userName = profile.getName();
+					}
 				}
 
 				members.append(Component.text(userName, MessageManager.VARIABLE_VALUE)
 						.clickEvent(ClickEvent
-								.suggestCommand("/protect removemember " + regionInfo.getName() + " " + userName))
+								.suggestCommand("/protect removemember " + regionInfo.getName() + " "
+										+ (userName != null ? userName : "Unknown")))
 						.hoverEvent(HoverEvent.showText(
 								Component.text("Klicke, um den Spieler zu entfernen", MessageManager.SPACER))));
 
@@ -134,7 +135,12 @@ public class ProtectionInfoCommand extends CommandAPICommand {
 
 			protectionUser.sendMessage(Component.text(" Name: ", MessageManager.VARIABLE_KEY)
 					.append(Component.text(regionInfo.getName(), MessageManager.VARIABLE_VALUE)));
-			protectionUser.sendMessage(Component.text(" Position: ", MessageManager.VARIABLE_KEY).append(postion));
+
+			if (positionBuilder != null) {
+				protectionUser.sendMessage(
+						Component.text(" Position: ", MessageManager.VARIABLE_KEY).append(positionBuilder));
+			}
+
 			protectionUser
 					.sendMessage(Component.text(" Größe: ", MessageManager.VARIABLE_KEY).append(size.build()));
 			protectionUser

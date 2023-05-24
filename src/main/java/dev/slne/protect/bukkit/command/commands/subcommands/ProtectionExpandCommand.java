@@ -10,11 +10,12 @@ import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.StringArgument;
 import dev.slne.protect.bukkit.message.MessageManager;
-import dev.slne.protect.bukkit.regions.RegionCreation;
-import dev.slne.protect.bukkit.regions.RegionInfo;
+import dev.slne.protect.bukkit.region.ProtectionRegion;
+import dev.slne.protect.bukkit.region.ProtectionUtils;
+import dev.slne.protect.bukkit.region.flags.ProtectionFlags;
+import dev.slne.protect.bukkit.region.info.RegionInfo;
+import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
 import dev.slne.protect.bukkit.user.ProtectionUser;
-import dev.slne.protect.bukkit.utils.ProtectionSettings;
-import dev.slne.protect.bukkit.utils.ProtectionUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent.Builder;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -36,10 +37,10 @@ public class ProtectionExpandCommand extends CommandAPICommand {
 						return;
 					}
 
-					RegionCreation regionCreation = new RegionCreation(protectionUser, regionInfo.getRegion());
+					ProtectionRegion regionCreation = new ProtectionRegion(protectionUser, regionInfo.getRegion());
 
 					ProtectedRegion protectedRegion = regionInfo.getRegion();
-					State canSellState = protectedRegion.getFlag(ProtectionSettings.SURVIVAL_CAN_SELL_FLAG);
+					State canSellState = protectedRegion.getFlag(ProtectionFlags.SURVIVAL_CAN_SELL_FLAG);
 					boolean canSell = canSellState == State.ALLOW || canSellState == null;
 
 					if (!canSell) {
@@ -90,7 +91,7 @@ public class ProtectionExpandCommand extends CommandAPICommand {
 			infoText.append(Component.newline());
 			infoText.append(Component.text("Du definierst dein Grundstück indem du bis zu ", MessageManager.SPACER));
 			infoText.append(Component.text(ProtectionSettings.MARKERS, MessageManager.SPACER));
-			infoText.append(Component.text(" Marker plazierst und anschließend mit dem grünen Block bestätigst.",
+			infoText.append(Component.text(" Marker platzierst und anschließend mit dem grünen Block bestätigst.",
 					MessageManager.SPACER));
 			infoText.append(Component.newline());
 			infoText.append(Component.text(
@@ -115,9 +116,7 @@ public class ProtectionExpandCommand extends CommandAPICommand {
 				.filter(region -> {
 					RegionInfo regionInfoItem = new RegionInfo(region.getValue());
 					return regionInfoItem != null && regionInfoItem.getName().equals(regionName);
-				}).map(region -> {
-					return new RegionInfo(region.getValue());
-				}).findFirst().orElse(null);
+				}).map(region -> new RegionInfo(region.getValue())).findFirst().orElse(null);
 
 		if (regionInfo == null) {
 			protectionUser.sendMessage(Component.text("Das Grundstück existiert nicht.", MessageManager.ERROR));

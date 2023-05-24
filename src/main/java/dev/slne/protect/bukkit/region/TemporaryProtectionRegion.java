@@ -1,26 +1,46 @@
-package dev.slne.protect.bukkit.regions;
+package dev.slne.protect.bukkit.region;
 
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 
-import dev.slne.protect.bukkit.utils.ProtectionUtils;
+/**
+ * Represents a temporary protection region
+ *
+ * A temporary protection region is a region that is not yet protected
+ */
+public class TemporaryProtectionRegion {
 
-public class TemporaryRegion {
 	private final ProtectedRegion region;
 	private final RegionManager manager;
 	private long effectiveArea;
 
-	public TemporaryRegion(ProtectedRegion region, RegionManager manager) {
+	/**
+	 * Construct a new temporary protection region
+	 *
+	 * @param region  the region
+	 * @param manager the region manager
+	 */
+	public TemporaryProtectionRegion(ProtectedRegion region, RegionManager manager) {
 		this.region = region;
 		this.manager = manager;
 	}
 
+	/**
+	 * Gets the actual protected region
+	 *
+	 * @return the protected region
+	 */
 	public ProtectedRegion getRegion() {
 		return region;
 	}
 
+	/**
+	 * Gets the region manager
+	 *
+	 * @return the region manager
+	 */
 	public RegionManager getManager() {
 		return manager;
 	}
@@ -70,12 +90,15 @@ public class TemporaryRegion {
 	 */
 	public boolean overlaps(ProtectedRegion other) {
 		ApplicableRegionSet regions = manager.getApplicableRegions(this.region);
+
 		if (regions.size() < 1) {
 			return false;
 		}
+
 		if (other == null) {
 			return true;
 		}
+
 		return regions.getRegions().contains(other) ? regions.size() > 1 : regions.size() > 0;
 	}
 

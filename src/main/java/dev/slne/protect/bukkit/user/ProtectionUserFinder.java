@@ -7,11 +7,21 @@ import org.bukkit.Bukkit;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 
+/**
+ * Utils for {@link LocalPlayer}s
+ */
 public class ProtectionUserFinder {
 
     /**
+     * Utility class
+     */
+    private ProtectionUserFinder() {
+        throw new IllegalStateException("Utility class");
+    }
+
+    /**
      * Find a user by their UUID
-     * 
+     *
      * @param uuid The UUID of the user
      * @return The user
      */
@@ -25,7 +35,7 @@ public class ProtectionUserFinder {
 
     /**
      * Find a user by their playerName
-     * 
+     *
      * @param playerName The playerName of the user
      * @return The user
      */

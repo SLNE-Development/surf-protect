@@ -1,6 +1,4 @@
-package dev.slne.protect.bukkit.gui;
-
-import java.util.concurrent.ExecutionException;
+package dev.slne.protect.bukkit.listener.listeners;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -21,33 +19,43 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.util.Vector;
 
 import dev.slne.protect.bukkit.BukkitMain;
-import dev.slne.protect.bukkit.regions.RegionCreation;
+import dev.slne.protect.bukkit.gui.ItemStackUtils;
+import dev.slne.protect.bukkit.region.ProtectionRegion;
+import dev.slne.protect.bukkit.region.ProtectionUtils;
+import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
+import dev.slne.protect.bukkit.region.visual.Marker;
 import dev.slne.protect.bukkit.user.ProtectionUser;
-import dev.slne.protect.bukkit.utils.ItemStackUtils;
-import dev.slne.protect.bukkit.utils.ProtectionSettings;
-import dev.slne.protect.bukkit.utils.ProtectionUtils;
-import dev.slne.protect.bukkit.visual.Marker;
 
-public class ProtectionHotbarGui implements Listener {
+public class ProtectionHotbarListener implements Listener {
 
-	public static ItemStack markerItem = ItemStackUtils.getItem(Material.REDSTONE_TORCH, ProtectionSettings.MARKERS, 0,
+	/**
+	 * The marker {@link ItemStack}
+	 */
+	public static final ItemStack markerItem = ItemStackUtils.getItem(Material.REDSTONE_TORCH,
+			ProtectionSettings.MARKERS, 0,
 			"§eMarker", "§7Platziere die Marker um dein Grundstück zu definieren");
-	public static ItemStack acceptItem = ItemStackUtils.getItem(Material.LIME_CONCRETE, 1, 0, "§aKaufen",
+
+	/**
+	 * The {@link ItemStack} to accept the protection
+	 */
+	public static final ItemStack acceptItem = ItemStackUtils.getItem(Material.LIME_CONCRETE, 1, 0, "§aKaufen",
 			"§7Bestätige deine Auswahl und erwerbe das Grundstück");
-	public static ItemStack cancelItem = ItemStackUtils.getItem(Material.RED_CONCRETE, 1, 0, "§cAbbrechen",
+
+	/**
+	 * The {@link ItemStack} to cancel the protection
+	 */
+	public static final ItemStack cancelItem = ItemStackUtils.getItem(Material.RED_CONCRETE, 1, 0, "§cAbbrechen",
 			"§7Verlasse den ProtectionMode und kehre zum normalen Spiel zurück");
 
 	@EventHandler
 	public void onInventoryClick(InventoryClickEvent event) {
-
 		if (!(event.getWhoClicked() instanceof Player)) {
 			return;
 		}
 
 		Player player = (Player) event.getWhoClicked();
 		ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
-
-		RegionCreation regionCreation = protectionUser.getRegionCreation();
+		ProtectionRegion regionCreation = protectionUser.getRegionCreation();
 
 		if (regionCreation != null) {
 			event.setCancelled(true);
@@ -59,7 +67,7 @@ public class ProtectionHotbarGui implements Listener {
 		Player player = event.getPlayer();
 		ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
 
-		RegionCreation regionCreation = protectionUser.getRegionCreation();
+		ProtectionRegion regionCreation = protectionUser.getRegionCreation();
 
 		if (regionCreation == null) {
 			return;
@@ -71,24 +79,12 @@ public class ProtectionHotbarGui implements Listener {
 		}
 
 		if (clickedItem.getItemMeta().displayName().equals(acceptItem.getItemMeta().displayName())) {
-			try {
-				regionCreation.finishProtection();
-				event.setCancelled(true);
-			} catch (InterruptedException | ExecutionException e) {
-				e.printStackTrace();
-			}
+			regionCreation.finishProtection();
+			event.setCancelled(true);
 		} else if (clickedItem.getItemMeta().displayName().equals(cancelItem.getItemMeta().displayName())) {
 			regionCreation.cancelProtection();
 			event.setCancelled(true);
 		}
-	}
-
-	public void setMarkerAmount(ProtectionUser protectionUser) {
-		RegionCreation regionCreation = protectionUser.getRegionCreation();
-		ItemStack newMarkerItem = markerItem.clone();
-		newMarkerItem.setAmount(regionCreation.getMarkerCountLeft());
-
-		protectionUser.getBukkitPlayer().getInventory().setItem(0, newMarkerItem);
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR)
@@ -98,17 +94,16 @@ public class ProtectionHotbarGui implements Listener {
 		ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
 
 		if (block.getState().hasMetadata(ProtectionSettings.MARKER_KEY)) {
-			Object obj = block.getState().getMetadata(ProtectionSettings.MARKER_KEY).get(0).value();
+			Object markerObject = block.getState().getMetadata(ProtectionSettings.MARKER_KEY).get(0).value();
 
-			if (obj instanceof Marker) {
-				Marker marker = (Marker) obj;
-				RegionCreation creation = marker.getRegionCreation();
+			if (markerObject instanceof Marker marker) {
+				ProtectionRegion creation = marker.getRegionCreation();
 				if (protectionUser.getRegionCreation() != creation) {
 					event.setCancelled(true);
 					return;
 				}
 
-				creation.removeMarker(marker, true);
+				creation.removeMarker(marker);
 				block.getState().removeMetadata(ProtectionSettings.MARKER_KEY, BukkitMain.getInstance());
 
 				event.setDropItems(false);
@@ -118,13 +113,8 @@ public class ProtectionHotbarGui implements Listener {
 			return;
 		}
 
-		if (event.getPlayer() == null) {
-			return;
-		}
-
 		if (protectionUser.getRegionCreation() != null) {
 			event.setCancelled(true);
-			return;
 		}
 	}
 
@@ -148,6 +138,7 @@ public class ProtectionHotbarGui implements Listener {
 		}) {
 			Location location = root.clone().add(vector);
 			Block block = location.getBlock();
+
 			if (block.getState().hasMetadata(ProtectionSettings.MARKER_KEY)) {
 				event.setCancelled(true);
 				return;
@@ -170,17 +161,16 @@ public class ProtectionHotbarGui implements Listener {
 			}
 
 			if (clickedItem.getItemMeta().displayName().equals(markerItem.getItemMeta().displayName())) {
-				RegionCreation regionCreation = protectionUser.getRegionCreation();
+				ProtectionRegion regionCreation = protectionUser.getRegionCreation();
 
 				if (regionCreation == null) {
 					event.setCancelled(true);
 					return;
 				}
 
-				// todo: place checks
-				BlockData replaced = event.getBlockReplacedState().getBlockData();
+				BlockData previousData = event.getBlockReplacedState().getBlockData();
+				final Marker marker = regionCreation.createMarker(event.getBlock(), previousData);
 
-				final Marker marker = regionCreation.createMarker(event.getBlock(), replaced);
 				if (marker == null) {
 					event.setCancelled(true);
 					return;
@@ -189,18 +179,27 @@ public class ProtectionHotbarGui implements Listener {
 				location.getBlock().getState().setMetadata(ProtectionSettings.MARKER_KEY,
 						new FixedMetadataValue(BukkitMain.getInstance(), marker));
 				setMarkerAmount(protectionUser);
+
 				return;
 			}
 		}
 
-		if (event.getPlayer() == null) {
-			return;
-		}
-
 		if (protectionUser.getRegionCreation() != null) {
 			event.setCancelled(true);
-			return;
 		}
+	}
+
+	/**
+	 * Set the amount of marker
+	 *
+	 * @param protectionUser the {@link ProtectionUser}
+	 */
+	public void setMarkerAmount(ProtectionUser protectionUser) {
+		ProtectionRegion regionCreation = protectionUser.getRegionCreation();
+		ItemStack newMarkerItem = markerItem.clone();
+		newMarkerItem.setAmount(regionCreation.getMarkerCountLeft());
+
+		protectionUser.getBukkitPlayer().getInventory().setItem(0, newMarkerItem);
 	}
 
 }

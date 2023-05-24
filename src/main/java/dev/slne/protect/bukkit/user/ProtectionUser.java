@@ -2,6 +2,7 @@ package dev.slne.protect.bukkit.user;
 
 import java.util.HashMap;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -12,15 +13,15 @@ import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 
 import dev.slne.protect.bukkit.BukkitMain;
-import dev.slne.protect.bukkit.gui.ProtectionHotbarGui;
+import dev.slne.protect.bukkit.listener.listeners.ProtectionHotbarListener;
 import dev.slne.protect.bukkit.message.MessageManager;
-import dev.slne.protect.bukkit.regions.RegionCreation;
-import dev.slne.protect.bukkit.utils.ProtectionSettings;
+import dev.slne.protect.bukkit.region.ProtectionRegion;
+import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
 import net.kyori.adventure.text.Component;
 
 public class ProtectionUser {
 
-	private RegionCreation regionCreation;
+	private ProtectionRegion regionCreation;
 	private HashMap<String, Long> creationCooldown;
 
 	private UUID uuid;
@@ -28,19 +29,19 @@ public class ProtectionUser {
 
 	/**
 	 * Construct a new user
-	 * 
+	 *
 	 * @param uuid The UUID of the user
 	 */
 	public ProtectionUser(UUID uuid) {
 		this.uuid = uuid;
-		this.creationCooldown = new HashMap<String, Long>();
+		this.creationCooldown = new HashMap<>();
 
 		applyLocalPlayer();
 	}
 
 	/**
 	 * Returns the {@link ProtectionUser} for the given {@link Player}
-	 * 
+	 *
 	 * @param player The player
 	 * @return The {@link ProtectionUser}
 	 */
@@ -50,7 +51,7 @@ public class ProtectionUser {
 
 	/**
 	 * Returns the {@link ProtectionUser} for the given {@link UUID}
-	 * 
+	 *
 	 * @param uuid The UUID of the user
 	 * @return The {@link ProtectionUser}
 	 */
@@ -58,7 +59,27 @@ public class ProtectionUser {
 		return BukkitMain.getBukkitInstance().getUserManager().getProtectionUser(uuid);
 	}
 
-	public RegionCreation getRegionCreation() {
+	/**
+	 * Adds a transaction to the user
+	 *
+	 * @param amount the amount to add
+	 * @return the future when the transaction is completed
+	 */
+	public CompletableFuture<Boolean> addTransaction(double amount) {
+		return CompletableFuture.completedFuture(true);
+	}
+
+	/**
+	 * Checks if the user has enough currency
+	 *
+	 * @param amount the amount to check
+	 * @return the future when the check is completed
+	 */
+	public CompletableFuture<Boolean> hasEnoughCurrency(double amount) {
+		return CompletableFuture.completedFuture(true);
+	}
+
+	public ProtectionRegion getRegionCreation() {
 		return regionCreation;
 	}
 
@@ -66,7 +87,7 @@ public class ProtectionUser {
 		return this.getRegionCreation() != null;
 	}
 
-	public void startRegionCreation(RegionCreation regionCreation) {
+	public void startRegionCreation(ProtectionRegion regionCreation) {
 		if (this.regionCreation != null) {
 			getBukkitPlayer().sendMessage(MessageManager.prefix()
 					.append(Component.text("Du befindest dich bereits im ProtectionMode.", MessageManager.ERROR)));
@@ -104,9 +125,9 @@ public class ProtectionUser {
 		getBukkitPlayer().setCollidable(false);
 
 		Inventory inventory = getBukkitPlayer().getInventory();
-		inventory.setItem(0, ProtectionHotbarGui.markerItem);
-		inventory.setItem(7, ProtectionHotbarGui.acceptItem);
-		inventory.setItem(8, ProtectionHotbarGui.cancelItem);
+		inventory.setItem(0, ProtectionHotbarListener.markerItem);
+		inventory.setItem(7, ProtectionHotbarListener.acceptItem);
+		inventory.setItem(8, ProtectionHotbarListener.cancelItem);
 
 		this.regionCreation = regionCreation;
 	}
@@ -116,7 +137,7 @@ public class ProtectionUser {
 			return;
 		}
 
-		RegionCreation creation = this.regionCreation;
+		ProtectionRegion creation = this.regionCreation;
 		this.regionCreation = null;
 		getBukkitPlayer().teleport(creation.getStartLocation());
 
@@ -129,10 +150,12 @@ public class ProtectionUser {
 
 	private LocalPlayer applyLocalPlayer() {
 		if (Bukkit.getPlayer(uuid) != null && Bukkit.getPlayer(uuid).isOnline()) {
-			return this.localPlayer = WorldGuardPlugin.inst().wrapPlayer(Bukkit.getPlayer(uuid));
+			this.localPlayer = WorldGuardPlugin.inst().wrapPlayer(Bukkit.getPlayer(uuid));
+		} else {
+			this.localPlayer = WorldGuardPlugin.inst().wrapOfflinePlayer(Bukkit.getOfflinePlayer(uuid));
 		}
 
-		return this.localPlayer = WorldGuardPlugin.inst().wrapOfflinePlayer(Bukkit.getOfflinePlayer(uuid));
+		return this.localPlayer;
 	}
 
 	public void sendMessage(Component message) {

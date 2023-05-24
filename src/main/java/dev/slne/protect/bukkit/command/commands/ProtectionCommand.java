@@ -44,8 +44,9 @@ public class ProtectionCommand extends CommandAPICommand {
 			header.append(Component.newline());
 
 			player.sendMessage(header.build());
+
 			sendCommandDescription(player, "/protect", "Zeige die Befehlsübersicht",
-					"Öffnet die aktuell angezeige Befehlsübersicht");
+					"Öffnet die aktuell angezeigte Befehlsübersicht");
 			sendCommandDescription(player, "/protect create", "Erstelle ein neues Grundstück",
 					"Betrete den ProtectionMode und erstelle ein neues Grundstück");
 			sendCommandDescription(player, "/protect expand <Grundstück>", "Vergrößere ein vorhandenes Grundstück",
@@ -53,36 +54,43 @@ public class ProtectionCommand extends CommandAPICommand {
 			sendCommandDescription(player, "/protect list", "Zeige alle deine Grundstücke an",
 					"Zeigt dir eine Liste aller deiner aktuellen Grundstücke an");
 			sendCommandDescription(player, "/protect info <Grundstück>", "Öffne die Info Seite eines Grundstückes",
-					"Öffnet eine Verwaltungsübersicht des entsprechnden Grundstücks. Hier kann du dein Grundstück auch vergrößern oder Freunde hinzufügen.");
+					"Öffnet eine Verwaltungsübersicht des entsprechenden Grundstücks. Hier kann du dein Grundstück auch vergrößern oder Freunde hinzufügen.");
 			sendCommandDescription(player, "/protect addMember <Grundstück> <Spieler>",
 					"Fügt ein Mitglied zum Grundstück hinzu",
-					"Gibt dem angegbenen Spieler die Berechtigung auf dem Grundstück zu bauen.");
+					"Gibt dem angegebenem Spieler die Berechtigung auf dem Grundstück zu bauen.");
 			sendCommandDescription(player, "/protect removeMember <Grundstück> <Spieler>",
 					"Entfernt ein Mitglied vom Grundstück hinzu",
-					"Entzieht dem angegbenen Spieler die Berechtigung auf dem Grundstück zu bauen.");
+					"Entzieht dem angegebenem Spieler die Berechtigung auf dem Grundstück zu bauen.");
 			sendCommandDescription(player, "/protect sell <Grundstück>", "Verkaufe das angegebene Grundstück",
 					"Verkauft das angegebene Grundstück und erstattet einen Teilbetrag zurück");
 			sendCommandDescription(player, "/pwho", "Überprüfe ob du auf einem Grundstück stehst",
-					"Zeige das Grunndstück und dessen Eigentümer an, auf welchem du dich gerade befindest.");
-			player.sendMessage(Component.space());
+					"Zeige das Grundstück und dessen Eigentümer an, auf welchem du dich gerade befindest.");
 
+			player.sendMessage(Component.space());
 		});
 
 		register();
-
 	}
 
+	/**
+	 * Sends the command description
+	 *
+	 * @param sender           the {@link CommandSender}
+	 * @param command          the command
+	 * @param shortDescription the short description
+	 * @param longDescription  the long description
+	 */
 	public void sendCommandDescription(CommandSender sender, String command, String shortDescription,
 			String longDescription) {
-		Builder commandDesciption = Component.text();
-		commandDesciption.append(Component.text(" - ", MessageManager.SPACER));
-		commandDesciption.append(Component.text(command, MessageManager.VARIABLE_VALUE)
+		Builder commandDescription = Component.text();
+		commandDescription.append(Component.text(" - ", MessageManager.SPACER));
+		commandDescription.append(Component.text(command, MessageManager.VARIABLE_VALUE)
 				.clickEvent(ClickEvent.suggestCommand(command))
 				.hoverEvent(HoverEvent.showText(Component.text(command, MessageManager.VARIABLE_VALUE)
 						.append(Component.newline().append(Component.text(longDescription, MessageManager.SPACER))))));
-		commandDesciption.append(Component.space());
-		commandDesciption.append(Component.text(shortDescription, MessageManager.SPACER));
-		sender.sendMessage(commandDesciption.build());
+		commandDescription.append(Component.space());
+		commandDescription.append(Component.text(shortDescription, MessageManager.SPACER));
+		sender.sendMessage(commandDescription.build());
 	}
 
 }

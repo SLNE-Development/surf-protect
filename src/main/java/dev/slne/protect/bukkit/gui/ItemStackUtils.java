@@ -1,4 +1,4 @@
-package dev.slne.protect.bukkit.utils;
+package dev.slne.protect.bukkit.gui;
 
 import java.util.Arrays;
 import java.util.List;
@@ -18,8 +18,15 @@ import net.kyori.adventure.text.Component;
 public class ItemStackUtils {
 
 	/**
+	 * Utility class
+	 */
+	private ItemStackUtils() {
+		throw new IllegalStateException("Utility class");
+	}
+
+	/**
 	 * Gets a new {@link ItemStack} by the given values
-	 * 
+	 *
 	 * @param material    the {@link Material}
 	 * @param amount      the {@link ItemStack} amount
 	 * @param damage      the {@link ItemStack} damage
@@ -29,12 +36,12 @@ public class ItemStackUtils {
 	 */
 	public static ItemStack getItem(Material material, int amount, int damage, String displayName, String... lore) {
 		return getItem(material, amount, damage, Component.text(displayName),
-				Arrays.asList(lore).stream().map(loreItem -> Component.text(loreItem)).collect(Collectors.toList()));
+				Arrays.asList(lore).stream().map(Component::text).collect(Collectors.toList()));
 	}
 
 	/**
 	 * Gets a new {@link ItemStack} by the given values
-	 * 
+	 *
 	 * @param material    the {@link Material}
 	 * @param amount      the {@link ItemStack} amount
 	 * @param damage      the {@link ItemStack} damage
@@ -49,7 +56,7 @@ public class ItemStackUtils {
 
 	/**
 	 * Gets a new {@link ItemStack} by the given values
-	 * 
+	 *
 	 * @param material    the {@link Material}
 	 * @param amount      the {@link ItemStack} amount
 	 * @param damage      the {@link ItemStack} damage
@@ -71,7 +78,7 @@ public class ItemStackUtils {
 		ItemMeta itemMeta = itemStack.getItemMeta();
 		itemMeta.displayName(displayName);
 
-		if (lore != null && lore.size() > 0) {
+		if (lore != null && !lore.isEmpty()) {
 			itemMeta.lore(lore);
 		}
 
