@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldguard.protection.flags.Flags;
@@ -17,6 +18,7 @@ import dev.slne.protect.bukkit.region.ProtectionUtils;
 import dev.slne.protect.bukkit.region.info.RegionInfo;
 import dev.slne.protect.bukkit.user.ProtectionUser;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TextComponent.Builder;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -31,7 +33,7 @@ public class ProtectionAdminListCommand extends ProtectionListCommand {
 
 		withArguments(new StringArgument("player")
 				.replaceSuggestions(ArgumentSuggestions.strings(info -> Bukkit.getOnlinePlayers().stream()
-						.map(player -> player.getName()).toArray(size -> new String[size]))));
+						.map(Player::getName).toArray(size -> new String[size]))));
 	}
 
 	@Override
@@ -55,7 +57,7 @@ public class ProtectionAdminListCommand extends ProtectionListCommand {
 			RegionInfo regionInfo2 = new RegionInfo(region2);
 
 			return regionInfo1.getName().compareTo(regionInfo2.getName());
-		}).forEach((entry) -> {
+		}).forEach(entry -> {
 			ProtectedRegion region = entry.getValue();
 			RegionInfo regionInfo = new RegionInfo(region);
 
@@ -66,28 +68,35 @@ public class ProtectionAdminListCommand extends ProtectionListCommand {
 			builder.append(Component.text(regionInfo.getArea(), MessageManager.VARIABLE_VALUE));
 			builder.append(Component.text(" Blöcke", MessageManager.VARIABLE_VALUE));
 
-			Location teleLoc = regionInfo.getRegion().getFlag(Flags.TELE_LOC);
-			Builder position = Component.text();
-			position.append(Component.text(teleLoc.getBlockX(), MessageManager.VARIABLE_VALUE));
-			position.append(Component.text(", ", MessageManager.SPACER));
-			position.append(Component.text(teleLoc.getBlockY(), MessageManager.VARIABLE_VALUE));
-			position.append(Component.text(", ", MessageManager.SPACER));
-			position.append(Component.text(teleLoc.getBlockZ(), MessageManager.VARIABLE_VALUE));
+			Location teleportLocation = regionInfo.getRegion().getFlag(Flags.TELE_LOC);
+			TextComponent.Builder positionBuilder = Component.text();
 
-			if (customSurvivalUser.getBukkitPlayer().getLocation().getWorld() == regionInfo.getTeleportLocation()
-					.getWorld()) {
-				builder.append(Component.text(" [", MessageManager.SPACER));
-				builder.append(position.build()
-						.clickEvent(ClickEvent.runCommand(
-								"/tp " + teleLoc.getBlockX() + " " + teleLoc.getBlockY() + " " + teleLoc.getBlockZ()))
-						.hoverEvent(HoverEvent.showText(Component
-								.text("Klicken, um dich zum Grundstück zu teleportieren", MessageManager.SPACER))));
-				builder.append(Component.text("]", MessageManager.SPACER));
+			if (teleportLocation != null) {
+				positionBuilder.append(Component.text(teleportLocation.getBlockX(), MessageManager.VARIABLE_VALUE));
+				positionBuilder.append(Component.text(", ", MessageManager.SPACER));
+				positionBuilder.append(Component.text(teleportLocation.getBlockY(), MessageManager.VARIABLE_VALUE));
+				positionBuilder.append(Component.text(", ", MessageManager.SPACER));
+				positionBuilder.append(Component.text(teleportLocation.getBlockZ(), MessageManager.VARIABLE_VALUE));
 
-				builder.append(Component.text(" [Info]", MessageManager.SPACER)
-						.clickEvent(ClickEvent.runCommand("/rg info " + regionInfo.getName()))
-						.hoverEvent(HoverEvent.showText(
-								Component.text("Klicken, um dir die Infos zu holen", MessageManager.SPACER))));
+				if (customSurvivalUser.getBukkitPlayer().getLocation().getWorld() == regionInfo.getTeleportLocation()
+						.getWorld()) {
+					builder.append(Component.text(" [", MessageManager.SPACER));
+					builder.append(positionBuilder.build()
+							.clickEvent(ClickEvent.runCommand(
+									"/tp " + teleportLocation.getBlockX() + " " + teleportLocation.getBlockY() + " "
+											+ teleportLocation.getBlockZ()))
+							.hoverEvent(HoverEvent.showText(Component
+									.text("Klicken, um dich zum Grundstück zu teleportieren", MessageManager.SPACER))));
+					builder.append(Component.text("]", MessageManager.SPACER));
+
+					builder.append(Component.text(" [Info]", MessageManager.SPACER)
+							.clickEvent(ClickEvent.runCommand("/rg info " + regionInfo.getName()))
+							.hoverEvent(HoverEvent.showText(
+									Component.text("Klicken, um dir die Infos zu holen", MessageManager.SPACER))));
+				}
+			} else {
+				positionBuilder
+						.append(Component.text("Die Teleport-Location ist nicht gesetzt.", MessageManager.ERROR));
 			}
 
 			customSurvivalUser.sendMessage(builder.build());

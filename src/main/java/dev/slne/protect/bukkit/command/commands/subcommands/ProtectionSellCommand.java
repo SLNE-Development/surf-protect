@@ -27,15 +27,17 @@ import net.kyori.adventure.text.format.NamedTextColor;
 
 public class ProtectionSellCommand extends CommandAPICommand {
 
+	private static final String PROTECTION_NAME = "protectionName2";
+
 	public ProtectionSellCommand() {
 		super("sell");
 
 		withPermission("survival.protect.sell");
 
-		withSubcommand(new CommandAPICommand("confirm").withArguments(new StringArgument("protectionName2"))
+		withSubcommand(new CommandAPICommand("confirm").withArguments(new StringArgument(PROTECTION_NAME))
 				.executesPlayer((player, args) -> {
 					ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
-					RegionInfo regionInfo = getRegionInfo(protectionUser, (String) args.get("protectionName2"));
+					RegionInfo regionInfo = getRegionInfo(protectionUser, (String) args.get(PROTECTION_NAME));
 
 					if (regionInfo == null) {
 						protectionUser.sendMessage(MessageManager.getProtectionDoesntExistComponent());
@@ -76,7 +78,7 @@ public class ProtectionSellCommand extends CommandAPICommand {
 					RegionManager regionManager = ProtectionUtils.getRegionManager(player.getWorld());
 					regionManager.removeRegion(protectedRegion.getId());
 
-					RegionInfo regionInfo2 = getRegionInfo(protectionUser, (String) args.get("protectionName2"));
+					RegionInfo regionInfo2 = getRegionInfo(protectionUser, (String) args.get(PROTECTION_NAME));
 					if (regionInfo2 == null) {
 						protectionUser.addTransaction(regionInfo.getRetailPrice());
 					} else {
@@ -102,7 +104,7 @@ public class ProtectionSellCommand extends CommandAPICommand {
 
 		executesPlayer((player, args) -> {
 			ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
-			String protectionName = (String) args.get("protectionName2");
+			String protectionName = (String) args.get(PROTECTION_NAME);
 			RegionInfo regionInfo = getRegionInfo(protectionUser, protectionName);
 			if (regionInfo == null) {
 				protectionUser.sendMessage(MessageManager.prefix()

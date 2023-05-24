@@ -23,15 +23,18 @@ import net.kyori.adventure.text.event.HoverEvent;
 
 public class ProtectionExpandCommand extends CommandAPICommand {
 
+	private static final String PROTECTION_NAME = "protectionName2";
+
 	public ProtectionExpandCommand() {
 		super("expand");
 
 		withPermission("survival.protect.expand");
 
-		withSubcommand(new CommandAPICommand("confirm").withArguments(new StringArgument("protectionName2"))
+		withSubcommand(new CommandAPICommand("confirm").withArguments(new StringArgument(
+				PROTECTION_NAME))
 				.executesPlayer((player, args) -> {
 					ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
-					RegionInfo regionInfo = getRegionInfo(protectionUser, (String) args.get("protectionName2"));
+					RegionInfo regionInfo = getRegionInfo(protectionUser, (String) args.get(PROTECTION_NAME));
 
 					if (regionInfo == null) {
 						return;
@@ -101,8 +104,9 @@ public class ProtectionExpandCommand extends CommandAPICommand {
 			infoText.append(Component.newline());
 			infoText.append(Component.text("ProtectionMode betreten (Klick)", MessageManager.SUCCESS)
 					.clickEvent(ClickEvent
-							.runCommand("/protect expand " + (String) args.get("protectionName2") + " confirm "
-									+ (String) args.get("protectionName2")))
+							.runCommand("/protect expand " + (String) args.get(
+									PROTECTION_NAME) + " confirm "
+									+ (String) args.get(PROTECTION_NAME)))
 					.hoverEvent(HoverEvent.showText(
 							Component.text("Klicke hier um den ProtectionMode zu betreten.",
 									MessageManager.SPACER))));

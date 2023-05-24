@@ -28,9 +28,8 @@ public class ProtectionHelperCommand extends CommandAPICommand {
 		String[] arrowChars = new String[arrowLength];
 		Arrays.fill(arrowChars, "-");
 
-		Arrays.asList(arrowChars).forEach(arrowChar -> {
-			arrowComponentBuilder.append(Component.text(arrowChar, MessageManager.SPACER));
-		});
+		Arrays.asList(arrowChars).forEach(arrowChar -> arrowComponentBuilder
+				.append(Component.text(arrowChar, MessageManager.SPACER)));
 
 		Component arrowComponent = arrowComponentBuilder.build();
 

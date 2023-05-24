@@ -13,7 +13,7 @@ import net.kyori.adventure.text.Component;
 
 public abstract class ProtectionListCommand extends ProtectionHelperCommand {
 
-	public ProtectionListCommand(String commandName) {
+	protected ProtectionListCommand(String commandName) {
 		super(commandName);
 
 		executesPlayer((player, args) -> {

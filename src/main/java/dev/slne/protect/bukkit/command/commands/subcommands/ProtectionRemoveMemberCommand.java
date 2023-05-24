@@ -20,12 +20,15 @@ import net.kyori.adventure.text.Component;
 
 public class ProtectionRemoveMemberCommand extends CommandAPICommand {
 
+	private static final String PROTECTION_NAME = "protectionName";
+	private static final String PLAYER = "player";
+
 	public ProtectionRemoveMemberCommand() {
-		super("removemember");
+		super("removeMember");
 
-		withPermission("survival.protect.removemember");
+		withPermission("survival.protect.removeMember");
 
-		withArguments(new StringArgument("protectionName").replaceSuggestions(ArgumentSuggestions.strings(info -> {
+		withArguments(new StringArgument(PROTECTION_NAME).replaceSuggestions(ArgumentSuggestions.strings(info -> {
 			CommandSender commandSender = info.sender();
 
 			if (!(commandSender instanceof Player)) {
@@ -39,7 +42,7 @@ public class ProtectionRemoveMemberCommand extends CommandAPICommand {
 					.map(region -> new RegionInfo(region.getValue()).getName()).toArray(size -> new String[size]);
 		})));
 
-		withArguments(new StringArgument("player").replaceSuggestions(ArgumentSuggestions.strings(info -> {
+		withArguments(new StringArgument(PLAYER).replaceSuggestions(ArgumentSuggestions.strings(info -> {
 			CommandSender commandSender = info.sender();
 
 			if (!(commandSender instanceof Player)) {
@@ -49,7 +52,7 @@ public class ProtectionRemoveMemberCommand extends CommandAPICommand {
 			Player player = (Player) commandSender;
 			ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
 
-			String regionName = (String) info.previousArgs().get("protectionName");
+			String regionName = (String) info.previousArgs().get(PROTECTION_NAME);
 			RegionInfo regionInfo = ProtectionUtils.getRegionInfo(protectionUser.getLocalPlayer(), regionName);
 
 			if (regionInfo == null) {
@@ -75,26 +78,25 @@ public class ProtectionRemoveMemberCommand extends CommandAPICommand {
 		})));
 
 		executesPlayer((player, args) -> {
-
 			ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
-
 			RegionInfo regionInfo = ProtectionUtils.getRegionInfo(protectionUser.getLocalPlayer(),
-					(String) args.get("protectionName"));
+					(String) args.get(PROTECTION_NAME));
 
 			if (regionInfo == null) {
 				protectionUser.sendMessage(MessageManager.prefix()
 						.append(Component.text("Das Grundstück ", MessageManager.ERROR)
 								.append(Component.text((String) args.get(
-										"protectionName"), MessageManager.VARIABLE_VALUE))
+										PROTECTION_NAME), MessageManager.VARIABLE_VALUE))
 								.append(Component.text(" konnte nicht gefunden werden!", MessageManager.ERROR))));
 				return;
 			}
 
-			LocalPlayer selectedLocalPlayer = ProtectionUserFinder.findLocalPlayer((String) args.get("player"));
+			LocalPlayer selectedLocalPlayer = ProtectionUserFinder.findLocalPlayer((String) args.get(PLAYER));
 			if (selectedLocalPlayer == null) {
 				protectionUser.sendMessage(MessageManager.prefix()
 						.append(Component.text("Der Spieler ", MessageManager.ERROR)
-								.append(Component.text((String) args.get("player"), MessageManager.VARIABLE_VALUE))
+								.append(Component.text((String) args.get(
+										PLAYER), MessageManager.VARIABLE_VALUE))
 								.append(Component.text(" konnte nicht gefunden werden!", MessageManager.ERROR))));
 				return;
 			}
@@ -102,7 +104,8 @@ public class ProtectionRemoveMemberCommand extends CommandAPICommand {
 			if (!regionInfo.getRegion().getMembers().contains(selectedLocalPlayer)) {
 				protectionUser.sendMessage(MessageManager.prefix()
 						.append(Component.text("Der Spieler ", MessageManager.ERROR)
-								.append(Component.text((String) args.get("player"), MessageManager.VARIABLE_VALUE))
+								.append(Component.text((String) args.get(
+										PLAYER), MessageManager.VARIABLE_VALUE))
 								.append(Component.text(" ist kein Mitglied!", MessageManager.ERROR))));
 				return;
 			}
@@ -111,7 +114,7 @@ public class ProtectionRemoveMemberCommand extends CommandAPICommand {
 			protectionUser.sendMessage(MessageManager.prefix()
 					.append(Component.text("Der Spieler ", MessageManager.SUCCESS)
 							.append(Component.text((String) args.get(
-									"player"), MessageManager.VARIABLE_VALUE))
+									PLAYER), MessageManager.VARIABLE_VALUE))
 							.append(Component.text(" wurde entfernt.", MessageManager.SUCCESS))));
 
 		});

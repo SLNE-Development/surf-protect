@@ -50,9 +50,9 @@ public class ProtectionInfoCommand extends CommandAPICommand {
 			ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
 			String protectionName = (String) args.get("protectionName");
 			RegionInfo regionInfo = ProtectionUtils.getRegionsFor(protectionUser.getLocalPlayer()).stream()
-					.map(region -> new RegionInfo(region.getValue())).filter(info -> {
-						return info.getName().equals(protectionName);
-					}).findFirst().orElse(null);
+					.map(region -> new RegionInfo(region.getValue())).filter(info -> info.getName()
+							.equals(protectionName))
+					.findFirst().orElse(null);
 
 			if (regionInfo == null) {
 				protectionUser.sendMessage(Component.text("Das Grundstück ", MessageManager.ERROR)
@@ -109,7 +109,7 @@ public class ProtectionInfoCommand extends CommandAPICommand {
 
 				members.append(Component.text(userName, MessageManager.VARIABLE_VALUE)
 						.clickEvent(ClickEvent
-								.suggestCommand("/protect removemember " + regionInfo.getName() + " "
+								.suggestCommand("/protect removeMember " + regionInfo.getName() + " "
 										+ (userName != null ? userName : "Unknown")))
 						.hoverEvent(HoverEvent.showText(
 								Component.text("Klicke, um den Spieler zu entfernen", MessageManager.SPACER))));
@@ -123,11 +123,11 @@ public class ProtectionInfoCommand extends CommandAPICommand {
 			members.append(Component.text("]", MessageManager.VARIABLE_VALUE));
 
 			members.append(Component.text(" [Hinzufügen]", MessageManager.SUCCESS)
-					.clickEvent(ClickEvent.suggestCommand("/protect addmember " + regionInfo.getName() + " "))
+					.clickEvent(ClickEvent.suggestCommand("/protect addMember " + regionInfo.getName() + " "))
 					.hoverEvent(HoverEvent.showText(
 							Component.text("Füge einen Spieler zu deinem Grundstück hinzu", MessageManager.SPACER))));
 			members.append(Component.text(" [Entfernen]", MessageManager.ERROR)
-					.clickEvent(ClickEvent.suggestCommand("/protect removemember " + regionInfo.getName() + " "))
+					.clickEvent(ClickEvent.suggestCommand("/protect removeMember " + regionInfo.getName() + " "))
 					.hoverEvent(HoverEvent.showText(Component.text("Entferne einen Spieler von deinem Grundstück hinzu",
 							MessageManager.SPACER))));
 
