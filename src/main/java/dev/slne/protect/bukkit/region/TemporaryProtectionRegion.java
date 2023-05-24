@@ -1,7 +1,8 @@
 package dev.slne.protect.bukkit.region;
 
+import org.bukkit.World;
+
 import com.sk89q.worldguard.LocalPlayer;
-import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 
@@ -14,15 +15,19 @@ public class TemporaryProtectionRegion {
 
 	private final ProtectedRegion region;
 	private final RegionManager manager;
+	private final World world;
+
 	private long effectiveArea;
 
 	/**
 	 * Construct a new temporary protection region
 	 *
+	 * @param world   the world
 	 * @param region  the region
 	 * @param manager the region manager
 	 */
-	public TemporaryProtectionRegion(ProtectedRegion region, RegionManager manager) {
+	public TemporaryProtectionRegion(World world, ProtectedRegion region, RegionManager manager) {
+		this.world = world;
 		this.region = region;
 		this.manager = manager;
 	}
@@ -89,17 +94,7 @@ public class TemporaryProtectionRegion {
 	 * @return whether the given region overlaps with this one
 	 */
 	public boolean overlaps(ProtectedRegion other) {
-		ApplicableRegionSet regions = manager.getApplicableRegions(this.region);
-
-		if (regions.size() < 1) {
-			return false;
-		}
-
-		if (other == null) {
-			return true;
-		}
-
-		return regions.getRegions().contains(other) ? regions.size() > 1 : regions.size() > 0;
+		return ProtectionUtils.doRegionsOverlap(this.world, this.region, other);
 	}
 
 	/**
@@ -107,5 +102,14 @@ public class TemporaryProtectionRegion {
 	 */
 	public void protect() {
 		manager.addRegion(region);
+	}
+
+	/**
+	 * Gets the world
+	 *
+	 * @return the world
+	 */
+	public World getWorld() {
+		return world;
 	}
 }

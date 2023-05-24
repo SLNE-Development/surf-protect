@@ -71,14 +71,13 @@ public class ProtectionSettings {
 	 * The max distance a user is allowed to go from the protection start before
 	 * being thrown back
 	 */
-	public static final int MAX_DISTANCE_FROM_PROTECTION_START = 100 * 100;
+	public static final int MAX_DISTANCE_FROM_PROTECTION_START = 100;
 
 	/**
 	 * The max distance a user is allowed to go from the protection start before
 	 * being teleported back
 	 */
-	public static final int MAX_DISTANCE_FROM_PROTECTION_START_TELEPORT = MAX_DISTANCE_FROM_PROTECTION_START
-			+ (20 * 20);
+	public static final int MAX_DISTANCE_FROM_PROTECTION_START_TELEPORT = MAX_DISTANCE_FROM_PROTECTION_START + 20;;
 
 	/**
 	 * The force a user is thrown back with when too far away from the protection

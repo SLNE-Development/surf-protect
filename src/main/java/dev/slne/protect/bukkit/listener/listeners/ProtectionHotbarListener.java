@@ -121,6 +121,7 @@ public class ProtectionHotbarListener implements Listener {
 	@EventHandler
 	public void onBlockToFrom(BlockFromToEvent event) {
 		Block block = event.getToBlock();
+
 		if (block.getState().hasMetadata(ProtectionSettings.MARKER_KEY)) {
 			event.setCancelled(true);
 		}

@@ -115,6 +115,26 @@ public class ProtectionUtils {
 	}
 
 	/**
+	 * Returns if two regions overlap
+	 *
+	 * @return true if regions overlap
+	 */
+	public static boolean doRegionsOverlap(World world, ProtectedRegion regionOne, ProtectedRegion regionTwo) {
+		RegionManager manager = ProtectionUtils.getRegionManager(world);
+		ApplicableRegionSet regions = manager.getApplicableRegions(regionOne);
+
+		if (regions.size() < 1) {
+			return false;
+		}
+
+		if (regionTwo == null) {
+			return true;
+		}
+
+		return regions.getRegions().contains(regionTwo) ? regions.size() > 1 : regions.size() > 0;
+	}
+
+	/**
 	 * Checks if the given location is inside global region
 	 *
 	 * @param location the location

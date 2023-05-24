@@ -105,7 +105,7 @@ public class Trail extends BukkitRunnable {
 	 */
 	private void doFrame() {
 		this.currentLocation.add(this.increase);
-		Color color = this.isProtecting ? Color.GREEN : Color.AQUA;
+		Color color = this.isProtecting ? Color.RED : Color.AQUA;
 
 		DustOptions dustOptions = new DustOptions(color, 1);
 		World world = currentLocation.getWorld();

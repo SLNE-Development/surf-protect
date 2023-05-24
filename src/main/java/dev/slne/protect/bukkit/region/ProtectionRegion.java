@@ -90,17 +90,7 @@ public class ProtectionRegion {
 			return CompletableFuture.completedFuture(RegionCreationState.MORE_MARKERS_NEEDED);
 		}
 
-		List<BlockVector2> vectors = new ArrayList<>();
-		for (Marker marker : boundingMarkers) {
-			vectors.add(BlockVector2.at(marker.getLocation().getX(), marker.getLocation().getZ()));
-		}
-
-		Player player = protectionUser.getBukkitPlayer();
-		RegionManager manager = ProtectionUtils.getRegionManager(player.getWorld());
-
-		ProtectedRegion region = prepareProtectedRegion(vectors, player);
-
-		this.temporaryRegion = new TemporaryProtectionRegion(region, manager);
+		this.prepareTemporaryRegion(protectionUser.getBukkitPlayer());
 		long area = temporaryRegion.getArea();
 
 		if (this.isExpandingRegion()) {
@@ -135,11 +125,32 @@ public class ProtectionRegion {
 	}
 
 	/**
+	 * Prepares a temporary region
+	 *
+	 * @param player the {@link Player}
+	 */
+	private void prepareTemporaryRegion(Player player) {
+		List<BlockVector2> vectors = new ArrayList<>();
+		for (Marker marker : boundingMarkers) {
+			vectors.add(BlockVector2.at(marker.getLocation().getX(), marker.getLocation().getZ()));
+		}
+
+		RegionManager manager = ProtectionUtils.getRegionManager(player.getWorld());
+		ProtectedRegion region = prepareProtectedRegion(vectors, player);
+
+		this.temporaryRegion = new TemporaryProtectionRegion(player.getWorld(), region, manager);
+	}
+
+	/**
 	 * Checks if the region is overlapping
 	 *
 	 * @return if overlapping
 	 */
 	private boolean isRegionOverlapping() {
+		if (this.temporaryRegion == null) {
+			this.prepareTemporaryRegion(this.protectionUser.getBukkitPlayer());
+		}
+
 		return this.temporaryRegion.overlaps(expandingProtection);
 	}
 

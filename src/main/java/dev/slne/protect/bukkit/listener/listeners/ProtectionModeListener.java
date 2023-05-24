@@ -144,8 +144,6 @@ public class ProtectionModeListener implements Listener {
 				throwbackForce).setY(0);
 
 		double currentDistance = playerLocation.distance(protectionModeLocation);
-		double currentDistanceSquared = playerLocation.distanceSquared(protectionModeLocation);
-		player.sendMessage(currentDistanceSquared + "");
 
 		if (currentDistance >= maxRange && currentDistance < teleportMaxRange) {
 			player.setVelocity(throwbackVector);
