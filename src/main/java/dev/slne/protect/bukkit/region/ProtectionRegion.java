@@ -3,7 +3,6 @@ package dev.slne.protect.bukkit.region;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.bukkit.Location;
@@ -83,85 +82,21 @@ public class ProtectionRegion {
 	 *
 	 * @return the {@link RegionCreationState}
 	 */
-	protected CompletableFuture<RegionCreationState> offerAccepting() {
+	protected RegionCreationState offerAccepting() {
 		if (boundingMarkers.size() < ProtectionSettings.MIN_MARKERS) {
 			protectionUser.sendMessage(MessageManager.getMoreMarkersComponent(boundingMarkers.size()));
 			temporaryRegion = null;
-			return CompletableFuture.completedFuture(RegionCreationState.MORE_MARKERS_NEEDED);
+			return RegionCreationState.MORE_MARKERS_NEEDED;
 		}
 
-		this.prepareTemporaryRegion(protectionUser.getBukkitPlayer());
-		long area = temporaryRegion.getArea();
-
-		if (this.isExpandingRegion()) {
-			temporaryRegion.setEffectiveArea(area - ProtectionUtils.getArea(expandingProtection));
-		} else {
-			temporaryRegion.setEffectiveArea(area);
-		}
-
-		if (isRegionOverlapping()) {
-			protectionUser.sendMessage(MessageManager.getOverlappingRegionsComponent());
-			return CompletableFuture.completedFuture(RegionCreationState.OVERLAPPING);
-		} else if (area <= ProtectionSettings.AREA_MIN_BLOCKS) {
-			protectionUser.sendMessage(MessageManager.getAreaTooSmallComponent());
-			return CompletableFuture.completedFuture(RegionCreationState.TOO_SMALL);
-		} else if (area > ProtectionSettings.AREA_MAX_BLOCKS) {
-			protectionUser.sendMessage(MessageManager.getAreaTooBigComponent());
-			return CompletableFuture.completedFuture(RegionCreationState.TOO_LARGE);
-		}
-
-		double effectiveCost = this.calculateProtectionPrice(temporaryRegion);
-
-		return protectionUser.hasEnoughCurrency(effectiveCost).thenApplyAsync(hasEnoughCurrency -> {
-			if (Boolean.TRUE.equals(hasEnoughCurrency)) {
-				MessageManager.sendAreaTooExpensiveComponent(protectionUser, area, effectiveCost);
-			} else {
-				MessageManager.sendAreaBuyableComponent(protectionUser, area, effectiveCost);
-			}
-
-			this.setTemporaryRegion(temporaryRegion);
-			return RegionCreationState.SUCCESS;
-		});
-	}
-
-	/**
-	 * Prepares a temporary region
-	 *
-	 * @param player the {@link Player}
-	 */
-	private void prepareTemporaryRegion(Player player) {
 		List<BlockVector2> vectors = new ArrayList<>();
 		for (Marker marker : boundingMarkers) {
 			vectors.add(BlockVector2.at(marker.getLocation().getX(), marker.getLocation().getZ()));
 		}
 
+		Player player = this.protectionUser.getBukkitPlayer();
+
 		RegionManager manager = ProtectionUtils.getRegionManager(player.getWorld());
-		ProtectedRegion region = prepareProtectedRegion(vectors, player);
-
-		this.temporaryRegion = new TemporaryProtectionRegion(player.getWorld(), region, manager);
-	}
-
-	/**
-	 * Checks if the region is overlapping
-	 *
-	 * @return if overlapping
-	 */
-	private boolean isRegionOverlapping() {
-		if (this.temporaryRegion == null) {
-			this.prepareTemporaryRegion(this.protectionUser.getBukkitPlayer());
-		}
-
-		return this.temporaryRegion.overlaps(expandingProtection);
-	}
-
-	/**
-	 * Prepares the protected region
-	 *
-	 * @param vectors the vectors
-	 * @param player  the player
-	 * @return the protected region
-	 */
-	private ProtectedRegion prepareProtectedRegion(List<BlockVector2> vectors, Player player) {
 		ProtectedRegion region;
 
 		if (this.isExpandingRegion()) {
@@ -176,7 +111,38 @@ public class ProtectionRegion {
 			region.setFlag(Flags.TELE_LOC, BukkitAdapter.adapt(boundingMarkers.get(0).getLocation()));
 		}
 
-		return region;
+		this.temporaryRegion = new TemporaryProtectionRegion(
+				player.getWorld(), region, manager);
+		long area = temporaryRegion.getArea();
+
+		if (this.isExpandingRegion()) {
+			temporaryRegion.setEffectiveArea(area - ProtectionUtils.getArea(expandingProtection));
+		} else {
+			temporaryRegion.setEffectiveArea(area);
+		}
+
+		if (temporaryRegion.overlaps(expandingProtection)) {
+			protectionUser.sendMessage(MessageManager.getOverlappingRegionsComponent());
+			return RegionCreationState.OVERLAPPING;
+		} else if (area <= ProtectionSettings.AREA_MIN_BLOCKS) {
+			protectionUser.sendMessage(MessageManager.getAreaTooSmallComponent());
+			return RegionCreationState.TOO_SMALL;
+		} else if (area > ProtectionSettings.AREA_MAX_BLOCKS) {
+			protectionUser.sendMessage(MessageManager.getAreaTooBigComponent());
+			return RegionCreationState.TOO_LARGE;
+		}
+
+		double effectiveCost = this.calculateProtectionPrice(temporaryRegion);
+		boolean hasEnoughCurrency = protectionUser.hasEnoughCurrency(effectiveCost).join();
+
+		if (!hasEnoughCurrency) {
+			MessageManager.sendAreaTooExpensiveComponent(protectionUser, area, effectiveCost);
+		} else {
+			MessageManager.sendAreaBuyableComponent(protectionUser, area, effectiveCost);
+		}
+
+		this.setTemporaryRegion(temporaryRegion);
+		return RegionCreationState.SUCCESS;
 	}
 
 	/**
@@ -184,35 +150,38 @@ public class ProtectionRegion {
 	 *
 	 * @return if successful
 	 */
-	public CompletableFuture<Boolean> finishProtection() {
+	public boolean finishProtection() {
 		if (temporaryRegion == null) {
 			offerAccepting();
-			return CompletableFuture.completedFuture(false);
+			return false;
 		}
 
 		if (temporaryRegion.overlapsUnownedRegion(protectionUser.getLocalPlayer())) {
 			protectionUser.sendMessage(MessageManager.getOverlappingRegionsComponent());
-			return CompletableFuture.completedFuture(false);
+			return false;
 		}
 
 		double effectiveCost = this.calculateProtectionPrice(temporaryRegion);
+		boolean hasEnoughCurrency = protectionUser.hasEnoughCurrency(effectiveCost).join();
 
-		return protectionUser.hasEnoughCurrency(effectiveCost).<Boolean>thenApplyAsync(hasEnoughCurrency -> {
-			if (Boolean.TRUE.equals(hasEnoughCurrency)) {
-				return protectionUser.addTransaction(-effectiveCost).<Boolean>thenApplyAsync(transactionAdded -> {
-					this.temporaryRegion.protect();
+		if (hasEnoughCurrency) {
+			boolean transactionAdded = protectionUser.addTransaction(-effectiveCost).join();
 
-					this.removeAllMarkers();
-					protectionUser.resetRegionCreation();
-					protectionUser.sendMessage(MessageManager.getProtectionCreatedComponent());
+			if (transactionAdded) {
+				this.temporaryRegion.protect();
 
-					return true;
-				}).join();
+				this.removeAllMarkers();
+				protectionUser.resetRegionCreation();
+				protectionUser.sendMessage(MessageManager.getProtectionCreatedComponent());
+				return true;
 			} else {
-				protectionUser.sendMessage(MessageManager.getTooExpensiveToBuyComponent());
+				protectionUser.sendMessage(MessageManager.getProtectionCanceledComponent());
 				return false;
 			}
-		});
+		} else {
+			protectionUser.sendMessage(MessageManager.getTooExpensiveToBuyComponent());
+			return false;
+		}
 	}
 
 	/**
@@ -283,7 +252,10 @@ public class ProtectionRegion {
 			return null;
 		}
 
-		if (isRegionOverlapping()) {
+		// Perform actual state operation
+		RegionCreationState state = offerAccepting();
+
+		if (state.equals(RegionCreationState.OVERLAPPING)) {
 			this.removeMarker(marker);
 			this.handleTrails();
 			this.calculateBoundingMarkers(marker);
@@ -332,7 +304,7 @@ public class ProtectionRegion {
 		}
 
 		// Add last trail
-		if (boundingMarkers.size() >= ProtectionSettings.MIN_MARKERS) {
+		if (boundingMarkers.size() >= ProtectionSettings.MIN_MARKERS_LAST_CONNECTION) {
 			Marker first = boundingMarkers.get(0);
 			Marker last = boundingMarkers.get(boundingMarkers.size() - 1);
 
