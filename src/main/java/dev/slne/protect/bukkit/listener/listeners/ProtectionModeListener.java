@@ -137,21 +137,27 @@ public class ProtectionModeListener implements Listener {
 		double throwbackForce = ProtectionSettings.MAX_DISTANCE_FROM_PROTECTION_START_FORCE;
 
 		Location playerLocation = player.getLocation();
+		Location playerLocationYZero = playerLocation.clone();
+		playerLocationYZero.setY(0); // Ignore Y
+		Location protectionModeLocationYZero = protectionModeLocation.clone();
+		protectionModeLocationYZero.setY(0); // Ignore Y
 
 		Vector playerLocationVector = playerLocation.toVector();
 		Vector protectionModeLocationVector = protectionModeLocation.toVector();
 		Vector throwbackVector = protectionModeLocationVector.subtract(playerLocationVector).multiply(
 				throwbackForce).setY(0);
 
-		double currentDistance = playerLocation.distance(protectionModeLocation);
+		double currentDistance = playerLocationYZero.distanceSquared(protectionModeLocationYZero);
 
 		if (currentDistance >= maxRange && currentDistance < teleportMaxRange) {
 			player.setVelocity(throwbackVector);
 		} else if (currentDistance >= teleportMaxRange) {
 			player.teleport(protectionModeLocation);
+		} else {
+			return;
 		}
 
 		player.sendMessage(MessageManager.getTooFarAwayFromStartComponent());
-		player.playSound(playerLocation, Sound.ENTITY_ENDER_DRAGON_FLAP, 3, 2);
+		player.playSound(playerLocation, Sound.ENTITY_ENDER_DRAGON_FLAP, .75f, 2);
 	}
 }
