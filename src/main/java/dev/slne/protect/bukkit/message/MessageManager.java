@@ -260,8 +260,8 @@ public class MessageManager {
     public static void sendAreaBuyableComponent(ProtectionUser user, long area, double effectiveCost) {
         sendAreaBuyHeader(user, area, effectiveCost);
 
-        prefixMessage(user, Component
-                .text("Wenn du das Grundstück kaufen möchtest, nutze den Bestätigungsknopf in deiner Hotbar", INFO));
+        prefixMessage(user, Component.text("Wenn du das Grundstück kaufen möchtest,", INFO));
+        prefixMessage(user, Component.text("nutze den Bestätigungsknopf in deiner Hotbar.", INFO));
     }
 
     /**
