@@ -28,11 +28,11 @@ public class ProtectionVisualizeCommand extends CommandAPICommand {
                 ProtectionVisualizer visualizer = new ProtectionVisualizer(protectedRegion, protectionUser);
 
                 if (state) {
-                    BukkitMain.getBukkitInstance().getVisualizerTask().addVisualizer(visualizer);
+                    BukkitMain.getBukkitInstance().getProtectionVisualizerManager().addVisualizer(visualizer);
                     visualizer.visualize();
                     player.sendMessage("showing");
                 } else {
-                    BukkitMain.getBukkitInstance().getVisualizerTask().removeVisualizers(player);
+                    BukkitMain.getBukkitInstance().getProtectionVisualizerManager().removeVisualizers(player);
                     player.sendMessage("hiding");
                 }
             }

@@ -45,7 +45,7 @@ public class ProtectionRenameConfirmCommand implements ProtectionHelperCommand {
                                 protectionUser.addTransaction(-ProtectionSettings.PROTECTION_RENAME_PRICE);
                                 ProtectionFlagInfo protectionInfo = new ProtectionFlagInfo(protectionDisplayName);
 
-                                regionInfo.getRegion().setFlag(ProtectionFlags.SURVIVAL_PROTECT_FLAG,
+                                regionInfo.getRegion().setFlag(ProtectionFlags.SURF_PROTECT_FLAG,
                                         protectionInfo);
 
                                 player.sendMessage(MessageManager.getProtectionRenamedComponent());

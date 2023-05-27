@@ -21,7 +21,7 @@ public class ProtectionAddMemberCommand extends CommandAPICommand {
 	public ProtectionAddMemberCommand() {
 		super("addmember");
 
-		withPermission("survival.protect.addmember");
+		withPermission("surf.protect.addmember");
 
 		withArguments(new StringArgument("protectionName").replaceSuggestions(ArgumentSuggestions.strings(info -> {
 			CommandSender commandSender = info.sender();
@@ -31,9 +31,9 @@ public class ProtectionAddMemberCommand extends CommandAPICommand {
 			}
 
 			Player player = (Player) commandSender;
-			ProtectionUser customSurvivalUser = ProtectionUser.getProtectionUser(player);
+			ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
 
-			return ProtectionUtils.getRegionsFor(customSurvivalUser.getLocalPlayer()).stream()
+			return ProtectionUtils.getRegionsFor(protectionUser.getLocalPlayer()).stream()
 					.map(region -> new RegionInfo(region.getValue()).getName()).toArray(size -> new String[size]);
 		})));
 
@@ -44,13 +44,13 @@ public class ProtectionAddMemberCommand extends CommandAPICommand {
 
 		executesPlayer((player, args) -> {
 
-			ProtectionUser customSurvivalUser = ProtectionUser.getProtectionUser(player);
+			ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
 
-			RegionInfo regionInfo = ProtectionUtils.getRegionInfo(customSurvivalUser.getLocalPlayer(),
+			RegionInfo regionInfo = ProtectionUtils.getRegionInfo(protectionUser.getLocalPlayer(),
 					(String) args.get("protectionName"));
 
 			if (regionInfo == null) {
-				customSurvivalUser.sendMessage(MessageManager.prefix()
+				protectionUser.sendMessage(MessageManager.prefix()
 						.append(Component.text("Das Grundstück ", MessageManager.ERROR)
 								.append(Component.text((String) args.get("protectionName"),
 										MessageManager.VARIABLE_VALUE))
@@ -58,17 +58,17 @@ public class ProtectionAddMemberCommand extends CommandAPICommand {
 				return;
 			}
 
-			LocalPlayer selecctedLocalPlayer = ProtectionUserFinder.findLocalPlayer((String) args.get("player"));
-			if (selecctedLocalPlayer == null) {
-				customSurvivalUser.sendMessage(MessageManager.prefix()
+			LocalPlayer selectedLocalPlayer = ProtectionUserFinder.findLocalPlayer((String) args.get("player"));
+			if (selectedLocalPlayer == null) {
+				protectionUser.sendMessage(MessageManager.prefix()
 						.append(Component.text("Der Spieler ", MessageManager.ERROR)
 								.append(Component.text((String) args.get("player"), MessageManager.VARIABLE_VALUE))
 								.append(Component.text(" konnte nicht gefunden werden!", MessageManager.ERROR))));
 				return;
 			}
 
-			if (regionInfo.getRegion().getMembers().contains(selecctedLocalPlayer)) {
-				customSurvivalUser.sendMessage(MessageManager.prefix()
+			if (regionInfo.getRegion().getMembers().contains(selectedLocalPlayer)) {
+				protectionUser.sendMessage(MessageManager.prefix()
 						.append(Component.text("Der Spieler ", MessageManager.ERROR)
 								.append(Component.text((String) args.get(
 										"player"), MessageManager.VARIABLE_VALUE))
@@ -76,8 +76,8 @@ public class ProtectionAddMemberCommand extends CommandAPICommand {
 				return;
 			}
 
-			regionInfo.getRegion().getMembers().addPlayer(selecctedLocalPlayer);
-			customSurvivalUser.sendMessage(MessageManager.prefix()
+			regionInfo.getRegion().getMembers().addPlayer(selectedLocalPlayer);
+			protectionUser.sendMessage(MessageManager.prefix()
 					.append(Component.text("Der Spieler ", MessageManager.SUCCESS)
 							.append(Component.text((String) args.get(
 									"player"), MessageManager.VARIABLE_VALUE))

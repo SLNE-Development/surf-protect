@@ -23,7 +23,7 @@ public class ProtectionCommand extends CommandAPICommand {
 		super("protect");
 
 		withAliases("protection", "claim");
-		withPermission("survival.protect");
+		withPermission("surf.protect");
 
 		withSubcommand(new ProtectionUserListCommand());
 		withSubcommand(new ProtectionAdminListCommand());

@@ -32,7 +32,7 @@ public class ProtectionSellCommand extends CommandAPICommand {
 	public ProtectionSellCommand() {
 		super("sell");
 
-		withPermission("survival.protect.sell");
+		withPermission("surf.protect.sell");
 
 		withSubcommand(new CommandAPICommand("confirm").withArguments(new StringArgument(PROTECTION_NAME))
 				.executesPlayer((player, args) -> {
@@ -45,7 +45,7 @@ public class ProtectionSellCommand extends CommandAPICommand {
 					}
 
 					ProtectedRegion protectedRegion = regionInfo.getRegion();
-					State canSellState = protectedRegion.getFlag(ProtectionFlags.SURVIVAL_CAN_SELL_FLAG);
+					State canSellState = protectedRegion.getFlag(ProtectionFlags.SURF_CAN_SELL_FLAG);
 					boolean canSell = canSellState == State.ALLOW || canSellState == null;
 
 					if (!canSell) {

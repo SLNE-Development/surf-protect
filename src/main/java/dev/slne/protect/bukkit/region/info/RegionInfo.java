@@ -32,13 +32,13 @@ public class RegionInfo {
 	/**
 	 * Construct a new region info
 	 *
-	 * Also fetches the survival protect flag from the region
+	 * Also fetches the surf protect flag from the region
 	 *
 	 * @param region The region
 	 */
 	public RegionInfo(ProtectedRegion region) {
 		this.region = region;
-		this.info = region.getFlag(ProtectionFlags.SURVIVAL_PROTECT_FLAG);
+		this.info = region.getFlag(ProtectionFlags.SURF_PROTECT_FLAG);
 
 		if (this.info == null) {
 			this.info = setProtectionInfoToRegion(new ProtectionFlagInfo(this.region.getId()));
@@ -111,7 +111,7 @@ public class RegionInfo {
 	 */
 	public ProtectionFlagInfo setProtectionInfoToRegion(ProtectionFlagInfo info) {
 		this.info = info;
-		this.region.setFlag(ProtectionFlags.SURVIVAL_PROTECT_FLAG, this.info);
+		this.region.setFlag(ProtectionFlags.SURF_PROTECT_FLAG, this.info);
 
 		return this.info;
 	}

@@ -30,7 +30,7 @@ public class ProtectionInfoCommand extends CommandAPICommand {
 	public ProtectionInfoCommand() {
 		super("info");
 
-		withPermission("survival.protect.info");
+		withPermission("surf.protect.info");
 
 		withArguments(new StringArgument("protectionName").replaceSuggestions(ArgumentSuggestions.strings(info -> {
 			CommandSender commandSender = info.sender();

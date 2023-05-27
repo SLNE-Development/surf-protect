@@ -29,7 +29,7 @@ public class ProtectionAdminListCommand extends ProtectionListCommand {
 	public ProtectionAdminListCommand() {
 		super("list");
 
-		withPermission("survival.protect.list.admin");
+		withPermission("surf.protect.list.admin");
 
 		withArguments(new StringArgument("player")
 				.replaceSuggestions(ArgumentSuggestions.strings(info -> Bukkit.getOnlinePlayers().stream()
@@ -37,17 +37,17 @@ public class ProtectionAdminListCommand extends ProtectionListCommand {
 	}
 
 	@Override
-	public void provideList(ProtectionUser customSurvivalUser, ProtectionUser runAs, CommandArguments args) {
+	public void provideList(ProtectionUser protectionUser, ProtectionUser runAs, CommandArguments args) {
 
-		if (!customSurvivalUser.getBukkitPlayer().hasPermission("survival.protect.list.admin")) {
-			customSurvivalUser.sendMessage(MessageManager.prefix()
+		if (!protectionUser.getBukkitPlayer().hasPermission("surf.protect.list.admin")) {
+			protectionUser.sendMessage(MessageManager.prefix()
 					.append(Component.text("Du hast keine Berechtigung für diesen Befehl!", MessageManager.ERROR)));
 			return;
 		}
 
 		List<Map.Entry<String, ProtectedRegion>> playerRegions = ProtectionUtils.getRegionsFor(runAs.getLocalPlayer());
 
-		customSurvivalUser.sendMessage(getHeaderComponent(runAs.getLocalPlayer().getName() + "'s Grundstücke"));
+		protectionUser.sendMessage(getHeaderComponent(runAs.getLocalPlayer().getName() + "'s Grundstücke"));
 
 		playerRegions.stream().sorted((o1, o2) -> {
 			ProtectedRegion region1 = o1.getValue();
@@ -78,7 +78,7 @@ public class ProtectionAdminListCommand extends ProtectionListCommand {
 				positionBuilder.append(Component.text(", ", MessageManager.SPACER));
 				positionBuilder.append(Component.text(teleportLocation.getBlockZ(), MessageManager.VARIABLE_VALUE));
 
-				if (customSurvivalUser.getBukkitPlayer().getLocation().getWorld() == regionInfo.getTeleportLocation()
+				if (protectionUser.getBukkitPlayer().getLocation().getWorld() == regionInfo.getTeleportLocation()
 						.getWorld()) {
 					builder.append(Component.text(" [", MessageManager.SPACER));
 					builder.append(positionBuilder.build()
@@ -99,9 +99,9 @@ public class ProtectionAdminListCommand extends ProtectionListCommand {
 						.append(Component.text("Die Teleport-Location ist nicht gesetzt.", MessageManager.ERROR));
 			}
 
-			customSurvivalUser.sendMessage(builder.build());
+			protectionUser.sendMessage(builder.build());
 		});
 
-		customSurvivalUser.sendMessage(Component.space());
+		protectionUser.sendMessage(Component.space());
 	}
 }

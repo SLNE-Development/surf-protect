@@ -19,7 +19,7 @@ public class ProtectionWhoCommand extends CommandAPICommand {
 	public ProtectionWhoCommand() {
 		super("pwho");
 
-		withPermission("survival.protect.pwho");
+		withPermission("surf.protect.pwho");
 
 		executesPlayer((player, args) -> {
 			Location playerLocation = player.getLocation();

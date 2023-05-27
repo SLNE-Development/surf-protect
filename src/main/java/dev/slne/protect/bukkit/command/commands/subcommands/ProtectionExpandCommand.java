@@ -28,7 +28,7 @@ public class ProtectionExpandCommand extends CommandAPICommand {
 	public ProtectionExpandCommand() {
 		super("expand");
 
-		withPermission("survival.protect.expand");
+		withPermission("surf.protect.expand");
 
 		withSubcommand(new CommandAPICommand("confirm").withArguments(new StringArgument(
 				PROTECTION_NAME))
@@ -43,7 +43,7 @@ public class ProtectionExpandCommand extends CommandAPICommand {
 					ProtectionRegion regionCreation = new ProtectionRegion(protectionUser, regionInfo.getRegion());
 
 					ProtectedRegion protectedRegion = regionInfo.getRegion();
-					State canSellState = protectedRegion.getFlag(ProtectionFlags.SURVIVAL_CAN_SELL_FLAG);
+					State canSellState = protectedRegion.getFlag(ProtectionFlags.SURF_CAN_SELL_FLAG);
 					boolean canSell = canSellState == State.ALLOW || canSellState == null;
 
 					if (!canSell) {

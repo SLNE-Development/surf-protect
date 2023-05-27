@@ -112,7 +112,7 @@ public class ProtectionUtils {
 		}
 
 		ApplicableRegionSet regions = manager.getApplicableRegions(BukkitAdapter.asBlockVector(location));
-		return regions.testState(null, ProtectionFlags.SURVIVAL_PROTECT);
+		return regions.testState(null, ProtectionFlags.SURF_PROTECT);
 	}
 
 	/**

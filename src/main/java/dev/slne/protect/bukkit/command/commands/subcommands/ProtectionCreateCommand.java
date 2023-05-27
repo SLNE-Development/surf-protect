@@ -15,7 +15,7 @@ public class ProtectionCreateCommand extends CommandAPICommand {
 	public ProtectionCreateCommand() {
 		super("create");
 
-		withPermission("survival.protect.create");
+		withPermission("surf.protect.create");
 
 		withSubcommand(new CommandAPICommand("confirm").executesPlayer((player, args) -> {
 			ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
@@ -37,7 +37,7 @@ public class ProtectionCreateCommand extends CommandAPICommand {
 					MessageManager.SPACER));
 			infoText.append(Component.text(ProtectionSettings.MARKERS,
 					MessageManager.SPACER));
-			infoText.append(Component.text(" Marker plazierst und anschließend mit dem grünen Block bestätigst.",
+			infoText.append(Component.text(" Marker platzierst und anschließend mit dem grünen Block bestätigst.",
 					MessageManager.SPACER));
 			infoText.append(Component.newline());
 			infoText.append(Component.text(

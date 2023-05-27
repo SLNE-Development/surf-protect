@@ -26,7 +26,7 @@ public class ProtectionRemoveMemberCommand extends CommandAPICommand {
 	public ProtectionRemoveMemberCommand() {
 		super("removeMember");
 
-		withPermission("survival.protect.removeMember");
+		withPermission("surf.protect.removeMember");
 
 		withArguments(new StringArgument(PROTECTION_NAME).replaceSuggestions(ArgumentSuggestions.strings(info -> {
 			CommandSender commandSender = info.sender();

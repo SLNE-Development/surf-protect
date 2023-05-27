@@ -21,7 +21,7 @@ public class ProtectionUserListCommand extends ProtectionListCommand {
 	public ProtectionUserListCommand() {
 		super("list");
 
-		withPermission("survival.protect.list");
+		withPermission("surf.protect.list");
 	}
 
 	@Override

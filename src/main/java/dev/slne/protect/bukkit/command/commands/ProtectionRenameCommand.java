@@ -39,7 +39,7 @@ public class ProtectionRenameCommand implements CommandExecutor, TabCompleter {
 
 		Player player = (Player) sender;
 
-		if (!sender.hasPermission("survival.protect.rename")) {
+		if (!sender.hasPermission("surf.protect.rename")) {
 			sender.sendMessage(MessageManager.getNoPermissionComponent());
 			return true;
 		}
@@ -64,7 +64,7 @@ public class ProtectionRenameCommand implements CommandExecutor, TabCompleter {
 
 		Player player = (Player) sender;
 
-		if (!sender.hasPermission("survival.protect.rename")) {
+		if (!sender.hasPermission("surf.protect.rename")) {
 			return suggestions;
 		}
 
