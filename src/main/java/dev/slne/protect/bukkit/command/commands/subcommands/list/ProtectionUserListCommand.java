@@ -1,7 +1,7 @@
 package dev.slne.protect.bukkit.command.commands.subcommands.list;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 
@@ -26,8 +26,7 @@ public class ProtectionUserListCommand extends ProtectionListCommand {
 
 	@Override
 	public void provideList(ProtectionUser protectionUser, ProtectionUser runAs, CommandArguments args) {
-
-		Set<Map.Entry<String, ProtectedRegion>> playerRegions = ProtectionUtils
+		List<Map.Entry<String, ProtectedRegion>> playerRegions = ProtectionUtils
 				.getRegionsFor(protectionUser.getLocalPlayer());
 
 		Builder header = Component.text();

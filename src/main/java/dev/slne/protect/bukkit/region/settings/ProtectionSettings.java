@@ -97,6 +97,17 @@ public class ProtectionSettings {
 	public static final int PROTECTION_RENAME_PRICE = 2500;
 
 	/**
+	 * The maximum amount of blocks a player can be away from the protection
+	 * visualization
+	 */
+	public static final int PROTECTION_VISUALIZER_MAX_DISTANCE = 50;
+
+	/**
+	 * The height of the protection visualizer
+	 */
+	public static final int PROTECTION_VISUALIZER_HEIGHT = 20;
+
+	/**
 	 * A utility class
 	 */
 	private ProtectionSettings() {

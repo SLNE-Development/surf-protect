@@ -1,6 +1,7 @@
 package dev.slne.protect.bukkit.command;
 
 import dev.slne.protect.bukkit.command.commands.ProtectionCommand;
+import dev.slne.protect.bukkit.command.commands.ProtectionVisualizeCommand;
 import dev.slne.protect.bukkit.command.commands.ProtectionWhoCommand;
 
 public class BukkitCommandManager {
@@ -11,6 +12,8 @@ public class BukkitCommandManager {
     public void registerCommands() {
         new ProtectionCommand();
         new ProtectionWhoCommand();
+
+        new ProtectionVisualizeCommand();
     }
 
 }

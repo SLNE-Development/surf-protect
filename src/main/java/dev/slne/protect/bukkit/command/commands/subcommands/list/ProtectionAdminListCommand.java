@@ -1,7 +1,7 @@
 package dev.slne.protect.bukkit.command.commands.subcommands.list;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -45,7 +45,7 @@ public class ProtectionAdminListCommand extends ProtectionListCommand {
 			return;
 		}
 
-		Set<Map.Entry<String, ProtectedRegion>> playerRegions = ProtectionUtils.getRegionsFor(runAs.getLocalPlayer());
+		List<Map.Entry<String, ProtectedRegion>> playerRegions = ProtectionUtils.getRegionsFor(runAs.getLocalPlayer());
 
 		customSurvivalUser.sendMessage(getHeaderComponent(runAs.getLocalPlayer().getName() + "'s Grundstücke"));
 

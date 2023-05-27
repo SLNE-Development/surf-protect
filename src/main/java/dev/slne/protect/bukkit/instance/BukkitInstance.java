@@ -8,6 +8,7 @@ import dev.slne.protect.bukkit.BukkitMain;
 import dev.slne.protect.bukkit.command.BukkitCommandManager;
 import dev.slne.protect.bukkit.listener.BukkitListenerManager;
 import dev.slne.protect.bukkit.region.flags.ProtectionFlags;
+import dev.slne.protect.bukkit.region.visual.visualizer.VisualizerTask;
 import dev.slne.protect.bukkit.user.ProtectionUserManager;
 
 public class BukkitInstance {
@@ -16,6 +17,7 @@ public class BukkitInstance {
     private BukkitListenerManager listenerManager;
 
     private ProtectionUserManager userManager;
+    private VisualizerTask visualizerTask;
 
     /**
      * Called when the plugin is loaded
@@ -41,6 +43,8 @@ public class BukkitInstance {
         commandManager.registerCommands();
 
         listenerManager.registerListeners();
+
+        visualizerTask = new VisualizerTask();
     }
 
     /**
@@ -67,6 +71,15 @@ public class BukkitInstance {
      */
     public ProtectionUserManager getUserManager() {
         return userManager;
+    }
+
+    /**
+     * Returns the {@link VisualizerTask}
+     *
+     * @return the {@link VisualizerTask}
+     */
+    public VisualizerTask getVisualizerTask() {
+        return visualizerTask;
     }
 
 }

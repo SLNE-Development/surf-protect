@@ -1,6 +1,7 @@
 package dev.slne.protect.bukkit.region;
 
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -63,8 +64,8 @@ public class ProtectionUtils {
 	 * @param localPlayer the {@link LocalPlayer}
 	 * @return the {@link Set} of {@link Map.Entry}
 	 */
-	public static Set<Map.Entry<String, ProtectedRegion>> getRegionsFor(LocalPlayer localPlayer) {
-		Set<Map.Entry<String, ProtectedRegion>> regions = new HashSet<>();
+	public static List<Map.Entry<String, ProtectedRegion>> getRegionsFor(LocalPlayer localPlayer) {
+		List<Map.Entry<String, ProtectedRegion>> regions = new ArrayList<>();
 
 		for (World world : Bukkit.getWorlds()) {
 			com.sk89q.worldedit.world.World adaptedWorld = BukkitAdapter.adapt(world);
@@ -72,11 +73,11 @@ public class ProtectionUtils {
 			RegionManager manager = getRegionContainer().get(adaptedWorld);
 
 			if (manager == null) {
-				return new HashSet<>();
+				return new ArrayList<>();
 			}
 
 			regions.addAll(manager.getRegions().entrySet().stream().filter(entry -> entry.getValue().getOwners()
-					.contains(localPlayer)).collect(Collectors.toSet()));
+					.contains(localPlayer)).toList());
 		}
 
 		return regions;
