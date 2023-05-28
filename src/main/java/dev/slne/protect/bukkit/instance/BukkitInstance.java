@@ -8,7 +8,7 @@ import dev.slne.protect.bukkit.BukkitMain;
 import dev.slne.protect.bukkit.command.BukkitCommandManager;
 import dev.slne.protect.bukkit.listener.BukkitListenerManager;
 import dev.slne.protect.bukkit.region.flags.ProtectionFlags;
-import dev.slne.protect.bukkit.region.visual.visualizer.VisualizerTask;
+import dev.slne.protect.bukkit.region.visual.visualizer.ProtectionVisualizerManager;
 import dev.slne.protect.bukkit.user.ProtectionUserManager;
 
 public class BukkitInstance {
@@ -17,7 +17,7 @@ public class BukkitInstance {
     private BukkitListenerManager listenerManager;
 
     private ProtectionUserManager userManager;
-    private VisualizerTask visualizerTask;
+    private ProtectionVisualizerManager protectionVisualizerManager;
 
     /**
      * Called when the plugin is loaded
@@ -30,9 +30,10 @@ public class BukkitInstance {
         userManager = new ProtectionUserManager();
 
         // Register flags
-        WorldGuard.getInstance().getFlagRegistry().register(ProtectionFlags.SURVIVAL_PROTECT);
-        WorldGuard.getInstance().getFlagRegistry().register(ProtectionFlags.SURVIVAL_PROTECT_FLAG);
-        WorldGuard.getInstance().getFlagRegistry().register(ProtectionFlags.SURVIVAL_CAN_SELL_FLAG);
+        WorldGuard.getInstance().getFlagRegistry().register(ProtectionFlags.SURF_PROTECT);
+        WorldGuard.getInstance().getFlagRegistry().register(ProtectionFlags.SURF_PROTECT_FLAG);
+        WorldGuard.getInstance().getFlagRegistry().register(ProtectionFlags.SURF_CAN_SELL_FLAG);
+        WorldGuard.getInstance().getFlagRegistry().register(ProtectionFlags.SURF_BIG_PROTECTION_FLAG);
     }
 
     /**
@@ -44,7 +45,7 @@ public class BukkitInstance {
 
         listenerManager.registerListeners();
 
-        visualizerTask = new VisualizerTask();
+        protectionVisualizerManager = new ProtectionVisualizerManager();
     }
 
     /**
@@ -74,12 +75,12 @@ public class BukkitInstance {
     }
 
     /**
-     * Returns the {@link VisualizerTask}
+     * Returns the {@link ProtectionVisualizerManager}
      *
-     * @return the {@link VisualizerTask}
+     * @return the {@link ProtectionVisualizerManager}
      */
-    public VisualizerTask getVisualizerTask() {
-        return visualizerTask;
+    public ProtectionVisualizerManager getProtectionVisualizerManager() {
+        return protectionVisualizerManager;
     }
 
 }

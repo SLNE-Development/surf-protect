@@ -24,17 +24,24 @@ public class ProtectionVisualizeCommand extends CommandAPICommand {
             List<Entry<String, ProtectedRegion>> regions = ProtectionUtils
                     .getRegionsFor(protectionUser.getLocalPlayer());
 
-            for (ProtectedRegion protectedRegion : regions.stream().map(Entry::getValue).toList()) {
-                ProtectionVisualizer visualizer = new ProtectionVisualizer(protectedRegion, protectionUser);
+            ProtectionVisualizer visualizer = BukkitMain.getBukkitInstance().getProtectionVisualizerManager()
+                    .getVisualizer(protectionUser);
 
-                if (state) {
-                    BukkitMain.getBukkitInstance().getProtectionVisualizerManager().addVisualizer(visualizer);
-                    visualizer.visualize();
-                    player.sendMessage("showing");
-                } else {
-                    BukkitMain.getBukkitInstance().getProtectionVisualizerManager().removeVisualizers(player);
-                    player.sendMessage("hiding");
+            if (visualizer == null) {
+                visualizer = new ProtectionVisualizer(protectionUser);
+                BukkitMain.getBukkitInstance().getProtectionVisualizerManager().addVisualizer(protectionUser,
+                        visualizer);
+            }
+
+            visualizer.stopVisualizing();
+
+            if (state) {
+                for (ProtectedRegion region : regions.stream().map(Entry::getValue).toList()) {
+                    visualizer.visualizeRegion(region);
                 }
+                player.sendMessage("showing");
+            } else {
+                player.sendMessage("hiding");
             }
 
             state = !state;
