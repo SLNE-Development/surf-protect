@@ -108,15 +108,15 @@ public class Trail extends BukkitRunnable {
 	private void doFrame() {
 		this.currentLocation.add(this.increase);
 
-		if (currentLocation.distanceSquared(this.startLocation) >= this.distanceSquared) {
-			currentLocation = this.startLocation.clone();
+		if (this.currentLocation.distanceSquared(this.startLocation) >= this.distanceSquared) {
+			this.currentLocation = this.startLocation.clone();
 		}
 
 		Color color = this.isProtecting ? Color.RED : Color.AQUA;
 
 		DustOptions dustOptions = new DustOptions(color, 1);
-		World world = currentLocation.getWorld();
-		world.spawnParticle(Particle.REDSTONE, currentLocation.clone().add(0.5, 0.5, 0.5), 1, dustOptions);
+		World world = this.currentLocation.getWorld();
+		world.spawnParticle(Particle.REDSTONE, this.currentLocation.clone().add(0.5, 0.5, 0.5), 1, dustOptions);
 	}
 
 	@Override
