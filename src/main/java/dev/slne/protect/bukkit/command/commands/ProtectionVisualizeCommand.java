@@ -1,15 +1,17 @@
 package dev.slne.protect.bukkit.command.commands;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map.Entry;
 
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.slne.protect.bukkit.BukkitMain;
+import dev.slne.protect.bukkit.message.MessageManager;
 import dev.slne.protect.bukkit.region.ProtectionUtils;
 import dev.slne.protect.bukkit.region.visual.visualizer.ProtectionVisualizer;
 import dev.slne.protect.bukkit.user.ProtectionUser;
+import net.kyori.adventure.text.Component;
 
 public class ProtectionVisualizeCommand extends CommandAPICommand {
 
@@ -20,29 +22,27 @@ public class ProtectionVisualizeCommand extends CommandAPICommand {
 
         executesPlayer((player, args) -> {
             ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
-
-            List<Entry<String, ProtectedRegion>> regions = ProtectionUtils
-                    .getRegionsFor(protectionUser.getLocalPlayer());
-
-            ProtectionVisualizer visualizer = BukkitMain.getBukkitInstance().getProtectionVisualizerManager()
-                    .getVisualizer(protectionUser);
-
-            if (visualizer == null) {
-                visualizer = new ProtectionVisualizer(protectionUser);
-                BukkitMain.getBukkitInstance().getProtectionVisualizerManager().addVisualizer(protectionUser,
-                        visualizer);
-            }
-
-            visualizer.stopVisualizing();
+            List<ProtectedRegion> regions = ProtectionUtils.getRegionListFor(protectionUser.getLocalPlayer());
 
             if (state) {
-                for (ProtectedRegion region : regions.stream().map(Entry::getValue).toList()) {
-                    visualizer.visualizeRegion(region);
+                for (ProtectedRegion region : regions) {
+                    BukkitMain.getBukkitInstance().getProtectionVisualizerManager().addVisualizer(player.getWorld(),
+                            region, player);
                 }
-                player.sendMessage("showing");
             } else {
-                player.sendMessage("hiding");
+                for (ProtectionVisualizer<?> visualizer : new ArrayList<>(
+                        BukkitMain.getBukkitInstance().getProtectionVisualizerManager().getVisualizers(player))) {
+                    visualizer.remove();
+                }
+
+                BukkitMain.getBukkitInstance().getProtectionVisualizerManager().removeVisualizer(player);
             }
+
+            player.sendMessage(
+                    MessageManager.prefix()
+                            .append(Component.text(state ? "Showing" : "Hiding",
+                                    state ? MessageManager.SUCCESS : MessageManager.ERROR))
+                            .append(Component.text(" visualizations.", MessageManager.INFO)));
 
             state = !state;
         });

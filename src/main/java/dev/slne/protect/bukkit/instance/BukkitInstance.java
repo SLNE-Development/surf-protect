@@ -46,12 +46,14 @@ public class BukkitInstance {
         listenerManager.registerListeners();
 
         protectionVisualizerManager = new ProtectionVisualizerManager();
+        protectionVisualizerManager.start();
     }
 
     /**
      * Called when the plugin is disabled
      */
     public void onDisable() {
+        protectionVisualizerManager.stop();
         listenerManager.unregisterListeners();
         CommandAPI.onDisable();
     }

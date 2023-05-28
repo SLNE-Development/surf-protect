@@ -1,31 +1,52 @@
 package dev.slne.protect.bukkit.region.visual.visualizer;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 
-import dev.slne.protect.bukkit.user.ProtectionUser;
+import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
+import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+
+import dev.slne.protect.bukkit.region.visual.visualizer.visualizers.CuboidProtectionVisualizer;
+import dev.slne.protect.bukkit.region.visual.visualizer.visualizers.PolygonalProtectionVisualizer;
 
 public class ProtectionVisualizerManager {
 
-    private Map<ProtectionUser, ProtectionVisualizer> visualizers;
+    private ProtectionVisualizerThread thread;
 
     /**
      * Create a new visualizer task
      */
     public ProtectionVisualizerManager() {
-        this.visualizers = new HashMap<>();
+        this.thread = new ProtectionVisualizerThread();
     }
 
     /**
      * Add a visualizer to the task
      *
-     * @param protectionUser the protection user
-     * @param visualizer     the visualizer
+     * @param world           the world
+     * @param protectedRegion the region
+     * @param player          the player
      */
-    public void addVisualizer(ProtectionUser protectionUser, ProtectionVisualizer visualizer) {
-        this.visualizers.put(protectionUser, visualizer);
+    public void addVisualizer(World world, ProtectedRegion protectedRegion, Player player) {
+        if (protectedRegion instanceof ProtectedCuboidRegion cuboidRegion) {
+            this.addVisualizer(new CuboidProtectionVisualizer(world, cuboidRegion, player));
+        } else if (protectedRegion instanceof ProtectedPolygonalRegion polygonalRegion) {
+            this.addVisualizer(new PolygonalProtectionVisualizer(world, polygonalRegion, player));
+        } else {
+            throw new IllegalArgumentException("Region type not supported.");
+        }
+    }
+
+    /**
+     * Add a visualizer to the task
+     *
+     * @param visualizer the visualizer
+     */
+    public void addVisualizer(ProtectionVisualizer<?> visualizer) {
+        this.thread.addVisualizer(visualizer);
     }
 
     /**
@@ -34,26 +55,40 @@ public class ProtectionVisualizerManager {
      * @param player the player
      */
     public void removeVisualizer(Player player) {
-        this.visualizers.remove(ProtectionUser.getProtectionUser(player));
+        this.thread.removeVisualizers(player);
     }
 
     /**
-     * Returns the visualizer for a player
-     *
-     * @param protectionUser the protection user
-     * @return the visualizer
-     */
-    public ProtectionVisualizer getVisualizer(ProtectionUser protectionUser) {
-        return this.visualizers.get(protectionUser);
-    }
-
-    /**
-     * Get the visualizers
+     * Get all visualizers
      *
      * @return the visualizers
      */
-    public Map<ProtectionUser, ProtectionVisualizer> getVisualizers() {
-        return visualizers;
+    public List<ProtectionVisualizer<?>> getVisualizers() {
+        return this.thread.getVisualizers();
+    }
+
+    /**
+     * Get all visualizers for a player
+     *
+     * @param player the player
+     * @return the visualizers
+     */
+    public List<ProtectionVisualizer<?>> getVisualizers(Player player) {
+        return this.thread.getVisualizers(player);
+    }
+
+    /**
+     * Start the visualizer task
+     */
+    public void start() {
+        this.thread.start();
+    }
+
+    /**
+     * Stop the visualizer task
+     */
+    public void stop() {
+        this.thread.stop();
     }
 
 }

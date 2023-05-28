@@ -84,6 +84,35 @@ public class ProtectionUtils {
 	}
 
 	/**
+	 * Gets all regions for the given {@link LocalPlayer}
+	 *
+	 * @param localPlayer the {@link LocalPlayer}
+	 * @return the {@link Set} of ProtectedRegions
+	 */
+	public static List<ProtectedRegion> getRegionListFor(LocalPlayer localPlayer) {
+		List<ProtectedRegion> regions = new ArrayList<>();
+
+		for (World world : Bukkit.getWorlds()) {
+			com.sk89q.worldedit.world.World adaptedWorld = BukkitAdapter.adapt(world);
+
+			RegionManager manager = getRegionContainer().get(adaptedWorld);
+
+			if (manager == null) {
+				return new ArrayList<>();
+			}
+
+			List<Map.Entry<String, ProtectedRegion>> regionMap = manager.getRegions().entrySet().stream()
+					.filter(entry -> entry.getValue().getOwners()
+							.contains(localPlayer))
+					.toList();
+
+			regions.addAll(regionMap.stream().map(Map.Entry::getValue).toList());
+		}
+
+		return regions;
+	}
+
+	/**
 	 * Tries to get a {@link RegionInfo} for a given {@link LocalPlayer} and
 	 * regionName
 	 *

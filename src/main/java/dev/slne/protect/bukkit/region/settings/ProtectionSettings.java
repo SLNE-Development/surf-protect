@@ -113,6 +113,11 @@ public class ProtectionSettings {
 	public static final int PROTECTION_VISUALIZER_WALKER_HEIGHT = 5;
 
 	/**
+	 * The time in seconds between protection visualizer updates
+	 */
+	public static final int PROTECTION_VISUALIZER_UPDATE_INTERVAL = 5;
+
+	/**
 	 * A utility class
 	 */
 	private ProtectionSettings() {

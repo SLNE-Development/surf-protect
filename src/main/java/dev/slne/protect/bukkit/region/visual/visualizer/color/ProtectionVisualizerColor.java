@@ -1,4 +1,4 @@
-package dev.slne.protect.bukkit.region.visual.visualizer;
+package dev.slne.protect.bukkit.region.visual.visualizer.color;
 
 import dev.slne.protect.bukkit.BukkitMain;
 
@@ -17,7 +17,7 @@ public class ProtectionVisualizerColor {
     /**
      * All usable colors
      */
-    enum VisualizerColor {
+    public enum VisualizerColor {
         WHITE(5942),
         ORANGE(5943),
         MAGENTA(5944),
