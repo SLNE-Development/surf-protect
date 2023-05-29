@@ -4,11 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
+import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+
 import dev.slne.protect.bukkit.BukkitMain;
 import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
+import dev.slne.protect.bukkit.region.visual.visualizer.visualizers.CuboidProtectionVisualizer;
+import dev.slne.protect.bukkit.region.visual.visualizer.visualizers.PolygonalProtectionVisualizer;
 
 public class ProtectionVisualizerThread extends BukkitRunnable {
 
@@ -23,13 +30,8 @@ public class ProtectionVisualizerThread extends BukkitRunnable {
 
     @Override
     public void run() {
-        System.out.println("Visulizing " + this.visualizers.size() + " regions");
-
         for (ProtectionVisualizer<?> visualizer : new ArrayList<>(this.visualizers)) {
-            visualizer.remove();
-            visualizer.visualize();
-
-            visualizer.visualizeLocations();
+            visualizer.update();
         }
     }
 
@@ -59,6 +61,23 @@ public class ProtectionVisualizerThread extends BukkitRunnable {
     }
 
     /**
+     * Add a visualizer to the task
+     *
+     * @param world           the world
+     * @param protectedRegion the region
+     * @param player          the player
+     */
+    public void addVisualizer(World world, ProtectedRegion protectedRegion, Player player) {
+        if (protectedRegion instanceof ProtectedCuboidRegion cuboidRegion) {
+            this.addVisualizer(new CuboidProtectionVisualizer(world, cuboidRegion, player));
+        } else if (protectedRegion instanceof ProtectedPolygonalRegion polygonalRegion) {
+            this.addVisualizer(new PolygonalProtectionVisualizer(world, polygonalRegion, player));
+        } else {
+            throw new IllegalArgumentException("Region type not supported.");
+        }
+    }
+
+    /**
      * Add a visualizer to the thread
      *
      * @param visualizer the visualizer
@@ -72,7 +91,7 @@ public class ProtectionVisualizerThread extends BukkitRunnable {
      *
      * @return the visualizers
      */
-    public List<ProtectionVisualizer<?>> getVisualizers() {
+    public List<ProtectionVisualizer<? extends ProtectedRegion>> getVisualizers() {
         return visualizers;
     }
 
@@ -82,7 +101,7 @@ public class ProtectionVisualizerThread extends BukkitRunnable {
      * @param player the player
      * @return the visualizers
      */
-    public List<ProtectionVisualizer<?>> getVisualizers(Player player) {
+    public List<ProtectionVisualizer<? extends ProtectedRegion>> getVisualizers(Player player) {
         return new ArrayList<>(this.visualizers.stream().filter(visualizer -> visualizer.getPlayer().equals(player))
                 .collect(Collectors.toList()));
     }

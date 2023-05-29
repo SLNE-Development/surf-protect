@@ -97,15 +97,15 @@ public class ProtectionSettings {
 	public static final int PROTECTION_RENAME_PRICE = 2500;
 
 	/**
-	 * The maximum amount of blocks a player can be away from the protection
+	 * The maximum amount of blocks squared a player can be away from the protection
 	 * visualization
 	 */
-	public static final int PROTECTION_VISUALIZER_MAX_DISTANCE = 50;
+	public static final int PROTECTION_VISUALIZER_MAX_DISTANCE = 100 * 100;
 
 	/**
 	 * The height of the protection visualizer pillar
 	 */
-	public static final int PROTECTION_VISUALIZER_PILLAR_HEIGHT = 10;
+	public static final int PROTECTION_VISUALIZER_PILLAR_HEIGHT = 6;
 
 	/**
 	 * The height of the protection visualizer walker

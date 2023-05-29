@@ -26,16 +26,16 @@ public class ProtectionVisualizeCommand extends CommandAPICommand {
 
             if (state) {
                 for (ProtectedRegion region : regions) {
-                    BukkitMain.getBukkitInstance().getProtectionVisualizerManager().addVisualizer(player.getWorld(),
+                    BukkitMain.getBukkitInstance().getProtectionVisualizerThread().addVisualizer(player.getWorld(),
                             region, player);
                 }
             } else {
                 for (ProtectionVisualizer<?> visualizer : new ArrayList<>(
-                        BukkitMain.getBukkitInstance().getProtectionVisualizerManager().getVisualizers(player))) {
+                        BukkitMain.getBukkitInstance().getProtectionVisualizerThread().getVisualizers(player))) {
                     visualizer.remove();
                 }
 
-                BukkitMain.getBukkitInstance().getProtectionVisualizerManager().removeVisualizer(player);
+                BukkitMain.getBukkitInstance().getProtectionVisualizerThread().removeVisualizers(player);
             }
 
             player.sendMessage(

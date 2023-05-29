@@ -29,14 +29,16 @@ public class PolygonalProtectionVisualizer extends ProtectionVisualizer<Protecte
     }
 
     @Override
-    public void visualize() {
+    public List<Location> visualize() {
+        List<Location> locations = new ArrayList<>();
         List<BlockVector2> points = getRegion().getPoints();
 
         for (BlockVector2 point : points) {
-            getLocations().addAll(this.formVisualizerPillar(point));
+            locations.addAll(this.formVisualizerPillar(point));
         }
 
-        getLocations().addAll(this.formVisualizerLine(points));
+        locations.addAll(this.formVisualizerLine(points));
+        return locations;
     }
 
     /**

@@ -8,7 +8,7 @@ import dev.slne.protect.bukkit.BukkitMain;
 import dev.slne.protect.bukkit.command.BukkitCommandManager;
 import dev.slne.protect.bukkit.listener.BukkitListenerManager;
 import dev.slne.protect.bukkit.region.flags.ProtectionFlags;
-import dev.slne.protect.bukkit.region.visual.visualizer.ProtectionVisualizerManager;
+import dev.slne.protect.bukkit.region.visual.visualizer.ProtectionVisualizerThread;
 import dev.slne.protect.bukkit.user.ProtectionUserManager;
 
 public class BukkitInstance {
@@ -17,7 +17,7 @@ public class BukkitInstance {
     private BukkitListenerManager listenerManager;
 
     private ProtectionUserManager userManager;
-    private ProtectionVisualizerManager protectionVisualizerManager;
+    private ProtectionVisualizerThread protectionVisualizerThread;
 
     /**
      * Called when the plugin is loaded
@@ -45,15 +45,15 @@ public class BukkitInstance {
 
         listenerManager.registerListeners();
 
-        protectionVisualizerManager = new ProtectionVisualizerManager();
-        protectionVisualizerManager.start();
+        protectionVisualizerThread = new ProtectionVisualizerThread();
+        protectionVisualizerThread.start();
     }
 
     /**
      * Called when the plugin is disabled
      */
     public void onDisable() {
-        protectionVisualizerManager.stop();
+        protectionVisualizerThread.stop();
         listenerManager.unregisterListeners();
         CommandAPI.onDisable();
     }
@@ -77,12 +77,12 @@ public class BukkitInstance {
     }
 
     /**
-     * Returns the {@link ProtectionVisualizerManager}
+     * Returns the {@link ProtectionVisualizerThread}
      *
-     * @return the {@link ProtectionVisualizerManager}
+     * @return the {@link ProtectionVisualizerThread}
      */
-    public ProtectionVisualizerManager getProtectionVisualizerManager() {
-        return protectionVisualizerManager;
+    public ProtectionVisualizerThread getProtectionVisualizerThread() {
+        return protectionVisualizerThread;
     }
 
 }
