@@ -18,6 +18,9 @@ public class ProtectionVisualizerColor {
      * All usable colors
      */
     public enum VisualizerColor {
+        OWNING(5947),
+        NOT_OWNING(5956),
+
         WHITE(5942),
         ORANGE(5943),
         MAGENTA(5944),

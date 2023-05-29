@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import com.sk89q.worldguard.protection.regions.RegionType;
 
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.slne.protect.bukkit.BukkitMain;
 import dev.slne.protect.bukkit.message.MessageManager;
 import dev.slne.protect.bukkit.region.ProtectionUtils;
 import dev.slne.protect.bukkit.region.visual.visualizer.ProtectionVisualizer;
-import dev.slne.protect.bukkit.user.ProtectionUser;
 import net.kyori.adventure.text.Component;
 
 public class ProtectionVisualizeCommand extends CommandAPICommand {
@@ -21,8 +21,8 @@ public class ProtectionVisualizeCommand extends CommandAPICommand {
         super("pvisualize");
 
         executesPlayer((player, args) -> {
-            ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
-            List<ProtectedRegion> regions = ProtectionUtils.getRegionListFor(protectionUser.getLocalPlayer());
+            List<ProtectedRegion> regions = ProtectionUtils.getRegionManager(player.getWorld()).getRegions().values()
+                    .stream().filter(region -> !region.getType().equals(RegionType.GLOBAL)).toList();
 
             if (state) {
                 for (ProtectedRegion region : regions) {

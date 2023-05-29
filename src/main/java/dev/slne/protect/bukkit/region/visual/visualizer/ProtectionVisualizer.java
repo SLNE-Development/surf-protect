@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -56,7 +57,7 @@ public abstract class ProtectionVisualizer<T extends ProtectedRegion> {
         this.locations = new ArrayList<>();
         this.oldLocations = new ArrayList<>();
         this.entityIds = new HashMap<>();
-        this.applyRandomProtectionColor();
+        this.applyProtectionColor();
     }
 
     /**
@@ -94,9 +95,11 @@ public abstract class ProtectionVisualizer<T extends ProtectedRegion> {
     private synchronized List<Location> performDistanceCheck() {
         List<Location> inDistance = new ArrayList<>();
 
+        int entityViewDistance = this.calculateEntityDistanceWithViewDistance();
+
         for (Location location : this.locations) {
             if (location.distanceSquared(
-                    this.getPlayer().getLocation()) <= ProtectionSettings.PROTECTION_VISUALIZER_MAX_DISTANCE) {
+                    this.getPlayer().getLocation()) <= entityViewDistance) {
                 inDistance.add(location);
             }
         }
@@ -234,6 +237,50 @@ public abstract class ProtectionVisualizer<T extends ProtectedRegion> {
      */
     private synchronized void applyRandomProtectionColor() {
         this.color = new ProtectionVisualizerColor().getRandomColor();
+    }
+
+    /**
+     * Applies a protection color to the visualizer using the region owners
+     */
+    private synchronized void applyProtectionColor() {
+        boolean ownsRegion = this.region.getOwners().contains(this.player.getUniqueId());
+
+        if (ownsRegion) {
+            this.color = VisualizerColor.OWNING;
+        } else {
+            this.color = VisualizerColor.NOT_OWNING;
+        }
+    }
+
+    /**
+     * Clamp a value between a minimum and maximum value.
+     *
+     * @param value The value to clamp.
+     * @param min   The minimum value.
+     * @param max   The maximum value.
+     * @return The clamped value.
+     */
+    private synchronized int clamp(int value, int min, int max) {
+        return Math.max(min, Math.min(max, value));
+    }
+
+    /**
+     * Calculate the entity distance with the view distance.
+     *
+     * @return The entity distance.
+     */
+    private synchronized int calculateEntityDistanceWithViewDistance() {
+        int clientViewDistance = getPlayer().getViewDistance();
+        int serverViewDistance = Bukkit.getServer().getViewDistance();
+
+        int viewDistance = Math.min(clientViewDistance, serverViewDistance);
+        int maxViewDistance = ProtectionSettings.PROTECTION_VISUALIZER_MAX_DISTANCE;
+        int minViewDistance = ProtectionSettings.PROTECTION_VISUALIZER_MIN_DISTANCE;
+
+        viewDistance = viewDistance * 10;
+        viewDistance = viewDistance * viewDistance;
+
+        return clamp(viewDistance, minViewDistance, maxViewDistance);
     }
 
     /**
