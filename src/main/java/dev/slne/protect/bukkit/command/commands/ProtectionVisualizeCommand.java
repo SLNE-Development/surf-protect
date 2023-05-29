@@ -11,7 +11,6 @@ import dev.slne.protect.bukkit.BukkitMain;
 import dev.slne.protect.bukkit.message.MessageManager;
 import dev.slne.protect.bukkit.region.ProtectionUtils;
 import dev.slne.protect.bukkit.region.visual.visualizer.ProtectionVisualizer;
-import net.kyori.adventure.text.Component;
 
 public class ProtectionVisualizeCommand extends CommandAPICommand {
 
@@ -38,12 +37,7 @@ public class ProtectionVisualizeCommand extends CommandAPICommand {
                 BukkitMain.getBukkitInstance().getProtectionVisualizerThread().removeVisualizers(player);
             }
 
-            player.sendMessage(
-                    MessageManager.prefix()
-                            .append(Component.text(state ? "Showing" : "Hiding",
-                                    state ? MessageManager.SUCCESS : MessageManager.ERROR))
-                            .append(Component.text(" visualizations.", MessageManager.INFO)));
-
+            player.sendMessage(MessageManager.getProtectionVisualizeComponent(state));
             state = !state;
         });
 

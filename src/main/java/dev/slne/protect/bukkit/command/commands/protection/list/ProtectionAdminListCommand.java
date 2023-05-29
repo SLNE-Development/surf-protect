@@ -1,4 +1,4 @@
-package dev.slne.protect.bukkit.command.commands.subcommands.list;
+package dev.slne.protect.bukkit.command.commands.protection.list;
 
 import java.util.List;
 import java.util.Map;

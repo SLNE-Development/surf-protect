@@ -1,4 +1,4 @@
-package dev.slne.protect.bukkit.command.commands.subcommands;
+package dev.slne.protect.bukkit.command.commands.protection.member;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;

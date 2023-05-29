@@ -1,4 +1,4 @@
-package dev.slne.protect.bukkit.command.commands.subcommands;
+package dev.slne.protect.bukkit.command.commands.protection;
 
 import java.util.Arrays;
 
@@ -7,9 +7,9 @@ import dev.slne.protect.bukkit.message.MessageManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 
-public class ProtectionHelperCommand extends CommandAPICommand {
+public class CommandApiProtectionHelperCommand extends CommandAPICommand {
 
-	public ProtectionHelperCommand(String commandName) {
+	public CommandApiProtectionHelperCommand(String commandName) {
 		super(commandName);
 	}
 

@@ -1,4 +1,4 @@
-package dev.slne.protect.bukkit.command.commands.subcommands;
+package dev.slne.protect.bukkit.command.commands.protection.info;
 
 import java.util.Iterator;
 import java.util.List;

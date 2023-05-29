@@ -1,17 +1,17 @@
-package dev.slne.protect.bukkit.command.commands.subcommands.list;
+package dev.slne.protect.bukkit.command.commands.protection.list;
 
 import org.bukkit.entity.Player;
 
 import com.sk89q.worldguard.LocalPlayer;
 
 import dev.jorel.commandapi.executors.CommandArguments;
-import dev.slne.protect.bukkit.command.commands.subcommands.ProtectionHelperCommand;
+import dev.slne.protect.bukkit.command.commands.protection.CommandApiProtectionHelperCommand;
 import dev.slne.protect.bukkit.message.MessageManager;
 import dev.slne.protect.bukkit.user.ProtectionUser;
 import dev.slne.protect.bukkit.user.ProtectionUserFinder;
 import net.kyori.adventure.text.Component;
 
-public abstract class ProtectionListCommand extends ProtectionHelperCommand {
+public abstract class ProtectionListCommand extends CommandApiProtectionHelperCommand {
 
 	protected ProtectionListCommand(String commandName) {
 		super(commandName);

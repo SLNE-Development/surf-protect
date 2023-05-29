@@ -1,4 +1,4 @@
-package dev.slne.protect.bukkit.command.commands.subcommands;
+package dev.slne.protect.bukkit.command.commands.protection.creation;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;

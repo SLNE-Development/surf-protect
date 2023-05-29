@@ -3,14 +3,14 @@ package dev.slne.protect.bukkit.command.commands;
 import org.bukkit.command.CommandSender;
 
 import dev.jorel.commandapi.CommandAPICommand;
-import dev.slne.protect.bukkit.command.commands.subcommands.ProtectionAddMemberCommand;
-import dev.slne.protect.bukkit.command.commands.subcommands.ProtectionCreateCommand;
-import dev.slne.protect.bukkit.command.commands.subcommands.ProtectionExpandCommand;
-import dev.slne.protect.bukkit.command.commands.subcommands.ProtectionInfoCommand;
-import dev.slne.protect.bukkit.command.commands.subcommands.ProtectionRemoveMemberCommand;
-import dev.slne.protect.bukkit.command.commands.subcommands.ProtectionSellCommand;
-import dev.slne.protect.bukkit.command.commands.subcommands.list.ProtectionAdminListCommand;
-import dev.slne.protect.bukkit.command.commands.subcommands.list.ProtectionUserListCommand;
+import dev.slne.protect.bukkit.command.commands.protection.creation.ProtectionCreateCommand;
+import dev.slne.protect.bukkit.command.commands.protection.creation.ProtectionExpandCommand;
+import dev.slne.protect.bukkit.command.commands.protection.creation.ProtectionSellCommand;
+import dev.slne.protect.bukkit.command.commands.protection.info.ProtectionInfoCommand;
+import dev.slne.protect.bukkit.command.commands.protection.list.ProtectionAdminListCommand;
+import dev.slne.protect.bukkit.command.commands.protection.list.ProtectionUserListCommand;
+import dev.slne.protect.bukkit.command.commands.protection.member.ProtectionAddMemberCommand;
+import dev.slne.protect.bukkit.command.commands.protection.member.ProtectionRemoveMemberCommand;
 import dev.slne.protect.bukkit.message.MessageManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent.Builder;
@@ -65,6 +65,8 @@ public class ProtectionCommand extends CommandAPICommand {
 					"Verkauft das angegebene Grundstück und erstattet einen Teilbetrag zurück");
 			sendCommandDescription(player, "/pwho", "Überprüfe ob du auf einem Grundstück stehst",
 					"Zeige das Grundstück und dessen Eigentümer an, auf welchem du dich gerade befindest.");
+			sendCommandDescription(player, "/pvisualize", "Visualisation",
+					"Zeigt dir die Grenzen umliegender Grundstücke an.");
 
 			player.sendMessage(Component.space());
 		});

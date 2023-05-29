@@ -1,4 +1,4 @@
-package dev.slne.protect.bukkit.command.commands;
+package dev.slne.protect.bukkit.command.commands.protection.rename;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,8 +11,6 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
 import dev.slne.protect.bukkit.command.commands.protection.ProtectionHelperCommand;
-import dev.slne.protect.bukkit.command.commands.protection.rename.ProtectionRenameConfirmCommand;
-import dev.slne.protect.bukkit.command.commands.protection.rename.ProtectionRenamePrintCommand;
 import dev.slne.protect.bukkit.message.MessageManager;
 
 public class ProtectionRenameCommand implements CommandExecutor, TabCompleter {

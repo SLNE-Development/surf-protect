@@ -1,4 +1,4 @@
-package dev.slne.protect.bukkit.command.commands.subcommands;
+package dev.slne.protect.bukkit.command.commands.protection.creation;
 
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.slne.protect.bukkit.message.MessageManager;

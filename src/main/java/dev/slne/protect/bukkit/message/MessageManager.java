@@ -417,4 +417,16 @@ public class MessageManager {
         return prefix().append(Component.text("Du hast dein Grundstück erfolgreich umbenannt.", SUCCESS));
     }
 
+    /**
+     * Returns the component which tells the user that they have toggled
+     * visualization
+     *
+     * @return the component
+     */
+    public static Component getProtectionVisualizeComponent(boolean state) {
+        return prefix().append(Component.text("Du hast die Visualisierung der Grundstücke ", INFO))
+                .append(Component.text(state ? "aktiviert" : "deaktiviert", state ? SUCCESS : ERROR))
+                .append(Component.text(".", INFO));
+    }
+
 }
