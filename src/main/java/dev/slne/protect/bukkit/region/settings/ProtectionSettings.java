@@ -109,14 +109,9 @@ public class ProtectionSettings {
 	public static final int PROTECTION_VISUALIZER_MAX_DISTANCE = 200 * 200;
 
 	/**
-	 * The height of the protection visualizer pillar
+	 * The height of the protection visualizer
 	 */
-	public static final int PROTECTION_VISUALIZER_PILLAR_HEIGHT = 6;
-
-	/**
-	 * The height of the protection visualizer walker
-	 */
-	public static final int PROTECTION_VISUALIZER_WALKER_HEIGHT = 5;
+	public static final int PROTECTION_VISUALIZER_HEIGHT = 5;
 
 	/**
 	 * The time in seconds between protection visualizer updates

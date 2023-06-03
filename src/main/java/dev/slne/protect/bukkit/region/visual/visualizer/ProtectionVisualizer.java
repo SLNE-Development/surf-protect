@@ -19,6 +19,7 @@ import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import com.github.retrooper.packetevents.protocol.entity.type.EntityType;
 import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes;
 import com.github.retrooper.packetevents.util.Vector3d;
+import com.github.retrooper.packetevents.util.Vector3f;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDestroyEntities;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnEntity;
@@ -27,7 +28,6 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 
 import dev.slne.protect.bukkit.BukkitMain;
 import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
-import dev.slne.protect.bukkit.region.visual.visualizer.color.ProtectionVisualizerColor;
 import dev.slne.protect.bukkit.region.visual.visualizer.color.ProtectionVisualizerColor.VisualizerColor;
 
 public abstract class ProtectionVisualizer<T extends ProtectedRegion> {
@@ -41,6 +41,8 @@ public abstract class ProtectionVisualizer<T extends ProtectedRegion> {
 
     private VisualizerColor color;
     private Map<Location, Integer> entityIds;
+
+    private boolean scaleUp;
 
     /**
      * Create a new visualizer for a region.
@@ -58,6 +60,8 @@ public abstract class ProtectionVisualizer<T extends ProtectedRegion> {
         this.oldLocations = new ArrayList<>();
         this.entityIds = new HashMap<>();
         this.applyProtectionColor();
+
+        this.scaleUp = false;
     }
 
     /**
@@ -224,19 +228,17 @@ public abstract class ProtectionVisualizer<T extends ProtectedRegion> {
         List<EntityData> entityData = new ArrayList<>();
         entityData.add(new EntityData(22, EntityDataTypes.BLOCK_STATE, color.getId()));
 
+        if (this.scaleUp) {
+            Vector3f scale = new Vector3f(1, ProtectionSettings.PROTECTION_VISUALIZER_HEIGHT, 1);
+            entityData.add(new EntityData(11, EntityDataTypes.VECTOR3F, scale));
+        }
+
         WrapperPlayServerEntityMetadata metaData = new WrapperPlayServerEntityMetadata(entityId, entityData);
 
         PacketEvents.getAPI().getPlayerManager().sendPacket(player, spawnEntity);
         PacketEvents.getAPI().getPlayerManager().sendPacket(player, metaData);
 
         this.entityIds.put(location, entityId);
-    }
-
-    /**
-     * Applies a random color to the visualizer
-     */
-    private synchronized void applyRandomProtectionColor() {
-        this.color = new ProtectionVisualizerColor().getRandomColor();
     }
 
     /**
@@ -353,5 +355,21 @@ public abstract class ProtectionVisualizer<T extends ProtectedRegion> {
      */
     public List<Location> getOldLocations() {
         return oldLocations;
+    }
+
+    /**
+     * Returns if the visualizer should scale up
+     */
+    public boolean shouldScaleUp() {
+        return scaleUp;
+    }
+
+    /**
+     * Sets if the visualizer should scale up
+     *
+     * @param scaleUp if the visualizer should scale up
+     */
+    public void setScaleUp(boolean scaleUp) {
+        this.scaleUp = scaleUp;
     }
 }

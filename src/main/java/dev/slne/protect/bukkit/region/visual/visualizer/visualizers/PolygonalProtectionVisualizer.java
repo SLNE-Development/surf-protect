@@ -12,7 +12,6 @@ import org.bukkit.entity.Player;
 import com.sk89q.worldedit.math.BlockVector2;
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
 
-import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
 import dev.slne.protect.bukkit.region.visual.visualizer.ProtectionVisualizer;
 
 public class PolygonalProtectionVisualizer extends ProtectionVisualizer<ProtectedPolygonalRegion> {
@@ -26,6 +25,8 @@ public class PolygonalProtectionVisualizer extends ProtectionVisualizer<Protecte
      */
     public PolygonalProtectionVisualizer(World world, ProtectedPolygonalRegion region, Player player) {
         super(world, region, player);
+
+        setScaleUp(true);
     }
 
     @Override
@@ -52,13 +53,7 @@ public class PolygonalProtectionVisualizer extends ProtectionVisualizer<Protecte
         Block highestYBlock = getWorld().getHighestBlockAt(point.getBlockX(), point.getBlockZ(),
                 HeightMap.MOTION_BLOCKING_NO_LEAVES);
         int highestY = highestYBlock.getY() + 1;
-        int yHeightSettings = ProtectionSettings.PROTECTION_VISUALIZER_PILLAR_HEIGHT;
-
-        int yHeight = highestY + yHeightSettings;
-
-        for (double y = highestY; y <= yHeight; y++) {
-            locations.add(new Location(getWorld(), point.getBlockX(), y, point.getBlockZ()));
-        }
+        locations.add(new Location(getWorld(), point.getBlockX(), highestY, point.getBlockZ()));
 
         return locations;
     }
@@ -116,13 +111,7 @@ public class PolygonalProtectionVisualizer extends ProtectionVisualizer<Protecte
                 Block highestYBlock = getWorld().getHighestBlockAt(point.getBlockX(), point.getBlockZ(),
                         HeightMap.MOTION_BLOCKING_NO_LEAVES);
                 int highestY = highestYBlock.getY() + 1;
-                int yHeightSettings = ProtectionSettings.PROTECTION_VISUALIZER_WALKER_HEIGHT;
-
-                int yHeight = highestY + yHeightSettings;
-
-                for (double y = highestY; y <= yHeight; y++) {
-                    finalLocations.add(new Location(getWorld(), point.getBlockX(), y, point.getBlockZ()));
-                }
+                finalLocations.add(new Location(getWorld(), point.getBlockX(), highestY, point.getBlockZ()));
             }
         }
 
