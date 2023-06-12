@@ -34,7 +34,7 @@ public class ProtectionCommand extends CommandAPICommand {
                 return;
             }
 
-            ProtectionGui gui = new ProtectionGui(target);
+            ProtectionGui gui = new ProtectionGui(player, target);
             gui.show(player);
         });
 

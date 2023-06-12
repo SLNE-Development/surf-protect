@@ -112,7 +112,7 @@ public class ProtectionListGui extends ListGui {
 						event -> {
 							ProtectionListOneGui oneGui = new ProtectionListOneGui(
 									region, area, finalDistance, ownersNames,
-									membersNames, regionInfo);
+									membersNames, regionInfo, viewingPlayer);
 							oneGui.show(viewingPlayer);
 						}));
 			}
