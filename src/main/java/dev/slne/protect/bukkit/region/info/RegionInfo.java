@@ -5,9 +5,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.annotation.Nullable;
+
 import org.bukkit.Location;
+import org.bukkit.World;
 
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldedit.math.BlockVector2;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.domains.DefaultDomain;
 import com.sk89q.worldguard.protection.flags.Flags;
@@ -23,6 +27,7 @@ import dev.slne.protect.bukkit.user.ProtectionUserFinder;
  */
 public class RegionInfo {
 
+	private World world;
 	private ProtectionFlagInfo info;
 	private final ProtectedRegion region;
 
@@ -36,9 +41,10 @@ public class RegionInfo {
 	 *
 	 * @param region The region
 	 */
-	public RegionInfo(ProtectedRegion region) {
+	public RegionInfo(World world, ProtectedRegion region) {
 		this.region = region;
 		this.info = region.getFlag(ProtectionFlags.SURF_PROTECT_FLAG);
+		this.world = world;
 
 		if (this.info == null) {
 			this.info = setProtectionInfoToRegion(new ProtectionFlagInfo(this.region.getId()));
@@ -69,8 +75,42 @@ public class RegionInfo {
 	 *
 	 * @return The price
 	 */
-	public float getPrice() {
-		return getArea() * ProtectionSettings.PRICE_PER_BLOCK;
+	public double getPrice() {
+		BlockVector2 smallestDistance = getSmallestDistance(region.getPoints());
+
+		if (smallestDistance == null) {
+			return ProtectionSettings.PRICE_PER_BLOCK;
+		}
+
+		Location smallestDistanceLocation = new Location(world, smallestDistance.getX(),
+				world.getHighestBlockYAt(smallestDistance.getBlockX(), smallestDistance.getBlockZ()),
+				smallestDistance.getZ());
+
+		return (double) getArea() * ProtectionUtils.getProtectionPricePerBlock(smallestDistanceLocation);
+	}
+
+	/**
+	 * Gets the smallest distance from the spawn
+	 *
+	 * @param points The points
+	 * @return The smallest distance
+	 */
+	private BlockVector2 getSmallestDistance(List<BlockVector2> points) {
+		BlockVector2 smallestDistance = null;
+		BlockVector2 spawnPoint = BukkitAdapter.asBlockVector(world.getSpawnLocation()).toBlockVector2();
+
+		for (BlockVector2 point : points) {
+			if (smallestDistance == null) {
+				smallestDistance = point;
+				continue;
+			}
+
+			if (point.distanceSq(spawnPoint) < smallestDistance.distanceSq(spawnPoint)) {
+				smallestDistance = point;
+			}
+		}
+
+		return smallestDistance;
 	}
 
 	/**
@@ -78,7 +118,7 @@ public class RegionInfo {
 	 *
 	 * @return The retail price
 	 */
-	public float getRetailPrice() {
+	public double getRetailPrice() {
 		return getPrice() * ProtectionSettings.RETAIL_MODIFIER;
 	}
 
@@ -121,8 +161,14 @@ public class RegionInfo {
 	 *
 	 * @return The teleport location
 	 */
-	public Location getTeleportLocation() {
-		return BukkitAdapter.adapt(region.getFlag(Flags.TELE_LOC));
+	public @Nullable Location getTeleportLocation() {
+		com.sk89q.worldedit.util.Location teleportState = region.getFlag(Flags.TELE_LOC);
+
+		if (teleportState == null) {
+			return null;
+		}
+
+		return BukkitAdapter.adapt(teleportState);
 	}
 
 	/**
@@ -171,6 +217,13 @@ public class RegionInfo {
 	 */
 	public List<LocalPlayer> getOwners() {
 		return owners;
+	}
+
+	/**
+	 * @return the world
+	 */
+	public World getWorld() {
+		return world;
 	}
 
 }

@@ -14,8 +14,10 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPortalEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
+import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.util.Vector;
 
+import dev.slne.protect.bukkit.BukkitMain;
 import dev.slne.protect.bukkit.message.MessageManager;
 import dev.slne.protect.bukkit.region.ProtectionRegion;
 import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
@@ -125,6 +127,15 @@ public class ProtectionModeListener implements Listener {
 
 		if (regionCreation != null) {
 			event.setCancelled(true);
+		}
+	}
+
+	@EventHandler
+	public void onServerStop(PluginDisableEvent event) {
+		for (ProtectionUser protectionUser : BukkitMain.getBukkitInstance().getUserManager().getUsers()) {
+			if (protectionUser.hasRegionCreation()) {
+				protectionUser.getRegionCreation().cancelProtection();
+			}
 		}
 	}
 

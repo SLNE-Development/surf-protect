@@ -1,10 +1,16 @@
 package dev.slne.protect.bukkit.command.commands.protection.member;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.WorldGuard;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.util.profile.Profile;
 import com.sk89q.worldguard.util.profile.cache.ProfileCache;
 
@@ -20,15 +26,16 @@ import net.kyori.adventure.text.Component;
 
 public class ProtectionRemoveMemberCommand extends CommandAPICommand {
 
-	private static final String PROTECTION_NAME = "protectionName";
-	private static final String PLAYER = "player";
-
+	/**
+	 * Creates a new ProtectionRemoveMemberCommand
+	 */
+	@SuppressWarnings({ "java:S1192", "java:S3776" })
 	public ProtectionRemoveMemberCommand() {
 		super("removeMember");
 
 		withPermission("surf.protect.removeMember");
 
-		withArguments(new StringArgument(PROTECTION_NAME).replaceSuggestions(ArgumentSuggestions.strings(info -> {
+		withArguments(new StringArgument("protectionName").replaceSuggestions(ArgumentSuggestions.strings(info -> {
 			CommandSender commandSender = info.sender();
 
 			if (!(commandSender instanceof Player)) {
@@ -38,11 +45,19 @@ public class ProtectionRemoveMemberCommand extends CommandAPICommand {
 			Player player = (Player) commandSender;
 			ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
 
-			return ProtectionUtils.getRegionsFor(protectionUser.getLocalPlayer()).stream()
-					.map(region -> new RegionInfo(region.getValue()).getName()).toArray(size -> new String[size]);
+			List<String> suggestions = new ArrayList<>();
+
+			for (Map.Entry<World, List<Map.Entry<String, ProtectedRegion>>> entry : ProtectionUtils
+					.getRegionsFor(protectionUser.getLocalPlayer()).entrySet()) {
+				for (Map.Entry<String, ProtectedRegion> regionEntry : entry.getValue()) {
+					suggestions.add(regionEntry.getKey());
+				}
+			}
+
+			return suggestions.toArray(new String[suggestions.size()]);
 		})));
 
-		withArguments(new StringArgument(PLAYER).replaceSuggestions(ArgumentSuggestions.strings(info -> {
+		withArguments(new StringArgument("player").replaceSuggestions(ArgumentSuggestions.strings(info -> {
 			CommandSender commandSender = info.sender();
 
 			if (!(commandSender instanceof Player)) {
@@ -52,7 +67,7 @@ public class ProtectionRemoveMemberCommand extends CommandAPICommand {
 			Player player = (Player) commandSender;
 			ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
 
-			String regionName = (String) info.previousArgs().get(PROTECTION_NAME);
+			String regionName = (String) info.previousArgs().get("protectionName");
 			RegionInfo regionInfo = ProtectionUtils.getRegionInfo(protectionUser.getLocalPlayer(), regionName);
 
 			if (regionInfo == null) {
@@ -80,23 +95,23 @@ public class ProtectionRemoveMemberCommand extends CommandAPICommand {
 		executesPlayer((player, args) -> {
 			ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
 			RegionInfo regionInfo = ProtectionUtils.getRegionInfo(protectionUser.getLocalPlayer(),
-					(String) args.get(PROTECTION_NAME));
+					(String) args.get("protectionName"));
 
 			if (regionInfo == null) {
 				protectionUser.sendMessage(MessageManager.prefix()
 						.append(Component.text("Das Grundstück ", MessageManager.ERROR)
 								.append(Component.text((String) args.get(
-										PROTECTION_NAME), MessageManager.VARIABLE_VALUE))
+										"protectionName"), MessageManager.VARIABLE_VALUE))
 								.append(Component.text(" konnte nicht gefunden werden!", MessageManager.ERROR))));
 				return;
 			}
 
-			LocalPlayer selectedLocalPlayer = ProtectionUserFinder.findLocalPlayer((String) args.get(PLAYER));
+			LocalPlayer selectedLocalPlayer = ProtectionUserFinder.findLocalPlayer((String) args.get("player"));
 			if (selectedLocalPlayer == null) {
 				protectionUser.sendMessage(MessageManager.prefix()
 						.append(Component.text("Der Spieler ", MessageManager.ERROR)
 								.append(Component.text((String) args.get(
-										PLAYER), MessageManager.VARIABLE_VALUE))
+										"player"), MessageManager.VARIABLE_VALUE))
 								.append(Component.text(" konnte nicht gefunden werden!", MessageManager.ERROR))));
 				return;
 			}
@@ -105,7 +120,7 @@ public class ProtectionRemoveMemberCommand extends CommandAPICommand {
 				protectionUser.sendMessage(MessageManager.prefix()
 						.append(Component.text("Der Spieler ", MessageManager.ERROR)
 								.append(Component.text((String) args.get(
-										PLAYER), MessageManager.VARIABLE_VALUE))
+										"player"), MessageManager.VARIABLE_VALUE))
 								.append(Component.text(" ist kein Mitglied!", MessageManager.ERROR))));
 				return;
 			}
@@ -114,7 +129,7 @@ public class ProtectionRemoveMemberCommand extends CommandAPICommand {
 			protectionUser.sendMessage(MessageManager.prefix()
 					.append(Component.text("Der Spieler ", MessageManager.SUCCESS)
 							.append(Component.text((String) args.get(
-									PLAYER), MessageManager.VARIABLE_VALUE))
+									"player"), MessageManager.VARIABLE_VALUE))
 							.append(Component.text(" wurde entfernt.", MessageManager.SUCCESS))));
 
 		});

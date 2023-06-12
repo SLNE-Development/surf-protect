@@ -11,6 +11,7 @@ import io.papermc.paper.plugin.loader.library.impl.MavenLibraryResolver;
 public class BukkitLoader implements PluginLoader {
 
 	@Override
+	@SuppressWarnings("java:S1192")
 	public void classloader(PluginClasspathBuilder classpathBuilder) {
 		MavenLibraryResolver mavenResolver = new MavenLibraryResolver();
 
@@ -29,12 +30,12 @@ public class BukkitLoader implements PluginLoader {
 
 		// Dependencies
 		mavenResolver.addDependency(
-				new Dependency(new DefaultArtifact("dev.jorel:commandapi-bukkit-shade:9.0.1"), null));
+				new Dependency(new DefaultArtifact("dev.jorel:commandapi-bukkit-shade:9.0.2"), null));
 		mavenResolver.addDependency(
 				new Dependency(new DefaultArtifact("net.kyori:adventure-nbt:4.13.1"), null));
-		// mavenResolver.addDependency(
-		// new Dependency(new DefaultArtifact(
-		// "com.github.retrooper.packetevents:spigot:2.0.0-SNAPSHOT"), null));
+		mavenResolver.addDependency(
+				new Dependency(new DefaultArtifact(
+						"com.github.retrooper.packetevents:spigot:2.0.0-SNAPSHOT"), null));
 
 		// Resolve
 		classpathBuilder.addLibrary(mavenResolver);

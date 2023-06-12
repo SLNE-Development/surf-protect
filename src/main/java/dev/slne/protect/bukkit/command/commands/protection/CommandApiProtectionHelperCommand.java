@@ -9,14 +9,32 @@ import net.kyori.adventure.text.TextComponent;
 
 public class CommandApiProtectionHelperCommand extends CommandAPICommand {
 
+	/**
+	 * Creates a new CommandApiProtectionHelperCommand
+	 *
+	 * @param commandName The name of the command
+	 */
 	public CommandApiProtectionHelperCommand(String commandName) {
 		super(commandName);
 	}
 
+	/**
+	 * Returns a header component
+	 *
+	 * @param headerContent The content of the header
+	 * @return The header component
+	 */
 	public Component getHeaderComponent(String headerContent) {
 		return this.getHeaderComponent(headerContent, 25);
 	}
 
+	/**
+	 * Returns a header component
+	 *
+	 * @param headerContent   The content of the header
+	 * @param arrowBaseLength The base length of the arrow
+	 * @return The header component
+	 */
 	public Component getHeaderComponent(String headerContent, int arrowBaseLength) {
 		TextComponent.Builder headerComponentBuilder = Component.text();
 		int arrowModifier = 2;

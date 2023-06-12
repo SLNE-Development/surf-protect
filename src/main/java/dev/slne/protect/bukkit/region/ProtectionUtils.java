@@ -1,6 +1,7 @@
 package dev.slne.protect.bukkit.region;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,10 +23,9 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
 import com.sk89q.worldguard.protection.regions.RegionQuery;
 
-import dev.slne.protect.bukkit.message.MessageManager;
 import dev.slne.protect.bukkit.region.flags.ProtectionFlags;
 import dev.slne.protect.bukkit.region.info.RegionInfo;
-import dev.slne.protect.bukkit.user.ProtectionUser;
+import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
 
 /**
  * Represents the protection utils
@@ -64,20 +64,23 @@ public class ProtectionUtils {
 	 * @param localPlayer the {@link LocalPlayer}
 	 * @return the {@link Set} of {@link Map.Entry}
 	 */
-	public static List<Map.Entry<String, ProtectedRegion>> getRegionsFor(LocalPlayer localPlayer) {
-		List<Map.Entry<String, ProtectedRegion>> regions = new ArrayList<>();
+	public static Map<World, List<Map.Entry<String, ProtectedRegion>>> getRegionsFor(LocalPlayer localPlayer) {
+		Map<World, List<Map.Entry<String, ProtectedRegion>>> regions = new HashMap<>();
 
 		for (World world : Bukkit.getWorlds()) {
+			List<Map.Entry<String, ProtectedRegion>> regionMap = new ArrayList<>();
 			com.sk89q.worldedit.world.World adaptedWorld = BukkitAdapter.adapt(world);
 
 			RegionManager manager = getRegionContainer().get(adaptedWorld);
 
 			if (manager == null) {
-				return new ArrayList<>();
+				continue;
 			}
 
-			regions.addAll(manager.getRegions().entrySet().stream().filter(entry -> entry.getValue().getOwners()
+			regionMap.addAll(manager.getRegions().entrySet().stream().filter(entry -> entry.getValue().getOwners()
 					.contains(localPlayer)).toList());
+
+			regions.put(world, regionMap);
 		}
 
 		return regions;
@@ -89,24 +92,25 @@ public class ProtectionUtils {
 	 * @param localPlayer the {@link LocalPlayer}
 	 * @return the {@link Set} of ProtectedRegions
 	 */
-	public static List<ProtectedRegion> getRegionListFor(LocalPlayer localPlayer) {
-		List<ProtectedRegion> regions = new ArrayList<>();
+	public static Map<World, List<ProtectedRegion>> getRegionListFor(LocalPlayer localPlayer) {
+		Map<World, List<ProtectedRegion>> regions = new HashMap<>();
 
 		for (World world : Bukkit.getWorlds()) {
+			List<ProtectedRegion> regionMap = new ArrayList<>();
 			com.sk89q.worldedit.world.World adaptedWorld = BukkitAdapter.adapt(world);
 
 			RegionManager manager = getRegionContainer().get(adaptedWorld);
 
 			if (manager == null) {
-				return new ArrayList<>();
+				continue;
 			}
 
-			List<Map.Entry<String, ProtectedRegion>> regionMap = manager.getRegions().entrySet().stream()
+			regionMap.addAll(manager.getRegions().entrySet().stream()
 					.filter(entry -> entry.getValue().getOwners()
 							.contains(localPlayer))
-					.toList();
+					.map(Map.Entry::getValue).toList());
 
-			regions.addAll(regionMap.stream().map(Map.Entry::getValue).toList());
+			regions.put(world, regionMap);
 		}
 
 		return regions;
@@ -121,10 +125,15 @@ public class ProtectionUtils {
 	 * @return the {@link RegionInfo} or <code>null</code>
 	 */
 	public static RegionInfo getRegionInfo(LocalPlayer localPlayer, String regionName) {
-		return getRegionsFor(localPlayer).stream().map(regionPredicate -> new RegionInfo(regionPredicate.getValue()))
-				.filter(regionInfo -> regionInfo != null
-						&& regionInfo.getName().equals(regionName))
-				.findFirst().orElse(null);
+		for (Map.Entry<World, List<Map.Entry<String, ProtectedRegion>>> entry : getRegionsFor(localPlayer).entrySet()) {
+			for (Map.Entry<String, ProtectedRegion> region : entry.getValue()) {
+				if (region.getValue().getId().equals(regionName)) {
+					return new RegionInfo(entry.getKey(), region.getValue());
+				}
+			}
+		}
+
+		return null;
 	}
 
 	/**
@@ -266,24 +275,25 @@ public class ProtectionUtils {
 	}
 
 	/**
-	 * Returns the region info for the given {@link ProtectionUser} and region name
+	 * Returns the price per block for the given location
 	 *
-	 * @param protectionUser the {@link ProtectionUser}
-	 * @param regionName     the region name
-	 * @return the {@link RegionInfo}
+	 * @param protectionLocation the location
+	 * @return the price per block
 	 */
-	public static RegionInfo getRegionInfo(ProtectionUser protectionUser, String regionName) {
-		RegionInfo regionInfo = ProtectionUtils.getRegionsFor(protectionUser.getLocalPlayer()).stream()
-				.filter(region -> {
-					RegionInfo regionInfoItem = new RegionInfo(region.getValue());
-					return regionInfoItem != null && regionInfoItem.getName().equals(regionName);
-				}).map(region -> new RegionInfo(region.getValue())).findFirst().orElse(null);
+	public static long getProtectionPricePerBlock(Location protectionLocation) {
+		double distanceSquared = protectionLocation.distanceSquared(protectionLocation.getWorld().getSpawnLocation());
+		double breakPoint = Math.pow(ProtectionSettings.PRICE_PER_BLOCK_BREAKPOINT, 2);
+		double pricePerBlock = ProtectionSettings.PRICE_PER_BLOCK;
+		double spawnProtection = Math.pow(100, 2);
 
-		if (regionInfo == null) {
-			protectionUser.sendMessage(MessageManager.getProtectionDoesntExistComponent());
-			return null;
+		if (distanceSquared < spawnProtection) {
+			return 0;
 		}
 
-		return regionInfo;
+		if (distanceSquared > breakPoint) {
+			return (long) pricePerBlock;
+		}
+
+		return (long) (pricePerBlock * 5 - (distanceSquared / 1000) * pricePerBlock);
 	}
 }

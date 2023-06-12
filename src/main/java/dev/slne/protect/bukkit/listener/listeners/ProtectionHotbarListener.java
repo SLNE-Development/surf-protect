@@ -19,7 +19,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.util.Vector;
 
 import dev.slne.protect.bukkit.BukkitMain;
-import dev.slne.protect.bukkit.gui.ItemStackUtils;
+import dev.slne.protect.bukkit.gui.item.ItemStackUtils;
 import dev.slne.protect.bukkit.region.ProtectionRegion;
 import dev.slne.protect.bukkit.region.ProtectionUtils;
 import dev.slne.protect.bukkit.region.settings.ProtectionSettings;

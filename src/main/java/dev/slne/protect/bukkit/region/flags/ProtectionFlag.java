@@ -7,7 +7,6 @@ import javax.annotation.Nullable;
 
 import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.protection.flags.FlagContext;
-import com.sk89q.worldguard.protection.flags.InvalidFlagFormat;
 
 import dev.slne.protect.bukkit.region.info.ProtectionFlagInfo;
 
@@ -26,7 +25,7 @@ public class ProtectionFlag extends Flag<ProtectionFlagInfo> {
 	}
 
 	@Override
-	public ProtectionFlagInfo parseInput(FlagContext context) throws InvalidFlagFormat {
+	public ProtectionFlagInfo parseInput(FlagContext context) {
 		String userInput = context.getUserInput();
 
 		// Form a new protection flag info from the user input. Currently only the name

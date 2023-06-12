@@ -31,7 +31,7 @@ public class ProtectionWhoCommand extends CommandAPICommand {
 			}
 
 			for (ProtectedRegion protectedRegion : regions) {
-				RegionInfo regionInfo = new RegionInfo(protectedRegion);
+				RegionInfo regionInfo = new RegionInfo(player.getWorld(), protectedRegion);
 				player.sendMessage(MessageManager.getPWhoComponent(regionInfo));
 			}
 		});

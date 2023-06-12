@@ -8,6 +8,7 @@ import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.util.profile.Profile;
 import com.sk89q.worldguard.util.profile.cache.ProfileCache;
 
+import dev.slne.protect.bukkit.gui.item.ItemStackUtils;
 import dev.slne.protect.bukkit.region.info.RegionInfo;
 import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
 import dev.slne.protect.bukkit.user.ProtectionUser;
@@ -426,7 +427,39 @@ public class MessageManager {
     public static Component getProtectionVisualizeComponent(boolean state) {
         return prefix().append(Component.text("Du hast die Visualisierung der Grundstücke ", INFO))
                 .append(Component.text(state ? "aktiviert" : "deaktiviert", state ? SUCCESS : ERROR))
-                .append(Component.text(".", INFO));
+                .append(Component.text(". Bitte warte einen kleinen Moment.", INFO));
+    }
+
+    /**
+     * Returns the component which tells the user that a player could not be found
+     *
+     * @return the component
+     */
+    public static Component getPlayerNotFoundComponent() {
+        return prefix().append(Component.text("Der Spieler wurde nicht gefunden.", ERROR));
+    }
+
+    /**
+     * Sends the enter messages to the player
+     *
+     * @param user the player
+     */
+    public static void sendProtectionModeEnterMessages(ProtectionUser user) {
+        prefixMessage(user, Component.empty());
+        prefixMessage(user, Component.text("Willkommen im ProtectionSystem!", INFO));
+        prefixMessage(user, Component.empty());
+
+        List<Component> messages = ItemStackUtils.splitComponent(
+                "Wenn du den ProtectionMode betrittst, erhältst du vorübergehend Fly um dein Grundstück besser definieren zu können. Du definierst dein Grundstück indem du bis zu "
+                        + ProtectionSettings.MARKERS
+                        + " Marker platzierst und anschließend mit dem grünen Block bestätigst. Mit dem roten Block kannst du die Protection jederzeit abbrechen und zu deinem Ausgangspunkt zurückkehren.",
+                70, SPACER);
+
+        for (Component message : messages) {
+            prefixMessage(user, message);
+        }
+
+        prefixMessage(user, Component.empty());
     }
 
 }

@@ -1,10 +1,16 @@
 package dev.slne.protect.bukkit.command.commands.protection.member;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.sk89q.worldguard.LocalPlayer;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.ArgumentSuggestions;
@@ -18,6 +24,10 @@ import net.kyori.adventure.text.Component;
 
 public class ProtectionAddMemberCommand extends CommandAPICommand {
 
+	/**
+	 * Creates a new ProtectionAddMemberCommand
+	 */
+	@SuppressWarnings("java:S1192")
 	public ProtectionAddMemberCommand() {
 		super("addmember");
 
@@ -33,14 +43,22 @@ public class ProtectionAddMemberCommand extends CommandAPICommand {
 			Player player = (Player) commandSender;
 			ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
 
-			return ProtectionUtils.getRegionsFor(protectionUser.getLocalPlayer()).stream()
-					.map(region -> new RegionInfo(region.getValue()).getName()).toArray(size -> new String[size]);
+			List<String> suggestions = new ArrayList<>();
+
+			for (Map.Entry<World, List<Map.Entry<String, ProtectedRegion>>> entry : ProtectionUtils
+					.getRegionsFor(protectionUser.getLocalPlayer()).entrySet()) {
+				for (Map.Entry<String, ProtectedRegion> regionEntry : entry.getValue()) {
+					suggestions.add(regionEntry.getKey());
+				}
+			}
+
+			return suggestions.toArray(new String[suggestions.size()]);
 		})));
 
 		withArguments(new StringArgument("player")
 				.replaceSuggestions(ArgumentSuggestions.strings(info -> Bukkit.getOnlinePlayers().stream()
 						.filter(target -> info.sender() instanceof Player && ((Player) info.sender()).canSee(target))
-						.map(player -> player.getName()).toArray(size -> new String[size]))));
+						.map(Player::getName).toArray(size -> new String[size]))));
 
 		executesPlayer((player, args) -> {
 

@@ -35,7 +35,7 @@ public class ProtectionRenameConfirmCommand implements ProtectionHelperCommand {
 
             // Check if user has enough currency
             ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
-            RegionInfo regionInfo = ProtectionUtils.getRegionInfo(protectionUser, protectionName);
+            RegionInfo regionInfo = ProtectionUtils.getRegionInfo(protectionUser.getLocalPlayer(), protectionName);
 
             return protectionUser.hasEnoughCurrency(ProtectionSettings.PROTECTION_RENAME_PRICE)
                     .thenApplyAsync(hasEnoughCurrency -> {

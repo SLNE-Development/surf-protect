@@ -1,15 +1,17 @@
 package dev.slne.protect.bukkit.command.commands.protection.rename;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
+import org.bukkit.World;
 import org.bukkit.entity.Player;
+
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 
 import dev.slne.protect.bukkit.command.commands.protection.ProtectionHelperCommand;
 import dev.slne.protect.bukkit.message.MessageManager;
 import dev.slne.protect.bukkit.region.ProtectionUtils;
-import dev.slne.protect.bukkit.region.info.RegionInfo;
 import dev.slne.protect.bukkit.user.ProtectionUser;
 
 public class ProtectionRenamePrintCommand implements ProtectionHelperCommand {
@@ -45,12 +47,12 @@ public class ProtectionRenamePrintCommand implements ProtectionHelperCommand {
         ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
 
         if (args.length == 1) {
-            suggestions.addAll(Arrays
-                    .asList(ProtectionUtils.getRegionsFor(protectionUser.getLocalPlayer()).stream()
-                            .map(region -> new RegionInfo(region.getValue()).getName())
-                            .toArray(size -> new String[size]))
-                    .stream()
-                    .filter(info -> info.toLowerCase().contains(args[0].toLowerCase())).toList());
+            for (Map.Entry<World, List<Map.Entry<String, ProtectedRegion>>> entry : ProtectionUtils
+                    .getRegionsFor(protectionUser.getLocalPlayer()).entrySet()) {
+                for (Map.Entry<String, ProtectedRegion> regionEntry : entry.getValue()) {
+                    suggestions.add(regionEntry.getKey());
+                }
+            }
         }
 
         return suggestions;

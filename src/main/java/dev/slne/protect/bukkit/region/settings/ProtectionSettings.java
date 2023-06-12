@@ -60,12 +60,12 @@ public class ProtectionSettings {
 	/**
 	 * The price the user is paying per block
 	 */
-	public static final float PRICE_PER_BLOCK = 5f;
+	public static final double PRICE_PER_BLOCK = 5f;
 
 	/**
 	 * The money the user is getting per block when selling
 	 */
-	public static final float RETAIL_MODIFIER = 0.5f;
+	public static final double RETAIL_MODIFIER = 0.5f;
 
 	/**
 	 * The height map used for protection
@@ -117,6 +117,11 @@ public class ProtectionSettings {
 	 * The time in seconds between protection visualizer updates
 	 */
 	public static final int PROTECTION_VISUALIZER_UPDATE_INTERVAL = 5;
+
+	/**
+	 * The price per block breakpoint
+	 */
+	public static final double PRICE_PER_BLOCK_BREAKPOINT = 100;
 
 	/**
 	 * A utility class

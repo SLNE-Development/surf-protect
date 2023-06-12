@@ -8,6 +8,7 @@ import dev.slne.protect.bukkit.BukkitMain;
 import dev.slne.protect.bukkit.command.BukkitCommandManager;
 import dev.slne.protect.bukkit.listener.BukkitListenerManager;
 import dev.slne.protect.bukkit.region.flags.ProtectionFlags;
+import dev.slne.protect.bukkit.region.visual.visualizer.ProtectionVisualizerState;
 import dev.slne.protect.bukkit.region.visual.visualizer.ProtectionVisualizerThread;
 import dev.slne.protect.bukkit.user.ProtectionUserManager;
 
@@ -18,6 +19,7 @@ public class BukkitInstance {
 
     private ProtectionUserManager userManager;
     private ProtectionVisualizerThread protectionVisualizerThread;
+    private ProtectionVisualizerState protectionVisualizerState;
 
     /**
      * Called when the plugin is loaded
@@ -43,6 +45,7 @@ public class BukkitInstance {
         CommandAPI.onEnable();
         commandManager.registerCommands();
 
+        protectionVisualizerState = new ProtectionVisualizerState();
         listenerManager.registerListeners();
 
         protectionVisualizerThread = new ProtectionVisualizerThread();
@@ -83,6 +86,20 @@ public class BukkitInstance {
      */
     public ProtectionVisualizerThread getProtectionVisualizerThread() {
         return protectionVisualizerThread;
+    }
+
+    /**
+     * @return the commandManager
+     */
+    public BukkitCommandManager getCommandManager() {
+        return commandManager;
+    }
+
+    /**
+     * @return the protectionVisualizerState
+     */
+    public ProtectionVisualizerState getProtectionVisualizerState() {
+        return protectionVisualizerState;
     }
 
 }
