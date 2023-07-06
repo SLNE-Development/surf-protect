@@ -13,6 +13,7 @@ import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
 import com.github.stefvanschie.inventoryframework.pane.OutlinePane;
 import com.github.stefvanschie.inventoryframework.pane.Pane;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
+import com.sk89q.worldguard.protection.flags.StateFlag.State;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.regions.RegionType;
 
@@ -23,6 +24,7 @@ import dev.slne.protect.bukkit.gui.utils.ConfirmationGui;
 import dev.slne.protect.bukkit.message.MessageManager;
 import dev.slne.protect.bukkit.region.ProtectionRegion;
 import dev.slne.protect.bukkit.region.ProtectionUtils;
+import dev.slne.protect.bukkit.region.flags.ProtectionFlags;
 import dev.slne.protect.bukkit.region.visual.visualizer.ProtectionVisualizer;
 import dev.slne.protect.bukkit.user.ProtectionUser;
 import net.kyori.adventure.text.Component;
@@ -132,9 +134,14 @@ public class ProtectionGui extends ChestGui {
 
 					if (!state) {
 						for (ProtectedRegion region : regions) {
+							State visualizeState = region.getFlag(ProtectionFlags.SURF_PROTECT_VISUALIZE);
+
+							if (visualizeState != null && visualizeState.equals(State.DENY)) {
+								continue;
+							}
+
 							BukkitMain.getBukkitInstance().getProtectionVisualizerThread().addVisualizer(
-									player.getWorld(),
-									region, player);
+									player.getWorld(), region, player);
 						}
 					} else {
 						for (ProtectionVisualizer<?> visualizer : new ArrayList<>(

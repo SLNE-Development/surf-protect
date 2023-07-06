@@ -1,8 +1,9 @@
 package dev.slne.protect.bukkit.user;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -12,11 +13,16 @@ import org.bukkit.inventory.Inventory;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 
+import dev.slne.data.core.database.future.SurfFutureResult;
+import dev.slne.data.core.instance.DataApi;
 import dev.slne.protect.bukkit.BukkitMain;
 import dev.slne.protect.bukkit.listener.listeners.ProtectionHotbarListener;
 import dev.slne.protect.bukkit.message.MessageManager;
 import dev.slne.protect.bukkit.region.ProtectionRegion;
 import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
+import dev.slne.transaction.core.currency.Currency;
+import dev.slne.transaction.core.player.TransactionPlayer;
+import dev.slne.transaction.core.transaction.Transaction;
 import net.kyori.adventure.text.Component;
 
 public class ProtectionUser {
@@ -62,31 +68,59 @@ public class ProtectionUser {
 	/**
 	 * Adds a transaction to the user
 	 *
-	 * @param amount the amount to add
+	 * @param sender   The sender of the transaction
+	 * @param amount   The amount of the transaction
+	 * @param currency The currency of the transaction
 	 * @return the future when the transaction is completed
 	 */
-	public CompletableFuture<Boolean> addTransaction(double amount) {
-		return CompletableFuture.completedFuture(true);
+	public SurfFutureResult<Optional<Boolean>> addTransaction(UUID sender, BigDecimal amount, Currency currency) {
+		TransactionPlayer player = TransactionPlayer.getTransactionPlayer(uuid);
+		Transaction transaction = new Transaction(sender, uuid, amount, currency);
+
+		return player.asyncAddTransaction(transaction);
 	}
 
 	/**
 	 * Checks if the user has enough currency
 	 *
-	 * @param amount the amount to check
-	 * @return the future when the check is completed
+	 * @param amount   The amount to check
+	 * @param currency The currency to check
+	 * @return The future when the check is completed
 	 */
-	public CompletableFuture<Boolean> hasEnoughCurrency(double amount) {
-		return CompletableFuture.completedFuture(true);
+	public SurfFutureResult<Boolean> hasEnoughCurrency(BigDecimal amount, Currency currency) {
+		return DataApi.getDataInstance().supplyAsync(() -> {
+
+			TransactionPlayer player = TransactionPlayer.getTransactionPlayer(uuid);
+			BigDecimal sum = player.sumTransactions(currency);
+
+			BigDecimal result = sum.subtract(amount);
+			return result.compareTo(BigDecimal.ZERO) >= 0;
+		});
 	}
 
+	/**
+	 * Returns the {@link ProtectionRegion} the user is currently creating
+	 *
+	 * @return The {@link ProtectionRegion} the user is currently creating
+	 */
 	public ProtectionRegion getRegionCreation() {
 		return regionCreation;
 	}
 
+	/**
+	 * Checks if the user is currently creating a {@link ProtectionRegion}
+	 *
+	 * @return True if the user is currently creating a
+	 */
 	public boolean hasRegionCreation() {
 		return this.getRegionCreation() != null;
 	}
 
+	/**
+	 * Starts the creation of a {@link ProtectionRegion}
+	 *
+	 * @param regionCreation The {@link ProtectionRegion} to create
+	 */
 	public void startRegionCreation(ProtectionRegion regionCreation) {
 		if (this.regionCreation != null) {
 			getBukkitPlayer().sendMessage(MessageManager.prefix()
@@ -132,6 +166,9 @@ public class ProtectionUser {
 		this.regionCreation = regionCreation;
 	}
 
+	/**
+	 * Resets the creation of a {@link ProtectionRegion}
+	 */
 	public void resetRegionCreation() {
 		if (this.regionCreation == null) {
 			return;
@@ -148,6 +185,11 @@ public class ProtectionUser {
 		getBukkitPlayer().setCollidable(true);
 	}
 
+	/**
+	 * Applies the {@link LocalPlayer} to the user
+	 *
+	 * @return The {@link LocalPlayer}
+	 */
 	private LocalPlayer applyLocalPlayer() {
 		if (Bukkit.getPlayer(uuid) != null && Bukkit.getPlayer(uuid).isOnline()) {
 			this.localPlayer = WorldGuardPlugin.inst().wrapPlayer(Bukkit.getPlayer(uuid));
@@ -158,18 +200,38 @@ public class ProtectionUser {
 		return this.localPlayer;
 	}
 
+	/**
+	 * Sends a message to the user
+	 *
+	 * @param message The message to send
+	 */
 	public void sendMessage(Component message) {
 		getBukkitPlayer().sendMessage(message);
 	}
 
+	/**
+	 * Returns the {@link LocalPlayer} of the user
+	 *
+	 * @return The {@link LocalPlayer}
+	 */
 	public LocalPlayer getLocalPlayer() {
 		return localPlayer;
 	}
 
+	/**
+	 * Returns the {@link Player} of the user
+	 *
+	 * @return The {@link Player}
+	 */
 	public Player getBukkitPlayer() {
 		return Bukkit.getPlayer(uuid);
 	}
 
+	/**
+	 * Returns the {@link UUID} of the user
+	 *
+	 * @return The {@link UUID}
+	 */
 	public UUID getUuid() {
 		return uuid;
 	}

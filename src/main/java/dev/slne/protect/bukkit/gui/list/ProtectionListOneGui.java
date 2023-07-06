@@ -1,7 +1,9 @@
 package dev.slne.protect.bukkit.gui.list;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -26,6 +28,7 @@ import dev.slne.protect.bukkit.region.ProtectionUtils;
 import dev.slne.protect.bukkit.region.flags.ProtectionFlags;
 import dev.slne.protect.bukkit.region.info.RegionInfo;
 import dev.slne.protect.bukkit.user.ProtectionUser;
+import dev.slne.transaction.core.currency.Currency;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -192,6 +195,7 @@ public class ProtectionListOneGui extends ChestGui {
     /**
      * Returns the item for the protection sell
      */
+    @SuppressWarnings("java:S3776")
     private GuiItem getProtectionSellItem() {
         return new GuiItem(ItemStackUtils.getItem(Material.BEDROCK, 1, 0,
                 Component.text("Grundstück löschen", NamedTextColor.RED), Component.empty(),
@@ -245,9 +249,21 @@ public class ProtectionListOneGui extends ChestGui {
                             notifyDeletion(player, regionInfo);
                         }
 
+                        BigDecimal refund = BigDecimal.valueOf(regionInfo.getRetailPrice());
+
+                        Optional<Currency> currencyOptional = Currency.currencyByName("CastCoin");
+
+                        if (currencyOptional.isEmpty()) {
+                            protectionUser.sendMessage(MessageManager.getNoCurrencyComponent());
+                            return;
+                        }
+
+                        Currency currency = currencyOptional.get();
+
                         RegionManager regionManager = ProtectionUtils.getRegionManager(player.getWorld());
                         regionManager.removeRegion(protectedRegion.getId());
-                        protectionUser.addTransaction(regionInfo.getRetailPrice());
+
+                        protectionUser.addTransaction(null, refund, currency);
                         confirmEvent.getWhoClicked().closeInventory();
                     }, cancelEvent -> {
 

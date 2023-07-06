@@ -30,8 +30,6 @@ public class BukkitLoader implements PluginLoader {
 
 		// Dependencies
 		mavenResolver.addDependency(
-				new Dependency(new DefaultArtifact("dev.jorel:commandapi-bukkit-shade:9.0.2"), null));
-		mavenResolver.addDependency(
 				new Dependency(new DefaultArtifact("net.kyori:adventure-nbt:4.13.1"), null));
 		mavenResolver.addDependency(
 				new Dependency(new DefaultArtifact(

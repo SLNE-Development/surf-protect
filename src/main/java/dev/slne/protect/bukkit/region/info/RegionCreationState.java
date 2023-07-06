@@ -30,6 +30,11 @@ public enum RegionCreationState {
 	TOO_SMALL,
 
 	/**
+	 * No currency
+	 */
+	NO_CURRENCY,
+
+	/**
 	 * The region creation can be completed
 	 */
 	SUCCESS;

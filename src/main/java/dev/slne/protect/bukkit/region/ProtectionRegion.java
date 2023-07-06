@@ -1,8 +1,10 @@
 package dev.slne.protect.bukkit.region;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.bukkit.Location;
@@ -27,6 +29,7 @@ import dev.slne.protect.bukkit.region.visual.Marker;
 import dev.slne.protect.bukkit.region.visual.QuickHull;
 import dev.slne.protect.bukkit.region.visual.Trail;
 import dev.slne.protect.bukkit.user.ProtectionUser;
+import dev.slne.transaction.core.currency.Currency;
 
 public class ProtectionRegion {
 
@@ -132,8 +135,18 @@ public class ProtectionRegion {
 			return RegionCreationState.TOO_LARGE;
 		}
 
+		Optional<Currency> currencyOptional = Currency.currencyByName("CastCoin");
+
+		if (currencyOptional.isEmpty()) {
+			protectionUser.sendMessage(MessageManager.getNoCurrencyComponent());
+			return RegionCreationState.NO_CURRENCY;
+		}
+
+		Currency currency = currencyOptional.get();
+
 		double effectiveCost = this.calculateProtectionPrice(temporaryRegion);
-		boolean hasEnoughCurrency = protectionUser.hasEnoughCurrency(effectiveCost).join();
+		BigDecimal effectiveCostBigDecimal = BigDecimal.valueOf(effectiveCost);
+		boolean hasEnoughCurrency = protectionUser.hasEnoughCurrency(effectiveCostBigDecimal, currency).join();
 
 		if (!hasEnoughCurrency) {
 			MessageManager.sendAreaTooExpensiveComponent(protectionUser, area, effectiveCost);
@@ -162,22 +175,27 @@ public class ProtectionRegion {
 		}
 
 		double effectiveCost = this.calculateProtectionPrice(temporaryRegion);
-		boolean hasEnoughCurrency = protectionUser.hasEnoughCurrency(effectiveCost).join();
+		BigDecimal effectiveCostBigDecimal = BigDecimal.valueOf(-effectiveCost);
 
-		if (hasEnoughCurrency) {
-			boolean transactionAdded = protectionUser.addTransaction(-effectiveCost).join();
+		Optional<Currency> currencyOptional = Currency.currencyByName("CastCoin");
 
-			if (transactionAdded) {
-				this.temporaryRegion.protect();
+		if (currencyOptional.isEmpty()) {
+			protectionUser.sendMessage(MessageManager.getNoCurrencyComponent());
+			return false;
+		}
 
-				this.removeAllMarkers();
-				protectionUser.resetRegionCreation();
-				protectionUser.sendMessage(MessageManager.getProtectionCreatedComponent());
-				return true;
-			} else {
-				protectionUser.sendMessage(MessageManager.getProtectionCanceledComponent());
-				return false;
-			}
+		Currency currency = currencyOptional.get();
+
+		Optional<Boolean> transactionAddedOptional = protectionUser
+				.addTransaction(null, effectiveCostBigDecimal, currency).join();
+
+		if (transactionAddedOptional.isPresent() && Boolean.TRUE.equals(transactionAddedOptional.get())) {
+			this.temporaryRegion.protect();
+
+			this.removeAllMarkers();
+			protectionUser.resetRegionCreation();
+			protectionUser.sendMessage(MessageManager.getProtectionCreatedComponent());
+			return true;
 		} else {
 			protectionUser.sendMessage(MessageManager.getTooExpensiveToBuyComponent());
 			return false;

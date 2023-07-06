@@ -100,6 +100,15 @@ public class MessageManager {
     }
 
     /**
+     * Returns that the currency could not be found
+     *
+     * @return The component
+     */
+    public static Component getNoCurrencyComponent() {
+        return prefix().append(Component.text("Die Währung konnte nicht gefunden werden.", ERROR));
+    }
+
+    /**
      * Returns the region owners and members component for the given region info
      *
      * @param regionInfo The region info

@@ -8,27 +8,20 @@ loader: dev.slne.protect.bukkit.BukkitLoader
 main: dev.slne.protect.bukkit.BukkitMain
 
 dependencies:
-    - name: SurfData
-      required: true
-      bootstrap: true
-    - name: WorldGuard
-      required: true
-      bootstrap: false
-    - name: ProtocolLib
-      required: false
-      bootstrap: false
-    - name: ProtocolSupport
-      required: false
-      bootstrap: false
-    - name: ViaVersion
-      required: false
-      bootstrap: false
-    - name: ViaBackwards
-      required: false
-      bootstrap: false
-    - name: ViaRewind
-      required: false
-      bootstrap: false
-    - name: Geyser-Spigot
-      required: false
-      bootstrap: false
+    server:
+        CommandAPI:
+            load: BEFORE
+            required: true
+            join-classpath: true
+        SurfData:
+            load: BEFORE
+            required: true
+            join-classpath: true
+        SurfTransaction:
+            load: BEFORE
+            required: true
+            join-classpath: true
+        WorldGuard:
+            load: BEFORE
+            required: true
+            join-classpath: true

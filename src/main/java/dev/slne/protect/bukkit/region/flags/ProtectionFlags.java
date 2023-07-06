@@ -27,6 +27,11 @@ public class ProtectionFlags {
      */
     public static final ProtectionFlag SURF_PROTECT_FLAG = new ProtectionFlag("surf-protect-info");
 
+    /**
+     * This flag contains the protection flag info
+     */
+    public static final StateFlag SURF_PROTECT_VISUALIZE = new StateFlag("surf-protect-visualize", true);
+
     private ProtectionFlags() {
         throw new IllegalStateException("Utility class");
     }

@@ -1,7 +1,9 @@
 package dev.slne.protect.bukkit.command.commands.protection.rename;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.bukkit.entity.Player;
 
@@ -13,6 +15,7 @@ import dev.slne.protect.bukkit.region.info.ProtectionFlagInfo;
 import dev.slne.protect.bukkit.region.info.RegionInfo;
 import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
 import dev.slne.protect.bukkit.user.ProtectionUser;
+import dev.slne.transaction.core.currency.Currency;
 
 public class ProtectionRenameConfirmCommand implements ProtectionHelperCommand {
 
@@ -37,29 +40,39 @@ public class ProtectionRenameConfirmCommand implements ProtectionHelperCommand {
             ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
             RegionInfo regionInfo = ProtectionUtils.getRegionInfo(protectionUser.getLocalPlayer(), protectionName);
 
-            return protectionUser.hasEnoughCurrency(ProtectionSettings.PROTECTION_RENAME_PRICE)
-                    .thenApplyAsync(hasEnoughCurrency -> {
-                        if (Boolean.TRUE.equals(hasEnoughCurrency)) {
-                            if (ProtectionUtils.standsInProtectedRegion(protectionUser.getBukkitPlayer(),
-                                    regionInfo.getRegion())) {
-                                protectionUser.addTransaction(-ProtectionSettings.PROTECTION_RENAME_PRICE);
-                                ProtectionFlagInfo protectionInfo = new ProtectionFlagInfo(protectionDisplayName);
+            Optional<Currency> currencyOptional = Currency.currencyByName("CastCoin");
 
-                                regionInfo.getRegion().setFlag(ProtectionFlags.SURF_PROTECT_FLAG,
-                                        protectionInfo);
+            if (currencyOptional.isEmpty()) {
+                protectionUser.sendMessage(MessageManager.getNoCurrencyComponent());
+                return false;
+            }
 
-                                player.sendMessage(MessageManager.getProtectionRenamedComponent());
-                                return true;
-                            } else {
-                                protectionUser
-                                        .sendMessage(MessageManager.getNotStandingOnRenameProtectionComponent());
-                                return true;
-                            }
-                        } else {
-                            player.sendMessage(MessageManager.getTooExpensiveToRenameComponent());
-                            return true;
-                        }
-                    }).join();
+            Currency currency = currencyOptional.get();
+            BigDecimal price = BigDecimal.valueOf(ProtectionSettings.PROTECTION_RENAME_PRICE);
+
+            boolean hasEnoughCurrency = protectionUser.hasEnoughCurrency(price, currency).join();
+
+            if (Boolean.TRUE.equals(hasEnoughCurrency)) {
+                if (ProtectionUtils.standsInProtectedRegion(protectionUser.getBukkitPlayer(), regionInfo.getRegion())) {
+                    BigDecimal amount = BigDecimal.valueOf(-ProtectionSettings.PROTECTION_RENAME_PRICE);
+
+                    protectionUser.addTransaction(null, amount, currency);
+                    ProtectionFlagInfo protectionInfo = new ProtectionFlagInfo(protectionDisplayName);
+
+                    regionInfo.getRegion().setFlag(ProtectionFlags.SURF_PROTECT_FLAG,
+                            protectionInfo);
+
+                    player.sendMessage(MessageManager.getProtectionRenamedComponent());
+                    return true;
+                } else {
+                    protectionUser
+                            .sendMessage(MessageManager.getNotStandingOnRenameProtectionComponent());
+                    return true;
+                }
+            } else {
+                player.sendMessage(MessageManager.getTooExpensiveToRenameComponent());
+                return true;
+            }
         }
 
         return false;
