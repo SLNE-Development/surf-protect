@@ -7,6 +7,7 @@ import java.util.Map;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
@@ -106,7 +107,13 @@ public class ProtectionGui extends ChestGui {
 						protectionUser.startRegionCreation(regionCreation);
 
 						MessageManager.sendProtectionModeEnterMessages(protectionUser);
-						confirmEvent.getWhoClicked().closeInventory();
+
+						new BukkitRunnable() {
+							@Override
+							public void run() {
+								confirmEvent.getWhoClicked().closeInventory();
+							}
+						}.runTaskLater(BukkitMain.getInstance(), 1);
 					}, cancelEvent -> {
 
 					}, Component.text("Grundstück erweitern", MessageManager.VARIABLE_KEY), confirmLore);

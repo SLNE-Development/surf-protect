@@ -46,7 +46,9 @@ public enum PageController {
      * @return the gui item
      */
     public GuiItem toGuiItem(ChestGui gui, Component itemName, PaginatedPane itemsPane, ItemStack failItem) {
-        if (!this.shouldContinue.test(itemsPane.getPage(), itemsPane)) {
+        int currentPage = itemsPane.getPage();
+
+        if (!this.shouldContinue.test(currentPage, itemsPane)) {
             return new GuiItem(failItem, event -> {
             });
         }
@@ -59,8 +61,6 @@ public enum PageController {
         item.setItemMeta(meta);
 
         return new GuiItem(item, event -> {
-            int currentPage = itemsPane.getPage();
-
             if (!this.shouldContinue.test(currentPage, itemsPane))
                 return;
 

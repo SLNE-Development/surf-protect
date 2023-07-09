@@ -1,4 +1,4 @@
-package dev.slne.protect.bukkit.gui.list;
+package dev.slne.protect.bukkit.gui.protection;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -21,6 +21,7 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 
 import dev.slne.protect.bukkit.BukkitMain;
 import dev.slne.protect.bukkit.gui.item.ItemStackUtils;
+import dev.slne.protect.bukkit.gui.protection.flags.ProtectionFlagsGui;
 import dev.slne.protect.bukkit.gui.utils.ConfirmationGui;
 import dev.slne.protect.bukkit.message.MessageManager;
 import dev.slne.protect.bukkit.region.ProtectionRegion;
@@ -32,7 +33,7 @@ import dev.slne.transaction.core.currency.Currency;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-public class ProtectionListOneGui extends ChestGui {
+public class ProtectionShowGui extends ChestGui {
 
     private ProtectedRegion region;
     private long area;
@@ -40,19 +41,21 @@ public class ProtectionListOneGui extends ChestGui {
     private List<String> ownerNames;
     private List<String> memberNames;
     private RegionInfo regionInfo;
+    private Player viewingPlayer;
 
     /**
      * Creates a new gui for a region
      *
-     * @param region      The region
-     * @param area        The area
-     * @param distance    The distance
-     * @param ownerNames  The owners
-     * @param memberNames The members
-     * @param regionInfo  The region info
+     * @param region        The region
+     * @param area          The area
+     * @param distance      The distance
+     * @param ownerNames    The owners
+     * @param memberNames   The members
+     * @param regionInfo    The region info
+     * @param viewingPlayer The viewing player
      */
     @SuppressWarnings("java:S2589")
-    public ProtectionListOneGui(ProtectedRegion region, long area, long distance,
+    public ProtectionShowGui(ProtectedRegion region, long area, long distance,
             List<String> ownerNames,
             List<String> memberNames, RegionInfo regionInfo, Player viewingPlayer) {
         super(5, regionInfo.getName());
@@ -63,6 +66,7 @@ public class ProtectionListOneGui extends ChestGui {
         this.distance = distance;
         this.ownerNames = ownerNames;
         this.memberNames = memberNames;
+        this.viewingPlayer = viewingPlayer;
 
         Location teleportLocation = regionInfo.getTeleportLocation();
 
@@ -118,6 +122,10 @@ public class ProtectionListOneGui extends ChestGui {
         // Row 4
         if (viewingPlayer.hasPermission("surf.protect.view.expand")) {
             staticPane.addItem(getProtectionExpandItem(), 1, 3);
+        }
+
+        if (viewingPlayer.hasPermission("surf.protect.flags.edit")) {
+            staticPane.addItem(getFlagsItem(), 2, 3);
         }
 
         if (viewingPlayer.hasPermission("surf.protect.view.sell")) {
@@ -439,6 +447,23 @@ public class ProtectionListOneGui extends ChestGui {
     }
 
     /**
+     * Returns the item for the flags
+     *
+     * @return The item
+     */
+    private GuiItem getFlagsItem() {
+        List<Component> lore = new ArrayList<>();
+
+        lore.add(Component.empty());
+        lore.add(Component.text("Hier können Flags eingestellt werden", NamedTextColor.GRAY));
+        lore.add(Component.empty());
+
+        return new GuiItem(
+                ItemStackUtils.getItem(Material.REDSTONE, 1, 0, Component.text("Flags", NamedTextColor.RED), lore),
+                event -> new ProtectionFlagsGui(region).show(event.getWhoClicked()));
+    }
+
+    /**
      * @return the area
      */
     public long getArea() {
@@ -478,6 +503,13 @@ public class ProtectionListOneGui extends ChestGui {
      */
     public RegionInfo getRegionInfo() {
         return regionInfo;
+    }
+
+    /**
+     * @return the viewingPlayer
+     */
+    public Player getViewingPlayer() {
+        return viewingPlayer;
     }
 
 }

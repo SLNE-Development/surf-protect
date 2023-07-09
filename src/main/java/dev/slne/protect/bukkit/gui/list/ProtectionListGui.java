@@ -8,18 +8,26 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
+import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
+import com.github.stefvanschie.inventoryframework.pane.OutlinePane;
+import com.github.stefvanschie.inventoryframework.pane.PaginatedPane;
+import com.github.stefvanschie.inventoryframework.pane.Pane;
+import com.github.stefvanschie.inventoryframework.pane.StaticPane;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 
+import dev.slne.protect.bukkit.gui.PageController;
 import dev.slne.protect.bukkit.gui.item.ItemStackUtils;
+import dev.slne.protect.bukkit.gui.protection.ProtectionShowGui;
 import dev.slne.protect.bukkit.message.MessageManager;
 import dev.slne.protect.bukkit.region.info.RegionInfo;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-public class ProtectionListGui extends ListGui {
+public class ProtectionListGui extends ChestGui {
 
 	private Player viewingPlayer;
 	private Map<World, List<ProtectedRegion>> regions;
@@ -32,10 +40,10 @@ public class ProtectionListGui extends ListGui {
 	 */
 	@SuppressWarnings("java:S3776")
 	public ProtectionListGui(Map<World, List<ProtectedRegion>> regions, Player viewingPlayer) {
-		super("Protections");
+		super(5, "Flags");
+		setOnGlobalClick(event -> event.setCancelled(true));
 
-		this.regions = regions;
-		this.viewingPlayer = viewingPlayer;
+		ItemStack backgroundItem = ItemStackUtils.getItem(Material.BLACK_STAINED_GLASS_PANE, 1, 0, Component.space());
 
 		List<GuiItem> buttons = new ArrayList<>();
 		for (Map.Entry<World, List<ProtectedRegion>> entry : regions.entrySet()) {
@@ -110,7 +118,7 @@ public class ProtectionListGui extends ListGui {
 				buttons.add(new GuiItem(ItemStackUtils.getItem(Material.DIRT, 1, 0,
 						Component.text(regionInfo.getName(), NamedTextColor.RED), lore),
 						event -> {
-							ProtectionListOneGui oneGui = new ProtectionListOneGui(
+							ProtectionShowGui oneGui = new ProtectionShowGui(
 									region, area, finalDistance, ownersNames,
 									membersNames, regionInfo, viewingPlayer);
 							oneGui.show(viewingPlayer);
@@ -118,7 +126,41 @@ public class ProtectionListGui extends ListGui {
 			}
 		}
 
-		getPaginatedPane().populateWithGuiItems(buttons);
+		PaginatedPane pages = new PaginatedPane(0, 1, 9, 3);
+		pages.populateWithGuiItems(buttons);
+
+		OutlinePane background = new OutlinePane(0, 0, 9, 1);
+		background.addItem(new GuiItem(backgroundItem));
+		background.setPriority(Pane.Priority.LOWEST);
+		background.setRepeat(true);
+
+		OutlinePane background2 = new OutlinePane(0, 4, 9, 1);
+		background2.addItem(new GuiItem(backgroundItem));
+		background2.setPriority(Pane.Priority.LOWEST);
+		background2.setRepeat(true);
+
+		StaticPane navigation = new StaticPane(0, 4, 9, 1);
+
+		navigation.addItem(
+				PageController.PREVIOUS.toGuiItem(this, Component.text("Zurück", NamedTextColor.GREEN), pages,
+						backgroundItem),
+				0, 0);
+
+		navigation.addItem(
+				PageController.NEXT.toGuiItem(
+						this, Component.text("Weiter", NamedTextColor.GREEN), pages, backgroundItem),
+				8, 0);
+
+		navigation.addItem(
+				new GuiItem(ItemStackUtils.getCloseItemStack(), event -> event.getWhoClicked().closeInventory()), 4, 0);
+
+		addPane(background);
+		addPane(background2);
+		addPane(pages);
+		addPane(navigation);
+
+		this.regions = regions;
+		this.viewingPlayer = viewingPlayer;
 	}
 
 	/**
