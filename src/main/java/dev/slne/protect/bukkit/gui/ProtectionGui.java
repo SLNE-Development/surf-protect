@@ -167,7 +167,7 @@ public class ProtectionGui extends ChestGui {
 	 */
 	private GuiItem getProtectionListItem() {
 		return new GuiItem(
-				ItemStackUtils.getItem(Material.ACACIA_BOAT, 1, 0,
+				ItemStackUtils.getItem(Material.DIRT, 1, 0,
 						Component.text("Liste", MessageManager.VARIABLE_KEY),
 						Component.text("Eine Liste von Protections", NamedTextColor.GRAY)),
 				event -> {

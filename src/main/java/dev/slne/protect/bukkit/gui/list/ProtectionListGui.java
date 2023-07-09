@@ -107,7 +107,7 @@ public class ProtectionListGui extends ListGui {
 
 				final long finalDistance = distance;
 
-				buttons.add(new GuiItem(ItemStackUtils.getItem(Material.ACACIA_BOAT, 1, 0,
+				buttons.add(new GuiItem(ItemStackUtils.getItem(Material.DIRT, 1, 0,
 						Component.text(regionInfo.getName(), NamedTextColor.RED), lore),
 						event -> {
 							ProtectionListOneGui oneGui = new ProtectionListOneGui(
