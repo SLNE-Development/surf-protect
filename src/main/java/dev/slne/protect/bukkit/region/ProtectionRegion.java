@@ -112,6 +112,10 @@ public class ProtectionRegion {
 					ProtectionSettings.MAX_Y_WORLD);
 			region.getOwners().addPlayer(protectionUser.getLocalPlayer());
 			region.setFlag(Flags.TELE_LOC, BukkitAdapter.adapt(boundingMarkers.get(0).getLocation()));
+
+			HashSet<String> owners = new HashSet<>();
+			owners.add(protectionUser.getLocalPlayer().getUniqueId().toString());
+			region.setFlag(Flags.NONPLAYER_PROTECTION_DOMAINS, owners);
 		}
 
 		this.temporaryRegion = new TemporaryProtectionRegion(
