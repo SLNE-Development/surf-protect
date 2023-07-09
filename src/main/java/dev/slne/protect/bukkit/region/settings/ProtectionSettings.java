@@ -60,12 +60,12 @@ public class ProtectionSettings {
 	/**
 	 * The price the user is paying per block
 	 */
-	public static final double PRICE_PER_BLOCK = 5f;
+	public static final double PRICE_PER_BLOCK = 6f;
 
 	/**
 	 * The money the user is getting per block when selling
 	 */
-	public static final double RETAIL_MODIFIER = 0.5f;
+	public static final double RETAIL_MODIFIER = 0.65f;
 
 	/**
 	 * The height map used for protection
