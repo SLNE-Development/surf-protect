@@ -8,13 +8,11 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 
 import dev.slne.protect.bukkit.BukkitMain;
 import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
-import dev.slne.protect.bukkit.region.visual.visualizer.visualizers.CuboidProtectionVisualizer;
 import dev.slne.protect.bukkit.region.visual.visualizer.visualizers.PolygonalProtectionVisualizer;
 
 public class ProtectionVisualizerThread extends BukkitRunnable {
@@ -68,12 +66,13 @@ public class ProtectionVisualizerThread extends BukkitRunnable {
      * @param player          the player
      */
     public void addVisualizer(World world, ProtectedRegion protectedRegion, Player player) {
-        if (protectedRegion instanceof ProtectedCuboidRegion cuboidRegion) {
-            this.addVisualizer(new CuboidProtectionVisualizer(world, cuboidRegion, player));
-        } else if (protectedRegion instanceof ProtectedPolygonalRegion polygonalRegion) {
+        /*
+         * if (protectedRegion instanceof ProtectedCuboidRegion cuboidRegion) {
+         * this.addVisualizer(new CuboidProtectionVisualizer(world, cuboidRegion,
+         * player));
+         * } else
+         */ if (protectedRegion instanceof ProtectedPolygonalRegion polygonalRegion) {
             this.addVisualizer(new PolygonalProtectionVisualizer(world, polygonalRegion, player));
-        } else {
-            throw new IllegalArgumentException("Region type not supported.");
         }
     }
 
