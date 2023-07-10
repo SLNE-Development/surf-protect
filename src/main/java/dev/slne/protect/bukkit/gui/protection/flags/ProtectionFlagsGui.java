@@ -1,22 +1,24 @@
 package dev.slne.protect.bukkit.gui.protection.flags;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.pane.PaginatedPane;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.flags.StateFlag.State;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+
 import dev.slne.surf.gui.api.SurfGui;
 import dev.slne.surf.gui.api.chest.SurfChestGui;
 import dev.slne.surf.gui.api.utils.ItemUtils;
 import dev.slne.surf.gui.api.utils.pagination.PageController;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class ProtectionFlagsGui extends SurfChestGui {
 
@@ -57,10 +59,12 @@ public class ProtectionFlagsGui extends SurfChestGui {
         ItemStack backgroundItem = ItemUtils.paneItem();
         navigationPane.addItem(
                 PageController.PREVIOUS.toGuiItem(this, Component.text("Zurück", NamedTextColor.GREEN), paginatedPane,
-                        backgroundItem), 0, 0);
+                        backgroundItem),
+                0, 0);
         navigationPane.addItem(
                 PageController.NEXT.toGuiItem(this, Component.text("Weiter", NamedTextColor.GREEN), paginatedPane,
-                        backgroundItem), 8, 0);
+                        backgroundItem),
+                8, 0);
 
         super.update();
     }

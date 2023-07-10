@@ -1,7 +1,18 @@
 package dev.slne.protect.bukkit.gui.protection.flags;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.sk89q.worldguard.protection.flags.StateFlag.State;
+
 import dev.slne.protect.bukkit.message.MessageManager;
 import dev.slne.surf.gui.api.utils.ItemUtils;
 import net.kyori.adventure.text.Component;
@@ -9,15 +20,6 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
 
 public class ToggleButton extends GuiItem {
     private static final TextColor active = MessageManager.VARIABLE_VALUE;
@@ -36,7 +38,7 @@ public class ToggleButton extends GuiItem {
      * @param consumer       the consumer
      */
     public ToggleButton(ProtectionFlagsMap protectionEnum, @Nullable State currentState,
-                        Consumer<@Nullable State> consumer) {
+            Consumer<@Nullable State> consumer) {
         super(ItemUtils.item(protectionEnum.getMaterial(), 1, 0, protectionEnum.getDisplayName(),
                 formLore(protectionEnum, getCurrentToggleState(currentState, protectionEnum.getToggleToState()),
                         protectionEnum.getToggleToState()).toArray(Component[]::new)));
@@ -68,7 +70,7 @@ public class ToggleButton extends GuiItem {
      * @return the lore
      */
     public static @NotNull List<Component> formLore(ProtectionFlagsMap protectionEnum, @Nullable State currentState,
-                                                    State toggleToState) {
+            State toggleToState) {
         List<Component> lore = new ArrayList<>();
 
         lore.add(Component.text(""));
@@ -148,11 +150,10 @@ public class ToggleButton extends GuiItem {
 
         getItem().setItemMeta(itemMeta);
 
-        Component displayName =
-                getItem().getItemMeta().hasDisplayName() ?
-                        (getItem().getItemMeta().displayName() != null ? getItem().getItemMeta().displayName() :
-                                Component.text(getItem().getType().name())) :
-                        Component.text(getItem().getType().name());
+        Component displayName = getItem().getItemMeta().hasDisplayName()
+                ? (getItem().getItemMeta().displayName() != null ? getItem().getItemMeta().displayName()
+                        : Component.text(getItem().getType().name()))
+                : Component.text(getItem().getType().name());
 
         TextComponent.Builder builder = Component.text();
 
