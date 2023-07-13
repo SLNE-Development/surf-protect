@@ -1,15 +1,5 @@
 package dev.slne.protect.bukkit.gui.protection;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
-
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
 import com.github.stefvanschie.inventoryframework.pane.OutlinePane;
@@ -18,7 +8,6 @@ import com.github.stefvanschie.inventoryframework.pane.StaticPane;
 import com.sk89q.worldguard.protection.flags.StateFlag.State;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-
 import dev.slne.protect.bukkit.BukkitMain;
 import dev.slne.protect.bukkit.gui.item.ItemStackUtils;
 import dev.slne.protect.bukkit.gui.protection.flags.ProtectionFlagsGui;
@@ -28,20 +17,29 @@ import dev.slne.protect.bukkit.region.ProtectionRegion;
 import dev.slne.protect.bukkit.region.ProtectionUtils;
 import dev.slne.protect.bukkit.region.flags.ProtectionFlags;
 import dev.slne.protect.bukkit.region.info.RegionInfo;
+import dev.slne.protect.bukkit.region.transaction.ProtectionSellData;
 import dev.slne.protect.bukkit.user.ProtectionUser;
 import dev.slne.transaction.core.currency.Currency;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ProtectionShowGui extends ChestGui {
 
-    private ProtectedRegion region;
-    private long area;
-    private double distance;
-    private List<String> ownerNames;
-    private List<String> memberNames;
-    private RegionInfo regionInfo;
-    private Player viewingPlayer;
+    private final ProtectedRegion region;
+    private final long area;
+    private final double distance;
+    private final List<String> ownerNames;
+    private final List<String> memberNames;
+    private final RegionInfo regionInfo;
+    private final Player viewingPlayer;
 
     /**
      * Creates a new gui for a region
@@ -56,8 +54,8 @@ public class ProtectionShowGui extends ChestGui {
      */
     @SuppressWarnings("java:S2589")
     public ProtectionShowGui(ProtectedRegion region, long area, long distance,
-            List<String> ownerNames,
-            List<String> memberNames, RegionInfo regionInfo, Player viewingPlayer) {
+                             List<String> ownerNames,
+                             List<String> memberNames, RegionInfo regionInfo, Player viewingPlayer) {
         super(5, regionInfo.getName());
 
         this.regionInfo = regionInfo;
@@ -142,185 +140,10 @@ public class ProtectionShowGui extends ChestGui {
     }
 
     /**
-     * Returns the item for the protection expand
-     *
-     * @return The item
-     */
-    private GuiItem getProtectionExpandItem() {
-        List<Component> lore = new ArrayList<>();
-
-        lore.add(Component.empty());
-        lore.add(Component.text("Erweitert das Grundstück", NamedTextColor.GRAY));
-        lore.add(Component.empty());
-
-        List<Component> confirmLore = new ArrayList<>();
-        confirmLore.add(Component.empty());
-        confirmLore
-                .addAll(ItemStackUtils.splitComponent("Bist du dir sicher, dass du das Grundstück erweitern möchtest?",
-                        50, MessageManager.VARIABLE_VALUE));
-
-        return new GuiItem(ItemStackUtils.getItem(Material.GRASS_BLOCK, 1, 0,
-                Component.text("Grundstück erweitern", MessageManager.VARIABLE_KEY), lore), event -> {
-                    Player player = (Player) event.getWhoClicked();
-                    player.closeInventory();
-
-                    ConfirmationGui confirmationGui = new ConfirmationGui(this, confirmEvent -> {
-                        ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
-                        ProtectionRegion protectionRegion = new ProtectionRegion(protectionUser,
-                                regionInfo.getRegion());
-
-                        ProtectedRegion protectedRegion = regionInfo.getRegion();
-                        State canSellState = protectedRegion.getFlag(ProtectionFlags.SURF_CAN_SELL_FLAG);
-                        boolean canExpand = canSellState == State.ALLOW || canSellState == null;
-
-                        if (!canExpand) {
-                            protectionUser.sendMessage(MessageManager.prefix()
-                                    .append(Component.text("Das Grundstück darf nicht erweitert werden.",
-                                            MessageManager.ERROR)));
-                            return;
-                        }
-
-                        if (ProtectionUtils.standsInProtectedRegion(protectionUser.getBukkitPlayer(),
-                                regionInfo.getRegion())) {
-                            protectionUser.startRegionCreation(protectionRegion);
-                            protectionRegion.setExpandingMarkers();
-
-                            MessageManager.sendProtectionModeEnterMessages(protectionUser);
-                        } else {
-                            protectionUser.sendMessage(MessageManager.prefix().append(Component.text(
-                                    "Du befindest dich nicht auf dem zu erweiternden Grundstück.",
-                                    MessageManager.ERROR)));
-                        }
-                        confirmEvent.getWhoClicked().closeInventory();
-                    }, cancelEvent -> {
-
-                    }, Component.text("Grundstück erweitern", MessageManager.VARIABLE_KEY), confirmLore);
-
-                    confirmationGui.show(player);
-                });
-    }
-
-    /**
-     * Returns the item for the protection sell
-     */
-    @SuppressWarnings("java:S3776")
-    private GuiItem getProtectionSellItem() {
-        return new GuiItem(ItemStackUtils.getItem(Material.BEDROCK, 1, 0,
-                Component.text("Grundstück löschen", NamedTextColor.RED), Component.empty(),
-                Component.text("Löscht das Grundstück", NamedTextColor.GRAY), Component.empty()), event -> {
-                    Player player = (Player) event.getWhoClicked();
-
-                    List<Component> confirmLore = new ArrayList<>();
-                    confirmLore.add(Component.empty());
-                    confirmLore.addAll(ItemStackUtils.splitComponent(
-                            "Bist du dir sicher, dass du das Grundstück löschen möchtest?", 50, MessageManager.ERROR));
-                    confirmLore.add(Component.empty());
-                    confirmLore.add(Component.text("Achtung: Das Grundstück kann nicht wiederhergestellt werden!",
-                            MessageManager.ERROR));
-                    confirmLore.add(Component.empty());
-                    confirmLore
-                            .add(Component.text("Das Grundstück wird dir für einen Anteil des Kaufpreises erstattet.",
-                                    NamedTextColor.GRAY));
-
-                    ConfirmationGui confirmationGui = new ConfirmationGui(this, confirmEvent -> {
-                        ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
-
-                        ProtectedRegion protectedRegion = regionInfo.getRegion();
-                        State canSellState = protectedRegion.getFlag(ProtectionFlags.SURF_CAN_SELL_FLAG);
-                        boolean canSell = canSellState == State.ALLOW || canSellState == null;
-
-                        if (!canSell) {
-                            protectionUser.sendMessage(MessageManager.prefix()
-                                    .append(Component.text("Das Grundstück darf nicht verkauft werden.",
-                                            MessageManager.ERROR)));
-                            return;
-                        }
-
-                        if (isRegionEdited()) {
-                            protectionUser.sendMessage(MessageManager.prefix()
-                                    .append(Component.text("Das Grundstück wird gerade bearbeitet!",
-                                            MessageManager.ERROR)));
-                            return;
-                        }
-
-                        List<String> members = new ArrayList<>();
-                        members.addAll(protectedRegion.getOwners().getPlayers());
-                        members.addAll(protectedRegion.getMembers().getPlayers());
-
-                        for (String member : members) {
-                            Player memberPlayer = Bukkit.getPlayer(member);
-
-                            if (!memberPlayer.isOnline()) {
-                                continue;
-                            }
-
-                            notifyDeletion(player, regionInfo);
-                        }
-
-                        BigDecimal refund = BigDecimal.valueOf(regionInfo.getRetailPrice());
-
-                        Optional<Currency> currencyOptional = Currency.currencyByName("CastCoin");
-
-                        if (currencyOptional.isEmpty()) {
-                            protectionUser.sendMessage(MessageManager.getNoCurrencyComponent());
-                            return;
-                        }
-
-                        Currency currency = currencyOptional.get();
-
-                        RegionManager regionManager = ProtectionUtils.getRegionManager(player.getWorld());
-                        regionManager.removeRegion(protectedRegion.getId());
-
-                        protectionUser.addTransaction(null, refund, currency);
-                        confirmEvent.getWhoClicked().closeInventory();
-                    }, cancelEvent -> {
-
-                    }, Component.text("Grundstück löschen?", NamedTextColor.RED), confirmLore);
-
-                    confirmationGui.show(player);
-                });
-    }
-
-    /**
-     * Returns whether the region is edited
-     *
-     * @return Whether the region is edited
-     */
-    private boolean isRegionEdited() {
-        List<ProtectionUser> protectionUsers = BukkitMain.getBukkitInstance().getUserManager().getUsers();
-        boolean isEdited = false;
-
-        for (ProtectionUser user : protectionUsers) {
-            if (user.hasRegionCreation()) {
-                ProtectionRegion protectionRegion = user.getRegionCreation();
-                ProtectedRegion protectedRegion = protectionRegion.getExpandingProtection();
-
-                if (protectedRegion != null && protectedRegion.getId().equals(region.getId())) {
-                    isEdited = true;
-                    break;
-                }
-            }
-        }
-
-        return isEdited;
-    }
-
-    /**
-     * Notifies the player about the deletion
-     *
-     * @param player     The player
-     * @param regionInfo The region info
-     */
-    private void notifyDeletion(Player player, RegionInfo regionInfo) {
-        player.sendMessage(MessageManager.prefix().append(Component.text("Das Grundstück ", MessageManager.INFO))
-                .append(Component.text(regionInfo.getName(), MessageManager.VARIABLE_VALUE))
-                .append(Component.text(" wurde verkauft.", MessageManager.INFO)));
-    }
-
-    /**
      * Returns the item for the area
      *
      * @param area The area
+     *
      * @return The item
      */
     private GuiItem getAreaItem(long area) {
@@ -335,9 +158,28 @@ public class ProtectionShowGui extends ChestGui {
     }
 
     /**
+     * Returns the item for the distance
+     *
+     * @param distance The distance
+     *
+     * @return The item
+     */
+    private GuiItem getDistanceItem(double distance) {
+        List<Component> lore = new ArrayList<>();
+
+        lore.add(Component.empty());
+        lore.add(Component.text(distance + " Blöcke", MessageManager.VARIABLE_VALUE));
+        lore.add(Component.empty());
+
+        return new GuiItem(ItemStackUtils.getItem(Material.COMPASS, 1, 0,
+                Component.text("Entfernung", MessageManager.VARIABLE_KEY), lore));
+    }
+
+    /**
      * Returns the item for the location
      *
      * @param teleportLocation The teleport location
+     *
      * @return The item
      */
     private GuiItem getLocationItem(Location teleportLocation) {
@@ -359,26 +201,10 @@ public class ProtectionShowGui extends ChestGui {
     }
 
     /**
-     * Returns the item for the distance
-     *
-     * @param distance The distance
-     * @return The item
-     */
-    private GuiItem getDistanceItem(double distance) {
-        List<Component> lore = new ArrayList<>();
-
-        lore.add(Component.empty());
-        lore.add(Component.text(distance + " Blöcke", MessageManager.VARIABLE_VALUE));
-        lore.add(Component.empty());
-
-        return new GuiItem(ItemStackUtils.getItem(Material.COMPASS, 1, 0,
-                Component.text("Entfernung", MessageManager.VARIABLE_KEY), lore));
-    }
-
-    /**
      * Returns the item for the owners
      *
      * @param owners The owners
+     *
      * @return The item
      */
     private GuiItem getOwnersItem(List<String> owners) {
@@ -404,6 +230,7 @@ public class ProtectionShowGui extends ChestGui {
      * Returns the item for the members
      *
      * @param members The members
+     *
      * @return The item
      */
     private GuiItem getMembersItem(List<String> members) {
@@ -441,9 +268,68 @@ public class ProtectionShowGui extends ChestGui {
 
         return new GuiItem(ItemStackUtils.getItem(Material.ENDER_PEARL, 1, 0,
                 Component.text("Teleportieren", MessageManager.VARIABLE_KEY), lore), event -> {
-                    event.getWhoClicked().closeInventory();
-                    event.getWhoClicked().teleportAsync(location);
-                });
+            event.getWhoClicked().closeInventory();
+            event.getWhoClicked().teleportAsync(location);
+        });
+    }
+
+    /**
+     * Returns the item for the protection expand
+     *
+     * @return The item
+     */
+    private GuiItem getProtectionExpandItem() {
+        List<Component> lore = new ArrayList<>();
+
+        lore.add(Component.empty());
+        lore.add(Component.text("Erweitert das Grundstück", NamedTextColor.GRAY));
+        lore.add(Component.empty());
+
+        List<Component> confirmLore = new ArrayList<>();
+        confirmLore.add(Component.empty());
+        confirmLore
+                .addAll(ItemStackUtils.splitComponent("Bist du dir sicher, dass du das Grundstück erweitern möchtest?",
+                        50, MessageManager.VARIABLE_VALUE));
+
+        return new GuiItem(ItemStackUtils.getItem(Material.GRASS_BLOCK, 1, 0,
+                Component.text("Grundstück erweitern", MessageManager.VARIABLE_KEY), lore), event -> {
+            Player player = (Player) event.getWhoClicked();
+            player.closeInventory();
+
+            ConfirmationGui confirmationGui = new ConfirmationGui(this, confirmEvent -> {
+                ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
+                ProtectionRegion protectionRegion = new ProtectionRegion(protectionUser,
+                        regionInfo.getRegion());
+
+                ProtectedRegion protectedRegion = regionInfo.getRegion();
+                State canSellState = protectedRegion.getFlag(ProtectionFlags.SURF_CAN_SELL_FLAG);
+                boolean canExpand = canSellState == State.ALLOW || canSellState == null;
+
+                if (! canExpand) {
+                    protectionUser.sendMessage(MessageManager.prefix()
+                            .append(Component.text("Das Grundstück darf nicht erweitert werden.",
+                                    MessageManager.ERROR)));
+                    return;
+                }
+
+                if (ProtectionUtils.standsInProtectedRegion(protectionUser.getBukkitPlayer(),
+                        regionInfo.getRegion())) {
+                    protectionUser.startRegionCreation(protectionRegion);
+                    protectionRegion.setExpandingMarkers();
+
+                    MessageManager.sendProtectionModeEnterMessages(protectionUser);
+                } else {
+                    protectionUser.sendMessage(MessageManager.prefix().append(Component.text(
+                            "Du befindest dich nicht auf dem zu erweiternden Grundstück.",
+                            MessageManager.ERROR)));
+                }
+                confirmEvent.getWhoClicked().closeInventory();
+            }, cancelEvent -> {
+
+            }, Component.text("Grundstück erweitern", MessageManager.VARIABLE_KEY), confirmLore);
+
+            confirmationGui.show(player);
+        });
     }
 
     /**
@@ -461,6 +347,121 @@ public class ProtectionShowGui extends ChestGui {
         return new GuiItem(
                 ItemStackUtils.getItem(Material.REDSTONE, 1, 0, Component.text("Flags", NamedTextColor.RED), lore),
                 event -> new ProtectionFlagsGui(region).show(event.getWhoClicked()));
+    }
+
+    /**
+     * Returns the item for the protection sell
+     */
+    @SuppressWarnings("java:S3776")
+    private GuiItem getProtectionSellItem() {
+        return new GuiItem(ItemStackUtils.getItem(Material.BEDROCK, 1, 0,
+                Component.text("Grundstück löschen", NamedTextColor.RED), Component.empty(),
+                Component.text("Löscht das Grundstück", NamedTextColor.GRAY), Component.empty()), event -> {
+            Player player = (Player) event.getWhoClicked();
+
+            List<Component> confirmLore = new ArrayList<>();
+            confirmLore.add(Component.empty());
+            confirmLore.addAll(ItemStackUtils.splitComponent(
+                    "Bist du dir sicher, dass du das Grundstück löschen möchtest?", 50, MessageManager.ERROR));
+            confirmLore.add(Component.empty());
+            confirmLore.add(Component.text("Achtung: Das Grundstück kann nicht wiederhergestellt werden!",
+                    MessageManager.ERROR));
+            confirmLore.add(Component.empty());
+            confirmLore
+                    .add(Component.text("Das Grundstück wird dir für einen Anteil des Kaufpreises erstattet.",
+                            NamedTextColor.GRAY));
+
+            ConfirmationGui confirmationGui = new ConfirmationGui(this, confirmEvent -> {
+                ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
+
+                ProtectedRegion protectedRegion = regionInfo.getRegion();
+                State canSellState = protectedRegion.getFlag(ProtectionFlags.SURF_CAN_SELL_FLAG);
+                boolean canSell = canSellState == State.ALLOW || canSellState == null;
+
+                if (! canSell) {
+                    protectionUser.sendMessage(MessageManager.prefix()
+                            .append(Component.text("Das Grundstück darf nicht verkauft werden.",
+                                    MessageManager.ERROR)));
+                    return;
+                }
+
+                if (isRegionEdited()) {
+                    protectionUser.sendMessage(MessageManager.prefix()
+                            .append(Component.text("Das Grundstück wird gerade bearbeitet!",
+                                    MessageManager.ERROR)));
+                    return;
+                }
+
+                List<String> members = new ArrayList<>();
+                members.addAll(protectedRegion.getOwners().getPlayers());
+                members.addAll(protectedRegion.getMembers().getPlayers());
+
+                for (String member : members) {
+                    Player memberPlayer = Bukkit.getPlayer(member);
+
+                    if (! memberPlayer.isOnline()) {
+                        continue;
+                    }
+
+                    notifyDeletion(player, regionInfo);
+                }
+
+                BigDecimal refund = BigDecimal.valueOf(regionInfo.getRetailPrice());
+
+                Currency currency = Currency.currencyByName("CastCoin");
+
+                if (currency == null) {
+                    protectionUser.sendMessage(MessageManager.getNoCurrencyComponent());
+                    return;
+                }
+
+                RegionManager regionManager = ProtectionUtils.getRegionManager(player.getWorld());
+                regionManager.removeRegion(protectedRegion.getId());
+
+                protectionUser.addTransaction(null, refund, currency, new ProtectionSellData(protectedRegion));
+                confirmEvent.getWhoClicked().closeInventory();
+            }, cancelEvent -> {
+
+            }, Component.text("Grundstück löschen?", NamedTextColor.RED), confirmLore);
+
+            confirmationGui.show(player);
+        });
+    }
+
+    /**
+     * Returns whether the region is edited
+     *
+     * @return Whether the region is edited
+     */
+    private boolean isRegionEdited() {
+        List<ProtectionUser> protectionUsers = BukkitMain.getBukkitInstance().getUserManager().getUsers();
+        boolean isEdited = false;
+
+        for (ProtectionUser user : protectionUsers) {
+            if (user.hasRegionCreation()) {
+                ProtectionRegion protectionRegion = user.getRegionCreation();
+                ProtectedRegion protectedRegion = protectionRegion.getExpandingProtection();
+
+                if (protectedRegion != null && protectedRegion.getId().equals(region.getId())) {
+                    isEdited = true;
+                    break;
+                }
+            }
+        }
+
+        return isEdited;
+    }
+
+    /**
+     * Notifies the player about the deletion
+     *
+     * @param player     The player
+     * @param regionInfo The region info
+     */
+    private void notifyDeletion(Player player, RegionInfo regionInfo) {
+        player.sendMessage(MessageManager.prefix().append(Component.text("Das Grundstück ", MessageManager.INFO))
+                .append(Component.text(regionInfo.getName(), MessageManager.VARIABLE_VALUE))
+                .append(Component.text(" wurde verkauft.", MessageManager.INFO)));
     }
 
     /**

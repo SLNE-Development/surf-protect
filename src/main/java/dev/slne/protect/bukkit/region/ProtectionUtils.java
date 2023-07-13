@@ -1,17 +1,5 @@
 package dev.slne.protect.bukkit.region;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.entity.Player;
-
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.regions.Polygonal2DRegion;
 import com.sk89q.worldguard.LocalPlayer;
@@ -22,10 +10,16 @@ import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
 import com.sk89q.worldguard.protection.regions.RegionQuery;
-
 import dev.slne.protect.bukkit.region.flags.ProtectionFlags;
 import dev.slne.protect.bukkit.region.info.RegionInfo;
 import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.entity.Player;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Represents the protection utils
@@ -68,7 +62,6 @@ public class ProtectionUtils {
 		Map<World, List<Map.Entry<String, ProtectedRegion>>> regions = new HashMap<>();
 
 		for (World world : Bukkit.getWorlds()) {
-			List<Map.Entry<String, ProtectedRegion>> regionMap = new ArrayList<>();
 			com.sk89q.worldedit.world.World adaptedWorld = BukkitAdapter.adapt(world);
 
 			RegionManager manager = getRegionContainer().get(adaptedWorld);
@@ -77,7 +70,7 @@ public class ProtectionUtils {
 				continue;
 			}
 
-			regionMap.addAll(manager.getRegions().entrySet().stream().filter(entry -> entry.getValue().getOwners()
+			List<Map.Entry<String, ProtectedRegion>> regionMap = new ArrayList<>(manager.getRegions().entrySet().stream().filter(entry -> entry.getValue().getOwners()
 					.contains(localPlayer)).toList());
 
 			regions.put(world, regionMap);
@@ -96,7 +89,6 @@ public class ProtectionUtils {
 		Map<World, List<ProtectedRegion>> regions = new HashMap<>();
 
 		for (World world : Bukkit.getWorlds()) {
-			List<ProtectedRegion> regionMap = new ArrayList<>();
 			com.sk89q.worldedit.world.World adaptedWorld = BukkitAdapter.adapt(world);
 
 			RegionManager manager = getRegionContainer().get(adaptedWorld);
@@ -105,10 +97,9 @@ public class ProtectionUtils {
 				continue;
 			}
 
-			regionMap.addAll(manager.getRegions().entrySet().stream()
-					.filter(entry -> entry.getValue().getOwners()
-							.contains(localPlayer))
-					.map(Map.Entry::getValue).toList());
+			List<ProtectedRegion> regionMap = new ArrayList<>(manager.getRegions().values().stream()
+					.filter(protectedRegion -> protectedRegion.getOwners()
+							.contains(localPlayer)).toList());
 
 			regions.put(world, regionMap);
 		}
@@ -200,7 +191,7 @@ public class ProtectionUtils {
 	 */
 	public static boolean standsInProtectedRegion(Player player, ProtectedRegion protectedRegion) {
 		for (ProtectedRegion region : getProtectedRegionsByLocation(player.getLocation())) {
-			if (region != null && protectedRegion.equals(region)) {
+			if (protectedRegion.equals(region)) {
 				return true;
 			}
 		}
@@ -249,9 +240,15 @@ public class ProtectionUtils {
 	 * @return the {@link Double} distance
 	 */
 	public static double getDistanceToRegion(ProtectedRegion protectedRegion, Location location) {
-		Location teleportLocation = BukkitAdapter.adapt(protectedRegion.getFlag(Flags.TELE_LOC));
+		com.sk89q.worldedit.util.Location teleportFlag = protectedRegion.getFlag(Flags.TELE_LOC);
 
-		if (teleportLocation == null || location == null) {
+		if(teleportFlag == null) {
+			return 0;
+		}
+
+		Location teleportLocation = BukkitAdapter.adapt(teleportFlag);
+
+		if (location == null) {
 			return 0;
 		}
 
