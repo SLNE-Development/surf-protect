@@ -23,6 +23,7 @@ public class ProtectionBuyData extends TransactionData {
     @Override
     public String toJson() {
         JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("type", "buy");
         jsonObject.addProperty("region_id", region.getId());
         jsonObject.addProperty("world_name", world.getName());
 

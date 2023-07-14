@@ -25,6 +25,7 @@ public class ProtectionRenameData extends TransactionData {
     @Override
     public String toJson() {
         JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("type", "rename");
         jsonObject.addProperty("region_id", region.getId());
         jsonObject.addProperty("from_name", fromName);
         jsonObject.addProperty("to_name", toName);
