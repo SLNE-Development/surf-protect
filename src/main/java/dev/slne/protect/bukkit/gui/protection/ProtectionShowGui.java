@@ -268,7 +268,6 @@ public class ProtectionShowGui extends ProtectionGui {
         lore.add(Component.empty());
 
         List<Component> confirmLore = new ArrayList<>();
-        confirmLore.add(Component.empty());
         confirmLore.addAll(ItemUtils.splitComponent("Bist du dir sicher, dass du das Grundstück erweitern möchtest?", 50, NamedTextColor.GRAY));
 
         return new GuiItem(ItemUtils.item(Material.GRASS_BLOCK, 1, 0, Component.text("Grundstück erweitern", NamedTextColor.GOLD), lore.toArray(Component[]::new)), event -> {
