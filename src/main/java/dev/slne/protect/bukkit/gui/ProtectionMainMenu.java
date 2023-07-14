@@ -18,11 +18,13 @@ import dev.slne.protect.bukkit.region.visual.visualizer.ProtectionVisualizer;
 import dev.slne.protect.bukkit.user.ProtectionUser;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.title.Title;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -108,6 +110,11 @@ public class ProtectionMainMenu extends ProtectionGui {
             }
 
             player.sendMessage(MessageManager.getProtectionVisualizeComponent(!state));
+
+            Duration fadeDuration = Duration.ofMillis(150);
+            Duration stayDuration = Duration.ofSeconds(1);
+
+            player.showTitle(Title.title(Component.text("Visualizer", NamedTextColor.GOLD), Component.text("Visualizer " + (state ? "deaktiviert" : "aktiviert"), NamedTextColor.GRAY), Title.Times.times(fadeDuration, stayDuration, fadeDuration)));
             BukkitMain.getBukkitInstance().getProtectionVisualizerState().togglePlayerState(player);
 
             player.closeInventory();
