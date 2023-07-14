@@ -8,7 +8,6 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import dev.slne.protect.bukkit.gui.PageController;
 import dev.slne.protect.bukkit.gui.ProtectionGui;
 import dev.slne.protect.bukkit.gui.protection.ProtectionShowGui;
-import dev.slne.protect.bukkit.gui.utils.GuiUtils;
 import dev.slne.protect.bukkit.gui.utils.ItemUtils;
 import dev.slne.protect.bukkit.message.MessageManager;
 import dev.slne.protect.bukkit.region.info.RegionInfo;
@@ -110,15 +109,12 @@ public class ProtectionListGui extends ProtectionGui {
         PaginatedPane pages = new PaginatedPane(0, 1, 9, 3);
         pages.populateWithGuiItems(buttons);
 
-        ItemStack backgroundItem = ItemUtils.paneItem();
-
         StaticPane navigation = new StaticPane(0, 4, 9, 1);
 
+        ItemStack backgroundItem = ItemUtils.paneItem();
         navigation.addItem(PageController.PREVIOUS.toGuiItem(this, Component.text("Zurück", NamedTextColor.GOLD), pages, backgroundItem), 0, 0);
         navigation.addItem(PageController.NEXT.toGuiItem(this, Component.text("Weiter", NamedTextColor.GOLD), pages, backgroundItem), 8, 0);
 
-        addPane(GuiUtils.getOutline(0));
-        addPane(GuiUtils.getOutline(4));
         addPane(pages);
         addPane(navigation);
 

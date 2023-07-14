@@ -1,8 +1,6 @@
 package dev.slne.protect.bukkit.gui.protection;
 
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
-import com.github.stefvanschie.inventoryframework.pane.OutlinePane;
-import com.github.stefvanschie.inventoryframework.pane.Pane;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
 import com.sk89q.worldguard.protection.flags.StateFlag.State;
 import com.sk89q.worldguard.protection.managers.RegionManager;
@@ -65,20 +63,8 @@ public class ProtectionShowGui extends ProtectionGui {
 
         Location teleportLocation = regionInfo.getTeleportLocation();
 
-        setOnGlobalClick(event -> event.setCancelled(true));
-
         GuiItem regionNameItem =
                 new GuiItem(ItemUtils.item(Material.NAME_TAG, 1, 0, Component.text(regionInfo.getName(), NamedTextColor.RED)));
-
-        OutlinePane backgroundPane = new OutlinePane(0, 0, 9, 1);
-        backgroundPane.addItem(new GuiItem(ItemUtils.item(Material.BLACK_STAINED_GLASS_PANE, 1, 0, Component.space())));
-        backgroundPane.setPriority(Pane.Priority.LOWEST);
-        backgroundPane.setRepeat(true);
-
-        OutlinePane backgroundPane2 = new OutlinePane(0, 4, 9, 1);
-        backgroundPane2.addItem(new GuiItem(ItemUtils.item(Material.BLACK_STAINED_GLASS_PANE, 1, 0, Component.space())));
-        backgroundPane2.setPriority(Pane.Priority.LOWEST);
-        backgroundPane2.setRepeat(true);
 
         StaticPane staticPane = new StaticPane(0, 0, 9, 5);
 
@@ -124,11 +110,6 @@ public class ProtectionShowGui extends ProtectionGui {
             staticPane.addItem(getProtectionSellItem(), 7, 3);
         }
 
-        // Row 5
-        staticPane.addItem(new GuiItem(ItemUtils.closeItem(), event -> event.getWhoClicked().closeInventory()), 4, 4);
-
-        addPane(backgroundPane);
-        addPane(backgroundPane2);
         addPane(staticPane);
     }
 

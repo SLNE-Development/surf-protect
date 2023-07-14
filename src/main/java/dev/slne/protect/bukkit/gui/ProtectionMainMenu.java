@@ -8,7 +8,6 @@ import com.sk89q.worldguard.protection.regions.RegionType;
 import dev.slne.protect.bukkit.BukkitMain;
 import dev.slne.protect.bukkit.gui.list.ProtectionListGui;
 import dev.slne.protect.bukkit.gui.utils.ConfirmationGui;
-import dev.slne.protect.bukkit.gui.utils.GuiUtils;
 import dev.slne.protect.bukkit.gui.utils.ItemUtils;
 import dev.slne.protect.bukkit.message.MessageManager;
 import dev.slne.protect.bukkit.region.ProtectionRegion;
@@ -57,8 +56,6 @@ public class ProtectionMainMenu extends ProtectionGui {
             navigationPane.addItem(getProtectionCreateItem(), 7, 2);
         }
 
-        addPane(GuiUtils.getOutline(0));
-        addPane(GuiUtils.getOutline(4));
         addPane(navigationPane);
     }
 
