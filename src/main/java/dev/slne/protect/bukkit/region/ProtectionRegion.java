@@ -90,7 +90,7 @@ public class ProtectionRegion {
         Marker marker = new Marker(this, block.getLocation(), previousData);
         calculateBoundingMarkers(marker);
 
-        if (! boundingMarkers.contains(marker)) {
+        if (!boundingMarkers.contains(marker)) {
             return null;
         }
 
@@ -149,13 +149,13 @@ public class ProtectionRegion {
         ProtectedRegion region;
 
         if (this.isExpandingRegion()) {
-            region = new ProtectedPolygonalRegion(expandingProtection.getId(), vectors, ProtectionSettings.MIN_Y_WORLD,
-                    ProtectionSettings.MAX_Y_WORLD);
+            region =
+                    new ProtectedPolygonalRegion(expandingProtection.getId(), vectors, ProtectionSettings.MIN_Y_WORLD, ProtectionSettings.MAX_Y_WORLD);
             region.copyFrom(expandingProtection);
         } else {
             String name = player.getName() + "-" + RandomStringUtils.randomAlphabetic(5).toUpperCase();
-            region = new ProtectedPolygonalRegion(name, vectors, ProtectionSettings.MIN_Y_WORLD,
-                    ProtectionSettings.MAX_Y_WORLD);
+            region =
+                    new ProtectedPolygonalRegion(name, vectors, ProtectionSettings.MIN_Y_WORLD, ProtectionSettings.MAX_Y_WORLD);
             region.getOwners().addPlayer(protectionUser.getLocalPlayer());
             region.setFlag(Flags.TELE_LOC, BukkitAdapter.adapt(boundingMarkers.get(0).getLocation()));
 
@@ -164,8 +164,7 @@ public class ProtectionRegion {
             region.setFlag(Flags.NONPLAYER_PROTECTION_DOMAINS, owners);
         }
 
-        this.temporaryRegion = new TemporaryProtectionRegion(
-                player.getWorld(), region, manager);
+        this.temporaryRegion = new TemporaryProtectionRegion(player.getWorld(), region, manager);
         long area = temporaryRegion.getArea();
 
         if (this.isExpandingRegion()) {
@@ -194,9 +193,10 @@ public class ProtectionRegion {
 
         double effectiveCost = this.calculateProtectionPrice(temporaryRegion);
         BigDecimal effectiveCostBigDecimal = BigDecimal.valueOf(effectiveCost);
-        boolean hasEnoughCurrency = Boolean.TRUE.equals(protectionUser.hasEnoughCurrency(effectiveCostBigDecimal, currency).join());
+        boolean hasEnoughCurrency =
+                Boolean.TRUE.equals(protectionUser.hasEnoughCurrency(effectiveCostBigDecimal, currency).join());
 
-        if (! hasEnoughCurrency) {
+        if (!hasEnoughCurrency) {
             MessageManager.sendAreaTooExpensiveComponent(protectionUser, area, effectiveCost);
         } else {
             MessageManager.sendAreaBuyableComponent(protectionUser, area, effectiveCost);
@@ -232,7 +232,7 @@ public class ProtectionRegion {
             Trail trail = new Trail(marker, next, this, true);
             newTrails.add(trail);
 
-            if (! trails.contains(trail)) {
+            if (!trails.contains(trail)) {
                 trails.add(trail);
                 trail.start();
             }
@@ -246,14 +246,14 @@ public class ProtectionRegion {
             Trail trail = new Trail(first, last, this, true);
             newTrails.add(trail);
 
-            if (! trails.contains(trail)) {
+            if (!trails.contains(trail)) {
                 trails.add(trail);
                 trail.start();
             }
         }
 
         trails.removeIf(trail -> {
-            if (! newTrails.contains(trail)) {
+            if (!newTrails.contains(trail)) {
                 trail.stopTask();
 
                 return true;
@@ -272,6 +272,15 @@ public class ProtectionRegion {
      */
     protected double calculateProtectionPrice(TemporaryProtectionRegion region) {
         return region.getEffectiveArea() * ProtectionSettings.PRICE_PER_BLOCK;
+    }
+
+    /**
+     * Sets the temporary region creation
+     *
+     * @param temporaryRegion the temporary region creation
+     */
+    public void setTemporaryRegion(TemporaryProtectionRegion temporaryRegion) {
+        this.temporaryRegion = temporaryRegion;
     }
 
     /**
@@ -294,32 +303,30 @@ public class ProtectionRegion {
 
     /**
      * Finished the protection
-     *
-     * @return if successful
      */
-    public boolean finishProtection() {
+    public void finishProtection() {
         if (temporaryRegion == null) {
             offerAccepting();
-            return false;
+            return;
         }
 
         if (temporaryRegion.overlapsUnownedRegion(protectionUser.getLocalPlayer())) {
             protectionUser.sendMessage(MessageManager.getOverlappingRegionsComponent());
-            return false;
+            return;
         }
 
         double effectiveCost = this.calculateProtectionPrice(temporaryRegion);
-        BigDecimal effectiveCostBigDecimal = BigDecimal.valueOf(- effectiveCost);
+        BigDecimal effectiveCostBigDecimal = BigDecimal.valueOf(-effectiveCost);
 
         Currency currency = Currency.currencyByName("CastCoin");
 
         if (currency == null) {
             protectionUser.sendMessage(MessageManager.getNoCurrencyComponent());
-            return false;
+            return;
         }
 
-        TransactionAddResult transactionResult = protectionUser
-                .addTransaction(null, effectiveCostBigDecimal, currency, new ProtectionBuyData(this.startLocation != null ? this.startLocation.getWorld() : null, this.temporaryRegion.getRegion())).join();
+        TransactionAddResult transactionResult =
+                protectionUser.addTransaction(null, effectiveCostBigDecimal, currency, new ProtectionBuyData(this.startLocation != null ? this.startLocation.getWorld() : null, this.temporaryRegion.getRegion())).join();
 
         if (transactionResult != null && transactionResult.equals(TransactionAddResult.SUCCESS)) {
             this.temporaryRegion.protect();
@@ -327,10 +334,8 @@ public class ProtectionRegion {
             this.removeAllMarkers();
             protectionUser.resetRegionCreation();
             protectionUser.sendMessage(MessageManager.getProtectionCreatedComponent());
-            return true;
         } else {
             protectionUser.sendMessage(MessageManager.getTooExpensiveToBuyComponent());
-            return false;
         }
     }
 
@@ -415,33 +420,6 @@ public class ProtectionRegion {
      */
     public Location getStartLocation() {
         return startLocation;
-    }
-
-    /**
-     * Returns the {@link List} of bounding {@link Marker}s
-     *
-     * @return the {@link List} of bounding {@link Marker}s
-     */
-    public List<Marker> getBoundingMarkers() {
-        return boundingMarkers;
-    }
-
-    /**
-     * Returns the temporary region creation
-     *
-     * @return the temporary region creation
-     */
-    public TemporaryProtectionRegion getTemporaryRegion() {
-        return temporaryRegion;
-    }
-
-    /**
-     * Sets the temporary region creation
-     *
-     * @param temporaryRegion the temporary region creation
-     */
-    public void setTemporaryRegion(TemporaryProtectionRegion temporaryRegion) {
-        this.temporaryRegion = temporaryRegion;
     }
 
     /**
