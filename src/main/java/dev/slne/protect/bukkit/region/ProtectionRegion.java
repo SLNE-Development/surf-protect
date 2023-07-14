@@ -7,6 +7,7 @@ import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import dev.slne.protect.bukkit.BukkitMain;
+import dev.slne.protect.bukkit.gui.protection.flags.ProtectionFlagsMap;
 import dev.slne.protect.bukkit.message.MessageManager;
 import dev.slne.protect.bukkit.region.info.RegionCreationState;
 import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
@@ -158,6 +159,10 @@ public class ProtectionRegion {
                     new ProtectedPolygonalRegion(name, vectors, ProtectionSettings.MIN_Y_WORLD, ProtectionSettings.MAX_Y_WORLD);
             region.getOwners().addPlayer(protectionUser.getLocalPlayer());
             region.setFlag(Flags.TELE_LOC, BukkitAdapter.adapt(boundingMarkers.get(0).getLocation()));
+
+            for (ProtectionFlagsMap flagsMap : ProtectionFlagsMap.values()) {
+                region.setFlag(flagsMap.getFlag(), flagsMap.getInitialState());
+            }
 
             HashSet<String> owners = new HashSet<>();
             owners.add(protectionUser.getLocalPlayer().getUniqueId().toString());
