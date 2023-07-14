@@ -30,8 +30,7 @@ public class ConfirmationGui extends ChestGui {
      * @param onConfirm   the action when the user confirms
      * @param onCancel    the action when the user cancels
      */
-    public ConfirmationGui(ChestGui previousGui, Consumer<InventoryClickEvent> onConfirm,
-                           Consumer<InventoryEvent> onCancel, Component questionLabel, List<Component> questionLore) {
+    public ConfirmationGui(ChestGui previousGui, Consumer<InventoryClickEvent> onConfirm, Consumer<InventoryEvent> onCancel, Component questionLabel, List<Component> questionLore) {
         super(5, "Bestätigung erforderlich");
 
         this.previousGui = previousGui;
@@ -48,8 +47,7 @@ public class ConfirmationGui extends ChestGui {
 
         confirmationPane.addItem(new GuiItem(ItemUtils.confirmationConfirmItem(), this::confirm), 1, 2);
 
-        confirmationPane.addItem(new GuiItem(ItemUtils.confirmationCancelItem(),
-                event -> cancel(event, (Player) event.getWhoClicked())), 7, 2);
+        confirmationPane.addItem(new GuiItem(ItemUtils.confirmationCancelItem(), event -> cancel(event, (Player) event.getWhoClicked())), 7, 2);
 
         List<Component> lore = new ArrayList<>();
         lore.add(Component.empty());
@@ -58,10 +56,7 @@ public class ConfirmationGui extends ChestGui {
         lore.addAll(questionLore);
         lore.add(Component.empty());
 
-        confirmationPane.addItem(
-                new GuiItem(ItemUtils.confirmationQuestionItem(questionLabel,
-                        lore.stream().toArray(size -> new Component[size]))),
-                4, 2);
+        confirmationPane.addItem(new GuiItem(ItemUtils.confirmationQuestionItem(questionLabel, lore.stream().toArray(size -> new Component[size]))), 4, 2);
 
         addPane(GuiUtils.getOutline(0));
         addPane(GuiUtils.getOutline(4));
@@ -78,8 +73,6 @@ public class ConfirmationGui extends ChestGui {
         if (onCancel != null) {
             onCancel.accept(event);
         }
-
-        backToParent(player);
     }
 
     /**

@@ -386,12 +386,10 @@ public class ProtectionShowGui extends ProtectionGui {
                     public void run() {
                         getViewingPlayer().closeInventory();
                     }
-                }.runTaskLater(BukkitMain.getInstance(), 1L);
+                }.runTask(BukkitMain.getInstance());
 
                 protectionUser.sendMessage(MessageManager.getProtectionSoldComponent(refund, currency));
-            }, cancelEvent -> {
-
-            }, Component.text("Grundstück löschen?", NamedTextColor.GOLD), confirmLore);
+            }, null, Component.text("Grundstück löschen?", NamedTextColor.GOLD), confirmLore);
 
             confirmationGui.show(player);
         });
