@@ -123,6 +123,8 @@ public class ProtectionListGui extends ProtectionGui {
         addPane(navigation);
 
         this.regions = regions;
+
+        update();
     }
 
     /**
