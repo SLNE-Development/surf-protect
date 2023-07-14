@@ -202,9 +202,9 @@ public class ProtectionRegion {
                 Boolean.TRUE.equals(protectionUser.hasEnoughCurrency(effectiveCostBigDecimal, currency).join());
 
         if (!hasEnoughCurrency) {
-            MessageManager.sendAreaTooExpensiveComponent(protectionUser, area, effectiveCost);
+            MessageManager.sendAreaTooExpensiveComponent(protectionUser, area, effectiveCost, currency);
         } else {
-            MessageManager.sendAreaBuyableComponent(protectionUser, area, effectiveCost);
+            MessageManager.sendAreaBuyableComponent(protectionUser, area, effectiveCost, currency);
         }
 
         this.setTemporaryRegion(temporaryRegion);

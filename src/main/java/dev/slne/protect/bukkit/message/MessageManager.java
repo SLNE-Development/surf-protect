@@ -8,6 +8,7 @@ import dev.slne.protect.bukkit.gui.utils.ItemUtils;
 import dev.slne.protect.bukkit.region.info.RegionInfo;
 import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
 import dev.slne.protect.bukkit.user.ProtectionUser;
+import dev.slne.transaction.core.currency.Currency;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -16,6 +17,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 
+import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.List;
 
@@ -124,13 +126,14 @@ public class MessageManager {
      * @param user          The user
      * @param area          The area
      * @param effectiveCost The effective cost
+     * @param currency      The currency
      */
-    private static void sendAreaBuyHeader(ProtectionUser user, long area, double effectiveCost) {
+    private static void sendAreaBuyHeader(ProtectionUser user, long area, double effectiveCost, Currency currency) {
         emptyLine(user);
         prefixMessage(user, Component.text("Das Grundstück steht zum Verkauf", SUCCESS));
         emptyLine(user);
         prefixMessage(user, Component.text("Fläche: ", VARIABLE_KEY).append(Component.text(area, VARIABLE_VALUE)).append(Component.text(" Blöcke", VARIABLE_VALUE)));
-        prefixMessage(user, Component.text("Kaufpreis: ", VARIABLE_KEY).append(Component.text(effectiveCost, VARIABLE_VALUE)).append(currencyDisplayName()));
+        prefixMessage(user, Component.text("Kaufpreis: ", VARIABLE_KEY).append(Component.text(effectiveCost, VARIABLE_VALUE)).append(currencyDisplayName(currency)));
         emptyLine(user);
     }
 
@@ -160,9 +163,10 @@ public class MessageManager {
      * @param user          The user
      * @param area          The area
      * @param effectiveCost The effective cost
+     * @param currency      The currency
      */
-    public static void sendAreaTooExpensiveComponent(ProtectionUser user, long area, double effectiveCost) {
-        sendAreaBuyHeader(user, area, effectiveCost);
+    public static void sendAreaTooExpensiveComponent(ProtectionUser user, long area, double effectiveCost, Currency currency) {
+        sendAreaBuyHeader(user, area, effectiveCost, currency);
 
         prefixMessage(user, getTooExpensiveToBuyComponent());
     }
@@ -173,9 +177,10 @@ public class MessageManager {
      * @param user          the user
      * @param area          the area
      * @param effectiveCost the effective cost
+     * @param currency      the currency
      */
-    public static void sendAreaBuyableComponent(ProtectionUser user, long area, double effectiveCost) {
-        sendAreaBuyHeader(user, area, effectiveCost);
+    public static void sendAreaBuyableComponent(ProtectionUser user, long area, double effectiveCost, Currency currency) {
+        sendAreaBuyHeader(user, area, effectiveCost, currency);
 
         prefixMessage(user, Component.text("Wenn du das Grundstück kaufen möchtest,", INFO));
         prefixMessage(user, Component.text("nutze den Bestätigungsknopf in deiner Hotbar.", INFO));
@@ -320,15 +325,6 @@ public class MessageManager {
     }
 
     /**
-     * Returns the component which tells the user that the protection doesn't exist
-     *
-     * @return the component
-     */
-    public static Component getProtectionDoesntExistComponent() {
-        return prefix().append(Component.text("Das Grundstück existiert nicht.", ERROR));
-    }
-
-    /**
      * Returns the component that informs the user about not having enough
      * permissions
      *
@@ -346,9 +342,10 @@ public class MessageManager {
      *
      * @return the component
      */
-    public static Component getProtectionRenameComponent(String command) {
+    public static Component getProtectionRenameComponent(String command, Currency currency) {
         ClickEvent clickEvent = ClickEvent.runCommand(command);
-        HoverEvent<Component> hoverEvent = HoverEvent.showText(MessageManager.getProtectionRenameHoverComponent());
+        HoverEvent<Component> hoverEvent =
+                HoverEvent.showText(MessageManager.getProtectionRenameHoverComponent(currency));
 
         Component clickComponent =
                 Component.text("hier", MessageManager.VARIABLE_VALUE).clickEvent(clickEvent).hoverEvent(hoverEvent);
@@ -360,9 +357,11 @@ public class MessageManager {
      * Returns the component which is being shown to the user when he tries to
      * rename a protection on hover
      *
+     * @param currency The currency
+     *
      * @return the component
      */
-    public static Component getProtectionRenameHoverComponent() {
+    public static Component getProtectionRenameHoverComponent(Currency currency) {
         TextComponent.Builder builder = Component.text();
         builder.append(Component.text("Klicke hier um deine Protection umzubenennen.", NamedTextColor.GRAY));
 
@@ -372,7 +371,7 @@ public class MessageManager {
         builder.append(Component.newline());
         builder.append(Component.text("Die Umbenennung kostet dich ", NamedTextColor.RED));
         builder.append(Component.text(ProtectionSettings.PROTECTION_RENAME_PRICE));
-        builder.append(currencyDisplayName().colorIfAbsent(VARIABLE_VALUE));
+        builder.append(currencyDisplayName(currency));
 
         return builder.asComponent();
     }
@@ -382,8 +381,8 @@ public class MessageManager {
      *
      * @return The currency display name
      */
-    private static Component currencyDisplayName() {
-        return Component.text("€", MessageManager.VARIABLE_VALUE);
+    private static Component currencyDisplayName(Currency currency) {
+        return currency.displayName().colorIfAbsent(VARIABLE_VALUE);
     }
 
     /**
@@ -455,6 +454,18 @@ public class MessageManager {
      */
     private static void prefixMessage(ProtectionUser user, Component message) {
         user.sendMessage(prefix().append(message));
+    }
+
+    /**
+     * Returns the component which tells the user that they have sold a protection
+     *
+     * @param amount   The amount
+     * @param currency The currency
+     *
+     * @return the component
+     */
+    public static Component getProtectionSoldComponent(BigDecimal amount, Currency currency) {
+        return prefix().append(Component.text("Du hast dein Grundstück für ", INFO)).append(Component.text(amount.toString(), MessageManager.VARIABLE_VALUE)).append(Component.text(" ", MessageManager.VARIABLE_VALUE)).append(currencyDisplayName(currency)).append(Component.text(" verkauft.", INFO));
     }
 
 }

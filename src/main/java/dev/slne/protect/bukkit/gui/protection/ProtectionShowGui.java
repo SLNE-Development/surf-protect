@@ -26,6 +26,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -368,7 +369,6 @@ public class ProtectionShowGui extends ProtectionGui {
                 }
 
                 BigDecimal refund = BigDecimal.valueOf(regionInfo.getRetailPrice());
-
                 Currency currency = Currency.currencyByName("CastCoin");
 
                 if (currency == null) {
@@ -380,7 +380,15 @@ public class ProtectionShowGui extends ProtectionGui {
                 regionManager.removeRegion(protectedRegion.getId());
 
                 protectionUser.addTransaction(null, refund, currency, new ProtectionSellData(protectedRegion));
-                confirmEvent.getWhoClicked().closeInventory();
+
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        confirmEvent.getWhoClicked().closeInventory();
+                    }
+                }.runTaskLater(BukkitMain.getInstance(), 1L);
+
+                protectionUser.sendMessage(MessageManager.getProtectionSoldComponent(refund, currency));
             }, cancelEvent -> {
 
             }, Component.text("Grundstück löschen?", NamedTextColor.GOLD), confirmLore);
