@@ -439,7 +439,7 @@ public class MessageManager {
                 ItemUtils.splitComponent("Wenn du den ProtectionMode betrittst, erhältst du vorübergehend Fly um dein Grundstück besser definieren zu können. Du definierst dein Grundstück indem du bis zu " + ProtectionSettings.MARKERS + " Marker platzierst und anschließend mit dem grünen Block bestätigst. Mit dem roten Block kannst du die Protection jederzeit abbrechen und zu deinem Ausgangspunkt zurückkehren.", 70, SPACER);
 
         for (Component message : messages) {
-            prefixMessage(user, message);
+            user.sendMessage(message);
         }
 
         prefixMessage(user, Component.empty());
