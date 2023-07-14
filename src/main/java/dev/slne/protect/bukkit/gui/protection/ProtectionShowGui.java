@@ -197,7 +197,7 @@ public class ProtectionShowGui extends ProtectionGui {
 
         lore.add(Component.empty());
 
-        Component none = Component.text("Keine", MessageManager.VARIABLE_VALUE);
+        Component none = Component.text("Keine", NamedTextColor.GOLD);
 
         if (owners.isEmpty()) {
             lore.add(none);
@@ -221,7 +221,7 @@ public class ProtectionShowGui extends ProtectionGui {
         List<Component> lore = new ArrayList<>();
 
         lore.add(Component.empty());
-        Component none = Component.text("Keine", MessageManager.VARIABLE_VALUE);
+        Component none = Component.text("Keine", NamedTextColor.GOLD);
 
         if (members.isEmpty()) {
             lore.add(none);
