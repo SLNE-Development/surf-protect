@@ -52,7 +52,7 @@ public class ProtectionListGui extends ProtectionGui {
                 List<String> ownersNames = new ArrayList<>();
                 List<String> membersNames = new ArrayList<>();
 
-                Component none = Component.text("Keine", NamedTextColor.GOLD);
+                Component none = Component.text("Keine", MessageManager.VARIABLE_VALUE);
 
                 for (LocalPlayer owner : owners) {
                     ownersNames.add(owner.getName());
