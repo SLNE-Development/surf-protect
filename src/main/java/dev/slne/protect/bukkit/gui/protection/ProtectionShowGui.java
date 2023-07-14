@@ -384,7 +384,7 @@ public class ProtectionShowGui extends ProtectionGui {
                 new BukkitRunnable() {
                     @Override
                     public void run() {
-                        confirmEvent.getWhoClicked().closeInventory();
+                        getViewingPlayer().closeInventory();
                     }
                 }.runTaskLater(BukkitMain.getInstance(), 1L);
 
