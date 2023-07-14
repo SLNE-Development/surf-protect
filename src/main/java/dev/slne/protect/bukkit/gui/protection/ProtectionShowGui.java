@@ -425,45 +425,10 @@ public class ProtectionShowGui extends ProtectionGui {
     }
 
     /**
-     * @return the area
-     */
-    public long getArea() {
-        return area;
-    }
-
-    /**
-     * @return the distance
-     */
-    public double getDistance() {
-        return distance;
-    }
-
-    /**
-     * @return the memberNames
-     */
-    public List<String> getMemberNames() {
-        return memberNames;
-    }
-
-    /**
-     * @return the ownerNames
-     */
-    public List<String> getOwnerNames() {
-        return ownerNames;
-    }
-
-    /**
      * @return the region
      */
     public ProtectedRegion getRegion() {
         return region;
-    }
-
-    /**
-     * @return the regionInfo
-     */
-    public RegionInfo getRegionInfo() {
-        return regionInfo;
     }
 
 }
