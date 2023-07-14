@@ -1,13 +1,6 @@
 package dev.slne.protect.bukkit.gui.protection.flags;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.bukkit.Material;
-import org.bukkit.inventory.ItemStack;
-
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
-import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
 import com.github.stefvanschie.inventoryframework.pane.OutlinePane;
 import com.github.stefvanschie.inventoryframework.pane.PaginatedPane;
 import com.github.stefvanschie.inventoryframework.pane.Pane;
@@ -15,24 +8,30 @@ import com.github.stefvanschie.inventoryframework.pane.StaticPane;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.flags.StateFlag.State;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-
 import dev.slne.protect.bukkit.gui.PageController;
-import dev.slne.protect.bukkit.gui.item.ItemStackUtils;
+import dev.slne.protect.bukkit.gui.ProtectionGui;
+import dev.slne.protect.bukkit.gui.utils.ItemUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
-public class ProtectionFlagsGui extends ChestGui {
+import java.util.ArrayList;
+import java.util.List;
+
+public class ProtectionFlagsGui extends ProtectionGui {
 
     /**
      * Creates a new protection flags gui
      *
      * @param region the region
      */
-    public ProtectionFlagsGui(ProtectedRegion region) {
-        super(5, "Flags");
+    public ProtectionFlagsGui(ProtectionGui parent, ProtectedRegion region, Player viewingPlayer) {
+        super(parent, 5, parent.getTitle() + " - Flags", viewingPlayer);
         setOnGlobalClick(event -> event.setCancelled(true));
 
-        ItemStack backgroundItem = ItemStackUtils.getItem(Material.BLACK_STAINED_GLASS_PANE, 1, 0, Component.space());
+        ItemStack backgroundItem = ItemUtils.item(Material.BLACK_STAINED_GLASS_PANE, 1, 0, Component.space());
 
         List<GuiItem> buttons = new ArrayList<>();
 
@@ -65,18 +64,11 @@ public class ProtectionFlagsGui extends ChestGui {
 
         StaticPane navigation = new StaticPane(0, 4, 9, 1);
 
-        navigation.addItem(
-                PageController.PREVIOUS.toGuiItem(this, Component.text("Zurück", NamedTextColor.GREEN), pages,
-                        backgroundItem),
-                0, 0);
+        navigation.addItem(PageController.PREVIOUS.toGuiItem(this, Component.text("Zurück", NamedTextColor.GREEN), pages, backgroundItem), 0, 0);
 
-        navigation.addItem(
-                PageController.NEXT.toGuiItem(
-                        this, Component.text("Weiter", NamedTextColor.GREEN), pages, backgroundItem),
-                8, 0);
+        navigation.addItem(PageController.NEXT.toGuiItem(this, Component.text("Weiter", NamedTextColor.GREEN), pages, backgroundItem), 8, 0);
 
-        navigation.addItem(
-                new GuiItem(ItemStackUtils.getCloseItemStack(), event -> event.getWhoClicked().closeInventory()), 4, 0);
+        navigation.addItem(new GuiItem(ItemUtils.closeItem(), event -> event.getWhoClicked().closeInventory()), 4, 0);
 
         addPane(pages);
         addPane(navigation);

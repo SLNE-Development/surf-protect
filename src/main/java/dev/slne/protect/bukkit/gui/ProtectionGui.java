@@ -1,197 +1,117 @@
 package dev.slne.protect.bukkit.gui;
 
+import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
+import dev.slne.protect.bukkit.gui.utils.GuiUtils;
+import org.bukkit.entity.Player;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
-import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
-
-import com.github.stefvanschie.inventoryframework.gui.GuiItem;
-import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
-import com.github.stefvanschie.inventoryframework.pane.OutlinePane;
-import com.github.stefvanschie.inventoryframework.pane.Pane;
-import com.github.stefvanschie.inventoryframework.pane.StaticPane;
-import com.sk89q.worldguard.protection.flags.StateFlag.State;
-import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-import com.sk89q.worldguard.protection.regions.RegionType;
-
-import dev.slne.protect.bukkit.BukkitMain;
-import dev.slne.protect.bukkit.gui.item.ItemStackUtils;
-import dev.slne.protect.bukkit.gui.list.ProtectionListGui;
-import dev.slne.protect.bukkit.gui.utils.ConfirmationGui;
-import dev.slne.protect.bukkit.message.MessageManager;
-import dev.slne.protect.bukkit.region.ProtectionRegion;
-import dev.slne.protect.bukkit.region.ProtectionUtils;
-import dev.slne.protect.bukkit.region.flags.ProtectionFlags;
-import dev.slne.protect.bukkit.region.visual.visualizer.ProtectionVisualizer;
-import dev.slne.protect.bukkit.user.ProtectionUser;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 
 public class ProtectionGui extends ChestGui {
 
-	private Player targetProtectionPlayer;
+    private final ProtectionGui parent;
+    private final Player viewingPlayer;
 
-	/**
-	 * Creates a new protection gui
-	 *
-	 * @param targetProtectionPlayer the player get the regions from
-	 */
-	public ProtectionGui(Player viewingPlayer, Player targetProtectionPlayer) {
-		super(5, "Protections");
+    /**
+     * Creates a new shop gui.
+     *
+     * @param parent        the parent gui
+     * @param rows          the amount of rows this gui should have
+     * @param title         the title of this gui
+     * @param viewingPlayer the player viewing the shop
+     */
+    protected ProtectionGui(ProtectionGui parent, int rows, String title, Player viewingPlayer) {
+        this(parent, rows, title, viewingPlayer, true, true, true, true);
+    }
 
-		setOnGlobalClick(event -> event.setCancelled(true));
+    /**
+     * Creates a new shop gui.
+     *
+     * @param parent            the parent gui
+     * @param rows              the amount of rows this gui should have
+     * @param title             the title of this gui
+     * @param viewingPlayer     the player viewing the shop
+     * @param cancelTopClick    if the top inventory click should be cancelled
+     * @param cancelTopDrag     if the top inventory drag should be cancelled
+     * @param cancelBottomClick if the bottom inventory click should be cancelled
+     * @param cancelBottomDrag  if the bottom inventory drag should be cancelled
+     */
+    @SuppressWarnings("java:S107")
+    protected ProtectionGui(ProtectionGui parent, int rows, String title, Player viewingPlayer, boolean cancelTopClick,
+                            boolean cancelTopDrag, boolean cancelBottomClick, boolean cancelBottomDrag) {
+        super(rows, title);
 
-		this.targetProtectionPlayer = targetProtectionPlayer;
+        if (rows < 2) {
+            throw new IllegalArgumentException("rows must be at least 2");
+        }
 
-		OutlinePane backgroundPane = new OutlinePane(0, 0, 9, 1);
-		backgroundPane.addItem(new GuiItem(
-				ItemStackUtils.getItem(Material.BLACK_STAINED_GLASS_PANE, 1, 0, Component.space())));
-		backgroundPane.setRepeat(true);
-		backgroundPane.setPriority(Pane.Priority.LOWEST);
+        this.parent = parent;
+        this.viewingPlayer = viewingPlayer;
 
-		OutlinePane backgroundPane2 = new OutlinePane(0, 4, 9, 1);
-		backgroundPane2.addItem(new GuiItem(
-				ItemStackUtils.getItem(Material.BLACK_STAINED_GLASS_PANE, 1, 0, Component.space())));
-		backgroundPane2.setRepeat(true);
-		backgroundPane2.setPriority(Pane.Priority.LOWEST);
+        setOnTopClick(event -> event.setCancelled(cancelTopClick));
+        setOnTopDrag(event -> event.setCancelled(cancelTopDrag));
+        setOnBottomClick(event -> event.setCancelled(cancelBottomClick));
+        setOnBottomDrag(event -> event.setCancelled(cancelBottomDrag));
+        setOnOutsideClick(event -> event.setCancelled(true));
 
-		StaticPane navigationPane = new StaticPane(0, 0, 9, 5);
+        addPane(GuiUtils.getOutline(0));
+        addPane(GuiUtils.getOutline(rows - 1));
+        addPane(GuiUtils.getNavigation(this, rows - 1));
+    }
 
-		if (viewingPlayer.hasPermission("surf.protect.list")) {
-			navigationPane.addItem(getProtectionListItem(), 1, 2);
-		}
+    /**
+     * Shows the parent gui to the player.
+     *
+     * @param player the player to show the gui to
+     */
+    public void showParent(Player player) {
+        if (parent == null) {
+            return;
+        }
 
-		if (viewingPlayer.hasPermission("surf.protect.visualize")) {
-			navigationPane.addItem(getVisualizerItem(), 2, 2);
-		}
+        parent.show(player);
+        parent.update();
+    }
 
-		if (viewingPlayer.hasPermission("surf.protect.create")) {
-			navigationPane.addItem(getProtectionCreateItem(), 7, 2);
-		}
+    /**
+     * Returns if the gui has a parent.
+     *
+     * @return if the gui has a parent
+     */
+    public boolean hasParent() {
+        return parent != null;
+    }
 
-		navigationPane.addItem(
-				new GuiItem(ItemStackUtils.getCloseItemStack(), event -> event.getWhoClicked().closeInventory()), 4, 4);
+    /**
+     * Walks through the parents of this gui and returns them.
+     *
+     * @return the parents of this gui
+     */
+    public List<ProtectionGui> walkParents() {
+        List<ProtectionGui> parents = new ArrayList<>();
 
-		addPane(backgroundPane);
-		addPane(backgroundPane2);
-		addPane(navigationPane);
-	}
+        ProtectionGui parentGui = getParent();
+        while (parentGui != null) {
+            parents.add(parentGui);
+            parentGui = parentGui.getParent();
+        }
 
-	/**
-	 * Returns the protection create item
-	 *
-	 * @return the protection create item
-	 */
-	private GuiItem getProtectionCreateItem() {
-		return new GuiItem(
-				ItemStackUtils.getItem(Material.GRASS_BLOCK, 1, 0,
-						Component.text("Grundstück erstellen", MessageManager.VARIABLE_KEY), Component.empty(),
-						Component.text("Erstelle ein neues Grundstück", NamedTextColor.GRAY), Component.empty()),
-				event -> {
-					Player player = (Player) event.getWhoClicked();
+        return parents;
+    }
 
-					List<Component> confirmLore = new ArrayList<>();
-					confirmLore.add(Component.empty());
-					confirmLore
-							.addAll(ItemStackUtils.splitComponent(
-									"Bist du dir sicher, dass du ein Grundstück erstellen möchtest?",
-									50, MessageManager.VARIABLE_VALUE));
+    /**
+     * @return the parent
+     */
+    public ProtectionGui getParent() {
+        return parent;
+    }
 
-					ConfirmationGui confirmationGui = new ConfirmationGui(this, confirmEvent -> {
-						ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
-						ProtectionRegion regionCreation = new ProtectionRegion(protectionUser, null);
-						protectionUser.startRegionCreation(regionCreation);
+    /**
+     * @return the viewingPlayer
+     */
+    public Player getViewingPlayer() {
+        return viewingPlayer;
+    }
 
-						MessageManager.sendProtectionModeEnterMessages(protectionUser);
-
-						new BukkitRunnable() {
-							@Override
-							public void run() {
-								confirmEvent.getWhoClicked().closeInventory();
-							}
-						}.runTaskLater(BukkitMain.getInstance(), 1);
-					}, cancelEvent -> {
-
-					}, Component.text("Grundstück erweitern", MessageManager.VARIABLE_KEY), confirmLore);
-
-					confirmationGui.show(player);
-				});
-	}
-
-	/**
-	 * Gets the visualizer item
-	 *
-	 * @return the visualizer item
-	 */
-	private GuiItem getVisualizerItem() {
-		return new GuiItem(ItemStackUtils.getItem(Material.ENDER_EYE, 1, 0,
-				Component.text("Visualizier", MessageManager.VARIABLE_KEY), Component.empty(),
-				Component.text("Aktiviert/Deaktiviert den Visualizer", NamedTextColor.GRAY), Component.empty()),
-				event -> {
-					Player player = (Player) event.getWhoClicked();
-					List<ProtectedRegion> regions = ProtectionUtils.getRegionManager(player.getWorld()).getRegions()
-							.values().stream().filter(region -> !region.getType().equals(RegionType.GLOBAL)).toList();
-
-					boolean state = BukkitMain.getBukkitInstance().getProtectionVisualizerState()
-							.getPlayerState(player);
-
-					if (!state) {
-						for (ProtectedRegion region : regions) {
-							State visualizeState = region.getFlag(ProtectionFlags.SURF_PROTECT_VISUALIZE);
-
-							if (visualizeState != null && visualizeState.equals(State.DENY)) {
-								continue;
-							}
-
-							BukkitMain.getBukkitInstance().getProtectionVisualizerThread().addVisualizer(
-									player.getWorld(), region, player);
-						}
-					} else {
-						for (ProtectionVisualizer<?> visualizer : new ArrayList<>(
-								BukkitMain.getBukkitInstance().getProtectionVisualizerThread()
-										.getVisualizers(player))) {
-							visualizer.remove();
-						}
-
-						BukkitMain.getBukkitInstance().getProtectionVisualizerThread().removeVisualizers(player);
-					}
-
-					player.sendMessage(MessageManager.getProtectionVisualizeComponent(!state));
-					BukkitMain.getBukkitInstance().getProtectionVisualizerState().togglePlayerState(player);
-
-					player.closeInventory();
-				});
-	}
-
-	/**
-	 * Gets the protection list item
-	 *
-	 * @return the protection list item
-	 */
-	private GuiItem getProtectionListItem() {
-		return new GuiItem(
-				ItemStackUtils.getItem(Material.DIRT, 1, 0,
-						Component.text("Liste", MessageManager.VARIABLE_KEY),
-						Component.text("Eine Liste von Protections", NamedTextColor.GRAY)),
-				event -> {
-					Player viewingPlayer = (Player) event.getWhoClicked();
-					ProtectionUser user = ProtectionUser.getProtectionUser(getTargetProtectionPlayer());
-					Map<World, List<ProtectedRegion>> regions = ProtectionUtils
-							.getRegionListFor(user.getLocalPlayer());
-
-					ProtectionListGui listGui = new ProtectionListGui(regions, viewingPlayer);
-					listGui.show(viewingPlayer);
-				});
-	}
-
-	/**
-	 * @return the targetProtectionPlayer
-	 */
-	public Player getTargetProtectionPlayer() {
-		return targetProtectionPlayer;
-	}
 }
+

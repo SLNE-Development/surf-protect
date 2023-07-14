@@ -1,13 +1,12 @@
 package dev.slne.protect.bukkit.command.commands.protection;
 
-import java.util.Optional;
-
-import org.bukkit.entity.Player;
-
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.PlayerArgument;
-import dev.slne.protect.bukkit.gui.ProtectionGui;
+import dev.slne.protect.bukkit.gui.ProtectionMainMenu;
 import dev.slne.protect.bukkit.message.MessageManager;
+import org.bukkit.entity.Player;
+
+import java.util.Optional;
 
 public class ProtectionCommand extends CommandAPICommand {
 
@@ -34,7 +33,7 @@ public class ProtectionCommand extends CommandAPICommand {
                 return;
             }
 
-            ProtectionGui gui = new ProtectionGui(player, target);
+            ProtectionMainMenu gui = new ProtectionMainMenu(player, target);
             gui.show(player);
         });
 

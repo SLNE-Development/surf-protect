@@ -1,30 +1,25 @@
 package dev.slne.protect.bukkit.gui.utils;
 
-import java.util.List;
-import java.util.function.Consumer;
-
-import org.bukkit.Material;
+import com.github.stefvanschie.inventoryframework.gui.GuiItem;
+import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
+import com.github.stefvanschie.inventoryframework.gui.type.util.Gui;
+import com.github.stefvanschie.inventoryframework.pane.StaticPane;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryEvent;
 
-import com.github.stefvanschie.inventoryframework.gui.GuiItem;
-import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
-import com.github.stefvanschie.inventoryframework.gui.type.util.Gui;
-import com.github.stefvanschie.inventoryframework.pane.OutlinePane;
-import com.github.stefvanschie.inventoryframework.pane.Pane;
-import com.github.stefvanschie.inventoryframework.pane.StaticPane;
-
-import dev.slne.protect.bukkit.gui.item.ItemStackUtils;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 public class ConfirmationGui extends ChestGui {
 
-    private Gui previousGui;
+    private final ChestGui previousGui;
 
-    private Component questionLabel;
-    private List<Component> questionLore;
+    private final Component questionLabel;
+    private final List<Component> questionLore;
     private Consumer<InventoryClickEvent> onConfirm;
     private Consumer<InventoryEvent> onCancel;
 
@@ -35,9 +30,9 @@ public class ConfirmationGui extends ChestGui {
      * @param onConfirm   the action when the user confirms
      * @param onCancel    the action when the user cancels
      */
-    public ConfirmationGui(Gui previousGui, Consumer<InventoryClickEvent> onConfirm,
-            Consumer<InventoryEvent> onCancel, Component questionLabel, List<Component> questionLore) {
-        super(5, "Bestätigung");
+    public ConfirmationGui(ChestGui previousGui, Consumer<InventoryClickEvent> onConfirm,
+                           Consumer<InventoryEvent> onCancel, Component questionLabel, List<Component> questionLore) {
+        super(5, "Bestätigung erforderlich");
 
         this.previousGui = previousGui;
         this.onConfirm = onConfirm;
@@ -49,42 +44,28 @@ public class ConfirmationGui extends ChestGui {
 
         setOnClose(event -> cancel(event, (Player) event.getPlayer()));
 
-        OutlinePane backgroundPane = new OutlinePane(0, 0, 9, 1);
-        backgroundPane.addItem(new GuiItem(
-                ItemStackUtils.getItem(Material.BLACK_STAINED_GLASS_PANE, 1, 0, Component.space())));
-        backgroundPane.setPriority(Pane.Priority.LOWEST);
-        backgroundPane.setRepeat(true);
-
-        OutlinePane backgroundPane2 = new OutlinePane(0, 4, 9, 1);
-        backgroundPane2.addItem(new GuiItem(
-                ItemStackUtils.getItem(Material.BLACK_STAINED_GLASS_PANE, 1, 0, Component.space())));
-        backgroundPane2.setPriority(Pane.Priority.LOWEST);
-        backgroundPane2.setRepeat(true);
-
         StaticPane confirmationPane = new StaticPane(0, 0, 9, 5);
 
-        confirmationPane.addItem(new GuiItem(ItemStackUtils.getItem(Material.GREEN_CONCRETE, 1, 0,
-                Component.text("Bestätigen", NamedTextColor.GREEN)), this::confirm), 1, 2);
+        confirmationPane.addItem(new GuiItem(ItemUtils.confirmationConfirmItem(), this::confirm), 1, 2);
 
-        confirmationPane.addItem(new GuiItem(ItemStackUtils.getItem(Material.RED_CONCRETE, 1, 0,
-                Component.text("Abbrechen", NamedTextColor.RED)),
+        confirmationPane.addItem(new GuiItem(ItemUtils.confirmationCancelItem(),
                 event -> cancel(event, (Player) event.getWhoClicked())), 7, 2);
 
+        List<Component> lore = new ArrayList<>();
+        lore.add(Component.empty());
+        lore.add(Component.text("Es ist eine Bestätigung erforderlich...", NamedTextColor.GRAY));
+        lore.add(Component.empty());
+        lore.addAll(questionLore);
+        lore.add(Component.empty());
+
         confirmationPane.addItem(
-                new GuiItem(ItemStackUtils.getItem(Material.ENCHANTED_BOOK, 1, 0, questionLabel, questionLore)), 4, 2);
+                new GuiItem(ItemUtils.confirmationQuestionItem(questionLabel,
+                        lore.stream().toArray(size -> new Component[size]))),
+                4, 2);
 
-        addPane(backgroundPane);
-        addPane(backgroundPane2);
+        addPane(GuiUtils.getOutline(0));
+        addPane(GuiUtils.getOutline(4));
         addPane(confirmationPane);
-    }
-
-    /**
-     * Confirms the action
-     *
-     * @param event the event
-     */
-    public void confirm(InventoryClickEvent event) {
-        onConfirm.accept(event);
     }
 
     /**
@@ -94,9 +75,36 @@ public class ConfirmationGui extends ChestGui {
      * @param player the player
      */
     public void cancel(InventoryEvent event, Player player) {
-        onCancel.accept(event);
-        previousGui.show(player);
-        previousGui.update();
+        if (onCancel != null) {
+            onCancel.accept(event);
+        }
+
+        backToParent(player);
+    }
+
+    /**
+     * Confirms the action
+     *
+     * @param event the event
+     */
+    public void confirm(InventoryClickEvent event) {
+        if (onConfirm != null) {
+            onConfirm.accept(event);
+        }
+    }
+
+    /**
+     * Goes back to the previous gui
+     *
+     * @param player the player
+     */
+    public void backToParent(Player player) {
+        if (previousGui != null) {
+            previousGui.show(player);
+            previousGui.update();
+        } else {
+            player.closeInventory();
+        }
     }
 
     /**
@@ -107,10 +115,24 @@ public class ConfirmationGui extends ChestGui {
     }
 
     /**
+     * @param onCancel the onCancel to set
+     */
+    public void setOnCancel(Consumer<InventoryEvent> onCancel) {
+        this.onCancel = onCancel;
+    }
+
+    /**
      * @return the onConfirm
      */
     public Consumer<InventoryClickEvent> getOnConfirm() {
         return onConfirm;
+    }
+
+    /**
+     * @param onConfirm the onConfirm to set
+     */
+    public void setOnConfirm(Consumer<InventoryClickEvent> onConfirm) {
+        this.onConfirm = onConfirm;
     }
 
     /**
@@ -135,3 +157,4 @@ public class ConfirmationGui extends ChestGui {
     }
 
 }
+

@@ -1,12 +1,5 @@
 package dev.slne.protect.bukkit.command.commands.protection.rename;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import org.bukkit.entity.Player;
-
 import dev.slne.protect.bukkit.command.commands.protection.ProtectionHelperCommand;
 import dev.slne.protect.bukkit.message.MessageManager;
 import dev.slne.protect.bukkit.region.ProtectionUtils;
@@ -14,8 +7,14 @@ import dev.slne.protect.bukkit.region.flags.ProtectionFlags;
 import dev.slne.protect.bukkit.region.info.ProtectionFlagInfo;
 import dev.slne.protect.bukkit.region.info.RegionInfo;
 import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
+import dev.slne.protect.bukkit.region.transaction.ProtectionRenameData;
 import dev.slne.protect.bukkit.user.ProtectionUser;
 import dev.slne.transaction.core.currency.Currency;
+import org.bukkit.entity.Player;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ProtectionRenameConfirmCommand implements ProtectionHelperCommand {
 
@@ -31,8 +30,7 @@ public class ProtectionRenameConfirmCommand implements ProtectionHelperCommand {
                 return false;
             }
 
-            if (!protectionName.equals(protectionNameConfirm)
-                    || !protectionDisplayName.equals(protectionDisplayNameConfirm)) {
+            if (!protectionName.equals(protectionNameConfirm) || !protectionDisplayName.equals(protectionDisplayNameConfirm)) {
                 return true;
             }
 
@@ -40,39 +38,42 @@ public class ProtectionRenameConfirmCommand implements ProtectionHelperCommand {
             ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
             RegionInfo regionInfo = ProtectionUtils.getRegionInfo(protectionUser.getLocalPlayer(), protectionName);
 
-            Optional<Currency> currencyOptional = Currency.currencyByName("CastCoin");
+            if (regionInfo == null) {
+                return false;
+            }
 
-            if (currencyOptional.isEmpty()) {
+            String oldName = regionInfo.getName();
+
+            Currency currency = Currency.currencyByName("CastCoin");
+
+            if (currency == null) {
                 protectionUser.sendMessage(MessageManager.getNoCurrencyComponent());
                 return false;
             }
 
-            Currency currency = currencyOptional.get();
             BigDecimal price = BigDecimal.valueOf(ProtectionSettings.PROTECTION_RENAME_PRICE);
 
-            boolean hasEnoughCurrency = protectionUser.hasEnoughCurrency(price, currency).join();
+            boolean hasEnoughCurrency = Boolean.TRUE.equals(protectionUser.hasEnoughCurrency(price, currency).join());
 
             if (Boolean.TRUE.equals(hasEnoughCurrency)) {
                 if (ProtectionUtils.standsInProtectedRegion(protectionUser.getBukkitPlayer(), regionInfo.getRegion())) {
                     BigDecimal amount = BigDecimal.valueOf(-ProtectionSettings.PROTECTION_RENAME_PRICE);
 
-                    protectionUser.addTransaction(null, amount, currency);
+                    protectionUser.addTransaction(null, amount, currency, new ProtectionRenameData(regionInfo.getRegion(), oldName, protectionName));
                     ProtectionFlagInfo protectionInfo = new ProtectionFlagInfo(protectionDisplayName);
 
-                    regionInfo.getRegion().setFlag(ProtectionFlags.SURF_PROTECT_FLAG,
-                            protectionInfo);
+                    regionInfo.getRegion().setFlag(ProtectionFlags.SURF_PROTECT_FLAG, protectionInfo);
 
                     player.sendMessage(MessageManager.getProtectionRenamedComponent());
-                    return true;
                 } else {
-                    protectionUser
-                            .sendMessage(MessageManager.getNotStandingOnRenameProtectionComponent());
-                    return true;
+                    protectionUser.sendMessage(MessageManager.getNotStandingOnRenameProtectionComponent());
                 }
+
             } else {
                 player.sendMessage(MessageManager.getTooExpensiveToRenameComponent());
-                return true;
             }
+
+            return true;
         }
 
         return false;

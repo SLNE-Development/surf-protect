@@ -1,14 +1,10 @@
 package dev.slne.protect.bukkit.message;
 
-import java.util.Iterator;
-import java.util.List;
-
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.util.profile.Profile;
 import com.sk89q.worldguard.util.profile.cache.ProfileCache;
-
-import dev.slne.protect.bukkit.gui.item.ItemStackUtils;
+import dev.slne.protect.bukkit.gui.utils.ItemUtils;
 import dev.slne.protect.bukkit.region.info.RegionInfo;
 import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
 import dev.slne.protect.bukkit.user.ProtectionUser;
@@ -19,6 +15,9 @@ import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Represents the message manager
@@ -46,6 +45,15 @@ public class MessageManager {
     }
 
     /**
+     * Returns that the currency could not be found
+     *
+     * @return The component
+     */
+    public static Component getNoCurrencyComponent() {
+        return prefix().append(Component.text("Die Währung konnte nicht gefunden werden.", ERROR));
+    }
+
+    /**
      * Returns a prefix for the plugin.
      *
      * @return The prefix for the plugin.
@@ -61,95 +69,16 @@ public class MessageManager {
     }
 
     /**
-     * Returns the region user component for the given users
-     *
-     * @param regionUsers The users
-     * @return The region user component
-     */
-    public static Component getRegionUsersComponent(List<LocalPlayer> regionUsers) {
-        TextComponent.Builder memberComponentBuilder = Component.text();
-        Iterator<LocalPlayer> memberIterator = regionUsers.iterator();
-
-        memberComponentBuilder.append(Component.text("[", SPACER));
-
-        ProfileCache cache = WorldGuard.getInstance().getProfileCache();
-        while (memberIterator.hasNext()) {
-            LocalPlayer memberUser = memberIterator.next();
-            String userName = memberUser.getName();
-
-            if (userName == null) {
-                Profile profile = cache.getIfPresent(memberUser.getUniqueId());
-
-                if (profile != null) {
-                    userName = profile.getName();
-                }
-            }
-
-            if (userName != null) {
-                memberComponentBuilder.append(Component.text(userName, VARIABLE_VALUE));
-
-                if (memberIterator.hasNext()) {
-                    memberComponentBuilder.append(Component.text(", ", SPACER));
-                }
-            }
-        }
-
-        memberComponentBuilder.append(Component.text("]", SPACER));
-
-        return memberComponentBuilder.build();
-    }
-
-    /**
-     * Returns that the currency could not be found
-     *
-     * @return The component
-     */
-    public static Component getNoCurrencyComponent() {
-        return prefix().append(Component.text("Die Währung konnte nicht gefunden werden.", ERROR));
-    }
-
-    /**
-     * Returns the region owners and members component for the given region info
-     *
-     * @param regionInfo The region info
-     * @return The region owners and members component
-     */
-    public static Component getRegionOwnersMembersComponent(RegionInfo regionInfo) {
-        TextComponent.Builder builder = Component.text();
-
-        List<LocalPlayer> regionOwners = regionInfo.getOwners();
-        List<LocalPlayer> regionMembers = regionInfo.getMembers();
-
-        if (regionOwners != null) {
-            builder.append(Component.text("Besitzer: ", VARIABLE_KEY));
-            builder.append(getRegionUsersComponent(regionOwners));
-        }
-
-        if (regionOwners != null && regionMembers != null) {
-            builder.append(Component.text(", ", SPACER));
-        }
-
-        if (regionMembers != null) {
-            builder.append(Component.text("Mitglieder: ", VARIABLE_KEY));
-            builder.append(getRegionUsersComponent(regionMembers));
-        }
-
-        return builder.build();
-    }
-
-    /**
      * Returns a component which tells the user that they need to place more markers
      *
      * @param placedMarkers The amount of placed markers
+     *
      * @return The component
      */
     public static Component getMoreMarkersComponent(int placedMarkers) {
         int neededMarkers = ProtectionSettings.MIN_MARKERS - placedMarkers;
 
-        return prefix()
-                .append(Component.text("Du musst mindestens ", ERROR))
-                .append(Component.text(String.valueOf(neededMarkers), VARIABLE_VALUE))
-                .append(Component.text(" weitere Marker platzieren.", ERROR));
+        return prefix().append(Component.text("Du musst mindestens ", ERROR)).append(Component.text(String.valueOf(neededMarkers), VARIABLE_VALUE)).append(Component.text(" weitere Marker platzieren.", ERROR));
     }
 
     /**
@@ -159,8 +88,7 @@ public class MessageManager {
      * @return The component
      */
     public static Component getOverlappingRegionsComponent() {
-        return prefix().append(Component
-                .text("Die markierte Fläche kollidiert mit einem anderen Grundstück.", ERROR));
+        return prefix().append(Component.text("Die markierte Fläche kollidiert mit einem anderen Grundstück.", ERROR));
     }
 
     /**
@@ -182,31 +110,12 @@ public class MessageManager {
     }
 
     /**
-     * Sends a prefixed message to the user
-     *
-     * @param user    The user
-     * @param message The message
-     */
-    private static void prefixMessage(ProtectionUser user, Component message) {
-        user.sendMessage(prefix().append(message));
-    }
-
-    /**
      * Sends an empty line to the user
      *
      * @param user The user
      */
     private static void emptyLine(ProtectionUser user) {
         prefixMessage(user, Component.empty());
-    }
-
-    /**
-     * Returns the currency display name
-     *
-     * @return The currency display name
-     */
-    private static Component currencyDisplayName() {
-        return Component.text("€", MessageManager.VARIABLE_VALUE);
     }
 
     /**
@@ -220,10 +129,8 @@ public class MessageManager {
         emptyLine(user);
         prefixMessage(user, Component.text("Das Grundstück steht zum Verkauf", SUCCESS));
         emptyLine(user);
-        prefixMessage(user, Component.text("Fläche: ", VARIABLE_KEY)
-                .append(Component.text(area, VARIABLE_VALUE)).append(Component.text(" Blöcke", VARIABLE_VALUE)));
-        prefixMessage(user, Component.text("Kaufpreis: ", VARIABLE_KEY)
-                .append(Component.text(effectiveCost, VARIABLE_VALUE)).append(currencyDisplayName()));
+        prefixMessage(user, Component.text("Fläche: ", VARIABLE_KEY).append(Component.text(area, VARIABLE_VALUE)).append(Component.text(" Blöcke", VARIABLE_VALUE)));
+        prefixMessage(user, Component.text("Kaufpreis: ", VARIABLE_KEY).append(Component.text(effectiveCost, VARIABLE_VALUE)).append(currencyDisplayName()));
         emptyLine(user);
     }
 
@@ -280,8 +187,7 @@ public class MessageManager {
      * @return The component
      */
     public static Component getProtectionCreatedComponent() {
-        return prefix().append(Component.text("Dein Grundstück wurde erfolgreich erstellt.",
-                SUCCESS));
+        return prefix().append(Component.text("Dein Grundstück wurde erfolgreich erstellt.", SUCCESS));
     }
 
     /**
@@ -290,8 +196,7 @@ public class MessageManager {
      * @return The component
      */
     public static Component getProtectionCanceledComponent() {
-        return prefix().append(Component.text("Du hast die Erstellung deines Grundstücks abgebrochen.",
-                ERROR));
+        return prefix().append(Component.text("Du hast die Erstellung deines Grundstücks abgebrochen.", ERROR));
     }
 
     /**
@@ -301,8 +206,7 @@ public class MessageManager {
      * @return the component
      */
     public static Component getTooFarAwayFromStartComponent() {
-        return prefix()
-                .append(Component.text("Du darfst dich nicht weiter von deinem Ausgangspunkt entfernen.", ERROR));
+        return prefix().append(Component.text("Du darfst dich nicht weiter von deinem Ausgangspunkt entfernen.", ERROR));
     }
 
     /**
@@ -312,21 +216,20 @@ public class MessageManager {
      * @return the component
      */
     public static Component getNoPlayerDefinedRegionComponent() {
-        return prefix().append(Component
-                .text("Du stehst in keiner von einem Spieler gesicherten Region.", ERROR));
+        return prefix().append(Component.text("Du stehst in keiner von einem Spieler gesicherten Region.", ERROR));
     }
 
     /**
      * Returns the pwho {@link Component}
      *
      * @param regionInfo the {@link RegionInfo}
+     *
      * @return the component
      */
     public static Component getPWhoComponent(RegionInfo regionInfo) {
         String regionId = regionInfo.getRegion().getId();
-        String regionName = regionInfo.getProtectionFlagInfo() != null
-                ? regionInfo.getProtectionFlagInfo().getName()
-                : null;
+        String regionName =
+                regionInfo.getProtectionFlagInfo() != null ? regionInfo.getProtectionFlagInfo().getName() : null;
 
         boolean existsAndDifferent = regionName != null && !regionName.equals(regionId);
 
@@ -347,6 +250,76 @@ public class MessageManager {
     }
 
     /**
+     * Returns the region owners and members component for the given region info
+     *
+     * @param regionInfo The region info
+     *
+     * @return The region owners and members component
+     */
+    public static Component getRegionOwnersMembersComponent(RegionInfo regionInfo) {
+        TextComponent.Builder builder = Component.text();
+
+        List<LocalPlayer> regionOwners = regionInfo.getOwners();
+        List<LocalPlayer> regionMembers = regionInfo.getMembers();
+
+        if (regionOwners != null) {
+            builder.append(Component.text("Besitzer: ", VARIABLE_KEY));
+            builder.append(getRegionUsersComponent(regionOwners));
+        }
+
+        if (regionOwners != null && regionMembers != null) {
+            builder.append(Component.text(", ", SPACER));
+        }
+
+        if (regionMembers != null) {
+            builder.append(Component.text("Mitglieder: ", VARIABLE_KEY));
+            builder.append(getRegionUsersComponent(regionMembers));
+        }
+
+        return builder.build();
+    }
+
+    /**
+     * Returns the region user component for the given users
+     *
+     * @param regionUsers The users
+     *
+     * @return The region user component
+     */
+    public static Component getRegionUsersComponent(List<LocalPlayer> regionUsers) {
+        TextComponent.Builder memberComponentBuilder = Component.text();
+        Iterator<LocalPlayer> memberIterator = regionUsers.iterator();
+
+        memberComponentBuilder.append(Component.text("[", SPACER));
+
+        ProfileCache cache = WorldGuard.getInstance().getProfileCache();
+        while (memberIterator.hasNext()) {
+            LocalPlayer memberUser = memberIterator.next();
+            String userName = memberUser.getName();
+
+            if (userName == null) {
+                Profile profile = cache.getIfPresent(memberUser.getUniqueId());
+
+                if (profile != null) {
+                    userName = profile.getName();
+                }
+            }
+
+            if (userName != null) {
+                memberComponentBuilder.append(Component.text(userName, VARIABLE_VALUE));
+
+                if (memberIterator.hasNext()) {
+                    memberComponentBuilder.append(Component.text(", ", SPACER));
+                }
+            }
+        }
+
+        memberComponentBuilder.append(Component.text("]", SPACER));
+
+        return memberComponentBuilder.build();
+    }
+
+    /**
      * Returns the component which tells the user that the protection doesn't exist
      *
      * @return the component
@@ -362,8 +335,25 @@ public class MessageManager {
      * @return the component
      */
     public static Component getNoPermissionComponent() {
-        return prefix().append(Component.text("Du besitzt keine Berechtigung für diesen Befehl.",
-                ERROR));
+        return prefix().append(Component.text("Du besitzt keine Berechtigung für diesen Befehl.", ERROR));
+    }
+
+    /**
+     * Returns the component which is being shown to the user when he tries to
+     * rename a protection
+     *
+     * @param command the command to run
+     *
+     * @return the component
+     */
+    public static Component getProtectionRenameComponent(String command) {
+        ClickEvent clickEvent = ClickEvent.runCommand(command);
+        HoverEvent<Component> hoverEvent = HoverEvent.showText(MessageManager.getProtectionRenameHoverComponent());
+
+        Component clickComponent =
+                Component.text("hier", MessageManager.VARIABLE_VALUE).clickEvent(clickEvent).hoverEvent(hoverEvent);
+
+        return prefix().append(Component.text("Um deine Region umzubenennen, klicke ", NamedTextColor.GRAY)).append(clickComponent).append(Component.text(".", NamedTextColor.GRAY));
     }
 
     /**
@@ -374,8 +364,7 @@ public class MessageManager {
      */
     public static Component getProtectionRenameHoverComponent() {
         TextComponent.Builder builder = Component.text();
-        builder.append(Component.text("Klicke hier um deine Protection umzubenennen.",
-                NamedTextColor.GRAY));
+        builder.append(Component.text("Klicke hier um deine Protection umzubenennen.", NamedTextColor.GRAY));
 
         builder.append(Component.newline());
         builder.append(Component.newline());
@@ -389,22 +378,12 @@ public class MessageManager {
     }
 
     /**
-     * Returns the component which is being shown to the user when he tries to
-     * rename a protection
+     * Returns the currency display name
      *
-     * @param command the command to run
-     * @return the component
+     * @return The currency display name
      */
-    public static Component getProtectionRenameComponent(String command) {
-        ClickEvent clickEvent = ClickEvent.runCommand(command);
-        HoverEvent<Component> hoverEvent = HoverEvent.showText(MessageManager.getProtectionRenameHoverComponent());
-
-        Component clickComponent = Component.text("hier", MessageManager.VARIABLE_VALUE).clickEvent(clickEvent)
-                .hoverEvent(hoverEvent);
-
-        return prefix().append(Component.text("Um deine Region umzubenennen, klicke ", NamedTextColor.GRAY))
-                .append(clickComponent)
-                .append(Component.text(".", NamedTextColor.GRAY));
+    private static Component currencyDisplayName() {
+        return Component.text("€", MessageManager.VARIABLE_VALUE);
     }
 
     /**
@@ -434,9 +413,7 @@ public class MessageManager {
      * @return the component
      */
     public static Component getProtectionVisualizeComponent(boolean state) {
-        return prefix().append(Component.text("Du hast die Visualisierung der Grundstücke ", INFO))
-                .append(Component.text(state ? "aktiviert" : "deaktiviert", state ? SUCCESS : ERROR))
-                .append(Component.text(". Bitte warte einen kleinen Moment.", INFO));
+        return prefix().append(Component.text("Du hast die Visualisierung der Grundstücke ", INFO)).append(Component.text(state ? "aktiviert" : "deaktiviert", state ? SUCCESS : ERROR)).append(Component.text(". Bitte warte einen kleinen Moment.", INFO));
     }
 
     /**
@@ -458,17 +435,24 @@ public class MessageManager {
         prefixMessage(user, Component.text("Willkommen im ProtectionSystem!", INFO));
         prefixMessage(user, Component.empty());
 
-        List<Component> messages = ItemStackUtils.splitComponent(
-                "Wenn du den ProtectionMode betrittst, erhältst du vorübergehend Fly um dein Grundstück besser definieren zu können. Du definierst dein Grundstück indem du bis zu "
-                        + ProtectionSettings.MARKERS
-                        + " Marker platzierst und anschließend mit dem grünen Block bestätigst. Mit dem roten Block kannst du die Protection jederzeit abbrechen und zu deinem Ausgangspunkt zurückkehren.",
-                70, SPACER);
+        List<Component> messages =
+                ItemUtils.splitComponent("Wenn du den ProtectionMode betrittst, erhältst du vorübergehend Fly um dein Grundstück besser definieren zu können. Du definierst dein Grundstück indem du bis zu " + ProtectionSettings.MARKERS + " Marker platzierst und anschließend mit dem grünen Block bestätigst. Mit dem roten Block kannst du die Protection jederzeit abbrechen und zu deinem Ausgangspunkt zurückkehren.", 70, SPACER);
 
         for (Component message : messages) {
             prefixMessage(user, message);
         }
 
         prefixMessage(user, Component.empty());
+    }
+
+    /**
+     * Sends a prefixed message to the user
+     *
+     * @param user    The user
+     * @param message The message
+     */
+    private static void prefixMessage(ProtectionUser user, Component message) {
+        user.sendMessage(prefix().append(message));
     }
 
 }
