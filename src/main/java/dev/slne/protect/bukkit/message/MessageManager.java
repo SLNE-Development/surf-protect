@@ -431,9 +431,11 @@ public class MessageManager {
      * @param user the player
      */
     public static void sendProtectionModeEnterMessages(ProtectionUser user) {
+        user.sendMessage(Component.empty());
         prefixMessage(user, Component.empty());
         prefixMessage(user, Component.text("Willkommen im ProtectionSystem!", INFO));
         prefixMessage(user, Component.empty());
+        user.sendMessage(Component.empty());
 
         List<Component> messages =
                 ItemUtils.splitComponent("Wenn du den ProtectionMode betrittst, erhältst du vorübergehend Fly um dein Grundstück besser definieren zu können. Du definierst dein Grundstück indem du bis zu " + ProtectionSettings.MARKERS + " Marker platzierst und anschließend mit dem grünen Block bestätigst. Mit dem roten Block kannst du die Protection jederzeit abbrechen und zu deinem Ausgangspunkt zurückkehren.", 70, SPACER);
@@ -442,7 +444,7 @@ public class MessageManager {
             user.sendMessage(message);
         }
 
-        prefixMessage(user, Component.empty());
+        user.sendMessage(Component.empty());
     }
 
     /**
