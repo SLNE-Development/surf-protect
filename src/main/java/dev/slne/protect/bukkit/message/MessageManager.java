@@ -18,6 +18,7 @@ import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.Iterator;
 import java.util.List;
 
@@ -465,7 +466,10 @@ public class MessageManager {
      * @return the component
      */
     public static Component getProtectionSoldComponent(BigDecimal amount, Currency currency) {
-        return prefix().append(Component.text("Du hast dein Grundstück für ", INFO)).append(Component.text(amount.toString(), MessageManager.VARIABLE_VALUE)).append(Component.text(" ", MessageManager.VARIABLE_VALUE)).append(currencyDisplayName(currency)).append(Component.text(" verkauft.", INFO));
+        DecimalFormat decimalFormat = new DecimalFormat("#.##");
+        String formattedAmount = decimalFormat.format(amount);
+
+        return prefix().append(Component.text("Du hast dein Grundstück für ", INFO)).append(Component.text(formattedAmount, MessageManager.VARIABLE_VALUE)).append(Component.text(" ", MessageManager.VARIABLE_VALUE)).append(currencyDisplayName(currency)).append(Component.text(" verkauft.", INFO));
     }
 
 }
