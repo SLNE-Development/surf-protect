@@ -16,6 +16,8 @@ public class ProtectionCommand extends CommandAPICommand {
     public ProtectionCommand() {
         super("protect");
 
+        withPermission("surf.protect");
+
         withOptionalArguments(new PlayerArgument("player"));
 
         executesPlayer((player, args) -> {

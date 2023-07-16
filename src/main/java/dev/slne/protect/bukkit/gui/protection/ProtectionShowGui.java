@@ -111,6 +111,7 @@ public class ProtectionShowGui extends ProtectionGui {
         }
 
         addPane(staticPane);
+        update();
     }
 
     /**
