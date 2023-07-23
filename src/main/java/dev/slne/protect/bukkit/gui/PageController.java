@@ -1,19 +1,17 @@
 package dev.slne.protect.bukkit.gui;
 
-import java.util.function.BiPredicate;
-import java.util.function.IntUnaryOperator;
-
+import com.github.stefvanschie.inventoryframework.gui.GuiItem;
+import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
+import com.github.stefvanschie.inventoryframework.pane.PaginatedPane;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 
-import com.github.stefvanschie.inventoryframework.gui.GuiItem;
-import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
-import com.github.stefvanschie.inventoryframework.pane.PaginatedPane;
-
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextDecoration;
+import java.util.function.BiPredicate;
+import java.util.function.IntUnaryOperator;
 
 public enum PageController {
     PREVIOUS("MHF_ArrowLeft", (page, itemsPane) -> page > 0, page -> --page),
@@ -46,6 +44,13 @@ public enum PageController {
      * @return the gui item
      */
     public GuiItem toGuiItem(ChestGui gui, Component itemName, PaginatedPane itemsPane, ItemStack failItem) {
+        System.err.println("--------");
+        System.err.println("PageController.toGuiItem");
+        System.err.println("gui: " + gui);
+        System.err.println("itemName: " + itemName);
+        itemsPane.getItems().forEach(item -> System.err.println("item: " + item.getItem()));
+        System.err.println("failItem: " + failItem);
+        System.err.println("--------");
         int currentPage = itemsPane.getPage();
 
         if (!this.shouldContinue.test(currentPage, itemsPane)) {
