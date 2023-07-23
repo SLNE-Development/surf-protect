@@ -33,12 +33,8 @@ public class ProtectionFlagsGui extends ProtectionGui {
             StateFlag flag = map.getFlag();
             State state = region.getFlag(flag);
 
-            if (state == null) {
-                state = map.getInitialState();
-            }
-
-            buttons.add(new ProtectionFlagToggleButton(map.getMaterial(), map.getDisplayName(), state, v -> {
-                region.setFlag(flag, State.valueOf(v));
+            buttons.add(new ToggleButton(map.getMaterial(), map.getDisplayName(), state, map.getToggleToState(), v -> {
+                region.setFlag(flag, v);
                 update();
             }));
         }
