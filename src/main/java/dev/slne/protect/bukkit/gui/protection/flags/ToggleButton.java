@@ -1,7 +1,18 @@
 package dev.slne.protect.bukkit.gui.protection.flags;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.sk89q.worldguard.protection.flags.StateFlag.State;
+
 import dev.slne.protect.bukkit.gui.utils.ItemUtils;
 import dev.slne.protect.bukkit.message.MessageManager;
 import net.kyori.adventure.text.Component;
@@ -9,38 +20,28 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
 
 public class ToggleButton extends GuiItem {
-    private static final TextColor active = NamedTextColor.GREEN;
+    private static final TextColor active = MessageManager.VARIABLE_VALUE;
     private static final TextColor inactive = NamedTextColor.GRAY;
 
     private final Consumer<State> consumer;
     private final State toggleToState;
+    private final ProtectionFlagsMap protectionEnum;
     private @Nullable State currentState;
 
     /**
      * Creates a new toggle button based on the item stack and action
      *
-     * @param material      the material
-     * @param displayName   the display name
+     * @param protectionEnum the protection enum
      * @param currentState  the currentState state
-     * @param toggleToState the state to toggle to
      * @param consumer      the consumer
      */
-    public ToggleButton(Material material, Component displayName, @Nullable State currentState, State toggleToState, Consumer<@Nullable State> consumer) {
-        super(ItemUtils.item(material, 1, 0, displayName, formLore(getCurrentToggleState(currentState, toggleToState), toggleToState).toArray(Component[]::new)));
-        this.toggleToState = toggleToState;
-
+    public ToggleButton(ProtectionFlagsMap protectionEnum, @Nullable State currentState, Consumer<@Nullable State> consumer) {
+        super(ItemUtils.item(protectionEnum.getMaterial(), 1, 0, protectionEnum.getDisplayName(), formLore(protectionEnum, getCurrentToggleState(currentState, protectionEnum.getToggleToState()), protectionEnum.getToggleToState()).toArray(Component[]::new)));
+        
+        this.toggleToState = protectionEnum.getToggleToState();
+        this.protectionEnum = protectionEnum;
         this.currentState = currentState;
         this.consumer = consumer;
 
@@ -64,9 +65,12 @@ public class ToggleButton extends GuiItem {
      *
      * @return the lore
      */
-    public static @NotNull List<Component> formLore(@Nullable State currentState, State toggleToState) {
+    public static @NotNull List<Component> formLore(ProtectionFlagsMap protectionEnum, @Nullable State currentState, State toggleToState) {
         List<Component> lore = new ArrayList<>();
 
+        lore.add(Component.text(""));
+        lore.add(protectionEnum.getDescription());
+        lore.add(Component.text(""));
 
         if (currentState == null) {
             if (toggleToState == State.ALLOW) {
@@ -79,6 +83,8 @@ public class ToggleButton extends GuiItem {
         } else {
             addAllowLore(lore);
         }
+
+        lore.add(Component.text(""));
 
         List<Component> newLore = new ArrayList<>();
 
@@ -95,15 +101,11 @@ public class ToggleButton extends GuiItem {
      * @param lore the lore list to add to
      */
     private static void addDenyLore(@NotNull List<Component> lore) {
-        lore.add(Component.text("[", active)
-                .append(Component.text("✓", active))
-                .append(Component.text("]", active))
+        lore.add(Component.text(">>", active)
                 .append(Component.space())
                 .append(Component.text(State.ALLOW.toString(), active)));
 
-        lore.add(Component.text("[", inactive)
-                .append(Component.text("✗", inactive))
-                .append(Component.text("]", inactive))
+        lore.add(Component.text(">>", inactive)
                 .append(Component.space())
                 .append(Component.text(State.DENY.toString(), inactive)));
     }
@@ -114,17 +116,13 @@ public class ToggleButton extends GuiItem {
      * @param lore the lore list to add to
      */
     private static void addAllowLore(@NotNull List<Component> lore) {
-        lore.add(Component.text("[", inactive)
-                .append(Component.text("✗", inactive))
-                .append(Component.text("]", inactive))
+        lore.add(Component.text(">>", inactive)
                 .append(Component.space())
-                .append(Component.text(State.ALLOW.toString(), inactive)));
+                .append(Component.text("AKTIVIERT", inactive)));
 
-        lore.add(Component.text("[", active)
-                .append(Component.text("✓", active))
-                .append(Component.text("]", active))
+        lore.add(Component.text(">>", active)
                 .append(Component.space())
-                .append(Component.text(State.DENY.toString(), active)));
+                .append(Component.text("DEAKTIVIERT", active)));
     }
 
     /**
@@ -143,7 +141,7 @@ public class ToggleButton extends GuiItem {
             return;
         }
 
-        itemMeta.lore(formLore(newState, toggleToState));
+        itemMeta.lore(formLore(getProtectionEnum(), newState, toggleToState));
 
         getItem().setItemMeta(itemMeta);
 
@@ -201,6 +199,15 @@ public class ToggleButton extends GuiItem {
      */
     public @Nullable State getCurrentState() {
         return currentState;
+    }
+
+    /**
+     * Gets the protection enum
+     *
+     * @return the protection enum
+     */
+    public ProtectionFlagsMap getProtectionEnum() {
+        return protectionEnum;
     }
 
 }

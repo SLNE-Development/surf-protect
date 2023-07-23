@@ -1,21 +1,20 @@
 package dev.slne.protect.bukkit.gui.protection.flags;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.pane.PaginatedPane;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.flags.StateFlag.State;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-import dev.slne.protect.bukkit.gui.PageController;
+
 import dev.slne.protect.bukkit.gui.ProtectionGui;
 import dev.slne.protect.bukkit.gui.utils.ItemUtils;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class ProtectionFlagsGui extends ProtectionGui {
 
@@ -33,7 +32,7 @@ public class ProtectionFlagsGui extends ProtectionGui {
             StateFlag flag = map.getFlag();
             State oldState = region.getFlag(flag);
 
-            buttons.add(new ToggleButton(map.getMaterial(), map.getDisplayName(), oldState, map.getToggleToState(), newState -> {
+            buttons.add(new ToggleButton(map, oldState, newState -> {
                 region.setFlag(flag, newState);
                 update();
             }));
@@ -45,8 +44,8 @@ public class ProtectionFlagsGui extends ProtectionGui {
         StaticPane navigation = new StaticPane(0, 4, 9, 1);
 
         ItemStack backgroundItem = ItemUtils.paneItem();
-        navigation.addItem(PageController.PREVIOUS.toGuiItem(this, Component.text("Zurück", NamedTextColor.GREEN), pages, backgroundItem), 0, 0);
-        navigation.addItem(PageController.NEXT.toGuiItem(this, Component.text("Weiter", NamedTextColor.GREEN), pages, backgroundItem), 8, 0);
+        //navigation.addItem(PageController.PREVIOUS.toGuiItem(this, Component.text("Zurück", NamedTextColor.GREEN), pages, backgroundItem), 0, 0);
+        //navigation.addItem(PageController.NEXT.toGuiItem(this, Component.text("Weiter", NamedTextColor.GREEN), pages, backgroundItem), 8, 0);
 
         addPane(pages);
         addPane(navigation);

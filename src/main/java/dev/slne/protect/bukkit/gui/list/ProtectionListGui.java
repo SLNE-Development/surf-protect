@@ -1,10 +1,21 @@
 package dev.slne.protect.bukkit.gui.list;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.pane.PaginatedPane;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+
 import dev.slne.protect.bukkit.gui.PageController;
 import dev.slne.protect.bukkit.gui.ProtectionGui;
 import dev.slne.protect.bukkit.gui.protection.ProtectionShowGui;
@@ -13,15 +24,6 @@ import dev.slne.protect.bukkit.message.MessageManager;
 import dev.slne.protect.bukkit.region.info.RegionInfo;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 public class ProtectionListGui extends ProtectionGui {
 
@@ -72,14 +74,14 @@ public class ProtectionListGui extends ProtectionGui {
 
                 List<Component> lore = new ArrayList<>();
                 lore.add(Component.empty());
-                lore.add(Component.text("Entfernung: ", MessageManager.VARIABLE_KEY));
+                lore.add(Component.text("Entfernung: ", NamedTextColor.GRAY));
                 lore.add(Component.text(distance == -1 ? "Unbekannt" : distance + " Blöcke", MessageManager.VARIABLE_VALUE));
                 lore.add(Component.empty());
-                lore.add(Component.text("Größe: ", MessageManager.VARIABLE_KEY));
+                lore.add(Component.text("Größe: ", NamedTextColor.GRAY));
                 lore.add(Component.text(area + " Blöcke", MessageManager.VARIABLE_VALUE));
                 lore.add(Component.empty());
 
-                lore.add(Component.text("Besitzer:", MessageManager.VARIABLE_KEY));
+                lore.add(Component.text("Besitzer:", NamedTextColor.GRAY));
                 if (ownersNames.isEmpty()) {
                     lore.add(none);
                 } else {
@@ -87,7 +89,7 @@ public class ProtectionListGui extends ProtectionGui {
                 }
                 lore.add(Component.empty());
 
-                lore.add(Component.text("Mitglieder:", MessageManager.VARIABLE_KEY));
+                lore.add(Component.text("Mitglieder:", NamedTextColor.GRAY));
                 if (membersNames.isEmpty()) {
                     lore.add(none);
                 } else {
@@ -98,7 +100,7 @@ public class ProtectionListGui extends ProtectionGui {
 
                 final long finalDistance = distance;
 
-                buttons.add(new GuiItem(ItemUtils.item(Material.DIRT, 1, 0, Component.text(regionInfo.getName(), NamedTextColor.GOLD), lore.toArray(Component[]::new)), event -> {
+                buttons.add(new GuiItem(ItemUtils.item(Material.DIRT, 1, 0, Component.text(regionInfo.getName(), MessageManager.INFO), lore.toArray(Component[]::new)), event -> {
                     ProtectionShowGui oneGui =
                             new ProtectionShowGui(this, region, area, finalDistance, ownersNames, membersNames, regionInfo, viewingPlayer);
                     oneGui.show(viewingPlayer);
@@ -112,8 +114,8 @@ public class ProtectionListGui extends ProtectionGui {
         StaticPane navigation = new StaticPane(0, 4, 9, 1);
 
         ItemStack backgroundItem = ItemUtils.paneItem();
-        navigation.addItem(PageController.PREVIOUS.toGuiItem(this, Component.text("Zurück", NamedTextColor.GOLD), pages, backgroundItem), 0, 0);
-        navigation.addItem(PageController.NEXT.toGuiItem(this, Component.text("Weiter", NamedTextColor.GOLD), pages, backgroundItem), 8, 0);
+        navigation.addItem(PageController.PREVIOUS.toGuiItem(this, Component.text("Zurück", MessageManager.INFO), pages, backgroundItem), 0, 0);
+        navigation.addItem(PageController.NEXT.toGuiItem(this, Component.text("Weiter", MessageManager.INFO), pages, backgroundItem), 8, 0);
 
         addPane(pages);
         addPane(navigation);

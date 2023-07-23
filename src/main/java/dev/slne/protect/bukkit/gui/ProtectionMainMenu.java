@@ -1,10 +1,21 @@
 package dev.slne.protect.bukkit.gui;
 
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
+
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
 import com.sk89q.worldguard.protection.flags.StateFlag.State;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.regions.RegionType;
+
 import dev.slne.protect.bukkit.BukkitMain;
 import dev.slne.protect.bukkit.gui.list.ProtectionListGui;
 import dev.slne.protect.bukkit.gui.utils.ConfirmationGui;
@@ -18,15 +29,6 @@ import dev.slne.protect.bukkit.user.ProtectionUser;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title;
-import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
-
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 public class ProtectionMainMenu extends ProtectionGui {
 
@@ -65,7 +67,7 @@ public class ProtectionMainMenu extends ProtectionGui {
      * @return the protection list item
      */
     private GuiItem getProtectionListItem() {
-        return new GuiItem(ItemUtils.item(Material.DIRT, 1, 0, Component.text("Liste", NamedTextColor.GOLD), Component.empty(), Component.text("Eine Liste von Protections", NamedTextColor.GRAY), Component.empty()), event -> {
+        return new GuiItem(ItemUtils.item(Material.DIRT, 1, 0, Component.text("Liste", MessageManager.INFO), Component.empty(), Component.text("Eine Liste von Protections", NamedTextColor.GRAY), Component.empty()), event -> {
             Player viewingPlayer = (Player) event.getWhoClicked();
             ProtectionUser user = ProtectionUser.getProtectionUser(getTargetProtectionPlayer());
             Map<World, List<ProtectedRegion>> regions = ProtectionUtils.getRegionListFor(user.getLocalPlayer());
@@ -81,7 +83,7 @@ public class ProtectionMainMenu extends ProtectionGui {
      * @return the visualizer item
      */
     private GuiItem getVisualizerItem() {
-        return new GuiItem(ItemUtils.item(Material.ENDER_EYE, 1, 0, Component.text("Visualizier", NamedTextColor.GOLD), Component.empty(), Component.text("Aktiviert/Deaktiviert den Visualizer", NamedTextColor.GRAY), Component.empty()), event -> {
+        return new GuiItem(ItemUtils.item(Material.ENDER_EYE, 1, 0, Component.text("Visualizier", MessageManager.INFO), Component.empty(), Component.text("Aktiviert/Deaktiviert den Visualizer", NamedTextColor.GRAY), Component.empty()), event -> {
             Player player = (Player) event.getWhoClicked();
             List<ProtectedRegion> regions =
                     ProtectionUtils.getRegionManager(player.getWorld()).getRegions().values().stream().filter(region -> !region.getType().equals(RegionType.GLOBAL)).toList();
@@ -111,7 +113,7 @@ public class ProtectionMainMenu extends ProtectionGui {
             Duration fadeDuration = Duration.ofMillis(150);
             Duration stayDuration = Duration.ofSeconds(1);
 
-            player.showTitle(Title.title(Component.text("Visualizer", NamedTextColor.GOLD), Component.text("Visualizer " + (state ? "deaktiviert" : "aktiviert"), NamedTextColor.GRAY), Title.Times.times(fadeDuration, stayDuration, fadeDuration)));
+            player.showTitle(Title.title(Component.text("Visualizer", MessageManager.INFO), Component.text("Visualizer " + (state ? "deaktiviert" : "aktiviert"), NamedTextColor.GRAY), Title.Times.times(fadeDuration, stayDuration, fadeDuration)));
             BukkitMain.getBukkitInstance().getProtectionVisualizerState().togglePlayerState(player);
 
             player.closeInventory();
@@ -124,7 +126,7 @@ public class ProtectionMainMenu extends ProtectionGui {
      * @return the protection create item
      */
     private GuiItem getProtectionCreateItem() {
-        return new GuiItem(ItemUtils.item(Material.GRASS_BLOCK, 1, 0, Component.text("Grundstück erstellen", NamedTextColor.GOLD), Component.empty(), Component.text("Erstelle ein neues Grundstück", NamedTextColor.GRAY), Component.empty()), event -> {
+        return new GuiItem(ItemUtils.item(Material.GRASS_BLOCK, 1, 0, Component.text("Grundstück erstellen", MessageManager.INFO), Component.empty(), Component.text("Erstelle ein neues Grundstück", NamedTextColor.GRAY), Component.empty()), event -> {
             Player player = (Player) event.getWhoClicked();
 
             List<Component> confirmLore = new ArrayList<>();
@@ -145,7 +147,7 @@ public class ProtectionMainMenu extends ProtectionGui {
                 }.runTaskLater(BukkitMain.getInstance(), 1);
             }, cancelEvent -> {
 
-            }, Component.text("Grundstück erstellen", NamedTextColor.GOLD), confirmLore);
+            }, Component.text("Grundstück erstellen", MessageManager.INFO), confirmLore);
 
             confirmationGui.show(player);
         });
