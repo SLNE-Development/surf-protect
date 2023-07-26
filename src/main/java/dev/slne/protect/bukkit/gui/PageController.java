@@ -28,8 +28,8 @@ public enum PageController {
      * @param shouldContinue   the predicate to check if the page should continue
      * @param nextPageSupplier the supplier for the next page
      */
-    private PageController(String skullName, BiPredicate<Integer, PaginatedPane> shouldContinue,
-            IntUnaryOperator nextPageSupplier) {
+    PageController(String skullName, BiPredicate<Integer, PaginatedPane> shouldContinue,
+                           IntUnaryOperator nextPageSupplier) {
         this.skullName = skullName;
         this.shouldContinue = shouldContinue;
         this.nextPageSupplier = nextPageSupplier;
@@ -41,16 +41,10 @@ public enum PageController {
      * @param gui       the gui
      * @param itemName  the item name
      * @param itemsPane the items pane
+     *
      * @return the gui item
      */
     public GuiItem toGuiItem(ChestGui gui, Component itemName, PaginatedPane itemsPane, ItemStack failItem) {
-        System.err.println("--------");
-        System.err.println("PageController.toGuiItem");
-        System.err.println("gui: " + gui);
-        System.err.println("itemName: " + itemName);
-        itemsPane.getItems().forEach(item -> System.err.println("item: " + item.getItem()));
-        System.err.println("failItem: " + failItem);
-        System.err.println("--------");
         int currentPage = itemsPane.getPage();
 
         if (!this.shouldContinue.test(currentPage, itemsPane)) {
@@ -66,8 +60,9 @@ public enum PageController {
         item.setItemMeta(meta);
 
         return new GuiItem(item, event -> {
-            if (!this.shouldContinue.test(currentPage, itemsPane))
+            if (!this.shouldContinue.test(currentPage, itemsPane)) {
                 return;
+            }
 
             itemsPane.setPage(this.nextPageSupplier.applyAsInt(currentPage));
             gui.update();
