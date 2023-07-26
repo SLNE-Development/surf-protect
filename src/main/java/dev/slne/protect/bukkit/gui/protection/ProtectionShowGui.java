@@ -8,7 +8,7 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import dev.slne.protect.bukkit.BukkitMain;
 import dev.slne.protect.bukkit.gui.ProtectionGui;
 import dev.slne.protect.bukkit.gui.protection.flags.ProtectionFlagsGui;
-import dev.slne.protect.bukkit.gui.protection.members.ProtectionMemberAddAnvilGui;
+import dev.slne.protect.bukkit.gui.protection.members.ProtectionMembersGui;
 import dev.slne.protect.bukkit.gui.utils.ConfirmationGui;
 import dev.slne.protect.bukkit.gui.utils.ItemUtils;
 import dev.slne.protect.bukkit.message.MessageManager;
@@ -228,8 +228,8 @@ public class ProtectionShowGui extends ProtectionGui {
 
         return new GuiItem(ItemUtils.item(Material.PLAYER_HEAD, 1, 0, Component.text("Mitglieder",
                 MessageManager.INFO), lore.toArray(Component[]::new)), event -> {
-            ProtectionMemberAddAnvilGui gui = new ProtectionMemberAddAnvilGui(this, getViewingPlayer());
-            gui.show(getViewingPlayer());
+            ProtectionMembersGui membersGui = new ProtectionMembersGui(this, members, getViewingPlayer(), region);
+            membersGui.show(getViewingPlayer());
         });
     }
 

@@ -1,13 +1,13 @@
 package dev.slne.protect.bukkit.instance;
 
 import com.sk89q.worldguard.WorldGuard;
-
 import dev.slne.protect.bukkit.command.BukkitCommandManager;
 import dev.slne.protect.bukkit.listener.BukkitListenerManager;
 import dev.slne.protect.bukkit.region.flags.ProtectionFlags;
 import dev.slne.protect.bukkit.region.visual.visualizer.ProtectionVisualizerState;
 import dev.slne.protect.bukkit.region.visual.visualizer.ProtectionVisualizerThread;
 import dev.slne.protect.bukkit.user.ProtectionUserManager;
+import dev.slne.protect.bukkit.user.UuidMinecraftNameCache;
 
 public class BukkitInstance {
 
@@ -17,6 +17,7 @@ public class BukkitInstance {
     private ProtectionUserManager userManager;
     private ProtectionVisualizerThread protectionVisualizerThread;
     private ProtectionVisualizerState protectionVisualizerState;
+    private UuidMinecraftNameCache uuidMinecraftNameCache;
 
     /**
      * Called when the plugin is loaded
@@ -26,6 +27,8 @@ public class BukkitInstance {
 
         listenerManager = new BukkitListenerManager();
         userManager = new ProtectionUserManager();
+
+        this.uuidMinecraftNameCache = new UuidMinecraftNameCache();
 
         // Register flags
         WorldGuard.getInstance().getFlagRegistry().register(ProtectionFlags.SURF_PROTECT);
@@ -97,4 +100,12 @@ public class BukkitInstance {
         return protectionVisualizerState;
     }
 
+    /**
+     * Returns the {@link UuidMinecraftNameCache}
+     *
+     * @return the {@link UuidMinecraftNameCache}
+     */
+    public UuidMinecraftNameCache getUuidMinecraftNameCache() {
+        return uuidMinecraftNameCache;
+    }
 }
