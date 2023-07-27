@@ -21,17 +21,23 @@ public class ProtectionBook {
         List<Component> pages = new ArrayList<>();
 
         TextComponent.Builder pageOne = Component.text();
+        pageOne.append(Component.text("Willkommen im Protection System!", MessageManager.PRIMARY));
+        pageOne.append(Component.newline());
+        pageOne.append(Component.newline());
         pageOne.append(Component.text("Wenn du den ProtectionMode betrittst, erhältst du vorübergehend Fly um dein " +
-                "Grundstück besser definieren zu können.", NamedTextColor.GRAY));
-        pageOne.append(Component.newline());
-        pageOne.append(Component.newline());
-        pageOne.append(Component.text("Du definierst dein Grundstück indem du bis zu ", NamedTextColor.GRAY));
-        pageOne.append(Component.text(ProtectionSettings.MARKERS, MessageManager.VARIABLE_VALUE));
-        pageOne.append(Component.text(" Marker platzierst und anschließend mit dem grünen Block bestätigst.",
-                NamedTextColor.GRAY));
-        pageOne.append(Component.text("Mit dem roten Block kannst du die Protection jederzeit abbrechen und zu deinem" +
+                "Grundstück besser definieren zu können.", NamedTextColor.BLACK));
+
+        TextComponent.Builder pageTwo = Component.text();
+        pageTwo.append(Component.text("Du definierst dein Grundstück indem du bis zu ", NamedTextColor.BLACK));
+        pageTwo.append(Component.text(ProtectionSettings.MARKERS, MessageManager.VARIABLE_VALUE));
+        pageTwo.append(Component.text(" Marker platzierst und anschließend mit dem grünen Block bestätigst.",
+                NamedTextColor.BLACK));
+        pageTwo.append(Component.newline());
+        pageTwo.append(Component.text("Mit dem roten Block kannst du die Protection jederzeit abbrechen und zu deinem" +
                 " Ausgangspunkt zurückkehren."));
+
         pages.add(pageOne.build());
+        pages.add(pageTwo.build());
 
         this.book =
                 Book.builder().pages(pages).author(Component.text("SLNE Dev Team", MessageManager.PRIMARY))
