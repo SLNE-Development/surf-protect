@@ -1,10 +1,11 @@
 package dev.slne.protect.bukkit.gui.utils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
+import dev.slne.protect.bukkit.gui.ProtectionGui;
+import dev.slne.protect.bukkit.message.MessageManager;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -13,12 +14,10 @@ import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
-import dev.slne.protect.bukkit.gui.ProtectionGui;
-import dev.slne.protect.bukkit.message.MessageManager;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.format.TextDecoration;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 
 public class ItemUtils {
 
@@ -39,7 +38,8 @@ public class ItemUtils {
     public static ItemStack head(UUID ownerUuid, Component... lore) {
         OfflinePlayer owner = Bukkit.getOfflinePlayer(ownerUuid);
 
-        return head(owner, Component.text(owner.getName() != null ? owner.getName() : "null", MessageManager.INFO), lore);
+        return head(owner, Component.text(owner.getName() != null ? owner.getName() : "null", MessageManager.PRIMARY),
+                lore);
     }
 
     /**
@@ -52,7 +52,7 @@ public class ItemUtils {
      * @return The created skull item.
      */
     public static ItemStack head(OfflinePlayer owner, Component displayName, Component... lore) {
-        ItemStack head = item(Material.PLAYER_HEAD, 1, 0, displayName.colorIfAbsent(MessageManager.INFO),
+        ItemStack head = item(Material.PLAYER_HEAD, 1, 0, displayName.colorIfAbsent(MessageManager.PRIMARY),
                 lore);
         ItemMeta meta = head.getItemMeta();
 
@@ -117,7 +117,7 @@ public class ItemUtils {
      * @return The created close item.
      */
     public static ItemStack closeItem() {
-        return item(Material.BARRIER, 1, 0, Component.text("Schließen", MessageManager.INFO),
+        return item(Material.BARRIER, 1, 0, Component.text("Schließen", MessageManager.PRIMARY),
                 Component.empty(), Component.text("Schließt das Menü", NamedTextColor.GRAY), Component.empty());
     }
 
@@ -134,7 +134,8 @@ public class ItemUtils {
         String formatterCurrent = ">> %s";
 
         parentNames.add(
-                Component.text(String.format(formatterCurrent, protectionGui.getTitle()), MessageManager.VARIABLE_VALUE));
+                Component.text(String.format(formatterCurrent, protectionGui.getTitle()),
+                        MessageManager.VARIABLE_VALUE));
         for (ProtectionGui parent : parents) {
             parentNames.add(Component.text(String.format(formatterParent, parent.getTitle()), NamedTextColor.GRAY));
         }
@@ -152,7 +153,7 @@ public class ItemUtils {
         lore.addAll(parentNames);
         lore.add(Component.empty());
 
-        return item(Material.ARROW, 1, 0, Component.text("Zurück", MessageManager.INFO),
+        return item(Material.ARROW, 1, 0, Component.text("Zurück", MessageManager.PRIMARY),
                 lore.toArray(Component[]::new));
     }
 
@@ -187,7 +188,7 @@ public class ItemUtils {
      * @return the confirmation item
      */
     public static ItemStack confirmationConfirmItem() {
-        return item(Material.LIME_CONCRETE, 1, 0, Component.text("Bestätigen", MessageManager.INFO),
+        return item(Material.LIME_CONCRETE, 1, 0, Component.text("Bestätigen", MessageManager.PRIMARY),
                 Component.empty(), Component.text("Bestätigt die Aktion", NamedTextColor.GRAY),
                 Component.empty());
     }
@@ -198,7 +199,7 @@ public class ItemUtils {
      * @return the cancel item
      */
     public static ItemStack confirmationCancelItem() {
-        return item(Material.RED_CONCRETE, 1, 0, Component.text("Abbrechen", MessageManager.INFO),
+        return item(Material.RED_CONCRETE, 1, 0, Component.text("Abbrechen", MessageManager.PRIMARY),
                 Component.empty(), Component.text("Bricht die Aktion ab", NamedTextColor.GRAY),
                 Component.empty());
     }

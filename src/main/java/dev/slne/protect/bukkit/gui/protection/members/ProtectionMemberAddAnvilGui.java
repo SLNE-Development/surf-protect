@@ -38,18 +38,19 @@ public class ProtectionMemberAddAnvilGui extends ProtectionMemberAnvilGui {
 
     @Override
     public void onSubmit(String input) {
-        backToParentGui();
-
         LocalPlayer memberPlayer = ProtectionUserFinder.findLocalPlayer(input);
         region.getMembers().addPlayer(memberPlayer);
+        
         getViewingPlayer().sendMessage("§aDu hast §e" + input + " §azu den Mitgliedern hinzugefügt.");
+
+        backToParentGui();
     }
 
     @Override
     public void onCancel(String input) {
-        backToParentGui();
-
         getViewingPlayer().sendMessage("§cDu hast das Hinzufügen von §e" + input + " §cabgebrochen.");
+
+        backToParentGui();
     }
 
     /**

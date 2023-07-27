@@ -30,15 +30,15 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public class ProtectionShowGui extends ProtectionGui {
 
     private final ProtectedRegion region;
     private final long area;
     private final double distance;
-    private final List<String> ownerNames;
-    private final List<String> memberNames;
     private final RegionInfo regionInfo;
+    private final StaticPane staticPane;
 
     /**
      * Creates a new gui for a region
@@ -46,31 +46,26 @@ public class ProtectionShowGui extends ProtectionGui {
      * @param region        The region
      * @param area          The area
      * @param distance      The distance
-     * @param ownerNames    The owners
-     * @param memberNames   The members
      * @param regionInfo    The region info
      * @param viewingPlayer The viewing player
      */
     @SuppressWarnings("java:S2589")
-    public ProtectionShowGui(ProtectionGui parentGui, ProtectedRegion region, long area, long distance,
-                             List<String> ownerNames, List<String> memberNames, RegionInfo regionInfo,
-                             Player viewingPlayer) {
+    public ProtectionShowGui(ProtectionGui parentGui, ProtectedRegion region, long area, double distance,
+                             RegionInfo regionInfo, Player viewingPlayer) {
         super(parentGui, 5, regionInfo.getName(), viewingPlayer);
 
         this.regionInfo = regionInfo;
         this.region = region;
         this.area = area;
         this.distance = distance;
-        this.ownerNames = ownerNames;
-        this.memberNames = memberNames;
 
         Location teleportLocation = regionInfo.getTeleportLocation();
 
         GuiItem regionNameItem =
                 new GuiItem(ItemUtils.item(Material.NAME_TAG, 1, 0,
-                        Component.text(regionInfo.getName(), NamedTextColor.RED)));
+                        Component.text(regionInfo.getName(), MessageManager.PRIMARY)));
 
-        StaticPane staticPane = new StaticPane(0, 0, 9, 5);
+        staticPane = new StaticPane(0, 0, 9, 5);
 
         // Row 1
         staticPane.addItem(regionNameItem, 4, 0);
@@ -86,14 +81,6 @@ public class ProtectionShowGui extends ProtectionGui {
 
         if (teleportLocation != null && viewingPlayer.hasPermission("surf.protect.view.location")) {
             staticPane.addItem(getLocationItem(teleportLocation), 3, 1);
-        }
-
-        if (viewingPlayer.hasPermission("surf.protect.view.owners")) {
-            staticPane.addItem(getOwnersItem(ownerNames), 6, 1);
-        }
-
-        if (viewingPlayer.hasPermission("surf.protect.view.members")) {
-            staticPane.addItem(getMembersItem(memberNames), 7, 1);
         }
 
         // Row 3
@@ -118,6 +105,33 @@ public class ProtectionShowGui extends ProtectionGui {
         update();
     }
 
+    @Override
+    public void update() {
+        if (getViewingPlayer().hasPermission("surf.protect.view.owners")) {
+            getOwnersItem().thenAcceptAsync(item -> {
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        staticPane.addItem(item, 6, 1);
+                        ProtectionShowGui.super.update();
+                    }
+                }.runTask(BukkitMain.getInstance());
+            });
+        }
+
+        if (getViewingPlayer().hasPermission("surf.protect.view.members")) {
+            getMembersItem().thenAcceptAsync(item -> {
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        staticPane.addItem(item, 7, 1);
+                        ProtectionShowGui.super.update();
+                    }
+                }.runTask(BukkitMain.getInstance());
+            });
+        }
+    }
+
     /**
      * Returns the item for the area
      *
@@ -132,7 +146,7 @@ public class ProtectionShowGui extends ProtectionGui {
         lore.add(Component.text(area + " Blöcke", MessageManager.VARIABLE_VALUE));
         lore.add(Component.empty());
 
-        return new GuiItem(ItemUtils.item(Material.WOODEN_AXE, 1, 0, Component.text("Fläche", MessageManager.INFO),
+        return new GuiItem(ItemUtils.item(Material.WOODEN_AXE, 1, 0, Component.text("Fläche", MessageManager.PRIMARY),
                 lore.toArray(Component[]::new)));
     }
 
@@ -150,7 +164,7 @@ public class ProtectionShowGui extends ProtectionGui {
         lore.add(Component.text(distance + " Blöcke", MessageManager.VARIABLE_VALUE));
         lore.add(Component.empty());
 
-        return new GuiItem(ItemUtils.item(Material.COMPASS, 1, 0, Component.text("Entfernung", MessageManager.INFO),
+        return new GuiItem(ItemUtils.item(Material.COMPASS, 1, 0, Component.text("Entfernung", MessageManager.PRIMARY),
                 lore.toArray(Component[]::new)));
     }
 
@@ -175,61 +189,53 @@ public class ProtectionShowGui extends ProtectionGui {
                 .append(Component.text(teleportLocation.getBlockZ(), MessageManager.VARIABLE_VALUE)));
         lore.add(Component.empty());
 
-        return new GuiItem(ItemUtils.item(Material.COMPASS, 1, 0, Component.text("Position", MessageManager.INFO),
+        return new GuiItem(ItemUtils.item(Material.COMPASS, 1, 0, Component.text("Position", MessageManager.PRIMARY),
                 lore.toArray(Component[]::new)));
     }
 
     /**
      * Returns the item for the owners
      *
-     * @param owners The owners
-     *
      * @return The item
      */
-    private GuiItem getOwnersItem(List<String> owners) {
-        List<Component> lore = new ArrayList<>();
+    private CompletableFuture<GuiItem> getOwnersItem() {
+        return ProtectionUtils.getOwnerNames(getRegion()).thenApplyAsync(owners -> {
+            List<Component> lore = new ArrayList<>();
+            lore.add(Component.empty());
+            if (owners.isEmpty()) {
+                lore.add(Component.text("Keine", MessageManager.VARIABLE_VALUE));
+            } else {
+                lore.addAll(ItemUtils.splitComponent(String.join(", ", owners), 50, MessageManager.VARIABLE_VALUE));
+            }
+            lore.add(Component.empty());
 
-        lore.add(Component.empty());
-
-        Component none = Component.text("Keine", MessageManager.VARIABLE_VALUE);
-
-        if (owners.isEmpty()) {
-            lore.add(none);
-        } else {
-            lore.addAll(ItemUtils.splitComponent(String.join(", ", owners), 50, MessageManager.VARIABLE_VALUE));
-        }
-
-        lore.add(Component.empty());
-
-        return new GuiItem(ItemUtils.item(Material.PLAYER_HEAD, 1, 0, Component.text("Besitzer", MessageManager.INFO),
-                lore.toArray(Component[]::new)));
+            return new GuiItem(
+                    ItemUtils.item(Material.PLAYER_HEAD, 1, 0, Component.text("Besitzer", MessageManager.PRIMARY),
+                            lore.toArray(Component[]::new)));
+        });
     }
 
     /**
      * Returns the item for the members
      *
-     * @param members The members
-     *
      * @return The item
      */
-    private GuiItem getMembersItem(List<String> members) {
-        List<Component> lore = new ArrayList<>();
+    private CompletableFuture<GuiItem> getMembersItem() {
+        return ProtectionUtils.getMemberNames(getRegion()).thenApplyAsync(members -> {
+            List<Component> lore = new ArrayList<>();
+            lore.add(Component.empty());
+            if (members.isEmpty()) {
+                lore.add(Component.text("Keine", MessageManager.VARIABLE_VALUE));
+            } else {
+                lore.addAll(ItemUtils.splitComponent(String.join(", ", members), 50, MessageManager.VARIABLE_VALUE));
+            }
+            lore.add(Component.empty());
 
-        lore.add(Component.empty());
-        Component none = Component.text("Keine", MessageManager.VARIABLE_VALUE);
-
-        if (members.isEmpty()) {
-            lore.add(none);
-        } else {
-            lore.addAll(ItemUtils.splitComponent(String.join(", ", members), 50, MessageManager.VARIABLE_VALUE));
-        }
-
-        lore.add(Component.empty());
-
-        return new GuiItem(ItemUtils.item(Material.PLAYER_HEAD, 1, 0, Component.text("Mitglieder",
-                MessageManager.INFO), lore.toArray(Component[]::new)), event -> {
-            ProtectionMembersGui membersGui = new ProtectionMembersGui(this, members, getViewingPlayer(), region);
-            membersGui.show(getViewingPlayer());
+            return new GuiItem(ItemUtils.item(Material.PLAYER_HEAD, 1, 0, Component.text("Mitglieder",
+                    MessageManager.PRIMARY), lore.toArray(Component[]::new)), event -> {
+                ProtectionMembersGui membersGui = new ProtectionMembersGui(this, getViewingPlayer(), region);
+                membersGui.show(getViewingPlayer());
+            });
         });
     }
 
@@ -249,7 +255,7 @@ public class ProtectionShowGui extends ProtectionGui {
         lore.add(Component.empty());
 
         return new GuiItem(
-                ItemUtils.item(Material.ENDER_PEARL, 1, 0, Component.text("Teleportieren", MessageManager.INFO),
+                ItemUtils.item(Material.ENDER_PEARL, 1, 0, Component.text("Teleportieren", MessageManager.PRIMARY),
                         lore.toArray(Component[]::new)), event -> {
             event.getWhoClicked().closeInventory();
             event.getWhoClicked().teleportAsync(location);
@@ -268,13 +274,13 @@ public class ProtectionShowGui extends ProtectionGui {
         lore.add(Component.text("Erweitert das Grundstück", NamedTextColor.GRAY));
         lore.add(Component.empty());
 
-        List<Component> confirmLore = new ArrayList<>();
-        confirmLore.addAll(
+        List<Component> confirmLore = new ArrayList<>(
                 ItemUtils.splitComponent("Bist du dir sicher, dass du das Grundstück erweitern möchtest?", 50,
                         NamedTextColor.GRAY));
 
         return new GuiItem(
-                ItemUtils.item(Material.GRASS_BLOCK, 1, 0, Component.text("Grundstück erweitern", MessageManager.INFO),
+                ItemUtils.item(Material.GRASS_BLOCK, 1, 0,
+                        Component.text("Grundstück erweitern", MessageManager.PRIMARY),
                         lore.toArray(Component[]::new)), event -> {
             Player player = (Player) event.getWhoClicked();
             player.closeInventory();
@@ -306,8 +312,9 @@ public class ProtectionShowGui extends ProtectionGui {
                 }
                 confirmEvent.getWhoClicked().closeInventory();
             }, cancelEvent -> {
-
-            }, Component.text("Grundstück erweitern", NamedTextColor.GRAY), confirmLore);
+                new ProtectionShowGui(this, region, area, distance, regionInfo, getViewingPlayer()).show(
+                        getViewingPlayer());
+            }, Component.text("Grundstück erweitern", MessageManager.PRIMARY), confirmLore);
 
             confirmationGui.show(player);
         });
@@ -325,7 +332,7 @@ public class ProtectionShowGui extends ProtectionGui {
         lore.add(Component.text("Hier können Flags eingestellt werden", NamedTextColor.GRAY));
         lore.add(Component.empty());
 
-        return new GuiItem(ItemUtils.item(Material.REDSTONE, 1, 0, Component.text("Flags", MessageManager.INFO),
+        return new GuiItem(ItemUtils.item(Material.REDSTONE, 1, 0, Component.text("Flags", MessageManager.PRIMARY),
                 lore.toArray(Component[]::new)),
                 event -> new ProtectionFlagsGui(this, region, getViewingPlayer()).show(event.getWhoClicked()));
     }
@@ -336,13 +343,12 @@ public class ProtectionShowGui extends ProtectionGui {
     @SuppressWarnings("java:S3776")
     private GuiItem getProtectionSellItem() {
         return new GuiItem(
-                ItemUtils.item(Material.BEDROCK, 1, 0, Component.text("Grundstück löschen", MessageManager.INFO),
+                ItemUtils.item(Material.BEDROCK, 1, 0, Component.text("Grundstück löschen", MessageManager.PRIMARY),
                         Component.empty(), Component.text("Löscht das Grundstück", NamedTextColor.GRAY),
                         Component.empty()), event -> {
             Player player = (Player) event.getWhoClicked();
 
-            List<Component> confirmLore = new ArrayList<>();
-            confirmLore.addAll(
+            List<Component> confirmLore = new ArrayList<>(
                     ItemUtils.splitComponent("Bist du dir sicher, dass du das Grundstück löschen möchtest?", 50,
                             MessageManager.ERROR));
             confirmLore.add(Component.empty());
@@ -351,7 +357,6 @@ public class ProtectionShowGui extends ProtectionGui {
             confirmLore.add(Component.empty());
             confirmLore.add(Component.text("Das Grundstück wird dir für einen Anteil des Kaufpreises erstattet.",
                     NamedTextColor.GRAY));
-            confirmLore.add(Component.empty());
 
             ConfirmationGui confirmationGui = new ConfirmationGui(this, confirmEvent -> {
                 ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
@@ -409,7 +414,10 @@ public class ProtectionShowGui extends ProtectionGui {
                 }.runTask(BukkitMain.getInstance());
 
                 protectionUser.sendMessage(MessageManager.getProtectionSoldComponent(refund, currency));
-            }, null, Component.text("Grundstück löschen?", MessageManager.INFO), confirmLore);
+            }, clickEvent -> {
+                new ProtectionShowGui(this, region, area, distance, regionInfo, getViewingPlayer()).show(
+                        getViewingPlayer());
+            }, Component.text("Grundstück löschen?", MessageManager.PRIMARY), confirmLore);
 
             confirmationGui.show(player);
         });
@@ -458,4 +466,21 @@ public class ProtectionShowGui extends ProtectionGui {
         return region;
     }
 
+    /**
+     * Returns the area
+     *
+     * @return the area
+     */
+    public long getArea() {
+        return area;
+    }
+
+    /**
+     * Returns the distance
+     *
+     * @return the distance
+     */
+    public double getDistance() {
+        return distance;
+    }
 }
