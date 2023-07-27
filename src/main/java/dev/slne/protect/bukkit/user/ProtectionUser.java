@@ -5,6 +5,7 @@ import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import dev.slne.data.core.database.future.SurfFutureResult;
 import dev.slne.data.core.instance.DataApi;
 import dev.slne.protect.bukkit.BukkitMain;
+import dev.slne.protect.bukkit.book.ProtectionBook;
 import dev.slne.protect.bukkit.listener.listeners.ProtectionHotbarListener;
 import dev.slne.protect.bukkit.message.MessageManager;
 import dev.slne.protect.bukkit.region.ProtectionRegion;
@@ -181,7 +182,7 @@ public class ProtectionUser {
         inventory.setItem(7, ProtectionHotbarListener.acceptItem);
         inventory.setItem(8, ProtectionHotbarListener.cancelItem);
 
-        MessageManager.sendProtectionModeEnterMessages(this);
+        getBukkitPlayer().openBook(new ProtectionBook().getBook());
 
         this.regionCreation = regionCreation;
     }

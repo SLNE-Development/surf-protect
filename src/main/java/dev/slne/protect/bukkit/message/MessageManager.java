@@ -4,7 +4,6 @@ import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.util.profile.Profile;
 import com.sk89q.worldguard.util.profile.cache.ProfileCache;
-import dev.slne.protect.bukkit.gui.utils.ItemUtils;
 import dev.slne.protect.bukkit.region.info.RegionInfo;
 import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
 import dev.slne.protect.bukkit.user.ProtectionUser;
@@ -434,32 +433,6 @@ public class MessageManager {
      */
     public static Component getPlayerNotFoundComponent() {
         return prefix().append(Component.text("Der Spieler wurde nicht gefunden.", ERROR));
-    }
-
-    /**
-     * Sends the enter messages to the player
-     *
-     * @param user the player
-     */
-    public static void sendProtectionModeEnterMessages(ProtectionUser user) {
-        user.sendMessage(Component.empty());
-        prefixMessage(user, Component.empty());
-        prefixMessage(user, Component.text("Willkommen im ProtectionSystem!", INFO));
-        prefixMessage(user, Component.empty());
-        user.sendMessage(Component.empty());
-
-        List<Component> messages =
-                ItemUtils.splitComponent(
-                        "Wenn du den ProtectionMode betrittst, erhältst du vorübergehend Fly um dein Grundstück besser definieren zu können. Du definierst dein Grundstück indem du bis zu " +
-                                ProtectionSettings.MARKERS +
-                                " Marker platzierst und anschließend mit dem grünen Block bestätigst. Mit dem roten Block kannst du die Protection jederzeit abbrechen und zu deinem Ausgangspunkt zurückkehren.",
-                        70, SPACER);
-
-        for (Component message : messages) {
-            user.sendMessage(message);
-        }
-
-        user.sendMessage(Component.empty());
     }
 
     /**
