@@ -21,7 +21,7 @@ import net.kyori.adventure.title.Title;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -142,24 +142,21 @@ public class ProtectionMainMenu extends ProtectionGui {
                         Component.empty()), event -> {
             Player player = (Player) event.getWhoClicked();
 
-            List<Component> confirmLore = new ArrayList<>();
-            confirmLore.addAll(
-                    ItemUtils.splitComponent("Bist du dir sicher, dass du ein Grundstück erstellen " + "m" + "öchtest?",
+            List<Component> confirmLore = new ArrayList<>(
+                    ItemUtils.splitComponent("Bist du dir sicher, dass du ein Grundstück erstellen möchtest?",
                             50, NamedTextColor.GRAY));
 
             ConfirmationGui confirmationGui = new ConfirmationGui(this, confirmEvent -> {
                 ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
                 ProtectionRegion regionCreation = new ProtectionRegion(protectionUser, null);
-                protectionUser.startRegionCreation(regionCreation);
 
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        getViewingPlayer().closeInventory();
-                    }
-                }.runTask(BukkitMain.getInstance());
+                getViewingPlayer().closeInventory(InventoryCloseEvent.Reason.PLUGIN);
+                protectionUser.startRegionCreation(regionCreation);
             }, cancelEvent -> {
-                new ProtectionMainMenu(player, getTargetProtectionPlayer()).show(player);
+                if (!(cancelEvent instanceof InventoryCloseEvent closeEvent && closeEvent.getReason().equals(
+                        InventoryCloseEvent.Reason.PLUGIN))) {
+                    new ProtectionMainMenu(player, getTargetProtectionPlayer()).show(player);
+                }
             }, Component.text("Grundstück erstellen", MessageManager.PRIMARY), confirmLore);
 
             confirmationGui.show(player);

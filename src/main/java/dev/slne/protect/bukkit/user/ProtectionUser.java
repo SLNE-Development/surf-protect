@@ -161,12 +161,13 @@ public class ProtectionUser {
                             (System.currentTimeMillis() / 1000);
 
             if (secondsLeft > 0) {
-
                 String time = String.format("%1$2d:%2$2d", secondsLeft / 60, secondsLeft % 60).replace(" ", "0");
+
                 getBukkitPlayer().sendMessage(Component.text().append(MessageManager.prefix())
                         .append(Component.text("Du kannst den ProtectionMode erst wieder in ", MessageManager.ERROR))
                         .append(Component.text(time, MessageManager.VARIABLE_VALUE)
                                 .append(Component.text(" Minuten verwenden.", MessageManager.ERROR))).build());
+
                 return;
             }
         }

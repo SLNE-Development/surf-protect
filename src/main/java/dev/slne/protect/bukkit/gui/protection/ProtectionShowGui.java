@@ -25,6 +25,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.math.BigDecimal;
@@ -300,6 +301,8 @@ public class ProtectionShowGui extends ProtectionGui {
                     return;
                 }
 
+                confirmEvent.getWhoClicked().closeInventory();
+
                 if (ProtectionUtils.standsInProtectedRegion(protectionUser.getBukkitPlayer(), regionInfo.getRegion())) {
                     protectionUser.startRegionCreation(protectionRegion);
                     protectionRegion.setExpandingMarkers();
@@ -308,10 +311,12 @@ public class ProtectionShowGui extends ProtectionGui {
                             .append(Component.text("Du befindest dich nicht auf dem zu erweiternden Grundstück.",
                                     MessageManager.ERROR)));
                 }
-                confirmEvent.getWhoClicked().closeInventory();
             }, cancelEvent -> {
-                new ProtectionShowGui(this, region, area, distance, regionInfo, getViewingPlayer()).show(
-                        getViewingPlayer());
+                if (!(cancelEvent instanceof InventoryCloseEvent closeEvent && closeEvent.getReason().equals(
+                        InventoryCloseEvent.Reason.PLUGIN))) {
+                    new ProtectionShowGui(this, region, area, distance, regionInfo, getViewingPlayer()).show(
+                            getViewingPlayer());
+                }
             }, Component.text("Grundstück erweitern", MessageManager.PRIMARY), confirmLore);
 
             confirmationGui.show(player);
