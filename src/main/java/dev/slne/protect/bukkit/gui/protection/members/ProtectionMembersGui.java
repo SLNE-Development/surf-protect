@@ -81,10 +81,12 @@ public class ProtectionMembersGui extends ProtectionGui {
                 lore.add(Component.text("Region entfernen möchtest.", MessageManager.ERROR));
 
                 List<Component> itemLore = new ArrayList<>();
+                itemLore.add(Component.empty());
                 itemLore.add(Component.text("Klicke hier, um ", NamedTextColor.GRAY)
                         .append(Component.text(memberName, MessageManager.VARIABLE_VALUE)).append(Component.text(" " +
                                 "aus der", NamedTextColor.GRAY)));
                 itemLore.add(Component.text("Region zu entfernen", NamedTextColor.GRAY));
+                itemLore.add(Component.empty());
 
                 items.add(new GuiItem(ItemUtils.head(offlinePlayer,
                         Component.text(memberName, MessageManager.PRIMARY), itemLore.toArray(Component[]::new)),
