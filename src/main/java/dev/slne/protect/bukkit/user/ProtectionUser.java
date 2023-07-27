@@ -45,18 +45,6 @@ public class ProtectionUser {
     }
 
     /**
-     * Applies the {@link LocalPlayer} to the user
-     */
-    private void applyLocalPlayer() {
-        if (Bukkit.getPlayer(uuid) != null && Objects.requireNonNull(Bukkit.getPlayer(uuid)).isOnline()) {
-            this.localPlayer = WorldGuardPlugin.inst().wrapPlayer(Bukkit.getPlayer(uuid));
-        } else {
-            this.localPlayer = WorldGuardPlugin.inst().wrapOfflinePlayer(Bukkit.getOfflinePlayer(uuid));
-        }
-
-    }
-
-    /**
      * Returns the {@link ProtectionUser} for the given {@link Player}
      *
      * @param player The player
@@ -79,6 +67,18 @@ public class ProtectionUser {
     }
 
     /**
+     * Applies the {@link LocalPlayer} to the user
+     */
+    private void applyLocalPlayer() {
+        if (Bukkit.getPlayer(uuid) != null && Objects.requireNonNull(Bukkit.getPlayer(uuid)).isOnline()) {
+            this.localPlayer = WorldGuardPlugin.inst().wrapPlayer(Bukkit.getPlayer(uuid));
+        } else {
+            this.localPlayer = WorldGuardPlugin.inst().wrapOfflinePlayer(Bukkit.getOfflinePlayer(uuid));
+        }
+
+    }
+
+    /**
      * Adds a transaction to the user
      *
      * @param sender   The sender of the transaction
@@ -88,7 +88,8 @@ public class ProtectionUser {
      *
      * @return the future when the transaction is completed
      */
-    public SurfFutureResult<TransactionAddResult> addTransaction(UUID sender, BigDecimal amount, Currency currency, TransactionData data) {
+    public SurfFutureResult<TransactionAddResult> addTransaction(UUID sender, BigDecimal amount, Currency currency,
+                                                                 TransactionData data) {
         TransactionPlayer player = TransactionPlayer.getTransactionPlayer(uuid);
         Transaction transaction = new Transaction(sender, uuid, amount, currency);
         transaction.setTransactionData(data);
@@ -140,24 +141,31 @@ public class ProtectionUser {
      */
     public void startRegionCreation(ProtectionRegion regionCreation) {
         if (this.regionCreation != null) {
-            getBukkitPlayer().sendMessage(MessageManager.prefix().append(Component.text("Du befindest dich bereits im ProtectionMode.", MessageManager.ERROR)));
+            getBukkitPlayer().sendMessage(MessageManager.prefix()
+                    .append(Component.text("Du befindest dich bereits im ProtectionMode.", MessageManager.ERROR)));
             return;
         }
 
-        if (getBukkitPlayer().getLocation().getWorld().getName().contains("_nether") || getBukkitPlayer().getLocation().getWorld().getName().contains("_end")) {
-            getBukkitPlayer().sendMessage(MessageManager.prefix().append(Component.text("Du befindest dich nicht in der Overworld.", MessageManager.ERROR)));
+        if (getBukkitPlayer().getLocation().getWorld().getName().contains("_nether") ||
+                getBukkitPlayer().getLocation().getWorld().getName().contains("_end")) {
+            getBukkitPlayer().sendMessage(MessageManager.prefix()
+                    .append(Component.text("Du befindest dich nicht in der Overworld.", MessageManager.ERROR)));
             return;
         }
 
         int cooldownTime = ProtectionSettings.REGION_CREATION_COOLDOWN;
         if (creationCooldown.containsKey(localPlayer.getName())) {
             long secondsLeft =
-                    ((creationCooldown.get(localPlayer.getName()) / 1000) + cooldownTime) - (System.currentTimeMillis() / 1000);
+                    ((creationCooldown.get(localPlayer.getName()) / 1000) + cooldownTime) -
+                            (System.currentTimeMillis() / 1000);
 
             if (secondsLeft > 0) {
 
                 String time = String.format("%1$2d:%2$2d", secondsLeft / 60, secondsLeft % 60).replace(" ", "0");
-                getBukkitPlayer().sendMessage(Component.text().append(MessageManager.prefix()).append(Component.text("Du kannst den ProtectionMode erst wieder in ", MessageManager.ERROR)).append(Component.text(time, MessageManager.VARIABLE_VALUE).append(Component.text(" Minuten verwenden.", MessageManager.ERROR))).build());
+                getBukkitPlayer().sendMessage(Component.text().append(MessageManager.prefix())
+                        .append(Component.text("Du kannst den ProtectionMode erst wieder in ", MessageManager.ERROR))
+                        .append(Component.text(time, MessageManager.VARIABLE_VALUE)
+                                .append(Component.text(" Minuten verwenden.", MessageManager.ERROR))).build());
                 return;
             }
         }
@@ -172,6 +180,8 @@ public class ProtectionUser {
         inventory.setItem(0, ProtectionHotbarListener.markerItem);
         inventory.setItem(7, ProtectionHotbarListener.acceptItem);
         inventory.setItem(8, ProtectionHotbarListener.cancelItem);
+
+        MessageManager.sendProtectionModeEnterMessages(this);
 
         this.regionCreation = regionCreation;
     }

@@ -152,8 +152,6 @@ public class ProtectionMainMenu extends ProtectionGui {
                 ProtectionRegion regionCreation = new ProtectionRegion(protectionUser, null);
                 protectionUser.startRegionCreation(regionCreation);
 
-                MessageManager.sendProtectionModeEnterMessages(protectionUser);
-
                 new BukkitRunnable() {
                     @Override
                     public void run() {
