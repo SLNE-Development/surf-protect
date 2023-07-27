@@ -58,10 +58,6 @@ public class ProtectionListGui extends ProtectionGui {
     public void update() {
         List<GuiItem> buttons = new ArrayList<>();
 
-        for (int i = 0; i < 100; i++) {
-            buttons.add(new GuiItem(ItemUtils.item(Material.ACACIA_BOAT, 1, 0, Component.text("Boot"))));
-        }
-
         for (Map.Entry<World, List<ProtectedRegion>> entry : regions.entrySet()) {
             World world = entry.getKey();
             List<ProtectedRegion> worldRegions = entry.getValue();
