@@ -81,7 +81,9 @@ public class MessageManager {
     public static Component getMoreMarkersComponent(int placedMarkers) {
         int neededMarkers = ProtectionSettings.MIN_MARKERS - placedMarkers;
 
-        return prefix().append(Component.text("Du musst mindestens ", ERROR)).append(Component.text(String.valueOf(neededMarkers), VARIABLE_VALUE)).append(Component.text(" weitere Marker platzieren.", ERROR));
+        return prefix().append(Component.text("Du musst mindestens ", ERROR))
+                .append(Component.text(String.valueOf(neededMarkers), VARIABLE_VALUE))
+                .append(Component.text(" weitere Marker platzieren.", ERROR));
     }
 
     /**
@@ -133,8 +135,11 @@ public class MessageManager {
         emptyLine(user);
         prefixMessage(user, Component.text("Das Grundstück steht zum Verkauf", SUCCESS));
         emptyLine(user);
-        prefixMessage(user, Component.text("Fläche: ", VARIABLE_KEY).append(Component.text(area, VARIABLE_VALUE)).append(Component.text(" Blöcke", VARIABLE_VALUE)));
-        prefixMessage(user, Component.text("Kaufpreis: ", VARIABLE_KEY).append(Component.text(effectiveCost, VARIABLE_VALUE)).append(currencyDisplayName(currency)));
+        prefixMessage(user, Component.text("Fläche: ", VARIABLE_KEY).append(Component.text(area, VARIABLE_VALUE))
+                .append(Component.text(" Blöcke", VARIABLE_VALUE)));
+        prefixMessage(user,
+                Component.text("Kaufpreis: ", VARIABLE_KEY).append(Component.text(effectiveCost, VARIABLE_VALUE))
+                        .append(currencyDisplayName(currency)));
         emptyLine(user);
     }
 
@@ -145,7 +150,7 @@ public class MessageManager {
      * @return The component
      */
     public static Component getTooExpensiveToBuyComponent() {
-        return Component.text("Du hast nicht genügend Geld um dieses Grundstück zu kaufen", ERROR);
+        return prefix().append(Component.text("Du hast nicht genügend Geld um dieses Grundstück zu kaufen.", ERROR));
     }
 
     /**
@@ -155,7 +160,7 @@ public class MessageManager {
      * @return The component
      */
     public static Component getTooExpensiveToRenameComponent() {
-        return Component.text("Du hast nicht genügend Geld um dieses Grundstück umzubenennen", ERROR);
+        return prefix().append(Component.text("Du hast nicht genügend Geld um dieses Grundstück umzubenennen.", ERROR));
     }
 
     /**
@@ -166,7 +171,8 @@ public class MessageManager {
      * @param effectiveCost The effective cost
      * @param currency      The currency
      */
-    public static void sendAreaTooExpensiveComponent(ProtectionUser user, long area, double effectiveCost, Currency currency) {
+    public static void sendAreaTooExpensiveComponent(ProtectionUser user, long area, double effectiveCost,
+                                                     Currency currency) {
         sendAreaBuyHeader(user, area, effectiveCost, currency);
 
         prefixMessage(user, getTooExpensiveToBuyComponent());
@@ -180,7 +186,8 @@ public class MessageManager {
      * @param effectiveCost the effective cost
      * @param currency      the currency
      */
-    public static void sendAreaBuyableComponent(ProtectionUser user, long area, double effectiveCost, Currency currency) {
+    public static void sendAreaBuyableComponent(ProtectionUser user, long area, double effectiveCost,
+                                                Currency currency) {
         sendAreaBuyHeader(user, area, effectiveCost, currency);
 
         prefixMessage(user, Component.text("Wenn du das Grundstück kaufen möchtest,", INFO));
@@ -212,7 +219,8 @@ public class MessageManager {
      * @return the component
      */
     public static Component getTooFarAwayFromStartComponent() {
-        return prefix().append(Component.text("Du darfst dich nicht weiter von deinem Ausgangspunkt entfernen.", ERROR));
+        return prefix().append(
+                Component.text("Du darfst dich nicht weiter von deinem Ausgangspunkt entfernen.", ERROR));
     }
 
     /**
@@ -351,7 +359,8 @@ public class MessageManager {
         Component clickComponent =
                 Component.text("hier", MessageManager.VARIABLE_VALUE).clickEvent(clickEvent).hoverEvent(hoverEvent);
 
-        return prefix().append(Component.text("Um deine Region umzubenennen, klicke ", NamedTextColor.GRAY)).append(clickComponent).append(Component.text(".", NamedTextColor.GRAY));
+        return prefix().append(Component.text("Um deine Region umzubenennen, klicke ", NamedTextColor.GRAY))
+                .append(clickComponent).append(Component.text(".", NamedTextColor.GRAY));
     }
 
     /**
@@ -413,7 +422,9 @@ public class MessageManager {
      * @return the component
      */
     public static Component getProtectionVisualizeComponent(boolean state) {
-        return prefix().append(Component.text("Du hast die Visualisierung der Grundstücke ", INFO)).append(Component.text(state ? "aktiviert" : "deaktiviert", state ? SUCCESS : ERROR)).append(Component.text(". Bitte warte einen kleinen Moment.", INFO));
+        return prefix().append(Component.text("Du hast die Visualisierung der Grundstücke ", INFO))
+                .append(Component.text(state ? "aktiviert" : "deaktiviert", state ? SUCCESS : ERROR))
+                .append(Component.text(". Bitte warte einen kleinen Moment.", INFO));
     }
 
     /**
@@ -438,7 +449,11 @@ public class MessageManager {
         user.sendMessage(Component.empty());
 
         List<Component> messages =
-                ItemUtils.splitComponent("Wenn du den ProtectionMode betrittst, erhältst du vorübergehend Fly um dein Grundstück besser definieren zu können. Du definierst dein Grundstück indem du bis zu " + ProtectionSettings.MARKERS + " Marker platzierst und anschließend mit dem grünen Block bestätigst. Mit dem roten Block kannst du die Protection jederzeit abbrechen und zu deinem Ausgangspunkt zurückkehren.", 70, SPACER);
+                ItemUtils.splitComponent(
+                        "Wenn du den ProtectionMode betrittst, erhältst du vorübergehend Fly um dein Grundstück besser definieren zu können. Du definierst dein Grundstück indem du bis zu " +
+                                ProtectionSettings.MARKERS +
+                                " Marker platzierst und anschließend mit dem grünen Block bestätigst. Mit dem roten Block kannst du die Protection jederzeit abbrechen und zu deinem Ausgangspunkt zurückkehren.",
+                        70, SPACER);
 
         for (Component message : messages) {
             user.sendMessage(message);
@@ -469,7 +484,10 @@ public class MessageManager {
         DecimalFormat decimalFormat = new DecimalFormat("#.##");
         String formattedAmount = decimalFormat.format(amount);
 
-        return prefix().append(Component.text("Du hast dein Grundstück für ", INFO)).append(Component.text(formattedAmount, MessageManager.VARIABLE_VALUE)).append(Component.text(" ", MessageManager.VARIABLE_VALUE)).append(currencyDisplayName(currency)).append(Component.text(" verkauft.", INFO));
+        return prefix().append(Component.text("Du hast dein Grundstück für ", INFO))
+                .append(Component.text(formattedAmount, MessageManager.VARIABLE_VALUE))
+                .append(Component.text(" ", MessageManager.VARIABLE_VALUE)).append(currencyDisplayName(currency))
+                .append(Component.text(" verkauft.", INFO));
     }
 
 }
