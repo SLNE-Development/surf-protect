@@ -157,9 +157,9 @@ public class ProtectionMainMenu extends ProtectionGui {
                 new BukkitRunnable() {
                     @Override
                     public void run() {
-                        confirmEvent.getWhoClicked().closeInventory();
+                        getViewingPlayer().closeInventory();
                     }
-                }.runTaskLater(BukkitMain.getInstance(), 1);
+                }.runTask(BukkitMain.getInstance());
             }, cancelEvent -> {
                 new ProtectionMainMenu(player, getTargetProtectionPlayer()).show(player);
             }, Component.text("Grundstück erstellen", MessageManager.PRIMARY), confirmLore);
