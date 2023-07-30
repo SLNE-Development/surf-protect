@@ -1,6 +1,9 @@
 package dev.slne.protect.bukkit.region.visual.visualizer.color;
 
 import dev.slne.protect.bukkit.BukkitMain;
+import io.github.retrooper.packetevents.util.SpigotConversionUtil;
+import org.bukkit.Material;
+import org.bukkit.block.data.BlockData;
 
 public class ProtectionVisualizerColor {
 
@@ -18,35 +21,35 @@ public class ProtectionVisualizerColor {
      * All usable colors
      */
     public enum VisualizerColor {
-        OWNING(5947),
-        NOT_OWNING(5956),
+        OWNING(Material.LIME_STAINED_GLASS.createBlockData()),
+        NOT_OWNING(Material.RED_STAINED_GLASS.createBlockData()),
 
-        WHITE(5942),
-        ORANGE(5943),
-        MAGENTA(5944),
-        LIGHT_BLUE(5945),
-        YELLOW(5946),
-        LIME(5947),
-        PINK(5948),
-        GRAY(5949),
-        LIGHT_GRAY(5950),
-        CYAN(5951),
-        PURPLE(5952),
-        BLUE(5953),
-        BROWN(5954),
-        GREEN(5955),
-        RED(5956),
-        BLACK(5957);
+        WHITE(Material.WHITE_STAINED_GLASS.createBlockData()),
+        ORANGE(Material.ORANGE_STAINED_GLASS.createBlockData()),
+        MAGENTA(Material.MAGENTA_STAINED_GLASS.createBlockData()),
+        LIGHT_BLUE(Material.LIGHT_BLUE_STAINED_GLASS.createBlockData()),
+        YELLOW(Material.YELLOW_STAINED_GLASS.createBlockData()),
+        LIME(Material.LIME_STAINED_GLASS.createBlockData()),
+        PINK(Material.PINK_STAINED_GLASS.createBlockData()),
+        GRAY(Material.GRAY_STAINED_GLASS.createBlockData()),
+        LIGHT_GRAY(Material.LIGHT_GRAY_STAINED_GLASS.createBlockData()),
+        CYAN(Material.CYAN_STAINED_GLASS.createBlockData()),
+        PURPLE(Material.PURPLE_STAINED_GLASS.createBlockData()),
+        BLUE(Material.BLUE_STAINED_GLASS.createBlockData()),
+        BROWN(Material.BROWN_STAINED_GLASS.createBlockData()),
+        GREEN(Material.GREEN_STAINED_GLASS.createBlockData()),
+        RED(Material.RED_STAINED_GLASS.createBlockData()),
+        BLACK(Material.BLACK_STAINED_GLASS.createBlockData());
 
-        private int id;
+        private final int id;
 
         /**
          * Create a new color
          *
-         * @param id
+         * @param blockState the block state
          */
-        VisualizerColor(int id) {
-            this.id = id;
+        VisualizerColor(BlockData blockState) {
+            this.id = SpigotConversionUtil.fromBukkitBlockData(blockState).getGlobalId();
         }
 
         /**

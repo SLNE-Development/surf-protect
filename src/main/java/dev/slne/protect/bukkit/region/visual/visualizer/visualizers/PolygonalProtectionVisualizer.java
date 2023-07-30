@@ -1,20 +1,18 @@
 package dev.slne.protect.bukkit.region.visual.visualizer.visualizers;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.sk89q.worldedit.math.BlockVector2;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import dev.slne.protect.bukkit.region.visual.visualizer.ProtectionVisualizer;
 import org.bukkit.HeightMap;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
-import com.sk89q.worldedit.math.BlockVector2;
-import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
+import java.util.ArrayList;
+import java.util.List;
 
-import dev.slne.protect.bukkit.region.visual.visualizer.ProtectionVisualizer;
-
-public class PolygonalProtectionVisualizer extends ProtectionVisualizer<ProtectedPolygonalRegion> {
+public class PolygonalProtectionVisualizer extends ProtectionVisualizer<ProtectedRegion> {
 
     /**
      * Create a new visualizer for a region.
@@ -23,7 +21,7 @@ public class PolygonalProtectionVisualizer extends ProtectionVisualizer<Protecte
      * @param region The region to visualize.
      * @param player The player to visualize for.
      */
-    public PolygonalProtectionVisualizer(World world, ProtectedPolygonalRegion region, Player player) {
+    public PolygonalProtectionVisualizer(World world, ProtectedRegion region, Player player) {
         super(world, region, player);
 
         setScaleUp(true);
@@ -91,7 +89,7 @@ public class PolygonalProtectionVisualizer extends ProtectionVisualizer<Protecte
                     break;
                 }
 
-                BlockVector2[] vectors = new BlockVector2[] {
+                BlockVector2[] vectors = new BlockVector2[]{
                         point.add(1, 0),
                         point.add(-1, 0),
                         point.add(0, 1),

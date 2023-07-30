@@ -7,6 +7,7 @@ import dev.slne.data.core.gson.GsonConverter;
 import dev.slne.data.core.web.WebRequest;
 import dev.slne.protect.bukkit.instance.BukkitApi;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -31,8 +32,9 @@ public class ProtectionUserFinder {
      * @return The user
      */
     public static LocalPlayer findLocalPlayer(UUID uuid) {
-        if (Bukkit.getPlayer(uuid) != null && Bukkit.getPlayer(uuid).isOnline()) {
-            return WorldGuardPlugin.inst().wrapPlayer(Bukkit.getPlayer(uuid));
+        Player player = Bukkit.getPlayer(uuid);
+        if (player != null && player.isOnline()) {
+            return WorldGuardPlugin.inst().wrapPlayer(player);
         }
 
         return WorldGuardPlugin.inst().wrapOfflinePlayer(Bukkit.getOfflinePlayer(uuid));
@@ -46,8 +48,9 @@ public class ProtectionUserFinder {
      * @return The user
      */
     public static LocalPlayer findLocalPlayer(String playerName) {
-        if (Bukkit.getPlayer(playerName) != null && Bukkit.getPlayer(playerName).isOnline()) {
-            return WorldGuardPlugin.inst().wrapPlayer(Bukkit.getPlayer(playerName));
+        Player player = Bukkit.getPlayer(playerName);
+        if (player != null && player.isOnline()) {
+            return WorldGuardPlugin.inst().wrapPlayer(player);
         }
 
         return WorldGuardPlugin.inst().wrapOfflinePlayer(Bukkit.getOfflinePlayer(playerName));
