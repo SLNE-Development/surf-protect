@@ -18,6 +18,7 @@ import dev.slne.transaction.core.transaction.TransactionData;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
@@ -52,7 +53,7 @@ public class ProtectionUser {
      *
      * @return The {@link ProtectionUser}
      */
-    public static ProtectionUser getProtectionUser(Player player) {
+    public static ProtectionUser getProtectionUser(OfflinePlayer player) {
         return getProtectionUser(player.getUniqueId());
     }
 

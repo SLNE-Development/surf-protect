@@ -19,6 +19,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -30,14 +31,14 @@ import java.util.Map;
 
 public class ProtectionMainMenu extends ProtectionGui {
 
-    private final Player targetProtectionPlayer;
+    private final OfflinePlayer targetProtectionPlayer;
 
     /**
      * Creates a new protection gui
      *
      * @param targetProtectionPlayer the player get the regions from
      */
-    public ProtectionMainMenu(Player viewingPlayer, Player targetProtectionPlayer) {
+    public ProtectionMainMenu(Player viewingPlayer, OfflinePlayer targetProtectionPlayer) {
         super(null, 5, "Protections - Menü", viewingPlayer);
 
         this.targetProtectionPlayer = targetProtectionPlayer;
@@ -166,7 +167,7 @@ public class ProtectionMainMenu extends ProtectionGui {
     /**
      * @return the targetProtectionPlayer
      */
-    public Player getTargetProtectionPlayer() {
+    public OfflinePlayer getTargetProtectionPlayer() {
         return targetProtectionPlayer;
     }
 }
