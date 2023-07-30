@@ -27,7 +27,6 @@ public class CuboidProtectionVisualizer extends ProtectionVisualizer<ProtectedCu
 
     @Override
     public List<Location> visualize() {
-        List<Location> locations = new ArrayList<>();
 
         BlockVector3 minimumPoint = getRegion().getMinimumPoint();
         BlockVector3 maximumPoint = getRegion().getMaximumPoint();
@@ -50,8 +49,7 @@ public class CuboidProtectionVisualizer extends ProtectionVisualizer<ProtectedCu
             }
         }
 
-        locations.addAll(edgeLocations);
-        return locations;
+        return new ArrayList<>(edgeLocations);
     }
 
 }

@@ -50,5 +50,4 @@ public class ProtectionFlagsGui extends ProtectionGui {
         addPane(pages);
         addPane(navigation);
     }
-
 }
