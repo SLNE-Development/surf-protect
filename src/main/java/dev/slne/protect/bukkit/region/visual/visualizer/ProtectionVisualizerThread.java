@@ -1,19 +1,16 @@
 package dev.slne.protect.bukkit.region.visual.visualizer;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import dev.slne.protect.bukkit.BukkitMain;
+import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
+import dev.slne.protect.bukkit.region.visual.visualizer.visualizers.PolygonalProtectionVisualizer;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
-import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-
-import dev.slne.protect.bukkit.BukkitMain;
-import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
-import dev.slne.protect.bukkit.region.visual.visualizer.visualizers.PolygonalProtectionVisualizer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class ProtectionVisualizerThread extends BukkitRunnable {
 
@@ -71,9 +68,9 @@ public class ProtectionVisualizerThread extends BukkitRunnable {
          * this.addVisualizer(new CuboidProtectionVisualizer(world, cuboidRegion,
          * player));
          * } else
-         */ if (protectedRegion instanceof ProtectedPolygonalRegion polygonalRegion) {
-            this.addVisualizer(new PolygonalProtectionVisualizer(world, polygonalRegion, player));
-        }
+         */ //if (protectedRegion instanceof ProtectedPolygonalRegion polygonalRegion) {
+        this.addVisualizer(new PolygonalProtectionVisualizer(world, protectedRegion, player));
+        //}
     }
 
     /**
