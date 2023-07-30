@@ -7,14 +7,15 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.regions.RegionType;
 import dev.slne.protect.bukkit.BukkitMain;
 import dev.slne.protect.bukkit.gui.list.ProtectionListGui;
-import dev.slne.protect.bukkit.gui.utils.ConfirmationGui;
-import dev.slne.protect.bukkit.gui.utils.ItemUtils;
 import dev.slne.protect.bukkit.message.MessageManager;
 import dev.slne.protect.bukkit.region.ProtectionRegion;
 import dev.slne.protect.bukkit.region.ProtectionUtils;
 import dev.slne.protect.bukkit.region.flags.ProtectionFlags;
 import dev.slne.protect.bukkit.region.visual.visualizer.ProtectionVisualizer;
 import dev.slne.protect.bukkit.user.ProtectionUser;
+import dev.slne.surf.gui.api.chest.SurfChestGui;
+import dev.slne.surf.gui.api.confirmation.ConfirmationGui;
+import dev.slne.surf.gui.api.utils.ItemUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title;
@@ -28,7 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class ProtectionMainMenu extends ProtectionGui {
+public class ProtectionMainMenu extends SurfChestGui {
 
     private final Player targetProtectionPlayer;
 
@@ -38,7 +39,7 @@ public class ProtectionMainMenu extends ProtectionGui {
      * @param targetProtectionPlayer the player get the regions from
      */
     public ProtectionMainMenu(Player viewingPlayer, Player targetProtectionPlayer) {
-        super(null, 5, "Protections - Menü", viewingPlayer);
+        super(null, 5, Component.text("Protections - Menü"), viewingPlayer);
 
         this.targetProtectionPlayer = targetProtectionPlayer;
 
@@ -146,7 +147,7 @@ public class ProtectionMainMenu extends ProtectionGui {
                     ItemUtils.splitComponent("Bist du dir sicher, dass du ein Grundstück erstellen möchtest?",
                             50, NamedTextColor.GRAY));
 
-            ConfirmationGui confirmationGui = new ConfirmationGui(this, confirmEvent -> {
+            ConfirmationGui confirmationGui = new ConfirmationGui(this, getViewingPlayer(), confirmEvent -> {
                 ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
                 ProtectionRegion regionCreation = new ProtectionRegion(protectionUser, null);
 

@@ -6,11 +6,8 @@ import com.sk89q.worldguard.protection.flags.StateFlag.State;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import dev.slne.protect.bukkit.BukkitMain;
-import dev.slne.protect.bukkit.gui.ProtectionGui;
 import dev.slne.protect.bukkit.gui.protection.flags.ProtectionFlagsGui;
 import dev.slne.protect.bukkit.gui.protection.members.ProtectionMembersGui;
-import dev.slne.protect.bukkit.gui.utils.ConfirmationGui;
-import dev.slne.protect.bukkit.gui.utils.ItemUtils;
 import dev.slne.protect.bukkit.message.MessageManager;
 import dev.slne.protect.bukkit.region.ProtectionRegion;
 import dev.slne.protect.bukkit.region.ProtectionUtils;
@@ -18,6 +15,10 @@ import dev.slne.protect.bukkit.region.flags.ProtectionFlags;
 import dev.slne.protect.bukkit.region.info.RegionInfo;
 import dev.slne.protect.bukkit.region.transaction.ProtectionSellData;
 import dev.slne.protect.bukkit.user.ProtectionUser;
+import dev.slne.surf.gui.api.SurfGui;
+import dev.slne.surf.gui.api.chest.SurfChestGui;
+import dev.slne.surf.gui.api.confirmation.ConfirmationGui;
+import dev.slne.surf.gui.api.utils.ItemUtils;
 import dev.slne.transaction.core.currency.Currency;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -33,7 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public class ProtectionShowGui extends ProtectionGui {
+public class ProtectionShowGui extends SurfChestGui {
 
     private final ProtectedRegion region;
     private final long area;
@@ -51,9 +52,9 @@ public class ProtectionShowGui extends ProtectionGui {
      * @param viewingPlayer The viewing player
      */
     @SuppressWarnings("java:S2589")
-    public ProtectionShowGui(ProtectionGui parentGui, ProtectedRegion region, long area, double distance,
+    public ProtectionShowGui(SurfGui parentGui, ProtectedRegion region, long area, double distance,
                              RegionInfo regionInfo, Player viewingPlayer) {
-        super(parentGui, 5, regionInfo.getName(), viewingPlayer);
+        super(parentGui, 5, Component.text(regionInfo.getName()), viewingPlayer);
 
         this.regionInfo = regionInfo;
         this.region = region;
@@ -286,7 +287,7 @@ public class ProtectionShowGui extends ProtectionGui {
             Player player = (Player) event.getWhoClicked();
             player.closeInventory();
 
-            ConfirmationGui confirmationGui = new ConfirmationGui(this, confirmEvent -> {
+            ConfirmationGui confirmationGui = new ConfirmationGui(this, getViewingPlayer(), confirmEvent -> {
                 ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
                 ProtectionRegion protectionRegion = new ProtectionRegion(protectionUser, regionInfo.getRegion());
 
@@ -361,7 +362,7 @@ public class ProtectionShowGui extends ProtectionGui {
             confirmLore.add(Component.text("Das Grundstück wird dir für einen Anteil des Kaufpreises erstattet.",
                     NamedTextColor.GRAY));
 
-            ConfirmationGui confirmationGui = new ConfirmationGui(this, confirmEvent -> {
+            ConfirmationGui confirmationGui = new ConfirmationGui(this, getViewingPlayer(), confirmEvent -> {
                 ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
 
                 ProtectedRegion protectedRegion = regionInfo.getRegion();
@@ -417,10 +418,8 @@ public class ProtectionShowGui extends ProtectionGui {
                 }.runTask(BukkitMain.getInstance());
 
                 protectionUser.sendMessage(MessageManager.getProtectionSoldComponent(refund, currency));
-            }, clickEvent -> {
-                new ProtectionShowGui(this, region, area, distance, regionInfo, getViewingPlayer()).show(
-                        getViewingPlayer());
-            }, Component.text("Grundstück löschen?", MessageManager.PRIMARY), confirmLore);
+            }, clickEvent -> new ProtectionShowGui(this, region, area, distance, regionInfo, getViewingPlayer()).show(
+                    getViewingPlayer()), Component.text("Grundstück löschen?", MessageManager.PRIMARY), confirmLore);
 
             confirmationGui.show(player);
         });

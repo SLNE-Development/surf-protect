@@ -8,20 +8,24 @@ loader: dev.slne.protect.bukkit.BukkitLoader
 main: dev.slne.protect.bukkit.BukkitMain
 
 dependencies:
-    server:
-        CommandAPI:
-            load: BEFORE
-            required: true
-            join-classpath: true
-        SurfData:
-            load: BEFORE
-            required: true
-            join-classpath: true
-        SurfTransaction:
-            load: BEFORE
-            required: true
-            join-classpath: true
-        WorldGuard:
-            load: BEFORE
-            required: true
-            join-classpath: true
+  server:
+    CommandAPI:
+      load: BEFORE
+      required: true
+      join-classpath: true
+    SurfData:
+      load: BEFORE
+      required: true
+      join-classpath: true
+    SurfTransaction:
+      load: BEFORE
+      required: true
+      join-classpath: true
+    WorldGuard:
+      load: BEFORE
+      required: true
+      join-classpath: true
+    SurfGui:
+      load: BEFORE
+      required: true
+      join-classpath: true

@@ -5,13 +5,14 @@ import com.github.stefvanschie.inventoryframework.pane.PaginatedPane;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import dev.slne.protect.bukkit.BukkitMain;
-import dev.slne.protect.bukkit.gui.PageController;
-import dev.slne.protect.bukkit.gui.ProtectionGui;
 import dev.slne.protect.bukkit.gui.protection.ProtectionShowGui;
-import dev.slne.protect.bukkit.gui.utils.ItemUtils;
 import dev.slne.protect.bukkit.message.MessageManager;
 import dev.slne.protect.bukkit.region.ProtectionUtils;
 import dev.slne.protect.bukkit.region.info.RegionInfo;
+import dev.slne.surf.gui.api.SurfGui;
+import dev.slne.surf.gui.api.chest.SurfChestGui;
+import dev.slne.surf.gui.api.utils.ItemUtils;
+import dev.slne.surf.gui.api.utils.pagination.PageController;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
@@ -26,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-public class ProtectionListGui extends ProtectionGui {
+public class ProtectionListGui extends SurfChestGui {
 
     private final StaticPane navigationPane;
     private final PaginatedPane paginatedPane;
@@ -40,8 +41,8 @@ public class ProtectionListGui extends ProtectionGui {
      * @param viewingPlayer the player viewing the gui
      */
     @SuppressWarnings("java:S3776")
-    public ProtectionListGui(ProtectionGui parent, Map<World, List<ProtectedRegion>> regions, Player viewingPlayer) {
-        super(parent, 5, "Protections - Liste", viewingPlayer);
+    public ProtectionListGui(SurfGui parent, Map<World, List<ProtectedRegion>> regions, Player viewingPlayer) {
+        super(parent, 5, Component.text("Protections - Liste"), viewingPlayer);
 
         paginatedPane = new PaginatedPane(0, 1, 9, 3);
         navigationPane = new StaticPane(0, 4, 9, 1);
@@ -63,8 +64,16 @@ public class ProtectionListGui extends ProtectionGui {
             List<ProtectedRegion> worldRegions = entry.getValue();
 
             for (ProtectedRegion region : worldRegions) {
-                CompletableFuture<List<String>> ownerNamesFuture = ProtectionUtils.getOwnerNames(region);
-                CompletableFuture<List<String>> memberNamesFuture = ProtectionUtils.getMemberNames(region);
+                CompletableFuture<List<String>> ownerNamesFuture =
+                        ProtectionUtils.getOwnerNames(region).exceptionally(exception -> {
+                            exception.printStackTrace();
+                            return null;
+                        });
+                CompletableFuture<List<String>> memberNamesFuture =
+                        ProtectionUtils.getMemberNames(region).exceptionally(exception -> {
+                            exception.printStackTrace();
+                            return null;
+                        });
 
                 CompletableFuture.allOf(ownerNamesFuture, memberNamesFuture).thenAcceptAsync(v -> {
                     List<String> ownersNames = ownerNamesFuture.join();
@@ -133,6 +142,9 @@ public class ProtectionListGui extends ProtectionGui {
                             ProtectionListGui.super.update();
                         }
                     }.runTask(BukkitMain.getInstance());
+                }).exceptionally(exception -> {
+                    exception.printStackTrace();
+                    return null;
                 });
             }
         }

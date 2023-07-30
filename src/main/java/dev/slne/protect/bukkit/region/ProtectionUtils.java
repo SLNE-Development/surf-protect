@@ -357,12 +357,15 @@ public class ProtectionUtils {
             futures.add(ProtectionUserFinder.getPlayerNameByUuid(ownerUuid));
         }
 
-        CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new)).thenAccept(v -> {
+        CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new)).thenAcceptAsync(v -> {
             for (CompletableFuture<String> nameFuture : futures) {
                 ownersNames.add(nameFuture.join());
             }
 
             future.complete(ownersNames);
+        }).exceptionally(exception -> {
+            future.completeExceptionally(exception);
+            return null;
         });
 
         return future;

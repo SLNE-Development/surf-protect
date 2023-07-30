@@ -1,12 +1,12 @@
 package dev.slne.protect.bukkit.listener.listeners;
 
 import dev.slne.protect.bukkit.BukkitMain;
-import dev.slne.protect.bukkit.gui.utils.ItemUtils;
 import dev.slne.protect.bukkit.region.ProtectionRegion;
 import dev.slne.protect.bukkit.region.ProtectionUtils;
 import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
 import dev.slne.protect.bukkit.region.visual.Marker;
 import dev.slne.protect.bukkit.user.ProtectionUser;
+import dev.slne.surf.gui.api.utils.ItemUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
@@ -33,19 +33,24 @@ public class ProtectionHotbarListener implements Listener {
      * The marker {@link ItemStack}
      */
     public static final ItemStack markerItem =
-            ItemUtils.item(Material.REDSTONE_TORCH, ProtectionSettings.MARKERS, 0, Component.text("Marker", NamedTextColor.YELLOW), Component.empty(), Component.text("Platziere die Marker um dein Grundstück" + " zu " + "definieren", NamedTextColor.GRAY), Component.empty());
+            ItemUtils.item(Material.REDSTONE_TORCH, ProtectionSettings.MARKERS, 0,
+                    Component.text("Marker", NamedTextColor.YELLOW), Component.empty(),
+                    Component.text("Platziere die Marker um dein Grundstück" + " zu " + "definieren",
+                            NamedTextColor.GRAY), Component.empty());
 
     /**
      * The {@link ItemStack} to accept the protection
      */
     public static final ItemStack acceptItem =
-            ItemUtils.item(Material.LIME_CONCRETE, 1, 0, Component.text("Kaufen", NamedTextColor.GREEN), Component.empty(), Component.text("Kaufe das Grundstück", NamedTextColor.GRAY), Component.empty());
+            ItemUtils.item(Material.LIME_CONCRETE, 1, 0, Component.text("Kaufen", NamedTextColor.GREEN),
+                    Component.empty(), Component.text("Kaufe das Grundstück", NamedTextColor.GRAY), Component.empty());
 
     /**
      * The {@link ItemStack} to cancel the protection
      */
     public static final ItemStack cancelItem =
-            ItemUtils.item(Material.RED_CONCRETE, 1, 0, Component.text("Abbrechen", NamedTextColor.RED), Component.empty(), Component.text("Bricht den Kauf ab", NamedTextColor.GRAY), Component.empty());
+            ItemUtils.item(Material.RED_CONCRETE, 1, 0, Component.text("Abbrechen", NamedTextColor.RED),
+                    Component.empty(), Component.text("Bricht den Kauf ab", NamedTextColor.GRAY), Component.empty());
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
@@ -189,7 +194,8 @@ public class ProtectionHotbarListener implements Listener {
                     return;
                 }
 
-                location.getBlock().getState().setMetadata(ProtectionSettings.MARKER_KEY, new FixedMetadataValue(BukkitMain.getInstance(), marker));
+                location.getBlock().getState().setMetadata(ProtectionSettings.MARKER_KEY,
+                        new FixedMetadataValue(BukkitMain.getInstance(), marker));
                 setMarkerAmount(protectionUser);
 
                 return;
