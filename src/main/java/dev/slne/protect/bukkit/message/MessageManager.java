@@ -147,8 +147,11 @@ public class MessageManager {
         prefixMessage(user,
                 Component.text("Distanz zum Spawn: ", VARIABLE_KEY).append(Component.text(distanceToSpawn,
                         VARIABLE_VALUE)).append(Component.text(" Blöcke", VARIABLE_VALUE)));
+
+        double roundedEffectiveCost = Math.round(effectiveCost * 100.0) / 100.0;
+        
         prefixMessage(user,
-                Component.text("Kaufpreis: ", VARIABLE_KEY).append(Component.text(effectiveCost, VARIABLE_VALUE))
+                Component.text("Kaufpreis: ", VARIABLE_KEY).append(Component.text(roundedEffectiveCost, VARIABLE_VALUE))
                         .appendSpace().append(currencyDisplayName(currency)));
         emptyLine(user);
     }

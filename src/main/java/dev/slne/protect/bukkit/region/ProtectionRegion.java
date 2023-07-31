@@ -203,6 +203,7 @@ public class ProtectionRegion {
         double distanceToSpawn = teleportLocation.distance(teleportLocation.getWorld().getSpawnLocation());
         double pricePerBlock = ProtectionUtils.getProtectionPricePerBlock(teleportLocation);
         double effectiveCost = this.calculateProtectionPrice(temporaryRegion, pricePerBlock);
+        effectiveCost = Math.round(effectiveCost * 100.0) / 100.0;
         BigDecimal effectiveCostBigDecimal = BigDecimal.valueOf(effectiveCost);
         boolean hasEnoughCurrency =
                 Boolean.TRUE.equals(protectionUser.hasEnoughCurrency(effectiveCostBigDecimal, currency).join());
