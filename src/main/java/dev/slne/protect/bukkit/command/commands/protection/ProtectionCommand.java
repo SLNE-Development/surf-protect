@@ -15,7 +15,7 @@ public class ProtectionCommand extends CommandAPICommand {
 
         withPermission("surf.protect");
 
-        withOptionalArguments(new OfflinePlayerArgument("player"));
+        withOptionalArguments(new OfflinePlayerArgument("player").withPermission("surf.protect.others"));
 
         executesPlayer((player, args) -> {
             final OfflinePlayer target = args.<OfflinePlayer>getOptionalUnchecked("player").orElse(player);
