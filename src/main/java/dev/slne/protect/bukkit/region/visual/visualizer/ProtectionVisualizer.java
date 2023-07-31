@@ -1,18 +1,5 @@
 package dev.slne.protect.bukkit.region.visual.visualizer;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
-import java.util.UUID;
-
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.entity.Player;
-
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
@@ -29,6 +16,19 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import dev.slne.protect.bukkit.BukkitMain;
 import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
 import dev.slne.protect.bukkit.region.visual.visualizer.color.ProtectionVisualizerColor.VisualizerColor;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.entity.Player;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Random;
+import java.util.UUID;
 
 public abstract class ProtectionVisualizer<T extends ProtectedRegion> {
 
@@ -266,27 +266,13 @@ public abstract class ProtectionVisualizer<T extends ProtectedRegion> {
     private int getRandomEntityId() {
         Random random = BukkitMain.getRandom();
         int entityId = random.nextInt(Integer.MAX_VALUE);
+        Collection<Integer> usedEntityIds = new ArrayList<>(this.entityIds.values());
 
-        while (flatMapAllUsedEntityIds().contains(entityId)) {
+        while (usedEntityIds.contains(entityId)) {
             entityId = random.nextInt(Integer.MAX_VALUE);
         }
 
         return entityId;
-    }
-
-    /**
-     * Get all of the used entity ids.
-     *
-     * @return The entity ids.
-     */
-    private List<Integer> flatMapAllUsedEntityIds() {
-        List<Integer> entityIdMap = new ArrayList<>();
-
-        for (Map.Entry<Location, Integer> entityIdMapping : this.entityIds.entrySet()) {
-            entityIdMap.add(entityIdMapping.getValue());
-        }
-
-        return entityIdMap;
     }
 
     /**
