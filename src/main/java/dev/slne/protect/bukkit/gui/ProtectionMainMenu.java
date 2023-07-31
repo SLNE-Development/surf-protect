@@ -91,6 +91,8 @@ public class ProtectionMainMenu extends SurfChestGui {
                         Component.empty(), Component.text("Aktiviert/Deaktiviert den Visualizer", NamedTextColor.GRAY),
                         Component.empty()), event -> {
             Player player = (Player) event.getWhoClicked();
+            player.closeInventory();
+
             List<ProtectedRegion> regions =
                     ProtectionUtils.getRegionManager(player.getWorld()).getRegions().values().stream()
                             .filter(region -> !region.getType().equals(RegionType.GLOBAL)).toList();
@@ -126,8 +128,6 @@ public class ProtectionMainMenu extends SurfChestGui {
                     Component.text("Visualizer " + (state ? "deaktiviert" : "aktiviert"), NamedTextColor.GRAY),
                     Title.Times.times(fadeDuration, stayDuration, fadeDuration)));
             BukkitMain.getBukkitInstance().getProtectionVisualizerState().togglePlayerState(player);
-
-            player.closeInventory();
         });
     }
 
