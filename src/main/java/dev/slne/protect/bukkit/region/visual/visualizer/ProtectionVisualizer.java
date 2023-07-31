@@ -1,5 +1,18 @@
 package dev.slne.protect.bukkit.region.visual.visualizer;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Random;
+import java.util.UUID;
+
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.entity.Player;
+
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
@@ -12,21 +25,10 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEn
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnEntity;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+
 import dev.slne.protect.bukkit.BukkitMain;
 import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
 import dev.slne.protect.bukkit.region.visual.visualizer.color.ProtectionVisualizerColor.VisualizerColor;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.entity.Player;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
-import java.util.UUID;
 
 public abstract class ProtectionVisualizer<T extends ProtectedRegion> {
 
@@ -62,7 +64,7 @@ public abstract class ProtectionVisualizer<T extends ProtectedRegion> {
     /**
      * Applies a protection color to the visualizer using the region owners
      */
-    private synchronized void applyProtectionColor() {
+    private void applyProtectionColor() {
         boolean ownsRegion = this.region.getOwners().contains(this.player.getUniqueId());
 
         if (ownsRegion) {
@@ -75,7 +77,7 @@ public abstract class ProtectionVisualizer<T extends ProtectedRegion> {
     /**
      * Update the visualizer
      */
-    public synchronized void update() {
+    public void update() {
         this.oldLocations = new ArrayList<>(this.locations);
 
         this.locations.clear();
@@ -104,7 +106,7 @@ public abstract class ProtectionVisualizer<T extends ProtectedRegion> {
      *
      * @return the locations
      */
-    private synchronized List<Location> performDistanceCheck() {
+    private List<Location> performDistanceCheck() {
         List<Location> inDistance = new ArrayList<>();
 
         int entityViewDistance = this.calculateEntityDistanceWithViewDistance();
@@ -127,7 +129,7 @@ public abstract class ProtectionVisualizer<T extends ProtectedRegion> {
      *
      * @return the locations
      */
-    private synchronized List<Location> getToRemoveLocations() {
+    private List<Location> getToRemoveLocations() {
         List<Location> toRemove = new ArrayList<>();
 
         for (Location location : this.oldLocations) {
@@ -144,19 +146,19 @@ public abstract class ProtectionVisualizer<T extends ProtectedRegion> {
      *
      * @param entityId The entity id of the visualizer.
      */
-    private synchronized void killVisualizer(Player player, int entityId) {
+    private void killVisualizer(Player player, int entityId) {
         WrapperPlayServerDestroyEntities destroyEntities = new WrapperPlayServerDestroyEntities(entityId);
         PacketEvents.getAPI().getPlayerManager().sendPacket(player, destroyEntities);
 
-        Location location =
-                this.entityIds.keySet().stream().filter(loc -> this.entityIds.get(loc) == entityId).findFirst().orElse(null);
+        Location location = this.entityIds.keySet().stream().filter(loc -> this.entityIds.get(loc) == entityId)
+                .findFirst().orElse(null);
         this.entityIds.remove(location);
     }
 
     /**
      * Visualize a list of locations.
      */
-    private synchronized void visualizeLocations() {
+    private void visualizeLocations() {
         for (Location location : new ArrayList<>(getLocations())) {
             if (!region.contains(BlockVector3.at(location.getBlockX(), location.getBlockY(), location.getBlockZ()))) {
                 continue;
@@ -171,7 +173,7 @@ public abstract class ProtectionVisualizer<T extends ProtectedRegion> {
      *
      * @return The entity distance.
      */
-    private synchronized int calculateEntityDistanceWithViewDistance() {
+    private int calculateEntityDistanceWithViewDistance() {
         int clientViewDistance = getPlayer().getViewDistance();
         int serverViewDistance = Bukkit.getServer().getViewDistance();
 
@@ -209,7 +211,7 @@ public abstract class ProtectionVisualizer<T extends ProtectedRegion> {
      * @param player   the player
      * @param location The location to visualize.
      */
-    private synchronized void visualizeLocation(Player player, Location location) {
+    private void visualizeLocation(Player player, Location location) {
         if (this.entityIds.containsKey(location)) {
             return;
         }
@@ -224,8 +226,8 @@ public abstract class ProtectionVisualizer<T extends ProtectedRegion> {
         int data = 0;
         Vector3d velocity = new Vector3d(0, 0, 0);
 
-        WrapperPlayServerSpawnEntity spawnEntity =
-                new WrapperPlayServerSpawnEntity(entityId, Optional.of(uuid), entityType, position, pitch, yaw, headYaw, data, Optional.of(velocity));
+        WrapperPlayServerSpawnEntity spawnEntity = new WrapperPlayServerSpawnEntity(entityId, Optional.of(uuid),
+                entityType, position, pitch, yaw, headYaw, data, Optional.of(velocity));
 
         List<EntityData> entityData = new ArrayList<>();
         entityData.add(new EntityData(22, EntityDataTypes.BLOCK_STATE, color.getId()));
@@ -252,7 +254,7 @@ public abstract class ProtectionVisualizer<T extends ProtectedRegion> {
      *
      * @return The clamped value.
      */
-    private synchronized int clamp(int value, int min, int max) {
+    private int clamp(int value, int min, int max) {
         return Math.max(min, Math.min(max, value));
     }
 
@@ -261,7 +263,7 @@ public abstract class ProtectionVisualizer<T extends ProtectedRegion> {
      *
      * @return The entity id.
      */
-    private synchronized int getRandomEntityId() {
+    private int getRandomEntityId() {
         Random random = BukkitMain.getRandom();
         int entityId = random.nextInt(Integer.MAX_VALUE);
 
@@ -277,7 +279,7 @@ public abstract class ProtectionVisualizer<T extends ProtectedRegion> {
      *
      * @return The entity ids.
      */
-    private synchronized List<Integer> flatMapAllUsedEntityIds() {
+    private List<Integer> flatMapAllUsedEntityIds() {
         List<Integer> entityIdMap = new ArrayList<>();
 
         for (Map.Entry<Location, Integer> entityIdMapping : this.entityIds.entrySet()) {
@@ -290,7 +292,7 @@ public abstract class ProtectionVisualizer<T extends ProtectedRegion> {
     /**
      * Remove the visualizers
      */
-    public synchronized void remove() {
+    public void remove() {
         for (Map.Entry<Location, Integer> entry : new ArrayList<>(this.entityIds.entrySet())) {
             this.killVisualizer(player, entry.getValue());
         }
