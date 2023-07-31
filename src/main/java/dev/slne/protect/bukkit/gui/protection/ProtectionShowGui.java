@@ -305,8 +305,9 @@ public class ProtectionShowGui extends SurfChestGui {
                 confirmEvent.getWhoClicked().closeInventory();
 
                 if (ProtectionUtils.standsInProtectedRegion(protectionUser.getBukkitPlayer(), regionInfo.getRegion())) {
-                    protectionUser.startRegionCreation(protectionRegion);
-                    protectionRegion.setExpandingMarkers();
+                    if (protectionUser.startRegionCreation(protectionRegion)) {
+                        protectionRegion.setExpandingMarkers();
+                    }
                 } else {
                     protectionUser.sendMessage(MessageManager.prefix()
                             .append(Component.text("Du befindest dich nicht auf dem zu erweiternden Grundstück.",

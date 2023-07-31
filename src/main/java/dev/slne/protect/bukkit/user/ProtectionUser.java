@@ -141,18 +141,18 @@ public class ProtectionUser {
      *
      * @param regionCreation The {@link ProtectionRegion} to create
      */
-    public void startRegionCreation(ProtectionRegion regionCreation) {
+    public boolean startRegionCreation(ProtectionRegion regionCreation) {
         if (this.regionCreation != null) {
             getBukkitPlayer().sendMessage(MessageManager.prefix()
                     .append(Component.text("Du befindest dich bereits im ProtectionMode.", MessageManager.ERROR)));
-            return;
+            return false;
         }
 
         if (getBukkitPlayer().getLocation().getWorld().getName().contains("_nether") ||
                 getBukkitPlayer().getLocation().getWorld().getName().contains("_end")) {
             getBukkitPlayer().sendMessage(MessageManager.prefix()
                     .append(Component.text("Du befindest dich nicht in der Overworld.", MessageManager.ERROR)));
-            return;
+            return false;
         }
 
         int cooldownTime = ProtectionSettings.REGION_CREATION_COOLDOWN;
@@ -169,7 +169,7 @@ public class ProtectionUser {
                         .append(Component.text(time, MessageManager.VARIABLE_VALUE)
                                 .append(Component.text(" Minuten verwenden.", MessageManager.ERROR))).build());
 
-                return;
+                return false;
             }
         }
         creationCooldown.put(getBukkitPlayer().getName(), System.currentTimeMillis());
@@ -187,6 +187,8 @@ public class ProtectionUser {
         getBukkitPlayer().openBook(new ProtectionBook().getBook());
 
         this.regionCreation = regionCreation;
+
+        return true;
     }
 
     /**
