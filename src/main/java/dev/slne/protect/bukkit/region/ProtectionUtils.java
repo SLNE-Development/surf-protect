@@ -297,22 +297,24 @@ public class ProtectionUtils {
      *
      * @return the price per block
      */
-    public static long getProtectionPricePerBlock(Location protectionLocation) {
+    public static double getProtectionPricePerBlock(Location protectionLocation) {
         Location spawnLocation = protectionLocation.getWorld().getSpawnLocation();
 
         spawnLocation.clone().setY(0);
         protectionLocation.clone().setY(0);
 
-        double distanceSquared = protectionLocation.distanceSquared(spawnLocation);
+        double distance = protectionLocation.distance(spawnLocation);
         double pricePerBlock = ProtectionSettings.PRICE_PER_BLOCK;
-        double spawnProtection = Math.pow(ProtectionSettings.PRICE_PER_BLOCK_SPAWN_PROTECTION, 2);
+        double spawnProtection = ProtectionSettings.PRICE_PER_BLOCK_SPAWN_PROTECTION;
 
-        if (distanceSquared < spawnProtection) {
+        if (distance < spawnProtection) {
             return Long.MAX_VALUE;
         }
 
-        double calculation = -0.0016666666667 * distanceSquared + 12.3333333333;
-        return (long) Math.min(pricePerBlock, calculation);
+        double calculation = -0.0016666666667 * distance + 12.3333333333;
+        calculation = Math.round(calculation * 100.0) / 100.0;
+        
+        return Math.max(pricePerBlock, calculation);
     }
 
     /**
