@@ -10,11 +10,10 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ProtectionVisualizerThread extends BukkitRunnable {
 
-    private List<ProtectionVisualizer<?>> visualizers;
+    private final List<ProtectionVisualizer<?>> visualizers;
 
     /**
      * Create a new visualizer thread
@@ -63,14 +62,7 @@ public class ProtectionVisualizerThread extends BukkitRunnable {
      * @param player          the player
      */
     public void addVisualizer(World world, ProtectedRegion protectedRegion, Player player) {
-        /*
-         * if (protectedRegion instanceof ProtectedCuboidRegion cuboidRegion) {
-         * this.addVisualizer(new CuboidProtectionVisualizer(world, cuboidRegion,
-         * player));
-         * } else
-         */ //if (protectedRegion instanceof ProtectedPolygonalRegion polygonalRegion) {
         this.addVisualizer(new PolygonalProtectionVisualizer(world, protectedRegion, player));
-        //}
     }
 
     /**
@@ -95,11 +87,12 @@ public class ProtectionVisualizerThread extends BukkitRunnable {
      * Get all visualizers for a player
      *
      * @param player the player
+     *
      * @return the visualizers
      */
     public List<ProtectionVisualizer<? extends ProtectedRegion>> getVisualizers(Player player) {
-        return new ArrayList<>(this.visualizers.stream().filter(visualizer -> visualizer.getPlayer().equals(player))
-                .collect(Collectors.toList()));
+        return this.visualizers.stream().filter(visualizer -> visualizer.getPlayer().equals(player))
+                .toList();
     }
 
     /**

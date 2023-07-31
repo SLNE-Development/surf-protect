@@ -1,20 +1,19 @@
 package dev.slne.protect.bukkit.region.visual.visualizer;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
+import dev.slne.protect.bukkit.BukkitMain;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-import dev.slne.protect.bukkit.BukkitMain;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class ProtectionVisualizerState implements Listener {
 
-    private Map<UUID, Boolean> playerState;
+    private final Map<UUID, Boolean> playerState;
 
     /**
      * Construct a new protection visualizer state
@@ -34,6 +33,7 @@ public class ProtectionVisualizerState implements Listener {
      * Returns the state of the player
      *
      * @param uuid the uuid of the player
+     *
      * @return the state of the player
      */
     public boolean getPlayerState(UUID uuid) {
@@ -44,6 +44,7 @@ public class ProtectionVisualizerState implements Listener {
      * Returns the state of the player
      *
      * @param player the player
+     *
      * @return the state of the player
      */
     public boolean getPlayerState(Player player) {
