@@ -32,6 +32,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class ProtectionShowGui extends SurfChestGui {
@@ -383,11 +384,11 @@ public class ProtectionShowGui extends SurfChestGui {
                     return;
                 }
 
-                List<String> members = new ArrayList<>();
-                members.addAll(protectedRegion.getOwners().getPlayers());
-                members.addAll(protectedRegion.getMembers().getPlayers());
+                List<UUID> members = new ArrayList<>();
+                members.addAll(protectedRegion.getOwners().getPlayerDomain().getUniqueIds());
+                members.addAll(protectedRegion.getMembers().getPlayerDomain().getUniqueIds());
 
-                for (String member : members) {
+                for (UUID member : members) {
                     Player memberPlayer = Bukkit.getPlayer(member);
 
                     assert memberPlayer != null;
@@ -407,8 +408,14 @@ public class ProtectionShowGui extends SurfChestGui {
                 }
 
                 RegionManager regionManager = ProtectionUtils.getRegionManager(player.getWorld());
-                regionManager.removeRegion(protectedRegion.getId());
 
+                if (!regionManager.hasRegion(protectedRegion.getId())) {
+                    protectionUser.sendMessage(MessageManager.prefix()
+                            .append(Component.text("Das Grundstück existiert nicht mehr!", MessageManager.ERROR)));
+                    return;
+                }
+
+                regionManager.removeRegion(protectedRegion.getId());
                 protectionUser.addTransaction(null, refund, currency, new ProtectionSellData(protectedRegion));
 
                 new BukkitRunnable() {
