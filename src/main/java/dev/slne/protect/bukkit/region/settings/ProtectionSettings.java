@@ -71,7 +71,7 @@ public class ProtectionSettings {
      * The max distance a user is allowed to go from the protection start before
      * being thrown back
      */
-    public static final int MAX_DISTANCE_FROM_PROTECTION_START = 100 * 100;
+    public static final int MAX_DISTANCE_FROM_PROTECTION_START = 150 * 150;
 
     /**
      * The max distance a user is allowed to go from the protection start before
