@@ -33,7 +33,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 public class ProtectionShowGui extends SurfChestGui {
 
@@ -111,28 +110,14 @@ public class ProtectionShowGui extends SurfChestGui {
     @Override
     public void update() {
         if (getViewingPlayer().hasPermission("surf.protect.view.owners")) {
-            getOwnersItem().thenAcceptAsync(item -> {
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        staticPane.addItem(item, 6, 1);
-                        ProtectionShowGui.super.update();
-                    }
-                }.runTask(BukkitMain.getInstance());
-            });
+            staticPane.addItem(getOwnersItem(), 6, 1);
         }
 
         if (getViewingPlayer().hasPermission("surf.protect.view.members")) {
-            getMembersItem().thenAcceptAsync(item -> {
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        staticPane.addItem(item, 7, 1);
-                        ProtectionShowGui.super.update();
-                    }
-                }.runTask(BukkitMain.getInstance());
-            });
+            staticPane.addItem(getMembersItem(), 7, 1);
         }
+
+        ProtectionShowGui.super.update();
     }
 
     /**
@@ -201,21 +186,21 @@ public class ProtectionShowGui extends SurfChestGui {
      *
      * @return The item
      */
-    private CompletableFuture<GuiItem> getOwnersItem() {
-        return ProtectionUtils.getOwnerNames(getRegion()).thenApplyAsync(owners -> {
-            List<Component> lore = new ArrayList<>();
-            lore.add(Component.empty());
-            if (owners.isEmpty()) {
-                lore.add(Component.text("Keine", MessageManager.VARIABLE_VALUE));
-            } else {
-                lore.addAll(ItemUtils.splitComponent(String.join(", ", owners), 50, MessageManager.VARIABLE_VALUE));
-            }
-            lore.add(Component.empty());
+    private GuiItem getOwnersItem() {
+        List<String> ownerNames = ProtectionUtils.getOwnerNames(getRegion());
+        List<Component> lore = new ArrayList<>();
 
-            return new GuiItem(
-                    ItemUtils.item(Material.PLAYER_HEAD, 1, 0, Component.text("Besitzer", MessageManager.PRIMARY),
-                            lore.toArray(Component[]::new)));
-        });
+        lore.add(Component.empty());
+        if (ownerNames.isEmpty()) {
+            lore.add(Component.text("Keine", MessageManager.VARIABLE_VALUE));
+        } else {
+            lore.addAll(ItemUtils.splitComponent(String.join(", ", ownerNames), 50, MessageManager.VARIABLE_VALUE));
+        }
+        lore.add(Component.empty());
+
+        return new GuiItem(
+                ItemUtils.item(Material.PLAYER_HEAD, 1, 0, Component.text("Besitzer", MessageManager.PRIMARY),
+                        lore.toArray(Component[]::new)));
     }
 
     /**
@@ -223,22 +208,22 @@ public class ProtectionShowGui extends SurfChestGui {
      *
      * @return The item
      */
-    private CompletableFuture<GuiItem> getMembersItem() {
-        return ProtectionUtils.getMemberNames(getRegion()).thenApplyAsync(members -> {
-            List<Component> lore = new ArrayList<>();
-            lore.add(Component.empty());
-            if (members.isEmpty()) {
-                lore.add(Component.text("Keine", MessageManager.VARIABLE_VALUE));
-            } else {
-                lore.addAll(ItemUtils.splitComponent(String.join(", ", members), 50, MessageManager.VARIABLE_VALUE));
-            }
-            lore.add(Component.empty());
+    private GuiItem getMembersItem() {
+        List<String> memberNames = ProtectionUtils.getMemberNames(getRegion());
+        List<Component> lore = new ArrayList<>();
 
-            return new GuiItem(ItemUtils.item(Material.PLAYER_HEAD, 1, 0, Component.text("Mitglieder",
-                    MessageManager.PRIMARY), lore.toArray(Component[]::new)), event -> {
-                ProtectionMembersGui membersGui = new ProtectionMembersGui(this, getViewingPlayer(), region);
-                membersGui.show(getViewingPlayer());
-            });
+        lore.add(Component.empty());
+        if (memberNames.isEmpty()) {
+            lore.add(Component.text("Keine", MessageManager.VARIABLE_VALUE));
+        } else {
+            lore.addAll(ItemUtils.splitComponent(String.join(", ", memberNames), 50, MessageManager.VARIABLE_VALUE));
+        }
+        lore.add(Component.empty());
+
+        return new GuiItem(ItemUtils.item(Material.PLAYER_HEAD, 1, 0, Component.text("Mitglieder",
+                MessageManager.PRIMARY), lore.toArray(Component[]::new)), event -> {
+            ProtectionMembersGui membersGui = new ProtectionMembersGui(this, getViewingPlayer(), region);
+            membersGui.show(getViewingPlayer());
         });
     }
 
@@ -419,7 +404,7 @@ public class ProtectionShowGui extends SurfChestGui {
                             getViewingPlayer().closeInventory();
                         }
                     }.runTask(BukkitMain.getInstance());
-                    
+
                     return;
                 }
 
@@ -482,23 +467,5 @@ public class ProtectionShowGui extends SurfChestGui {
      */
     public ProtectedRegion getRegion() {
         return region;
-    }
-
-    /**
-     * Returns the area
-     *
-     * @return the area
-     */
-    public long getArea() {
-        return area;
-    }
-
-    /**
-     * Returns the distance
-     *
-     * @return the distance
-     */
-    public double getDistance() {
-        return distance;
     }
 }

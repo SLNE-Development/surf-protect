@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 /**
@@ -313,7 +312,7 @@ public class ProtectionUtils {
 
         double calculation = -0.0016666666667 * distance + 12.3333333333;
         calculation = Math.round(calculation * 100.0) / 100.0;
-        
+
         return Math.max(pricePerBlock, calculation);
     }
 
@@ -324,24 +323,14 @@ public class ProtectionUtils {
      *
      * @return the member names
      */
-    public static CompletableFuture<List<String>> getMemberNames(ProtectedRegion region) {
+    public static List<String> getMemberNames(ProtectedRegion region) {
         List<String> memberNames = new ArrayList<>();
-        List<CompletableFuture<String>> futures = new ArrayList<>();
-        CompletableFuture<List<String>> future = new CompletableFuture<>();
 
         for (UUID memberUuid : region.getMembers().getPlayerDomain().getUniqueIds()) {
-            futures.add(ProtectionUserFinder.getPlayerNameByUuid(memberUuid));
+            memberNames.add(ProtectionUserFinder.getPlayerNameByUuid(memberUuid));
         }
 
-        CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new)).thenAccept(v -> {
-            for (CompletableFuture<String> nameFuture : futures) {
-                memberNames.add(nameFuture.join());
-            }
-
-            future.complete(memberNames);
-        });
-
-        return future;
+        return memberNames;
     }
 
     /**
@@ -351,26 +340,13 @@ public class ProtectionUtils {
      *
      * @return the owner names
      */
-    public static CompletableFuture<List<String>> getOwnerNames(ProtectedRegion region) {
+    public static List<String> getOwnerNames(ProtectedRegion region) {
         List<String> ownersNames = new ArrayList<>();
-        List<CompletableFuture<String>> futures = new ArrayList<>();
-        CompletableFuture<List<String>> future = new CompletableFuture<>();
 
         for (UUID ownerUuid : region.getOwners().getPlayerDomain().getUniqueIds()) {
-            futures.add(ProtectionUserFinder.getPlayerNameByUuid(ownerUuid));
+            ownersNames.add(ProtectionUserFinder.getPlayerNameByUuid(ownerUuid));
         }
 
-        CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new)).thenAcceptAsync(v -> {
-            for (CompletableFuture<String> nameFuture : futures) {
-                ownersNames.add(nameFuture.join());
-            }
-
-            future.complete(ownersNames);
-        }).exceptionally(exception -> {
-            future.completeExceptionally(exception);
-            return null;
-        });
-
-        return future;
+        return ownersNames;
     }
 }

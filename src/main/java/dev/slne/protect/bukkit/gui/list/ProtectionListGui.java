@@ -4,7 +4,6 @@ import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.pane.PaginatedPane;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-import dev.slne.protect.bukkit.BukkitMain;
 import dev.slne.protect.bukkit.gui.protection.ProtectionShowGui;
 import dev.slne.protect.bukkit.message.MessageManager;
 import dev.slne.protect.bukkit.region.ProtectionUtils;
@@ -19,13 +18,10 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 public class ProtectionListGui extends SurfChestGui {
 
@@ -64,88 +60,65 @@ public class ProtectionListGui extends SurfChestGui {
             List<ProtectedRegion> worldRegions = entry.getValue();
 
             for (ProtectedRegion region : worldRegions) {
-                CompletableFuture<List<String>> ownerNamesFuture =
-                        ProtectionUtils.getOwnerNames(region).exceptionally(exception -> {
-                            exception.printStackTrace();
-                            return null;
-                        });
-                CompletableFuture<List<String>> memberNamesFuture =
-                        ProtectionUtils.getMemberNames(region).exceptionally(exception -> {
-                            exception.printStackTrace();
-                            return null;
-                        });
+                List<String> ownerNames = ProtectionUtils.getOwnerNames(region);
+                List<String> memberNames = ProtectionUtils.getMemberNames(region);
 
-                CompletableFuture.allOf(ownerNamesFuture, memberNamesFuture).thenAcceptAsync(v -> {
-                    List<String> ownersNames = ownerNamesFuture.join();
-                    List<String> membersNames = memberNamesFuture.join();
+                RegionInfo regionInfo = new RegionInfo(world, region);
+                Component none = Component.text("Keine", MessageManager.VARIABLE_VALUE);
 
-                    RegionInfo regionInfo = new RegionInfo(world, region);
-                    Component none = Component.text("Keine", MessageManager.VARIABLE_VALUE);
+                long distance = -1;
+                Location teleportLocation = regionInfo.getTeleportLocation();
+                if (teleportLocation != null) {
+                    distance =
+                            (long) (getViewingPlayer().getWorld().equals(teleportLocation.getWorld()) ?
+                                    getViewingPlayer().getLocation().distance(regionInfo.getTeleportLocation()) :
+                                    -1);
+                }
 
-                    long distance = -1;
-                    Location teleportLocation = regionInfo.getTeleportLocation();
-                    if (teleportLocation != null) {
-                        distance =
-                                (long) (getViewingPlayer().getWorld().equals(teleportLocation.getWorld()) ?
-                                        getViewingPlayer().getLocation().distance(regionInfo.getTeleportLocation()) :
-                                        -1);
-                    }
+                long area = regionInfo.getArea();
 
-                    long area = regionInfo.getArea();
+                List<Component> lore = new ArrayList<>();
+                lore.add(Component.empty());
+                lore.add(Component.text("Entfernung: ", NamedTextColor.GRAY));
+                lore.add(Component.text(distance == -1 ? "Unbekannt" : distance + " Blöcke",
+                        MessageManager.VARIABLE_VALUE));
+                lore.add(Component.empty());
+                lore.add(Component.text("Größe: ", NamedTextColor.GRAY));
+                lore.add(Component.text(area + " Blöcke", MessageManager.VARIABLE_VALUE));
+                lore.add(Component.empty());
 
-                    List<Component> lore = new ArrayList<>();
-                    lore.add(Component.empty());
-                    lore.add(Component.text("Entfernung: ", NamedTextColor.GRAY));
-                    lore.add(Component.text(distance == -1 ? "Unbekannt" : distance + " Blöcke",
+                lore.add(Component.text("Besitzer:", NamedTextColor.GRAY));
+                if (ownerNames.isEmpty()) {
+                    lore.add(none);
+                } else {
+                    lore.addAll(ItemUtils.splitComponent(String.join(", ", ownerNames), 50,
                             MessageManager.VARIABLE_VALUE));
-                    lore.add(Component.empty());
-                    lore.add(Component.text("Größe: ", NamedTextColor.GRAY));
-                    lore.add(Component.text(area + " Blöcke", MessageManager.VARIABLE_VALUE));
-                    lore.add(Component.empty());
+                }
+                lore.add(Component.empty());
 
-                    lore.add(Component.text("Besitzer:", NamedTextColor.GRAY));
-                    if (ownersNames.isEmpty()) {
-                        lore.add(none);
-                    } else {
-                        lore.addAll(ItemUtils.splitComponent(String.join(", ", ownersNames), 50,
-                                MessageManager.VARIABLE_VALUE));
-                    }
-                    lore.add(Component.empty());
+                lore.add(Component.text("Mitglieder:", NamedTextColor.GRAY));
+                if (memberNames.isEmpty()) {
+                    lore.add(none);
+                } else {
+                    lore.addAll(ItemUtils.splitComponent(String.join(", ", memberNames), 50,
+                            MessageManager.VARIABLE_VALUE));
+                }
 
-                    lore.add(Component.text("Mitglieder:", NamedTextColor.GRAY));
-                    if (membersNames.isEmpty()) {
-                        lore.add(none);
-                    } else {
-                        lore.addAll(ItemUtils.splitComponent(String.join(", ", membersNames), 50,
-                                MessageManager.VARIABLE_VALUE));
-                    }
+                lore.add(Component.empty());
 
-                    lore.add(Component.empty());
+                final long finalDistance = distance;
 
-                    final long finalDistance = distance;
+                buttons.add(new GuiItem(
+                        ItemUtils.item(Material.DIRT, 1, 0,
+                                Component.text(regionInfo.getName(), MessageManager.PRIMARY),
+                                lore.toArray(Component[]::new)), event -> {
+                    ProtectionShowGui oneGui =
+                            new ProtectionShowGui(this, region, area, finalDistance,
+                                    regionInfo, getViewingPlayer());
+                    oneGui.show(getViewingPlayer());
+                }));
 
-                    buttons.add(new GuiItem(
-                            ItemUtils.item(Material.DIRT, 1, 0,
-                                    Component.text(regionInfo.getName(), MessageManager.PRIMARY),
-                                    lore.toArray(Component[]::new)), event -> {
-                        ProtectionShowGui oneGui =
-                                new ProtectionShowGui(this, region, area, finalDistance,
-                                        regionInfo, getViewingPlayer());
-                        oneGui.show(getViewingPlayer());
-                    }));
-
-                    new BukkitRunnable() {
-                        @Override
-                        public void run() {
-                            paginatedPane.populateWithGuiItems(buttons);
-                            updateNavigation();
-                            ProtectionListGui.super.update();
-                        }
-                    }.runTask(BukkitMain.getInstance());
-                }).exceptionally(exception -> {
-                    exception.printStackTrace();
-                    return null;
-                });
+                paginatedPane.populateWithGuiItems(buttons);
             }
         }
 
@@ -157,13 +130,12 @@ public class ProtectionListGui extends SurfChestGui {
      * Updates the navigation pane
      */
     private void updateNavigation() {
-        ItemStack backgroundItem = ItemUtils.paneItem();
         navigationPane.addItem(
                 PageController.PREVIOUS.toGuiItem(this, Component.text("Zurück", MessageManager.PRIMARY), paginatedPane,
-                        backgroundItem), 0, 0);
+                        ItemUtils.paneItem()), 0, 0);
         navigationPane.addItem(
                 PageController.NEXT.toGuiItem(this, Component.text("Weiter", MessageManager.PRIMARY), paginatedPane,
-                        backgroundItem), 8, 0);
+                        ItemUtils.paneItem()), 8, 0);
     }
 
     /**

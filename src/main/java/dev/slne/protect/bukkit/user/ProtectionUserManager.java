@@ -9,7 +9,7 @@ import java.util.UUID;
  */
 public class ProtectionUserManager {
 
-    private List<ProtectionUser> users;
+    private final List<ProtectionUser> users;
 
     /**
      * Create a new user manager
@@ -31,6 +31,7 @@ public class ProtectionUserManager {
      * Get a user by their UUID
      *
      * @param uuid The UUID of the user
+     *
      * @return The user
      */
     public ProtectionUser getProtectionUser(UUID uuid) {
