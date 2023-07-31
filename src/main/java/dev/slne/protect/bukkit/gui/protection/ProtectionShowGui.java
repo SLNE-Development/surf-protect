@@ -412,6 +412,14 @@ public class ProtectionShowGui extends SurfChestGui {
                 if (!regionManager.hasRegion(protectedRegion.getId())) {
                     protectionUser.sendMessage(MessageManager.prefix()
                             .append(Component.text("Das Grundstück existiert nicht mehr!", MessageManager.ERROR)));
+
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            getViewingPlayer().closeInventory();
+                        }
+                    }.runTask(BukkitMain.getInstance());
+                    
                     return;
                 }
 
