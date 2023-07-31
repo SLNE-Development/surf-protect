@@ -42,7 +42,7 @@ public class ProtectionMemberAddAnvilGui extends SurfAnvilGui {
 
     @Override
     public List<AnvilRequirement> getRequirements(List<AnvilRequirement> requirements) {
-        requirements.add(new AnvilLengthRequirement(3, 12));
+        requirements.add(new AnvilLengthRequirement(3, 16));
         requirements.add(new AnvilNoSpaceRequirement());
         requirements.add(new AnvilNoSpecialCharacterRequirement("A-Za-z0-9_"));
         requirements.add(new AnvilOfflinePlayerRequirement());
