@@ -149,16 +149,20 @@ public class ProtectionRegion {
         RegionManager manager = ProtectionUtils.getRegionManager(player.getWorld());
         ProtectedRegion region;
 
+        Location teleportLocation = boundingMarkers.get(0).getLocation();
+
         if (this.isExpandingRegion()) {
             region =
-                    new ProtectedPolygonalRegion(expandingProtection.getId(), vectors, ProtectionSettings.MIN_Y_WORLD, ProtectionSettings.MAX_Y_WORLD);
+                    new ProtectedPolygonalRegion(expandingProtection.getId(), vectors, ProtectionSettings.MIN_Y_WORLD,
+                            ProtectionSettings.MAX_Y_WORLD);
             region.copyFrom(expandingProtection);
         } else {
             String name = player.getName() + "-" + RandomStringUtils.randomAlphabetic(5).toUpperCase();
             region =
-                    new ProtectedPolygonalRegion(name, vectors, ProtectionSettings.MIN_Y_WORLD, ProtectionSettings.MAX_Y_WORLD);
+                    new ProtectedPolygonalRegion(name, vectors, ProtectionSettings.MIN_Y_WORLD,
+                            ProtectionSettings.MAX_Y_WORLD);
             region.getOwners().addPlayer(protectionUser.getLocalPlayer());
-            region.setFlag(Flags.TELE_LOC, BukkitAdapter.adapt(boundingMarkers.get(0).getLocation()));
+            region.setFlag(Flags.TELE_LOC, BukkitAdapter.adapt(teleportLocation));
 
             for (ProtectionFlagsMap flagsMap : ProtectionFlagsMap.values()) {
                 region.setFlag(flagsMap.getFlag(), flagsMap.getInitialState());
@@ -196,15 +200,19 @@ public class ProtectionRegion {
             return RegionCreationState.NO_CURRENCY;
         }
 
-        double effectiveCost = this.calculateProtectionPrice(temporaryRegion);
+        double distanceToSpawn = teleportLocation.distance(teleportLocation.getWorld().getSpawnLocation());
+        double pricePerBlock = ProtectionUtils.getProtectionPricePerBlock(teleportLocation);
+        double effectiveCost = this.calculateProtectionPrice(temporaryRegion, pricePerBlock);
         BigDecimal effectiveCostBigDecimal = BigDecimal.valueOf(effectiveCost);
         boolean hasEnoughCurrency =
                 Boolean.TRUE.equals(protectionUser.hasEnoughCurrency(effectiveCostBigDecimal, currency).join());
 
         if (!hasEnoughCurrency) {
-            MessageManager.sendAreaTooExpensiveComponent(protectionUser, area, effectiveCost, currency);
+            MessageManager.sendAreaTooExpensiveComponent(protectionUser, area, effectiveCost, currency, pricePerBlock
+                    , distanceToSpawn);
         } else {
-            MessageManager.sendAreaBuyableComponent(protectionUser, area, effectiveCost, currency);
+            MessageManager.sendAreaBuyableComponent(protectionUser, area, effectiveCost, currency, pricePerBlock,
+                    distanceToSpawn);
         }
 
         this.setTemporaryRegion(temporaryRegion);
@@ -271,12 +279,13 @@ public class ProtectionRegion {
     /**
      * Calculates the price for the given region
      *
-     * @param region the region
+     * @param region        the region
+     * @param pricePerBlock the price per block
      *
      * @return the price
      */
-    protected double calculateProtectionPrice(TemporaryProtectionRegion region) {
-        return region.getEffectiveArea() * ProtectionSettings.PRICE_PER_BLOCK;
+    protected double calculateProtectionPrice(TemporaryProtectionRegion region, double pricePerBlock) {
+        return region.getEffectiveArea() * pricePerBlock;
     }
 
     /**
@@ -320,7 +329,18 @@ public class ProtectionRegion {
             return;
         }
 
-        double effectiveCost = this.calculateProtectionPrice(temporaryRegion);
+
+        com.sk89q.worldedit.util.Location worldeditLocation = temporaryRegion.getRegion().getFlag(Flags.TELE_LOC);
+
+        if (worldeditLocation == null) {
+            protectionUser.sendMessage(MessageManager.getNoTeleportLocationComponent());
+            return;
+        }
+
+        Location teleportLocation = BukkitAdapter.adapt(worldeditLocation);
+        double pricePerBlock = ProtectionUtils.getProtectionPricePerBlock(teleportLocation);
+
+        double effectiveCost = this.calculateProtectionPrice(temporaryRegion, pricePerBlock);
         BigDecimal effectiveCostBigDecimal = BigDecimal.valueOf(-effectiveCost);
 
         Currency currency = Currency.currencyByName("CastCoin");
@@ -331,7 +351,9 @@ public class ProtectionRegion {
         }
 
         TransactionAddResult transactionResult =
-                protectionUser.addTransaction(null, effectiveCostBigDecimal, currency, new ProtectionBuyData(this.startLocation != null ? this.startLocation.getWorld() : null, this.temporaryRegion.getRegion())).join();
+                protectionUser.addTransaction(null, effectiveCostBigDecimal, currency,
+                        new ProtectionBuyData(this.startLocation != null ? this.startLocation.getWorld() : null,
+                                this.temporaryRegion.getRegion())).join();
 
         if (transactionResult != null && transactionResult.equals(TransactionAddResult.SUCCESS)) {
             this.temporaryRegion.protect();

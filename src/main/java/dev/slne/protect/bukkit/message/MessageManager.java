@@ -125,20 +125,31 @@ public class MessageManager {
     /**
      * Sends the area buy header to the user
      *
-     * @param user          The user
-     * @param area          The area
-     * @param effectiveCost The effective cost
-     * @param currency      The currency
+     * @param user            The user
+     * @param area            The area
+     * @param effectiveCost   The effective cost
+     * @param currency        The currency
+     * @param pricePerBlock   The price per block
+     * @param distanceToSpawn The distance to spawn
      */
-    private static void sendAreaBuyHeader(ProtectionUser user, long area, double effectiveCost, Currency currency) {
+    private static void sendAreaBuyHeader(ProtectionUser user, long area, double effectiveCost, Currency currency,
+                                          double pricePerBlock, double distanceToSpawn) {
+        distanceToSpawn = Math.round(distanceToSpawn * 100.0) / 100.0;
+
         emptyLine(user);
         prefixMessage(user, Component.text("Das Grundstück steht zum Verkauf", SUCCESS));
         emptyLine(user);
         prefixMessage(user, Component.text("Fläche: ", VARIABLE_KEY).append(Component.text(area, VARIABLE_VALUE))
                 .append(Component.text(" Blöcke", VARIABLE_VALUE)));
         prefixMessage(user,
+                Component.text("Preis/Block: ", VARIABLE_KEY).append(Component.text(pricePerBlock, VARIABLE_VALUE))
+                        .appendSpace().append(currencyDisplayName(currency)));
+        prefixMessage(user,
+                Component.text("Distanz zum Spawn: ", VARIABLE_KEY).append(Component.text(distanceToSpawn,
+                        VARIABLE_VALUE)).append(Component.text(" Blöcke", VARIABLE_VALUE)));
+        prefixMessage(user,
                 Component.text("Kaufpreis: ", VARIABLE_KEY).append(Component.text(effectiveCost, VARIABLE_VALUE))
-                        .append(currencyDisplayName(currency)));
+                        .appendSpace().append(currencyDisplayName(currency)));
         emptyLine(user);
     }
 
@@ -165,14 +176,16 @@ public class MessageManager {
     /**
      * Sends the user that the region is too expensive
      *
-     * @param user          The user
-     * @param area          The area
-     * @param effectiveCost The effective cost
-     * @param currency      The currency
+     * @param user            The user
+     * @param area            The area
+     * @param effectiveCost   The effective cost
+     * @param currency        The currency
+     * @param pricePerBlock   The price per block
+     * @param distanceToSpawn The distance to spawn
      */
     public static void sendAreaTooExpensiveComponent(ProtectionUser user, long area, double effectiveCost,
-                                                     Currency currency) {
-        sendAreaBuyHeader(user, area, effectiveCost, currency);
+                                                     Currency currency, double pricePerBlock, double distanceToSpawn) {
+        sendAreaBuyHeader(user, area, effectiveCost, currency, pricePerBlock, distanceToSpawn);
 
         prefixMessage(user, getTooExpensiveToBuyComponent());
     }
@@ -180,14 +193,16 @@ public class MessageManager {
     /**
      * Sends the user that he can buy the area
      *
-     * @param user          the user
-     * @param area          the area
-     * @param effectiveCost the effective cost
-     * @param currency      the currency
+     * @param user            the user
+     * @param area            the area
+     * @param effectiveCost   the effective cost
+     * @param currency        the currency
+     * @param pricePerBlock   The price per block
+     * @param distanceToSpawn The distance to spawn
      */
     public static void sendAreaBuyableComponent(ProtectionUser user, long area, double effectiveCost,
-                                                Currency currency) {
-        sendAreaBuyHeader(user, area, effectiveCost, currency);
+                                                Currency currency, double pricePerBlock, double distanceToSpawn) {
+        sendAreaBuyHeader(user, area, effectiveCost, currency, pricePerBlock, distanceToSpawn);
 
         prefixMessage(user, Component.text("Wenn du das Grundstück kaufen möchtest,", INFO));
         prefixMessage(user, Component.text("nutze den Bestätigungsknopf in deiner Hotbar.", INFO));
@@ -463,4 +478,12 @@ public class MessageManager {
                 .append(Component.text(" verkauft.", INFO));
     }
 
+    /**
+     * Returns the compoinent which tells the user that they have used a protection without a teleport point
+     *
+     * @return The component
+     */
+    public static Component getNoTeleportLocationComponent() {
+        return prefix().append(Component.text("Es wurde kein Teleportationspunkt gefunden.", ERROR));
+    }
 }

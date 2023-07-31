@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.widgets import TextBox
+import math
 
 money_per_block = 4
 spawn_protection = 100
@@ -10,21 +11,16 @@ break_point = 1000
 # Values
 xpoints = np.array(range(0, max_protection))
 
-
-def yfunc(x_array, multiplier=5):
+def yfunc(x_array):
     y_array = []
 
     for x in x_array:
         if x < spawn_protection:
             y_array.append(0)
         else:
-            if x > break_point:
-                y_array.append(money_per_block)
-            else:
-                y_array.append(
-                    money_per_block * multiplier - (x / 1000) * money_per_block
-                )
-
+            calc = -0.0016666666667 * x + 12.3333333333
+            y = max(money_per_block, calc)
+            y_array.append(y)
     return y_array
 
 

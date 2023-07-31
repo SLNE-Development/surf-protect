@@ -45,7 +45,7 @@ public class ProtectionSettings {
     /**
      * The minimum y coordinate of a region
      */
-    public static final int MIN_Y_WORLD = - 64;
+    public static final int MIN_Y_WORLD = -64;
 
     /**
      * The maximum y coordinate of a region
@@ -56,11 +56,6 @@ public class ProtectionSettings {
      * The maximum distance a user can go from the to be expanded region
      */
     public static final double MAX_EXPAND_DISTANCE = 20;
-
-    /**
-     * The price the user is paying per block
-     */
-    public static final double PRICE_PER_BLOCK = 6f;
 
     /**
      * The money the user is getting per block when selling
@@ -121,7 +116,12 @@ public class ProtectionSettings {
     /**
      * The price per block breakpoint
      */
-    public static final double PRICE_PER_BLOCK_BREAKPOINT = 100;
+    public static final double PRICE_PER_BLOCK = 4;
+
+    /**
+     * The price per block breakpoint
+     */
+    public static final double PRICE_PER_BLOCK_SPAWN_PROTECTION = 200;
 
     /**
      * A utility class

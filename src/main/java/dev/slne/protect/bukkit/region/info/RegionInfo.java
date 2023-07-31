@@ -1,229 +1,229 @@
 package dev.slne.protect.bukkit.region.info;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
-import javax.annotation.Nullable;
-
-import org.bukkit.Location;
-import org.bukkit.World;
-
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.math.BlockVector2;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.domains.DefaultDomain;
 import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-
 import dev.slne.protect.bukkit.region.ProtectionUtils;
 import dev.slne.protect.bukkit.region.flags.ProtectionFlags;
 import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
 import dev.slne.protect.bukkit.user.ProtectionUserFinder;
+import org.bukkit.Location;
+import org.bukkit.World;
+
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * Represents the info of a region
  */
 public class RegionInfo {
 
-	private World world;
-	private ProtectionFlagInfo info;
-	private final ProtectedRegion region;
+    private final ProtectedRegion region;
+    private final World world;
+    private ProtectionFlagInfo info;
+    private List<LocalPlayer> owners;
+    private List<LocalPlayer> members;
 
-	private List<LocalPlayer> owners;
-	private List<LocalPlayer> members;
+    /**
+     * Construct a new region info
+     * <p>
+     * Also fetches the surf protect flag from the region
+     *
+     * @param region The region
+     */
+    public RegionInfo(World world, ProtectedRegion region) {
+        this.region = region;
+        this.info = region.getFlag(ProtectionFlags.SURF_PROTECT_FLAG);
+        this.world = world;
 
-	/**
-	 * Construct a new region info
-	 *
-	 * Also fetches the surf protect flag from the region
-	 *
-	 * @param region The region
-	 */
-	public RegionInfo(World world, ProtectedRegion region) {
-		this.region = region;
-		this.info = region.getFlag(ProtectionFlags.SURF_PROTECT_FLAG);
-		this.world = world;
+        if (this.info == null) {
+            this.info = setProtectionInfoToRegion(new ProtectionFlagInfo(this.region.getId()));
+        }
 
-		if (this.info == null) {
-			this.info = setProtectionInfoToRegion(new ProtectionFlagInfo(this.region.getId()));
-		}
+        fetchAllPlayers();
+    }
 
-		fetchAllPlayers();
-	}
+    /**
+     * Fetches all players from the region
+     */
+    public void fetchAllPlayers() {
+        this.owners = fetchPlayers(region.getOwners());
+        this.members = fetchPlayers(region.getMembers());
+    }
 
-	/**
-	 * Fetches all players from the region
-	 */
-	public void fetchAllPlayers() {
-		this.owners = fetchPlayers(region.getOwners());
-		this.members = fetchPlayers(region.getMembers());
-	}
+    /**
+     * Gets the area of the region
+     *
+     * @return The area
+     */
+    public long getArea() {
+        return ProtectionUtils.getArea(this.region);
+    }
 
-	/**
-	 * Gets the area of the region
-	 *
-	 * @return The area
-	 */
-	public long getArea() {
-		return ProtectionUtils.getArea(this.region);
-	}
+    /**
+     * Gets the price of the region
+     *
+     * @return The price
+     */
+    public double getPrice() {
+        BlockVector2 smallestDistance = getSmallestDistance(region.getPoints());
 
-	/**
-	 * Gets the price of the region
-	 *
-	 * @return The price
-	 */
-	public double getPrice() {
-		BlockVector2 smallestDistance = getSmallestDistance(region.getPoints());
+        com.sk89q.worldedit.util.Location worldeditLocation = region.getFlag(Flags.TELE_LOC);
 
-		if (smallestDistance == null) {
-			return ProtectionSettings.PRICE_PER_BLOCK;
-		}
+        if (worldeditLocation == null) {
+            return Double.MAX_VALUE;
+        }
 
-		Location smallestDistanceLocation = new Location(world, smallestDistance.getX(),
-				world.getHighestBlockYAt(smallestDistance.getBlockX(), smallestDistance.getBlockZ()),
-				smallestDistance.getZ());
+        Location teleportLocation = BukkitAdapter.adapt(worldeditLocation);
+        double pricePerBlock = ProtectionUtils.getProtectionPricePerBlock(teleportLocation);
 
-		return (double) getArea() * ProtectionUtils.getProtectionPricePerBlock(smallestDistanceLocation);
-	}
+        return (double) getArea() * pricePerBlock;
+    }
 
-	/**
-	 * Gets the smallest distance from the spawn
-	 *
-	 * @param points The points
-	 * @return The smallest distance
-	 */
-	private BlockVector2 getSmallestDistance(List<BlockVector2> points) {
-		BlockVector2 smallestDistance = null;
-		BlockVector2 spawnPoint = BukkitAdapter.asBlockVector(world.getSpawnLocation()).toBlockVector2();
+    /**
+     * Gets the smallest distance from the spawn
+     *
+     * @param points The points
+     *
+     * @return The smallest distance
+     */
+    private BlockVector2 getSmallestDistance(List<BlockVector2> points) {
+        BlockVector2 smallestDistance = null;
+        BlockVector2 spawnPoint = BukkitAdapter.asBlockVector(world.getSpawnLocation()).toBlockVector2();
 
-		for (BlockVector2 point : points) {
-			if (smallestDistance == null) {
-				smallestDistance = point;
-				continue;
-			}
+        for (BlockVector2 point : points) {
+            if (smallestDistance == null) {
+                smallestDistance = point;
+                continue;
+            }
 
-			if (point.distanceSq(spawnPoint) < smallestDistance.distanceSq(spawnPoint)) {
-				smallestDistance = point;
-			}
-		}
+            if (point.distanceSq(spawnPoint) < smallestDistance.distanceSq(spawnPoint)) {
+                smallestDistance = point;
+            }
+        }
 
-		return smallestDistance;
-	}
+        return smallestDistance;
+    }
 
-	/**
-	 * Gets the retail price
-	 *
-	 * @return The retail price
-	 */
-	public double getRetailPrice() {
-		return getPrice() * ProtectionSettings.RETAIL_MODIFIER;
-	}
+    /**
+     * Gets the retail price
+     *
+     * @return The retail price
+     */
+    public double getRetailPrice() {
+        return getPrice() * ProtectionSettings.RETAIL_MODIFIER;
+    }
 
-	/**
-	 * Gets the name of the region
-	 *
-	 * If the protection flag info is set the name of the flag is used, otherwise
-	 * its the id of the region
-	 *
-	 * @return The name
-	 */
-	public String getName() {
-		return this.info != null ? this.info.getName() : this.region.getId();
-	}
+    /**
+     * Gets the name of the region
+     * <p>
+     * If the protection flag info is set the name of the flag is used, otherwise
+     * its the id of the region
+     *
+     * @return The name
+     */
+    public String getName() {
+        return this.info != null ? this.info.getName() : this.region.getId();
+    }
 
-	/**
-	 * Gets the protection flag info
-	 *
-	 * @return The info
-	 */
-	public ProtectionFlagInfo getProtectionFlagInfo() {
-		return info;
-	}
+    /**
+     * Gets the protection flag info
+     *
+     * @return The info
+     */
+    public ProtectionFlagInfo getProtectionFlagInfo() {
+        return info;
+    }
 
-	/**
-	 * Sets the protection flag info to the region
-	 *
-	 * @param info The info
-	 * @return The protection flag info
-	 */
-	public ProtectionFlagInfo setProtectionInfoToRegion(ProtectionFlagInfo info) {
-		this.info = info;
-		this.region.setFlag(ProtectionFlags.SURF_PROTECT_FLAG, this.info);
+    /**
+     * Sets the protection flag info to the region
+     *
+     * @param info The info
+     *
+     * @return The protection flag info
+     */
+    public ProtectionFlagInfo setProtectionInfoToRegion(ProtectionFlagInfo info) {
+        this.info = info;
+        this.region.setFlag(ProtectionFlags.SURF_PROTECT_FLAG, this.info);
 
-		return this.info;
-	}
+        return this.info;
+    }
 
-	/**
-	 * Gets the teleport location
-	 *
-	 * @return The teleport location
-	 */
-	public @Nullable Location getTeleportLocation() {
-		com.sk89q.worldedit.util.Location teleportState = region.getFlag(Flags.TELE_LOC);
+    /**
+     * Gets the teleport location
+     *
+     * @return The teleport location
+     */
+    public @Nullable Location getTeleportLocation() {
+        com.sk89q.worldedit.util.Location teleportState = region.getFlag(Flags.TELE_LOC);
 
-		if (teleportState == null) {
-			return null;
-		}
+        if (teleportState == null) {
+            return null;
+        }
 
-		return BukkitAdapter.adapt(teleportState);
-	}
+        return BukkitAdapter.adapt(teleportState);
+    }
 
-	/**
-	 * Fetches all players from the given domain
-	 *
-	 * @param domain The domain
-	 * @return The players
-	 */
-	public List<LocalPlayer> fetchPlayers(DefaultDomain domain) {
-		List<LocalPlayer> localPlayers = new ArrayList<>();
-		Set<UUID> uuids = domain.getUniqueIds();
+    /**
+     * Fetches all players from the given domain
+     *
+     * @param domain The domain
+     *
+     * @return The players
+     */
+    public List<LocalPlayer> fetchPlayers(DefaultDomain domain) {
+        List<LocalPlayer> localPlayers = new ArrayList<>();
+        Set<UUID> uuids = domain.getUniqueIds();
 
-		for (UUID uuid : uuids) {
-			LocalPlayer localPlayer = ProtectionUserFinder.findLocalPlayer(uuid);
+        for (UUID uuid : uuids) {
+            LocalPlayer localPlayer = ProtectionUserFinder.findLocalPlayer(uuid);
 
-			if (localPlayer != null) {
-				localPlayers.add(localPlayer);
-			}
-		}
+            if (localPlayer != null) {
+                localPlayers.add(localPlayer);
+            }
+        }
 
-		return localPlayers;
-	}
+        return localPlayers;
+    }
 
-	/**
-	 * Gets the region
-	 *
-	 * @return The region
-	 */
-	public ProtectedRegion getRegion() {
-		return region;
-	}
+    /**
+     * Gets the region
+     *
+     * @return The region
+     */
+    public ProtectedRegion getRegion() {
+        return region;
+    }
 
-	/**
-	 * Gets the members of this region
-	 *
-	 * @return The members
-	 */
-	public List<LocalPlayer> getMembers() {
-		return members;
-	}
+    /**
+     * Gets the members of this region
+     *
+     * @return The members
+     */
+    public List<LocalPlayer> getMembers() {
+        return members;
+    }
 
-	/**
-	 * Gets the owners of this region
-	 *
-	 * @return The owners
-	 */
-	public List<LocalPlayer> getOwners() {
-		return owners;
-	}
+    /**
+     * Gets the owners of this region
+     *
+     * @return The owners
+     */
+    public List<LocalPlayer> getOwners() {
+        return owners;
+    }
 
-	/**
-	 * @return the world
-	 */
-	public World getWorld() {
-		return world;
-	}
+    /**
+     * @return the world
+     */
+    public World getWorld() {
+        return world;
+    }
 
 }
