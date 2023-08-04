@@ -1,14 +1,5 @@
 package dev.slne.protect.bukkit.listener.listeners;
 
-import dev.slne.protect.bukkit.BukkitMain;
-import dev.slne.protect.bukkit.region.ProtectionRegion;
-import dev.slne.protect.bukkit.region.ProtectionUtils;
-import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
-import dev.slne.protect.bukkit.region.visual.Marker;
-import dev.slne.protect.bukkit.user.ProtectionUser;
-import dev.slne.surf.gui.api.utils.ItemUtils;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -18,39 +9,52 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockFromToEvent;
-import org.bukkit.event.block.BlockPhysicsEvent;
+import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.util.Vector;
+
+import com.destroystokyo.paper.event.block.BlockDestroyEvent;
+
+import dev.slne.protect.bukkit.BukkitMain;
+import dev.slne.protect.bukkit.region.ProtectionRegion;
+import dev.slne.protect.bukkit.region.ProtectionUtils;
+import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
+import dev.slne.protect.bukkit.region.visual.Marker;
+import dev.slne.protect.bukkit.user.ProtectionUser;
+import dev.slne.surf.gui.api.utils.ItemUtils;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 public class ProtectionHotbarListener implements Listener {
 
     /**
      * The marker {@link ItemStack}
      */
-    public static final ItemStack markerItem =
-            ItemUtils.item(Material.REDSTONE_TORCH, ProtectionSettings.MARKERS, 0,
-                    Component.text("Marker", NamedTextColor.YELLOW), Component.empty(),
-                    Component.text("Platziere die Marker um dein Grundstück" + " zu " + "definieren",
-                            NamedTextColor.GRAY), Component.empty());
+    public static final ItemStack markerItem = ItemUtils.item(Material.REDSTONE_TORCH, ProtectionSettings.MARKERS, 0,
+            Component.text("Marker", NamedTextColor.YELLOW), Component.empty(),
+            Component.text("Platziere die Marker um dein Grundstück" + " zu " + "definieren",
+                    NamedTextColor.GRAY),
+            Component.empty());
 
     /**
      * The {@link ItemStack} to accept the protection
      */
-    public static final ItemStack acceptItem =
-            ItemUtils.item(Material.LIME_CONCRETE, 1, 0, Component.text("Kaufen", NamedTextColor.GREEN),
-                    Component.empty(), Component.text("Kaufe das Grundstück", NamedTextColor.GRAY), Component.empty());
+    public static final ItemStack acceptItem = ItemUtils.item(Material.LIME_CONCRETE, 1, 0,
+            Component.text("Kaufen", NamedTextColor.GREEN),
+            Component.empty(), Component.text("Kaufe das Grundstück", NamedTextColor.GRAY), Component.empty());
 
     /**
      * The {@link ItemStack} to cancel the protection
      */
-    public static final ItemStack cancelItem =
-            ItemUtils.item(Material.RED_CONCRETE, 1, 0, Component.text("Abbrechen", NamedTextColor.RED),
-                    Component.empty(), Component.text("Bricht den Kauf ab", NamedTextColor.GRAY), Component.empty());
+    public static final ItemStack cancelItem = ItemUtils.item(Material.RED_CONCRETE, 1, 0,
+            Component.text("Abbrechen", NamedTextColor.RED),
+            Component.empty(), Component.text("Bricht den Kauf ab", NamedTextColor.GRAY), Component.empty());
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
@@ -91,7 +95,7 @@ public class ProtectionHotbarListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onMarkerBreak(BlockBreakEvent event) {
         Block block = event.getBlock();
         Player player = event.getPlayer();
@@ -135,7 +139,7 @@ public class ProtectionHotbarListener implements Listener {
         protectionUser.getBukkitPlayer().getInventory().setItem(0, newMarkerItem);
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onBlockToFrom(BlockFromToEvent event) {
         Block block = event.getToBlock();
 
@@ -145,18 +149,15 @@ public class ProtectionHotbarListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onMarkerPhysics(BlockPhysicsEvent event) {
-        Location root = event.getBlock().getLocation();
+    public void onMarkerDestroy(BlockDestroyEvent event) {
+        if (event.getBlock().getState().hasMetadata(ProtectionSettings.MARKER_KEY)) {
+            event.setCancelled(true);
+        }
+    }
 
-        for (Vector vector : new Vector[] { new Vector(0, 1, 0), // up
-                new Vector(1, 0, 0), // north
-                new Vector(0, 0, 1), // east
-                new Vector(-1, 0, 0), // south
-                new Vector(0, 0, -1) // west
-        }) {
-            Location location = root.clone().add(vector);
-            Block block = location.getBlock();
-
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPistonBreakMarker(BlockPistonExtendEvent event) {
+        for (Block block : event.getBlocks()) {
             if (block.getState().hasMetadata(ProtectionSettings.MARKER_KEY)) {
                 event.setCancelled(true);
                 return;
@@ -164,7 +165,17 @@ public class ProtectionHotbarListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onMarkerEntityExplode(EntityExplodeEvent event) {
+        event.blockList().removeIf(block -> block.getState().hasMetadata(ProtectionSettings.MARKER_KEY));
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onMarkerBlockExplode(BlockExplodeEvent event) {
+        event.blockList().removeIf(block -> block.getState().hasMetadata(ProtectionSettings.MARKER_KEY));
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onMarkerPlace(BlockPlaceEvent event) {
         Block block = event.getBlock();
         Location location = block.getLocation();
