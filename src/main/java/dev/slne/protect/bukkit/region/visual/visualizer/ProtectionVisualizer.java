@@ -111,7 +111,7 @@ public abstract class ProtectionVisualizer<T extends ProtectedRegion> {
 
         int entityViewDistance = this.calculateEntityDistanceWithViewDistance();
 
-        for (Location location : this.locations) {
+        for (Location location : new ArrayList<>(this.locations)) {
             if (!location.getWorld().equals(this.getPlayer().getLocation().getWorld())) {
                 continue;
             }
