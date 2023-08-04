@@ -1,10 +1,23 @@
 package dev.slne.protect.bukkit.gui.protection;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.scheduler.BukkitRunnable;
+
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
 import com.sk89q.worldguard.protection.flags.StateFlag.State;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+
 import dev.slne.protect.bukkit.BukkitMain;
 import dev.slne.protect.bukkit.gui.protection.flags.ProtectionFlagsGui;
 import dev.slne.protect.bukkit.gui.protection.members.ProtectionMembersGui;
@@ -22,17 +35,6 @@ import dev.slne.surf.gui.api.utils.ItemUtils;
 import dev.slne.transaction.core.currency.Currency;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.scheduler.BukkitRunnable;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 public class ProtectionShowGui extends SurfChestGui {
 
@@ -53,7 +55,7 @@ public class ProtectionShowGui extends SurfChestGui {
      */
     @SuppressWarnings("java:S2589")
     public ProtectionShowGui(SurfGui parentGui, ProtectedRegion region, long area, double distance,
-                             RegionInfo regionInfo, Player viewingPlayer) {
+            RegionInfo regionInfo, Player viewingPlayer) {
         super(parentGui, 5, Component.text(regionInfo.getName()), viewingPlayer);
 
         this.regionInfo = regionInfo;
@@ -63,9 +65,8 @@ public class ProtectionShowGui extends SurfChestGui {
 
         Location teleportLocation = regionInfo.getTeleportLocation();
 
-        GuiItem regionNameItem =
-                new GuiItem(ItemUtils.item(Material.NAME_TAG, 1, 0,
-                        Component.text(regionInfo.getName(), MessageManager.PRIMARY)));
+        GuiItem regionNameItem = new GuiItem(ItemUtils.item(Material.NAME_TAG, 1, 0,
+                Component.text(regionInfo.getName(), MessageManager.PRIMARY)));
 
         staticPane = new StaticPane(0, 0, 9, 5);
 
@@ -222,9 +223,9 @@ public class ProtectionShowGui extends SurfChestGui {
 
         return new GuiItem(ItemUtils.item(Material.PLAYER_HEAD, 1, 0, Component.text("Mitglieder",
                 MessageManager.PRIMARY), lore.toArray(Component[]::new)), event -> {
-            ProtectionMembersGui membersGui = new ProtectionMembersGui(this, getViewingPlayer(), region);
-            membersGui.show(getViewingPlayer());
-        });
+                    ProtectionMembersGui membersGui = new ProtectionMembersGui(this, getViewingPlayer(), region);
+                    membersGui.show(getViewingPlayer());
+                });
     }
 
     /**
@@ -244,10 +245,11 @@ public class ProtectionShowGui extends SurfChestGui {
 
         return new GuiItem(
                 ItemUtils.item(Material.ENDER_PEARL, 1, 0, Component.text("Teleportieren", MessageManager.PRIMARY),
-                        lore.toArray(Component[]::new)), event -> {
-            event.getWhoClicked().closeInventory();
-            event.getWhoClicked().teleportAsync(location);
-        });
+                        lore.toArray(Component[]::new)),
+                event -> {
+                    event.getWhoClicked().closeInventory();
+                    event.getWhoClicked().teleportAsync(location);
+                });
     }
 
     /**
@@ -269,46 +271,50 @@ public class ProtectionShowGui extends SurfChestGui {
         return new GuiItem(
                 ItemUtils.item(Material.GRASS_BLOCK, 1, 0,
                         Component.text("Grundstück erweitern", MessageManager.PRIMARY),
-                        lore.toArray(Component[]::new)), event -> {
-            Player player = (Player) event.getWhoClicked();
-            player.closeInventory();
+                        lore.toArray(Component[]::new)),
+                event -> {
+                    Player player = (Player) event.getWhoClicked();
+                    player.closeInventory();
 
-            ConfirmationGui confirmationGui = new ConfirmationGui(this, getViewingPlayer(), confirmEvent -> {
-                ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
-                ProtectionRegion protectionRegion = new ProtectionRegion(protectionUser, regionInfo.getRegion());
+                    ConfirmationGui confirmationGui = new ConfirmationGui(this, getViewingPlayer(), confirmEvent -> {
+                        ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
+                        ProtectionRegion protectionRegion = new ProtectionRegion(protectionUser,
+                                regionInfo.getRegion());
 
-                ProtectedRegion protectedRegion = regionInfo.getRegion();
-                State canSellState = protectedRegion.getFlag(ProtectionFlags.SURF_CAN_SELL_FLAG);
-                boolean canExpand = canSellState == State.ALLOW || canSellState == null;
+                        ProtectedRegion protectedRegion = regionInfo.getRegion();
+                        State canSellState = protectedRegion.getFlag(ProtectionFlags.SURF_CAN_SELL_FLAG);
+                        boolean canExpand = canSellState == State.ALLOW || canSellState == null;
 
-                if (!canExpand) {
-                    protectionUser.sendMessage(MessageManager.prefix()
-                            .append(Component.text("Das Grundstück darf nicht erweitert werden.",
-                                    MessageManager.ERROR)));
-                    return;
-                }
+                        if (!canExpand) {
+                            protectionUser.sendMessage(MessageManager.prefix()
+                                    .append(Component.text("Das Grundstück darf nicht erweitert werden.",
+                                            MessageManager.ERROR)));
+                            return;
+                        }
 
-                confirmEvent.getWhoClicked().closeInventory();
+                        confirmEvent.getWhoClicked().closeInventory();
 
-                if (ProtectionUtils.standsInProtectedRegion(protectionUser.getBukkitPlayer(), regionInfo.getRegion())) {
-                    if (protectionUser.startRegionCreation(protectionRegion)) {
-                        protectionRegion.setExpandingMarkers();
-                    }
-                } else {
-                    protectionUser.sendMessage(MessageManager.prefix()
-                            .append(Component.text("Du befindest dich nicht auf dem zu erweiternden Grundstück.",
-                                    MessageManager.ERROR)));
-                }
-            }, cancelEvent -> {
-                if (!(cancelEvent instanceof InventoryCloseEvent closeEvent && closeEvent.getReason().equals(
-                        InventoryCloseEvent.Reason.PLUGIN))) {
-                    new ProtectionShowGui(this, region, area, distance, regionInfo, getViewingPlayer()).show(
-                            getViewingPlayer());
-                }
-            }, Component.text("Grundstück erweitern", MessageManager.PRIMARY), confirmLore);
+                        if (ProtectionUtils.standsInProtectedRegion(protectionUser.getBukkitPlayer(),
+                                regionInfo.getRegion())) {
+                            if (protectionUser.startRegionCreation(protectionRegion)) {
+                                protectionRegion.setExpandingMarkers();
+                            }
+                        } else {
+                            protectionUser.sendMessage(MessageManager.prefix()
+                                    .append(Component.text(
+                                            "Du befindest dich nicht auf dem zu erweiternden Grundstück.",
+                                            MessageManager.ERROR)));
+                        }
+                    }, cancelEvent -> {
+                        if (!(cancelEvent instanceof InventoryCloseEvent closeEvent && closeEvent.getReason().equals(
+                                InventoryCloseEvent.Reason.PLUGIN))) {
+                            new ProtectionShowGui(this, region, area, distance, regionInfo, getViewingPlayer()).show(
+                                    getViewingPlayer());
+                        }
+                    }, Component.text("Grundstück erweitern", MessageManager.PRIMARY), confirmLore);
 
-            confirmationGui.show(player);
-        });
+                    confirmationGui.show(player);
+                });
     }
 
     /**
@@ -336,94 +342,99 @@ public class ProtectionShowGui extends SurfChestGui {
         return new GuiItem(
                 ItemUtils.item(Material.BEDROCK, 1, 0, Component.text("Grundstück löschen", MessageManager.PRIMARY),
                         Component.empty(), Component.text("Löscht das Grundstück", NamedTextColor.GRAY),
-                        Component.empty()), event -> {
-            Player player = (Player) event.getWhoClicked();
+                        Component.empty()),
+                event -> {
+                    Player player = (Player) event.getWhoClicked();
 
-            List<Component> confirmLore = new ArrayList<>(
-                    ItemUtils.splitComponent("Bist du dir sicher, dass du das Grundstück löschen möchtest?", 50,
+                    List<Component> confirmLore = new ArrayList<>(
+                            ItemUtils.splitComponent("Bist du dir sicher, dass du das Grundstück löschen möchtest?", 50,
+                                    MessageManager.ERROR));
+                    confirmLore.add(Component.empty());
+                    confirmLore.add(Component.text("Achtung: Das Grundstück kann nicht wiederhergestellt werden!",
                             MessageManager.ERROR));
-            confirmLore.add(Component.empty());
-            confirmLore.add(Component.text("Achtung: Das Grundstück kann nicht wiederhergestellt werden!",
-                    MessageManager.ERROR));
-            confirmLore.add(Component.empty());
-            confirmLore.add(Component.text("Das Grundstück wird dir für einen Anteil des Kaufpreises erstattet.",
-                    NamedTextColor.GRAY));
+                    confirmLore.add(Component.empty());
+                    confirmLore
+                            .add(Component.text("Das Grundstück wird dir für einen Anteil des Kaufpreises erstattet.",
+                                    NamedTextColor.GRAY));
 
-            ConfirmationGui confirmationGui = new ConfirmationGui(this, getViewingPlayer(), confirmEvent -> {
-                ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
+                    ConfirmationGui confirmationGui = new ConfirmationGui(this, getViewingPlayer(), confirmEvent -> {
+                        ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
 
-                ProtectedRegion protectedRegion = regionInfo.getRegion();
-                State canSellState = protectedRegion.getFlag(ProtectionFlags.SURF_CAN_SELL_FLAG);
-                boolean canSell = canSellState == State.ALLOW || canSellState == null;
+                        ProtectedRegion protectedRegion = regionInfo.getRegion();
+                        State canSellState = protectedRegion.getFlag(ProtectionFlags.SURF_CAN_SELL_FLAG);
+                        boolean canSell = canSellState == State.ALLOW || canSellState == null;
 
-                if (!canSell) {
-                    protectionUser.sendMessage(MessageManager.prefix()
-                            .append(Component.text("Das Grundstück darf nicht verkauft werden.",
-                                    MessageManager.ERROR)));
-                    return;
-                }
-
-                if (isRegionEdited()) {
-                    protectionUser.sendMessage(MessageManager.prefix()
-                            .append(Component.text("Das Grundstück wird gerade bearbeitet!", MessageManager.ERROR)));
-                    return;
-                }
-
-                List<UUID> members = new ArrayList<>();
-                members.addAll(protectedRegion.getOwners().getPlayerDomain().getUniqueIds());
-                members.addAll(protectedRegion.getMembers().getPlayerDomain().getUniqueIds());
-
-                for (UUID member : members) {
-                    Player memberPlayer = Bukkit.getPlayer(member);
-
-                    assert memberPlayer != null;
-                    if (!memberPlayer.isOnline()) {
-                        continue;
-                    }
-
-                    notifyDeletion(player, regionInfo);
-                }
-
-                BigDecimal refund = BigDecimal.valueOf(regionInfo.getRetailPrice());
-                Currency currency = Currency.currencyByName("CastCoin");
-
-                if (currency == null) {
-                    protectionUser.sendMessage(MessageManager.getNoCurrencyComponent());
-                    return;
-                }
-
-                RegionManager regionManager = ProtectionUtils.getRegionManager(player.getWorld());
-
-                if (!regionManager.hasRegion(protectedRegion.getId())) {
-                    protectionUser.sendMessage(MessageManager.prefix()
-                            .append(Component.text("Das Grundstück existiert nicht mehr!", MessageManager.ERROR)));
-
-                    new BukkitRunnable() {
-                        @Override
-                        public void run() {
-                            getViewingPlayer().closeInventory();
+                        if (!canSell) {
+                            protectionUser.sendMessage(MessageManager.prefix()
+                                    .append(Component.text("Das Grundstück darf nicht verkauft werden.",
+                                            MessageManager.ERROR)));
+                            return;
                         }
-                    }.runTask(BukkitMain.getInstance());
 
-                    return;
-                }
+                        if (isRegionEdited()) {
+                            protectionUser.sendMessage(MessageManager.prefix()
+                                    .append(Component.text("Das Grundstück wird gerade bearbeitet!",
+                                            MessageManager.ERROR)));
+                            return;
+                        }
 
-                regionManager.removeRegion(protectedRegion.getId());
-                protectionUser.addTransaction(null, refund, currency, new ProtectionSellData(protectedRegion));
+                        List<UUID> members = new ArrayList<>();
+                        members.addAll(protectedRegion.getOwners().getPlayerDomain().getUniqueIds());
+                        members.addAll(protectedRegion.getMembers().getPlayerDomain().getUniqueIds());
 
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        getViewingPlayer().closeInventory();
-                    }
-                }.runTask(BukkitMain.getInstance());
+                        for (UUID member : members) {
+                            Player memberPlayer = Bukkit.getPlayer(member);
 
-                protectionUser.sendMessage(MessageManager.getProtectionSoldComponent(refund, currency));
-            }, clickEvent -> new ProtectionShowGui(this, region, area, distance, regionInfo, getViewingPlayer()).show(
-                    getViewingPlayer()), Component.text("Grundstück löschen?", MessageManager.PRIMARY), confirmLore);
+                            if (memberPlayer == null || !memberPlayer.isOnline()) {
+                                continue;
+                            }
 
-            confirmationGui.show(player);
-        });
+                            notifyDeletion(player, regionInfo);
+                        }
+
+                        BigDecimal refund = BigDecimal.valueOf(regionInfo.getRetailPrice());
+                        Currency currency = Currency.currencyByName("CastCoin");
+
+                        if (currency == null) {
+                            protectionUser.sendMessage(MessageManager.getNoCurrencyComponent());
+                            return;
+                        }
+
+                        RegionManager regionManager = ProtectionUtils.getRegionManager(player.getWorld());
+
+                        if (!regionManager.hasRegion(protectedRegion.getId())) {
+                            protectionUser.sendMessage(MessageManager.prefix()
+                                    .append(Component.text("Das Grundstück existiert nicht mehr!",
+                                            MessageManager.ERROR)));
+
+                            new BukkitRunnable() {
+                                @Override
+                                public void run() {
+                                    getViewingPlayer().closeInventory();
+                                }
+                            }.runTask(BukkitMain.getInstance());
+
+                            return;
+                        }
+
+                        regionManager.removeRegion(protectedRegion.getId());
+                        protectionUser.addTransaction(null, refund, currency, new ProtectionSellData(protectedRegion));
+
+                        new BukkitRunnable() {
+                            @Override
+                            public void run() {
+                                getViewingPlayer().closeInventory();
+                            }
+                        }.runTask(BukkitMain.getInstance());
+
+                        protectionUser.sendMessage(MessageManager.getProtectionSoldComponent(refund, currency));
+                    }, clickEvent -> new ProtectionShowGui(this, region, area, distance, regionInfo, getViewingPlayer())
+                            .show(
+                                    getViewingPlayer()),
+                            Component.text("Grundstück löschen?", MessageManager.PRIMARY), confirmLore);
+
+                    confirmationGui.show(player);
+                });
     }
 
     /**
