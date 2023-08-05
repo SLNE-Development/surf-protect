@@ -68,8 +68,8 @@ public class ProtectionMainMenu extends SurfChestGui {
      */
     private GuiItem getProtectionListItem() {
         return new GuiItem(
-                ItemUtils.item(Material.DIRT, 1, 0, Component.text("Liste", MessageManager.PRIMARY), Component.empty(),
-                        Component.text("Eine Liste von Protections", NamedTextColor.GRAY), Component.empty()),
+                ItemUtils.item(Material.DIRT, 1, 0, Component.text("Meine Grundstücke", MessageManager.PRIMARY), Component.empty(),
+                        Component.text("Eine Liste mit allen deinen Grundstücken", NamedTextColor.GRAY), Component.empty()),
                 event -> {
                     Player viewingPlayer = (Player) event.getWhoClicked();
                     ProtectionUser user = ProtectionUser.getProtectionUser(getTargetProtectionPlayer());

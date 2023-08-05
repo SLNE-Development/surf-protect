@@ -38,7 +38,7 @@ public class ProtectionListGui extends SurfChestGui {
      */
     @SuppressWarnings("java:S3776")
     public ProtectionListGui(SurfGui parent, Map<World, List<ProtectedRegion>> regions, Player viewingPlayer) {
-        super(parent, 5, Component.text("Protections - Liste"), viewingPlayer);
+        super(parent, 5, Component.text("Protections - Meine Grundstücke"), viewingPlayer);
 
         paginatedPane = new PaginatedPane(0, 1, 9, 3);
         navigationPane = new StaticPane(0, 4, 9, 1);
