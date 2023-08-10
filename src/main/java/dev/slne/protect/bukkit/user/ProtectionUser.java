@@ -210,6 +210,8 @@ public class ProtectionUser {
 
         ProtectionRegion creation = regionCreation;
         regionCreation = null;
+
+        getBukkitPlayer().setFallDistance(0);
         getBukkitPlayer().teleport(creation.getStartLocation());
 
         getBukkitPlayer().getInventory().setContents(creation.getStartingInventoryContent());
@@ -217,6 +219,7 @@ public class ProtectionUser {
         getBukkitPlayer().setAllowFlight(getBukkitPlayer().getGameMode().equals(GameMode.CREATIVE));
         getBukkitPlayer().setFlying(getBukkitPlayer().getGameMode().equals(GameMode.CREATIVE));
         getBukkitPlayer().setCollidable(true);
+
     }
 
     /**
