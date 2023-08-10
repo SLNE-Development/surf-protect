@@ -9,6 +9,7 @@ import org.bukkit.inventory.ItemStack;
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.pane.PaginatedPane;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
+import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.flags.StateFlag.State;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
@@ -40,6 +41,12 @@ public class ProtectionFlagsGui extends SurfChestGui {
             State oldState = region.getFlag(flag);
 
             buttons.add(new ToggleButton(map, oldState, newState -> {
+
+                // Quick fix that enables TNT when toggeling other explosions
+                if (flag.equals(Flags.OTHER_EXPLOSION)) {
+                    region.setFlag(Flags.TNT, newState);
+                }
+
                 region.setFlag(flag, newState);
                 update();
             }));
