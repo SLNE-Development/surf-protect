@@ -7,7 +7,7 @@ import com.sk89q.worldguard.util.profile.cache.ProfileCache;
 import dev.slne.protect.bukkit.region.info.RegionInfo;
 import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
 import dev.slne.protect.bukkit.user.ProtectionUser;
-import dev.slne.transaction.core.currency.Currency;
+import dev.slne.transaction.api.currency.Currency;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -74,7 +74,6 @@ public class MessageManager {
      * Returns a component which tells the user that they need to place more markers
      *
      * @param placedMarkers The amount of placed markers
-     *
      * @return The component
      */
     public static Component getMoreMarkersComponent(int placedMarkers) {
@@ -149,7 +148,7 @@ public class MessageManager {
                         VARIABLE_VALUE)).append(Component.text(" Blöcke", VARIABLE_VALUE)));
 
         double roundedEffectiveCost = Math.round(effectiveCost * 100.0) / 100.0;
-        
+
         prefixMessage(user,
                 Component.text("Kaufpreis: ", VARIABLE_KEY).append(Component.text(roundedEffectiveCost, VARIABLE_VALUE))
                         .appendSpace().append(currencyDisplayName(currency)));
@@ -254,7 +253,6 @@ public class MessageManager {
      * Returns the pwho {@link Component}
      *
      * @param regionInfo the {@link RegionInfo}
-     *
      * @return the component
      */
     public static Component getPWhoComponent(RegionInfo regionInfo) {
@@ -284,7 +282,6 @@ public class MessageManager {
      * Returns the region owners and members component for the given region info
      *
      * @param regionInfo The region info
-     *
      * @return The region owners and members component
      */
     public static Component getRegionOwnersMembersComponent(RegionInfo regionInfo) {
@@ -314,7 +311,6 @@ public class MessageManager {
      * Returns the region user component for the given users
      *
      * @param regionUsers The users
-     *
      * @return The region user component
      */
     public static Component getRegionUsersComponent(List<LocalPlayer> regionUsers) {
@@ -365,7 +361,6 @@ public class MessageManager {
      * rename a protection
      *
      * @param command the command to run
-     *
      * @return the component
      */
     public static Component getProtectionRenameComponent(String command, Currency currency) {
@@ -385,7 +380,6 @@ public class MessageManager {
      * rename a protection on hover
      *
      * @param currency The currency
-     *
      * @return the component
      */
     public static Component getProtectionRenameHoverComponent(Currency currency) {
@@ -409,7 +403,7 @@ public class MessageManager {
      * @return The currency display name
      */
     private static Component currencyDisplayName(Currency currency) {
-        return currency.displayName().colorIfAbsent(VARIABLE_VALUE);
+        return currency.getDisplayName().colorIfAbsent(VARIABLE_VALUE);
     }
 
     /**
@@ -468,7 +462,6 @@ public class MessageManager {
      *
      * @param amount   The amount
      * @param currency The currency
-     *
      * @return the component
      */
     public static Component getProtectionSoldComponent(BigDecimal amount, Currency currency) {

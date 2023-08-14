@@ -16,8 +16,9 @@ import dev.slne.protect.bukkit.region.visual.Marker;
 import dev.slne.protect.bukkit.region.visual.QuickHull;
 import dev.slne.protect.bukkit.region.visual.Trail;
 import dev.slne.protect.bukkit.user.ProtectionUser;
-import dev.slne.transaction.core.currency.Currency;
-import dev.slne.transaction.core.transaction.TransactionAddResult;
+import dev.slne.transaction.api.TransactionApi;
+import dev.slne.transaction.api.currency.Currency;
+import dev.slne.transaction.api.transaction.result.TransactionAddResult;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -84,7 +85,6 @@ public class ProtectionRegion {
      *
      * @param block        the block of the location
      * @param previousData the previous data in that location
-     *
      * @return the new marker or null, if marker could not be created
      */
     public Marker createMarker(Block block, BlockData previousData) {
@@ -193,7 +193,7 @@ public class ProtectionRegion {
             return RegionCreationState.TOO_LARGE;
         }
 
-        Currency currency = Currency.currencyByName("CastCoin");
+        Currency currency = TransactionApi.getCurrency("CastCoin");
 
         if (currency == null) {
             protectionUser.sendMessage(MessageManager.getNoCurrencyComponent());
@@ -282,7 +282,6 @@ public class ProtectionRegion {
      *
      * @param region        the region
      * @param pricePerBlock the price per block
-     *
      * @return the price
      */
     protected double calculateProtectionPrice(TemporaryProtectionRegion region, double pricePerBlock) {
@@ -344,7 +343,7 @@ public class ProtectionRegion {
         double effectiveCost = this.calculateProtectionPrice(temporaryRegion, pricePerBlock);
         BigDecimal effectiveCostBigDecimal = BigDecimal.valueOf(-effectiveCost);
 
-        Currency currency = Currency.currencyByName("CastCoin");
+        Currency currency = TransactionApi.getCurrency("CastCoin");
 
         if (currency == null) {
             protectionUser.sendMessage(MessageManager.getNoCurrencyComponent());

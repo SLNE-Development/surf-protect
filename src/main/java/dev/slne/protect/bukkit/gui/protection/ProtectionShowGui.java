@@ -1,23 +1,10 @@
 package dev.slne.protect.bukkit.gui.protection;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.scheduler.BukkitRunnable;
-
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
 import com.sk89q.worldguard.protection.flags.StateFlag.State;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-
 import dev.slne.protect.bukkit.BukkitMain;
 import dev.slne.protect.bukkit.gui.protection.flags.ProtectionFlagsGui;
 import dev.slne.protect.bukkit.gui.protection.members.ProtectionMembersGui;
@@ -32,9 +19,21 @@ import dev.slne.surf.gui.api.SurfGui;
 import dev.slne.surf.gui.api.chest.SurfChestGui;
 import dev.slne.surf.gui.api.confirmation.ConfirmationGui;
 import dev.slne.surf.gui.api.utils.ItemUtils;
-import dev.slne.transaction.core.currency.Currency;
+import dev.slne.transaction.api.TransactionApi;
+import dev.slne.transaction.api.currency.Currency;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.scheduler.BukkitRunnable;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 public class ProtectionShowGui extends SurfChestGui {
 
@@ -55,7 +54,7 @@ public class ProtectionShowGui extends SurfChestGui {
      */
     @SuppressWarnings("java:S2589")
     public ProtectionShowGui(SurfGui parentGui, ProtectedRegion region, long area, double distance,
-            RegionInfo regionInfo, Player viewingPlayer) {
+                             RegionInfo regionInfo, Player viewingPlayer) {
         super(parentGui, 5, Component.text(regionInfo.getName()), viewingPlayer);
 
         this.regionInfo = regionInfo;
@@ -125,7 +124,6 @@ public class ProtectionShowGui extends SurfChestGui {
      * Returns the item for the area
      *
      * @param area The area
-     *
      * @return The item
      */
     private GuiItem getAreaItem(long area) {
@@ -143,7 +141,6 @@ public class ProtectionShowGui extends SurfChestGui {
      * Returns the item for the distance
      *
      * @param distance The distance
-     *
      * @return The item
      */
     private GuiItem getDistanceItem(double distance) {
@@ -161,7 +158,6 @@ public class ProtectionShowGui extends SurfChestGui {
      * Returns the item for the location
      *
      * @param teleportLocation The teleport location
-     *
      * @return The item
      */
     private GuiItem getLocationItem(Location teleportLocation) {
@@ -223,9 +219,9 @@ public class ProtectionShowGui extends SurfChestGui {
 
         return new GuiItem(ItemUtils.item(Material.PLAYER_HEAD, 1, 0, Component.text("Mitglieder",
                 MessageManager.PRIMARY), lore.toArray(Component[]::new)), event -> {
-                    ProtectionMembersGui membersGui = new ProtectionMembersGui(this, getViewingPlayer(), region);
-                    membersGui.show(getViewingPlayer());
-                });
+            ProtectionMembersGui membersGui = new ProtectionMembersGui(this, getViewingPlayer(), region);
+            membersGui.show(getViewingPlayer());
+        });
     }
 
     /**
@@ -393,7 +389,7 @@ public class ProtectionShowGui extends SurfChestGui {
                         }
 
                         BigDecimal refund = BigDecimal.valueOf(regionInfo.getRetailPrice());
-                        Currency currency = Currency.currencyByName("CastCoin");
+                        Currency currency = TransactionApi.getCurrency("CastCoin");
 
                         if (currency == null) {
                             protectionUser.sendMessage(MessageManager.getNoCurrencyComponent());

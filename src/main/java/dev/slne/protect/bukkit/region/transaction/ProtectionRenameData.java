@@ -2,9 +2,9 @@ package dev.slne.protect.bukkit.region.transaction;
 
 import com.google.gson.JsonObject;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-import dev.slne.transaction.core.transaction.TransactionData;
+import dev.slne.transaction.api.transaction.data.TransactionData;
 
-public class ProtectionRenameData extends TransactionData {
+public class ProtectionRenameData implements TransactionData {
 
     private final ProtectedRegion region;
 
@@ -20,6 +20,8 @@ public class ProtectionRenameData extends TransactionData {
      */
     public ProtectionRenameData(ProtectedRegion region, String fromName, String toName) {
         this.region = region;
+        this.fromName = fromName;
+        this.toName = toName;
     }
 
     @Override

@@ -2,10 +2,10 @@ package dev.slne.protect.bukkit.region.transaction;
 
 import com.google.gson.JsonObject;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-import dev.slne.transaction.core.transaction.TransactionData;
+import dev.slne.transaction.api.transaction.data.TransactionData;
 import org.bukkit.World;
 
-public class ProtectionBuyData extends TransactionData {
+public class ProtectionBuyData implements TransactionData {
 
     private final World world;
     private final ProtectedRegion region;
