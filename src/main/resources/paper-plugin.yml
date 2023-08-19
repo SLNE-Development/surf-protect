@@ -13,7 +13,7 @@ dependencies:
       load: BEFORE
       required: true
       join-classpath: true
-    SurfData:
+    SurfDataBukkit:
       load: BEFORE
       required: true
       join-classpath: true
