@@ -48,10 +48,8 @@ public class PolygonalProtectionVisualizer extends ProtectionVisualizer<Protecte
      */
     private List<Location> formVisualizerPillar(BlockVector2 point) {
         List<Location> locations = new ArrayList<>();
-        Block highestYBlock = getWorld().getHighestBlockAt(point.getBlockX(), point.getBlockZ(),
-                HeightMap.MOTION_BLOCKING_NO_LEAVES);
-        int highestY = highestYBlock.getY() + 1;
-        locations.add(new Location(getWorld(), point.getBlockX(), highestY, point.getBlockZ()));
+
+        addHighestBlockIfLoaded(locations, point);
 
         return locations;
     }
@@ -106,14 +104,19 @@ public class PolygonalProtectionVisualizer extends ProtectionVisualizer<Protecte
             }
 
             if (point != null) {
-                Block highestYBlock = getWorld().getHighestBlockAt(point.getBlockX(), point.getBlockZ(),
-                        HeightMap.MOTION_BLOCKING_NO_LEAVES);
-                int highestY = highestYBlock.getY() + 1;
-                finalLocations.add(new Location(getWorld(), point.getBlockX(), highestY, point.getBlockZ()));
+                addHighestBlockIfLoaded(finalLocations, point);
             }
         }
 
         return finalLocations;
+    }
+
+    private void addHighestBlockIfLoaded(List<Location> finalLocations, BlockVector2 point) {
+        if (getWorld().isChunkLoaded(point.getBlockX() >> 4, point.getBlockZ() >> 4)) {
+            Block highestYBlock = getWorld().getHighestBlockAt(point.getBlockX(), point.getBlockZ(), HeightMap.MOTION_BLOCKING_NO_LEAVES);
+            int highestY = highestYBlock.getY() + 1;
+            finalLocations.add(new Location(getWorld(), point.getBlockX(), highestY, point.getBlockZ()));
+        }
     }
 
     /**
