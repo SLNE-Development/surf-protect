@@ -17,7 +17,7 @@ dependencies:
       load: BEFORE
       required: true
       join-classpath: true
-    SurfTransaction:
+    SurfTransactionBukkit:
       load: BEFORE
       required: true
       join-classpath: true
@@ -25,7 +25,7 @@ dependencies:
       load: BEFORE
       required: true
       join-classpath: true
-    SurfGui:
+    SurfGuiBukkit:
       load: BEFORE
       required: true
       join-classpath: true
