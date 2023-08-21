@@ -74,7 +74,6 @@ public class MessageManager {
      * Returns a component which tells the user that they need to place more markers
      *
      * @param placedMarkers The amount of placed markers
-     *
      * @return The component
      */
     public static Component getMoreMarkersComponent(int placedMarkers) {
@@ -254,7 +253,6 @@ public class MessageManager {
      * Returns the pwho {@link Component}
      *
      * @param regionInfo the {@link RegionInfo}
-     *
      * @return the component
      */
     public static Component getPWhoComponent(RegionInfo regionInfo) {
@@ -284,7 +282,6 @@ public class MessageManager {
      * Returns the region owners and members component for the given region info
      *
      * @param regionInfo The region info
-     *
      * @return The region owners and members component
      */
     public static Component getRegionOwnersMembersComponent(RegionInfo regionInfo) {
@@ -314,7 +311,6 @@ public class MessageManager {
      * Returns the region user component for the given users
      *
      * @param regionUsers The users
-     *
      * @return The region user component
      */
     public static Component getRegionUsersComponent(List<LocalPlayer> regionUsers) {
@@ -365,7 +361,6 @@ public class MessageManager {
      * rename a protection
      *
      * @param command the command to run
-     *
      * @return the component
      */
     public static Component getProtectionRenameComponent(String command, Currency currency) {
@@ -385,7 +380,6 @@ public class MessageManager {
      * rename a protection on hover
      *
      * @param currency The currency
-     *
      * @return the component
      */
     public static Component getProtectionRenameHoverComponent(Currency currency) {
@@ -468,7 +462,6 @@ public class MessageManager {
      *
      * @param amount   The amount
      * @param currency The currency
-     *
      * @return the component
      */
     public static Component getProtectionSoldComponent(BigDecimal amount, Currency currency) {

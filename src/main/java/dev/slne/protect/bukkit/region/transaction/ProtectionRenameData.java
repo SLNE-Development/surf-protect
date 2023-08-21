@@ -27,6 +27,8 @@ public class ProtectionRenameData implements TransactionData {
     public ProtectionRenameData(World world, ProtectedRegion region, String fromName, String toName) {
         this.region = region;
         this.world = world;
+        this.fromName = fromName;
+        this.toName = toName;
     }
 
     @Override

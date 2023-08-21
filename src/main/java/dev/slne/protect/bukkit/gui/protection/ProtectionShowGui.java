@@ -395,7 +395,7 @@ public class ProtectionShowGui extends SurfChestGui {
                         }
 
                         BigDecimal refund = BigDecimal.valueOf(regionInfo.getRetailPrice());
-                        Currency currency = TransactionApi.getCurrencyManager().getCurrencyByName("CastCoin");
+                        Currency currency = TransactionApi.getCurrency("CastCoin");
 
                         if (currency == null) {
                             protectionUser.sendMessage(MessageManager.getNoCurrencyComponent());

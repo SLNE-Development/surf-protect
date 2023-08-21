@@ -194,7 +194,7 @@ public class ProtectionRegion {
             return RegionCreationState.TOO_LARGE;
         }
 
-        Currency currency = TransactionApi.getCurrencyManager().getCurrencyByName("CastCoin");
+        Currency currency = TransactionApi.getCurrency("CastCoin");
 
         if (currency == null) {
             protectionUser.sendMessage(MessageManager.getNoCurrencyComponent());
@@ -345,7 +345,7 @@ public class ProtectionRegion {
         double effectiveCost = this.calculateProtectionPrice(temporaryRegion, pricePerBlock);
         BigDecimal effectiveCostBigDecimal = BigDecimal.valueOf(-effectiveCost);
 
-        Currency currency = TransactionApi.getCurrencyManager().getCurrencyByName("CastCoin");
+        Currency currency = TransactionApi.getCurrency("CastCoin");
 
         if (currency == null) {
             protectionUser.sendMessage(MessageManager.getNoCurrencyComponent());
