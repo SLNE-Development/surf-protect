@@ -1,23 +1,14 @@
 package dev.slne.protect.bukkit.gui.protection;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.scheduler.BukkitRunnable;
-
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
 import com.sk89q.worldguard.protection.flags.StateFlag.State;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-
+import dev.slne.gui.api.SurfGui;
+import dev.slne.gui.api.chest.SurfChestGui;
+import dev.slne.gui.api.confirmation.ConfirmationGui;
+import dev.slne.gui.api.utils.ItemUtils;
 import dev.slne.protect.bukkit.BukkitMain;
 import dev.slne.protect.bukkit.gui.protection.flags.ProtectionFlagsGui;
 import dev.slne.protect.bukkit.gui.protection.members.ProtectionMembersGui;
@@ -28,13 +19,21 @@ import dev.slne.protect.bukkit.region.flags.ProtectionFlags;
 import dev.slne.protect.bukkit.region.info.RegionInfo;
 import dev.slne.protect.bukkit.region.transaction.ProtectionSellData;
 import dev.slne.protect.bukkit.user.ProtectionUser;
-import dev.slne.surf.gui.api.SurfGui;
-import dev.slne.surf.gui.api.chest.SurfChestGui;
-import dev.slne.surf.gui.api.confirmation.ConfirmationGui;
-import dev.slne.surf.gui.api.utils.ItemUtils;
-import dev.slne.transaction.core.currency.Currency;
+import dev.slne.transaction.api.TransactionApi;
+import dev.slne.transaction.api.currency.Currency;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.scheduler.BukkitRunnable;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 public class ProtectionShowGui extends SurfChestGui {
 
@@ -55,8 +54,8 @@ public class ProtectionShowGui extends SurfChestGui {
      */
     @SuppressWarnings("java:S2589")
     public ProtectionShowGui(SurfGui parentGui, ProtectedRegion region, long area, double distance,
-            RegionInfo regionInfo, Player viewingPlayer) {
-        super(parentGui, 5, Component.text(regionInfo.getName()), viewingPlayer);
+                             RegionInfo regionInfo, Player viewingPlayer) {
+        super(parentGui, 5, Component.text(regionInfo.getName()));
 
         this.regionInfo = regionInfo;
         this.region = region;
@@ -110,11 +109,13 @@ public class ProtectionShowGui extends SurfChestGui {
 
     @Override
     public void update() {
-        if (getViewingPlayer().hasPermission("surf.protect.view.owners")) {
+        Player viewingPlayer = (Player) getViewers().get(0);
+
+        if (viewingPlayer.hasPermission("surf.protect.view.owners")) {
             staticPane.addItem(getOwnersItem(), 6, 1);
         }
 
-        if (getViewingPlayer().hasPermission("surf.protect.view.members")) {
+        if (viewingPlayer.hasPermission("surf.protect.view.members")) {
             staticPane.addItem(getMembersItem(), 7, 1);
         }
 
@@ -223,9 +224,9 @@ public class ProtectionShowGui extends SurfChestGui {
 
         return new GuiItem(ItemUtils.item(Material.PLAYER_HEAD, 1, 0, Component.text("Mitglieder",
                 MessageManager.PRIMARY), lore.toArray(Component[]::new)), event -> {
-                    ProtectionMembersGui membersGui = new ProtectionMembersGui(this, getViewingPlayer(), region);
-                    membersGui.show(getViewingPlayer());
-                });
+            ProtectionMembersGui membersGui = new ProtectionMembersGui(this, region);
+            membersGui.show(event.getWhoClicked());
+        });
     }
 
     /**
@@ -276,7 +277,7 @@ public class ProtectionShowGui extends SurfChestGui {
                     Player player = (Player) event.getWhoClicked();
                     player.closeInventory();
 
-                    ConfirmationGui confirmationGui = new ConfirmationGui(this, getViewingPlayer(), confirmEvent -> {
+                    ConfirmationGui confirmationGui = new ConfirmationGui(this, confirmEvent -> {
                         ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
                         ProtectionRegion protectionRegion = new ProtectionRegion(protectionUser,
                                 regionInfo.getRegion());
@@ -308,8 +309,9 @@ public class ProtectionShowGui extends SurfChestGui {
                     }, cancelEvent -> {
                         if (!(cancelEvent instanceof InventoryCloseEvent closeEvent && closeEvent.getReason().equals(
                                 InventoryCloseEvent.Reason.PLUGIN))) {
-                            new ProtectionShowGui(this, region, area, distance, regionInfo, getViewingPlayer()).show(
-                                    getViewingPlayer());
+                            new ProtectionShowGui(this, region, area, distance, regionInfo,
+                                    (Player) event.getWhoClicked()).show(
+                                    event.getWhoClicked());
                         }
                     }, Component.text("Grundstück erweitern", MessageManager.PRIMARY), confirmLore);
 
@@ -331,7 +333,7 @@ public class ProtectionShowGui extends SurfChestGui {
 
         return new GuiItem(ItemUtils.item(Material.REDSTONE, 1, 0, Component.text("Flags", MessageManager.PRIMARY),
                 lore.toArray(Component[]::new)),
-                event -> new ProtectionFlagsGui(this, region, getViewingPlayer()).show(event.getWhoClicked()));
+                event -> new ProtectionFlagsGui(this, region).show(event.getWhoClicked()));
     }
 
     /**
@@ -357,7 +359,7 @@ public class ProtectionShowGui extends SurfChestGui {
                             .add(Component.text("Das Grundstück wird dir für einen Anteil des Kaufpreises erstattet.",
                                     NamedTextColor.GRAY));
 
-                    ConfirmationGui confirmationGui = new ConfirmationGui(this, getViewingPlayer(), confirmEvent -> {
+                    ConfirmationGui confirmationGui = new ConfirmationGui(this, confirmEvent -> {
                         ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
 
                         ProtectedRegion protectedRegion = regionInfo.getRegion();
@@ -393,7 +395,7 @@ public class ProtectionShowGui extends SurfChestGui {
                         }
 
                         BigDecimal refund = BigDecimal.valueOf(regionInfo.getRetailPrice());
-                        Currency currency = Currency.currencyByName("CastCoin");
+                        Currency currency = TransactionApi.getCurrencyManager().getCurrencyByName("CastCoin");
 
                         if (currency == null) {
                             protectionUser.sendMessage(MessageManager.getNoCurrencyComponent());
@@ -410,7 +412,7 @@ public class ProtectionShowGui extends SurfChestGui {
                             new BukkitRunnable() {
                                 @Override
                                 public void run() {
-                                    getViewingPlayer().closeInventory();
+                                    event.getWhoClicked().closeInventory();
                                 }
                             }.runTask(BukkitMain.getInstance());
 
@@ -418,19 +420,19 @@ public class ProtectionShowGui extends SurfChestGui {
                         }
 
                         regionManager.removeRegion(protectedRegion.getId());
-                        protectionUser.addTransaction(null, refund, currency, new ProtectionSellData(protectedRegion));
+                        protectionUser.addTransaction(null, refund, currency,
+                                new ProtectionSellData(event.getWhoClicked().getWorld(), protectedRegion));
 
                         new BukkitRunnable() {
                             @Override
                             public void run() {
-                                getViewingPlayer().closeInventory();
+                                event.getWhoClicked().closeInventory();
                             }
                         }.runTask(BukkitMain.getInstance());
 
                         protectionUser.sendMessage(MessageManager.getProtectionSoldComponent(refund, currency));
-                    }, clickEvent -> new ProtectionShowGui(this, region, area, distance, regionInfo, getViewingPlayer())
-                            .show(
-                                    getViewingPlayer()),
+                    }, clickEvent -> new ProtectionShowGui(this, region, area, distance, regionInfo,
+                            (Player) event.getWhoClicked()).show(event.getWhoClicked()),
                             Component.text("Grundstück löschen?", MessageManager.PRIMARY), confirmLore);
 
                     confirmationGui.show(player);

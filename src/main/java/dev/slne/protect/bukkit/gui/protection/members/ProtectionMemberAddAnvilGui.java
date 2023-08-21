@@ -2,15 +2,15 @@ package dev.slne.protect.bukkit.gui.protection.members;
 
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import dev.slne.gui.api.SurfGui;
+import dev.slne.gui.api.anvil.SurfAnvilGui;
+import dev.slne.gui.api.anvil.requirement.AnvilRequirement;
+import dev.slne.gui.api.anvil.requirement.requirements.AnvilLengthRequirement;
+import dev.slne.gui.api.anvil.requirement.requirements.AnvilNoSpaceRequirement;
+import dev.slne.gui.api.anvil.requirement.requirements.AnvilNoSpecialCharacterRequirement;
+import dev.slne.gui.api.anvil.requirement.requirements.player.AnvilOfflinePlayerRequirement;
 import dev.slne.protect.bukkit.message.MessageManager;
 import dev.slne.protect.bukkit.user.ProtectionUserFinder;
-import dev.slne.surf.gui.api.SurfGui;
-import dev.slne.surf.gui.api.anvil.SurfAnvilGui;
-import dev.slne.surf.gui.api.anvil.requirement.AnvilRequirement;
-import dev.slne.surf.gui.api.anvil.requirement.requirements.AnvilLengthRequirement;
-import dev.slne.surf.gui.api.anvil.requirement.requirements.AnvilNoSpaceRequirement;
-import dev.slne.surf.gui.api.anvil.requirement.requirements.AnvilNoSpecialCharacterRequirement;
-import dev.slne.surf.gui.api.anvil.requirement.requirements.player.AnvilOfflinePlayerRequirement;
 import net.kyori.adventure.text.Component;
 import net.wesjd.anvilgui.AnvilGUI;
 import org.bukkit.entity.Player;
@@ -25,19 +25,18 @@ public class ProtectionMemberAddAnvilGui extends SurfAnvilGui {
     /**
      * Creates a new anvil gui
      *
-     * @param parentGui     the parent gui
-     * @param viewingPlayer the viewing player
-     * @param region        the region to add the member to
+     * @param parentGui the parent gui
+     * @param region    the region to add the member to
      */
-    public ProtectionMemberAddAnvilGui(SurfGui parentGui, Player viewingPlayer, ProtectedRegion region) {
-        super(parentGui, Component.text("Mitglied hinzufügen"), viewingPlayer, MessageManager.prefix());
+    public ProtectionMemberAddAnvilGui(SurfGui parentGui, ProtectedRegion region) {
+        super(parentGui, Component.text("Mitglied hinzufügen"), MessageManager.prefix());
 
         this.region = region;
     }
 
     @Override
     public SurfAnvilGui copyGui() {
-        return new ProtectionMemberAddAnvilGui(getParent(), getViewingPlayer(), region);
+        return new ProtectionMemberAddAnvilGui(getParent(), region);
     }
 
     @Override
@@ -51,26 +50,26 @@ public class ProtectionMemberAddAnvilGui extends SurfAnvilGui {
     }
 
     @Override
-    public List<AnvilGUI.ResponseAction> onSubmit(String input) {
+    public List<AnvilGUI.ResponseAction> onSubmit(Player player, String input) {
         List<AnvilGUI.ResponseAction> responseActions = new ArrayList<>();
 
         LocalPlayer memberPlayer = ProtectionUserFinder.findLocalPlayer(input);
         region.getMembers().addPlayer(memberPlayer);
 
-        getViewingPlayer().sendMessage(MessageManager.prefix().append(Component.text("Du hast ",
+        player.sendMessage(MessageManager.prefix().append(Component.text("Du hast ",
                         MessageManager.SUCCESS)).append(Component.text(input, MessageManager.VARIABLE_VALUE))
                 .append(Component.text(" zu den Mitgliedern hinzugefügt.", MessageManager.SUCCESS)));
 
-        backToParent();
+        backToParent(player);
 
         return responseActions;
     }
 
     @Override
-    public List<AnvilGUI.ResponseAction> onCancel(String input) {
+    public List<AnvilGUI.ResponseAction> onCancel(Player player, String input) {
         List<AnvilGUI.ResponseAction> responseActions = new ArrayList<>();
 
-        backToParent();
+        backToParent(player);
 
         return responseActions;
     }

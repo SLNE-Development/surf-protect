@@ -6,20 +6,19 @@ import com.github.stefvanschie.inventoryframework.pane.Pane;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import dev.slne.gui.api.SurfGui;
+import dev.slne.gui.api.chest.SurfChestGui;
+import dev.slne.gui.api.confirmation.ConfirmationGui;
+import dev.slne.gui.api.utils.ItemUtils;
+import dev.slne.gui.api.utils.pagination.PageController;
 import dev.slne.protect.bukkit.message.MessageManager;
 import dev.slne.protect.bukkit.region.ProtectionUtils;
 import dev.slne.protect.bukkit.user.ProtectionUserFinder;
-import dev.slne.surf.gui.api.SurfGui;
-import dev.slne.surf.gui.api.chest.SurfChestGui;
-import dev.slne.surf.gui.api.confirmation.ConfirmationGui;
-import dev.slne.surf.gui.api.utils.ItemUtils;
-import dev.slne.surf.gui.api.utils.pagination.PageController;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,12 +32,11 @@ public class ProtectionMembersGui extends SurfChestGui {
     /**
      * Creates a new protection members gui
      *
-     * @param parent        the parent gui
-     * @param viewingPlayer the player viewing the gui
-     * @param region        the region
+     * @param parent the parent gui
+     * @param region the region
      */
-    public ProtectionMembersGui(SurfGui parent, Player viewingPlayer, ProtectedRegion region) {
-        super(parent, 5, Component.text("Mitglieder"), viewingPlayer);
+    public ProtectionMembersGui(SurfGui parent, ProtectedRegion region) {
+        super(parent, 5, Component.text("Mitglieder"));
 
         this.region = region;
 
@@ -52,9 +50,8 @@ public class ProtectionMembersGui extends SurfChestGui {
                 Component.empty(), Component.text("Klicke hier, um ein Mitglied hinzuzufügen",
                         NamedTextColor.GRAY), Component.empty()),
                 event -> {
-                    ProtectionMemberAddAnvilGui membersGui =
-                            new ProtectionMemberAddAnvilGui(this, viewingPlayer, region);
-                    membersGui.show(getViewingPlayer());
+                    ProtectionMemberAddAnvilGui membersGui = new ProtectionMemberAddAnvilGui(this, region);
+                    membersGui.show(event.getWhoClicked());
                 }), 1, 0);
 
         addPane(paginatedPane);
@@ -97,17 +94,15 @@ public class ProtectionMembersGui extends SurfChestGui {
             items.add(new GuiItem(ItemUtils.head(offlinePlayer,
                     Component.text(memberName, MessageManager.PRIMARY), itemLore.toArray(Component[]::new)),
                     event -> {
-                        new ConfirmationGui(this, getViewingPlayer(), clickEvent -> {
+                        new ConfirmationGui(this, clickEvent -> {
                             LocalPlayer localPlayer = ProtectionUserFinder.findLocalPlayer(memberName);
                             region.getMembers().removePlayer(localPlayer);
 
-                            new ProtectionMembersGui(getParent(), getViewingPlayer(), region).show(
-                                    getViewingPlayer());
+                            new ProtectionMembersGui(getParent(), region).show(event.getWhoClicked());
                         }, clickEvent -> {
-                            new ProtectionMembersGui(getParent(), getViewingPlayer(), region).show(
-                                    getViewingPlayer());
+                            new ProtectionMembersGui(getParent(), region).show(event.getWhoClicked());
                         }, Component.text("Bestätigung erforderlich", MessageManager.PRIMARY), lore).show(
-                                getViewingPlayer());
+                                event.getWhoClicked());
                     }));
         }
 

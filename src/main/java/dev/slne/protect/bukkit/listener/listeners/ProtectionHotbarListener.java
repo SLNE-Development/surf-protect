@@ -1,5 +1,15 @@
 package dev.slne.protect.bukkit.listener.listeners;
 
+import com.destroystokyo.paper.event.block.BlockDestroyEvent;
+import dev.slne.gui.api.utils.ItemUtils;
+import dev.slne.protect.bukkit.BukkitMain;
+import dev.slne.protect.bukkit.region.ProtectionRegion;
+import dev.slne.protect.bukkit.region.ProtectionUtils;
+import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
+import dev.slne.protect.bukkit.region.visual.Marker;
+import dev.slne.protect.bukkit.user.ProtectionUser;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -18,18 +28,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
-
-import com.destroystokyo.paper.event.block.BlockDestroyEvent;
-
-import dev.slne.protect.bukkit.BukkitMain;
-import dev.slne.protect.bukkit.region.ProtectionRegion;
-import dev.slne.protect.bukkit.region.ProtectionUtils;
-import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
-import dev.slne.protect.bukkit.region.visual.Marker;
-import dev.slne.protect.bukkit.user.ProtectionUser;
-import dev.slne.surf.gui.api.utils.ItemUtils;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 
 public class ProtectionHotbarListener implements Listener {
 

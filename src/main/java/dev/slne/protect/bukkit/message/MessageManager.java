@@ -7,7 +7,7 @@ import com.sk89q.worldguard.util.profile.cache.ProfileCache;
 import dev.slne.protect.bukkit.region.info.RegionInfo;
 import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
 import dev.slne.protect.bukkit.user.ProtectionUser;
-import dev.slne.transaction.core.currency.Currency;
+import dev.slne.transaction.api.currency.Currency;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -149,7 +149,7 @@ public class MessageManager {
                         VARIABLE_VALUE)).append(Component.text(" Blöcke", VARIABLE_VALUE)));
 
         double roundedEffectiveCost = Math.round(effectiveCost * 100.0) / 100.0;
-        
+
         prefixMessage(user,
                 Component.text("Kaufpreis: ", VARIABLE_KEY).append(Component.text(roundedEffectiveCost, VARIABLE_VALUE))
                         .appendSpace().append(currencyDisplayName(currency)));
@@ -260,7 +260,7 @@ public class MessageManager {
     public static Component getPWhoComponent(RegionInfo regionInfo) {
         String regionId = regionInfo.getRegion().getId();
         String regionName =
-                regionInfo.getProtectionFlagInfo() != null ? regionInfo.getProtectionFlagInfo().getName() : null;
+                regionInfo.getProtectionFlagInfo() != null ? regionInfo.getProtectionFlagInfo().name() : null;
 
         boolean existsAndDifferent = regionName != null && !regionName.equals(regionId);
 
@@ -409,7 +409,7 @@ public class MessageManager {
      * @return The currency display name
      */
     private static Component currencyDisplayName(Currency currency) {
-        return currency.displayName().colorIfAbsent(VARIABLE_VALUE);
+        return currency.getDisplayName().colorIfAbsent(VARIABLE_VALUE);
     }
 
     /**

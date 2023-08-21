@@ -2,8 +2,8 @@ package dev.slne.protect.bukkit.gui.protection.flags;
 
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.sk89q.worldguard.protection.flags.StateFlag.State;
+import dev.slne.gui.api.utils.ItemUtils;
 import dev.slne.protect.bukkit.message.MessageManager;
-import dev.slne.surf.gui.api.utils.ItemUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;

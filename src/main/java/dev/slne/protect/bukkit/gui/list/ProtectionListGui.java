@@ -4,14 +4,14 @@ import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.pane.PaginatedPane;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import dev.slne.gui.api.SurfGui;
+import dev.slne.gui.api.chest.SurfChestGui;
+import dev.slne.gui.api.utils.ItemUtils;
+import dev.slne.gui.api.utils.pagination.PageController;
 import dev.slne.protect.bukkit.gui.protection.ProtectionShowGui;
 import dev.slne.protect.bukkit.message.MessageManager;
 import dev.slne.protect.bukkit.region.ProtectionUtils;
 import dev.slne.protect.bukkit.region.info.RegionInfo;
-import dev.slne.surf.gui.api.SurfGui;
-import dev.slne.surf.gui.api.chest.SurfChestGui;
-import dev.slne.surf.gui.api.utils.ItemUtils;
-import dev.slne.surf.gui.api.utils.pagination.PageController;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
@@ -29,6 +29,8 @@ public class ProtectionListGui extends SurfChestGui {
     private final PaginatedPane paginatedPane;
     private final Map<World, List<ProtectedRegion>> regions;
 
+    private final Player viewingPlayer;
+
     /**
      * Creates a new protection list gui
      *
@@ -38,7 +40,9 @@ public class ProtectionListGui extends SurfChestGui {
      */
     @SuppressWarnings("java:S3776")
     public ProtectionListGui(SurfGui parent, Map<World, List<ProtectedRegion>> regions, Player viewingPlayer) {
-        super(parent, 5, Component.text("Protections - Meine Grundstücke"), viewingPlayer);
+        super(parent, 5, Component.text("Protections - Meine Grundstücke"));
+
+        this.viewingPlayer = viewingPlayer;
 
         paginatedPane = new PaginatedPane(0, 1, 9, 3);
         navigationPane = new StaticPane(0, 4, 9, 1);
@@ -70,9 +74,8 @@ public class ProtectionListGui extends SurfChestGui {
                 Location teleportLocation = regionInfo.getTeleportLocation();
                 if (teleportLocation != null) {
                     distance =
-                            (long) (getViewingPlayer().getWorld().equals(teleportLocation.getWorld()) ?
-                                    getViewingPlayer().getLocation().distance(regionInfo.getTeleportLocation()) :
-                                    -1);
+                            viewingPlayer.getWorld().equals(teleportLocation.getWorld()) ?
+                                    (long) viewingPlayer.getLocation().distance(regionInfo.getTeleportLocation()) : -1;
                 }
 
                 long area = regionInfo.getArea();
@@ -114,8 +117,8 @@ public class ProtectionListGui extends SurfChestGui {
                                 lore.toArray(Component[]::new)), event -> {
                     ProtectionShowGui oneGui =
                             new ProtectionShowGui(this, region, area, finalDistance,
-                                    regionInfo, getViewingPlayer());
-                    oneGui.show(getViewingPlayer());
+                                    regionInfo, (Player) event.getWhoClicked());
+                    oneGui.show(event.getWhoClicked());
                 }));
 
                 paginatedPane.populateWithGuiItems(buttons);

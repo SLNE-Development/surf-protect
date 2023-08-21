@@ -5,6 +5,9 @@ import com.github.stefvanschie.inventoryframework.pane.StaticPane;
 import com.sk89q.worldguard.protection.flags.StateFlag.State;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.regions.RegionType;
+import dev.slne.gui.api.chest.SurfChestGui;
+import dev.slne.gui.api.confirmation.ConfirmationGui;
+import dev.slne.gui.api.utils.ItemUtils;
 import dev.slne.protect.bukkit.BukkitMain;
 import dev.slne.protect.bukkit.gui.list.ProtectionListGui;
 import dev.slne.protect.bukkit.message.MessageManager;
@@ -13,9 +16,6 @@ import dev.slne.protect.bukkit.region.ProtectionUtils;
 import dev.slne.protect.bukkit.region.flags.ProtectionFlags;
 import dev.slne.protect.bukkit.region.visual.visualizer.ProtectionVisualizer;
 import dev.slne.protect.bukkit.user.ProtectionUser;
-import dev.slne.surf.gui.api.chest.SurfChestGui;
-import dev.slne.surf.gui.api.confirmation.ConfirmationGui;
-import dev.slne.surf.gui.api.utils.ItemUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title;
@@ -40,7 +40,7 @@ public class ProtectionMainMenu extends SurfChestGui {
      * @param targetProtectionPlayer the player get the regions from
      */
     public ProtectionMainMenu(Player viewingPlayer, OfflinePlayer targetProtectionPlayer) {
-        super(null, 5, Component.text("Protections - Menü"), viewingPlayer);
+        super(null, 5, Component.text("Protections - Menü"));
 
         this.targetProtectionPlayer = targetProtectionPlayer;
 
@@ -68,8 +68,10 @@ public class ProtectionMainMenu extends SurfChestGui {
      */
     private GuiItem getProtectionListItem() {
         return new GuiItem(
-                ItemUtils.item(Material.DIRT, 1, 0, Component.text("Meine Grundstücke", MessageManager.PRIMARY), Component.empty(),
-                        Component.text("Eine Liste mit allen deinen Grundstücken", NamedTextColor.GRAY), Component.empty()),
+                ItemUtils.item(Material.DIRT, 1, 0, Component.text("Meine Grundstücke", MessageManager.PRIMARY),
+                        Component.empty(),
+                        Component.text("Eine Liste mit allen deinen Grundstücken", NamedTextColor.GRAY),
+                        Component.empty()),
                 event -> {
                     Player viewingPlayer = (Player) event.getWhoClicked();
                     ProtectionUser user = ProtectionUser.getProtectionUser(getTargetProtectionPlayer());
@@ -148,11 +150,11 @@ public class ProtectionMainMenu extends SurfChestGui {
                     ItemUtils.splitComponent("Bist du dir sicher, dass du ein Grundstück erstellen möchtest?",
                             50, NamedTextColor.GRAY));
 
-            ConfirmationGui confirmationGui = new ConfirmationGui(this, getViewingPlayer(), confirmEvent -> {
+            ConfirmationGui confirmationGui = new ConfirmationGui(this, confirmEvent -> {
                 ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
                 ProtectionRegion regionCreation = new ProtectionRegion(protectionUser, null);
 
-                getViewingPlayer().closeInventory(InventoryCloseEvent.Reason.PLUGIN);
+                confirmEvent.getWhoClicked().closeInventory(InventoryCloseEvent.Reason.PLUGIN);
                 protectionUser.startRegionCreation(regionCreation);
             }, cancelEvent -> {
                 if (!(cancelEvent instanceof InventoryCloseEvent closeEvent && closeEvent.getReason().equals(

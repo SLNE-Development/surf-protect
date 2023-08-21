@@ -2,19 +2,17 @@ package dev.slne.protect.bukkit.user;
 
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
-import dev.slne.data.core.database.future.SurfFutureResult;
-import dev.slne.data.core.instance.DataApi;
 import dev.slne.protect.bukkit.BukkitMain;
 import dev.slne.protect.bukkit.book.ProtectionBook;
 import dev.slne.protect.bukkit.listener.listeners.ProtectionHotbarListener;
 import dev.slne.protect.bukkit.message.MessageManager;
 import dev.slne.protect.bukkit.region.ProtectionRegion;
 import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
-import dev.slne.transaction.core.currency.Currency;
-import dev.slne.transaction.core.player.TransactionPlayer;
-import dev.slne.transaction.core.transaction.Transaction;
-import dev.slne.transaction.core.transaction.TransactionAddResult;
-import dev.slne.transaction.core.transaction.TransactionData;
+import dev.slne.transaction.api.TransactionApi;
+import dev.slne.transaction.api.currency.Currency;
+import dev.slne.transaction.api.transaction.Transaction;
+import dev.slne.transaction.api.transaction.data.TransactionData;
+import dev.slne.transaction.api.transaction.result.TransactionAddResult;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -26,6 +24,7 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public class ProtectionUser {
 
@@ -90,13 +89,12 @@ public class ProtectionUser {
      *
      * @return the future when the transaction is completed
      */
-    public SurfFutureResult<TransactionAddResult> addTransaction(UUID sender, BigDecimal amount, Currency currency,
-                                                                 TransactionData data) {
-        TransactionPlayer player = TransactionPlayer.getTransactionPlayer(uuid);
-        Transaction transaction = new Transaction(sender, uuid, amount, currency);
+    public CompletableFuture<TransactionAddResult> addTransaction(UUID sender, BigDecimal amount, Currency currency,
+                                                                  TransactionData data) {
+        Transaction transaction = TransactionApi.createTransaction(sender, uuid, currency, amount);
         transaction.setTransactionData(data);
 
-        return player.asyncAddTransaction(transaction);
+        return TransactionApi.getTransactionPlayer(uuid).addTransaction(transaction);
     }
 
     /**
@@ -107,15 +105,9 @@ public class ProtectionUser {
      *
      * @return The future when the check is completed
      */
-    public SurfFutureResult<Boolean> hasEnoughCurrency(BigDecimal amount, Currency currency) {
-        return DataApi.getDataInstance().supplyAsync(() -> {
-
-            TransactionPlayer player = TransactionPlayer.getTransactionPlayer(uuid);
-            BigDecimal sum = player.sumTransactions(currency);
-
-            BigDecimal result = sum.subtract(amount);
-            return result.compareTo(BigDecimal.ZERO) >= 0;
-        });
+    public CompletableFuture<Boolean> hasEnoughCurrency(BigDecimal amount, Currency currency) {
+        return TransactionApi.getTransactionPlayer(uuid).getBalance(currency)
+                .thenApplyAsync(sum -> sum.subtract(amount).compareTo(BigDecimal.ZERO) >= 0);
     }
 
     /**

@@ -129,7 +129,7 @@ public class RegionInfo {
      * @return The name
      */
     public String getName() {
-        return this.info != null ? this.info.getName() : this.region.getId();
+        return this.info != null ? this.info.name() : this.region.getId();
     }
 
     /**
