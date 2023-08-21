@@ -43,6 +43,8 @@ public class ProtectionShowGui extends SurfChestGui {
     private final RegionInfo regionInfo;
     private final StaticPane staticPane;
 
+    private final Player viewingPlayer;
+
     /**
      * Creates a new gui for a region
      *
@@ -57,6 +59,7 @@ public class ProtectionShowGui extends SurfChestGui {
                              RegionInfo regionInfo, Player viewingPlayer) {
         super(parentGui, 5, Component.text(regionInfo.getName()));
 
+        this.viewingPlayer = viewingPlayer;
         this.regionInfo = regionInfo;
         this.region = region;
         this.area = area;
@@ -109,8 +112,6 @@ public class ProtectionShowGui extends SurfChestGui {
 
     @Override
     public void update() {
-        Player viewingPlayer = (Player) getViewers().get(0);
-
         if (viewingPlayer.hasPermission("surf.protect.view.owners")) {
             staticPane.addItem(getOwnersItem(), 6, 1);
         }
