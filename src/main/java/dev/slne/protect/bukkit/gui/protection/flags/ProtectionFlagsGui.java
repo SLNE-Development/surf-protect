@@ -30,7 +30,7 @@ public class ProtectionFlagsGui extends SurfChestGui {
      * @param region the region
      */
     public ProtectionFlagsGui(SurfGui parent, ProtectedRegion region) {
-        super(parent, 5, Component.text(parent.getGui().getTitle() + " - Flags"));
+        super(parent, 6, Component.text(parent.getGui().getTitle() + " - Flags"));
 
         List<GuiItem> buttons = new ArrayList<>();
 
