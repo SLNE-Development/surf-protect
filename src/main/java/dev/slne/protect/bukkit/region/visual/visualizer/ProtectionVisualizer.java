@@ -12,7 +12,6 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEn
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnEntity;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-
 import dev.slne.protect.bukkit.BukkitMain;
 import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
 import dev.slne.protect.bukkit.region.visual.visualizer.color.ProtectionVisualizerColor.VisualizerColor;
@@ -21,14 +20,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 public abstract class ProtectionVisualizer<T extends ProtectedRegion> {
 
@@ -65,13 +57,10 @@ public abstract class ProtectionVisualizer<T extends ProtectedRegion> {
      * Applies a protection color to the visualizer using the region owners
      */
     private void applyProtectionColor() {
-        boolean ownsRegion = this.region.getOwners().contains(this.player.getUniqueId());
+        final boolean ownsRegion = this.region.getOwners().contains(this.player.getUniqueId());
+        final boolean memberRegion = this.region.getMembers().contains(this.player.getUniqueId());
 
-        if (ownsRegion) {
-            this.color = VisualizerColor.OWNING;
-        } else {
-            this.color = VisualizerColor.NOT_OWNING;
-        }
+        this.color = ownsRegion ? VisualizerColor.OWNING : memberRegion ? VisualizerColor.MEMBER : VisualizerColor.NOT_OWNING;
     }
 
     /**
@@ -251,7 +240,6 @@ public abstract class ProtectionVisualizer<T extends ProtectedRegion> {
      * @param value The value to clamp.
      * @param min   The minimum value.
      * @param max   The maximum value.
-     *
      * @return The clamped value.
      */
     private int clamp(int value, int min, int max) {

@@ -22,6 +22,7 @@ public class ProtectionVisualizerColor {
      */
     public enum VisualizerColor {
         OWNING(Material.LIME_STAINED_GLASS.createBlockData()),
+        MEMBER(Material.ORANGE_STAINED_GLASS.createBlockData()),
         NOT_OWNING(Material.RED_STAINED_GLASS.createBlockData()),
 
         WHITE(Material.WHITE_STAINED_GLASS.createBlockData()),
