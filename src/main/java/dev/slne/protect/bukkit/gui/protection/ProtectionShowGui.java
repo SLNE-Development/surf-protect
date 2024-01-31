@@ -33,6 +33,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public class ProtectionShowGui extends SurfChestGui {
@@ -396,9 +397,9 @@ public class ProtectionShowGui extends SurfChestGui {
                         }
 
                         BigDecimal refund = BigDecimal.valueOf(regionInfo.getRetailPrice());
-                        Currency currency = TransactionApi.getCurrency("CastCoin");
+                        Optional<Currency> currency = TransactionApi.getCurrency("CastCoin");
 
-                        if (currency == null) {
+                        if (currency.isEmpty()) {
                             protectionUser.sendMessage(MessageManager.getNoCurrencyComponent());
                             return;
                         }
@@ -421,7 +422,7 @@ public class ProtectionShowGui extends SurfChestGui {
                         }
 
                         regionManager.removeRegion(protectedRegion.getId());
-                        protectionUser.addTransaction(null, refund, currency,
+                        protectionUser.addTransaction(null, refund, currency.get(),
                                 new ProtectionSellData(event.getWhoClicked().getWorld(), protectedRegion));
 
                         new BukkitRunnable() {
@@ -431,7 +432,7 @@ public class ProtectionShowGui extends SurfChestGui {
                             }
                         }.runTask(BukkitMain.getInstance());
 
-                        protectionUser.sendMessage(MessageManager.getProtectionSoldComponent(refund, currency));
+                        protectionUser.sendMessage(MessageManager.getProtectionSoldComponent(refund, currency.get()));
                     }, clickEvent -> new ProtectionShowGui(this, region, area, distance, regionInfo,
                             (Player) event.getWhoClicked()).show(event.getWhoClicked()),
                             Component.text("Grundstück löschen?", MessageManager.PRIMARY), confirmLore);

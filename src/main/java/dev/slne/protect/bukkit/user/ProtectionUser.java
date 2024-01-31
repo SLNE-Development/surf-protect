@@ -19,6 +19,8 @@ import org.bukkit.GameMode;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -89,7 +91,9 @@ public class ProtectionUser {
      *
      * @return the future when the transaction is completed
      */
-    public CompletableFuture<TransactionAddResult> addTransaction(UUID sender, BigDecimal amount, Currency currency,
+    public CompletableFuture<TransactionAddResult> addTransaction(@Nullable UUID sender,
+                                                                  @NotNull BigDecimal amount,
+                                                                  @NotNull Currency currency,
                                                                   TransactionData data) {
         Transaction transaction = TransactionApi.createTransaction(sender, uuid, currency, amount);
         transaction.setTransactionData(data);
@@ -106,8 +110,7 @@ public class ProtectionUser {
      * @return The future when the check is completed
      */
     public CompletableFuture<Boolean> hasEnoughCurrency(BigDecimal amount, Currency currency) {
-        return TransactionApi.getTransactionPlayer(uuid).getBalance(currency)
-                .thenApplyAsync(sum -> sum.subtract(amount).compareTo(BigDecimal.ZERO) >= 0);
+        return TransactionApi.getTransactionPlayer(uuid).hasEnough(currency, amount);
     }
 
     /**

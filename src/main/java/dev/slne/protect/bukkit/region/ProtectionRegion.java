@@ -31,6 +31,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 
 public class ProtectionRegion {
 
@@ -194,9 +195,9 @@ public class ProtectionRegion {
             return RegionCreationState.TOO_LARGE;
         }
 
-        Currency currency = TransactionApi.getCurrency("CastCoin");
+        Optional<Currency> currency = TransactionApi.getCurrency("CastCoin");
 
-        if (currency == null) {
+        if (currency.isEmpty()) {
             protectionUser.sendMessage(MessageManager.getNoCurrencyComponent());
             return RegionCreationState.NO_CURRENCY;
         }
@@ -206,14 +207,14 @@ public class ProtectionRegion {
         double effectiveCost = this.calculateProtectionPrice(temporaryRegion, pricePerBlock);
         effectiveCost = Math.round(effectiveCost * 100.0) / 100.0;
         BigDecimal effectiveCostBigDecimal = BigDecimal.valueOf(effectiveCost);
-        boolean hasEnoughCurrency =
-                Boolean.TRUE.equals(protectionUser.hasEnoughCurrency(effectiveCostBigDecimal, currency).join());
+        boolean hasEnoughCurrency = // FIXME: 31.01.2024 15:02 - wtf are the joins doing here? We should make this async
+                Boolean.TRUE.equals(protectionUser.hasEnoughCurrency(effectiveCostBigDecimal, currency.get()).join());
 
         if (!hasEnoughCurrency) {
-            MessageManager.sendAreaTooExpensiveComponent(protectionUser, area, effectiveCost, currency, pricePerBlock
+            MessageManager.sendAreaTooExpensiveComponent(protectionUser, area, effectiveCost, currency.get(), pricePerBlock
                     , distanceToSpawn);
         } else {
-            MessageManager.sendAreaBuyableComponent(protectionUser, area, effectiveCost, currency, pricePerBlock,
+            MessageManager.sendAreaBuyableComponent(protectionUser, area, effectiveCost, currency.get(), pricePerBlock,
                     distanceToSpawn);
         }
 
@@ -345,15 +346,15 @@ public class ProtectionRegion {
         double effectiveCost = this.calculateProtectionPrice(temporaryRegion, pricePerBlock);
         BigDecimal effectiveCostBigDecimal = BigDecimal.valueOf(-effectiveCost);
 
-        Currency currency = TransactionApi.getCurrency("CastCoin");
+        Optional<Currency> currency = TransactionApi.getCurrency("CastCoin");
 
-        if (currency == null) {
+        if (currency.isEmpty()) {
             protectionUser.sendMessage(MessageManager.getNoCurrencyComponent());
             return;
         }
 
         TransactionAddResult transactionResult =
-                protectionUser.addTransaction(null, effectiveCostBigDecimal, currency,
+                protectionUser.addTransaction(null, effectiveCostBigDecimal, currency.get(),
                         new ProtectionBuyData(this.startLocation != null ? this.startLocation.getWorld() : null,
                                 this.temporaryRegion.getRegion())).join();
 
