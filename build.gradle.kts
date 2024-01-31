@@ -1,16 +1,21 @@
 plugins {
     `java-library`
     `maven-publish`
+
+    id("org.hibernate.build.maven-repo-auth") version "3.0.4"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 repositories {
     mavenCentral()
 
     maven("https://repo.papermc.io/repository/maven-public/")
-    maven("https://packages.slne.dev/maven/p/surf/maven")
     maven("https://repo.codemc.io/repository/maven-snapshots/")
     maven("https://repo.codemc.io/repository/maven-public/")
     maven("https://oss.sonatype.org/content/repositories/snapshots/")
+    maven("https://maven.enginehub.org/repo/")
+    maven("https://jitpack.io")
+    maven("https://packages.slne.dev/maven/p/surf/maven") { name = "space-maven" }
 }
 
 dependencies {
@@ -56,7 +61,7 @@ publishing {
 tasks {
     compileJava {
         options.encoding = Charsets.UTF_8.name()
-        options.compilerArgs.add("--parameters")
+        options.compilerArgs.add("-parameters")
     }
 
     javadoc {
