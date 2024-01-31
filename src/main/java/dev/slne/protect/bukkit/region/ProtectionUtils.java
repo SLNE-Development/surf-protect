@@ -19,12 +19,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -52,7 +47,6 @@ public class ProtectionUtils {
      * Gets the {@link RegionManager} for the given world
      *
      * @param world the world
-     *
      * @return the {@link RegionManager}
      */
     public static RegionManager getRegionManager(World world) {
@@ -63,7 +57,6 @@ public class ProtectionUtils {
      * Gets all regions for the given {@link LocalPlayer}
      *
      * @param localPlayer the {@link LocalPlayer}
-     *
      * @return the {@link Set} of {@link Map.Entry}
      */
     public static Map<World, List<Map.Entry<String, ProtectedRegion>>> getRegionsFor(LocalPlayer localPlayer) {
@@ -92,7 +85,6 @@ public class ProtectionUtils {
      * Gets all regions for the given {@link LocalPlayer}
      *
      * @param localPlayer the {@link LocalPlayer}
-     *
      * @return the {@link Set} of ProtectedRegions
      */
     public static Map<World, List<ProtectedRegion>> getRegionListFor(LocalPlayer localPlayer) {
@@ -123,7 +115,6 @@ public class ProtectionUtils {
      *
      * @param localPlayer the {@link LocalPlayer}
      * @param regionName  the {@link String} regionName
-     *
      * @return the {@link RegionInfo} or <code>null</code>
      */
     public static RegionInfo getRegionInfo(LocalPlayer localPlayer, String regionName) {
@@ -142,7 +133,6 @@ public class ProtectionUtils {
      * Checks if the given location is in the protection region
      *
      * @param location the location
-     *
      * @return true if in region
      */
     public static boolean isInProtectionRegion(Location location) {
@@ -180,7 +170,6 @@ public class ProtectionUtils {
      * Checks if the given location is inside global region
      *
      * @param location the location
-     *
      * @return true if in global region
      */
     public static boolean isGlobalRegion(Location location) {
@@ -200,7 +189,6 @@ public class ProtectionUtils {
      *
      * @param player          the {@link Player} to check
      * @param protectedRegion the {@link ProtectedRegion} to check
-     *
      * @return if in {@link ProtectedRegion}
      */
     public static boolean standsInProtectedRegion(Player player, ProtectedRegion protectedRegion) {
@@ -218,7 +206,6 @@ public class ProtectionUtils {
      * without including the {@link ProtectedRegion#GLOBAL_REGION}
      *
      * @param location the {@link com.sk89q.worldedit.util.Location}
-     *
      * @return the Set of {@link ProtectedRegion} or an empty list
      */
     public static Set<ProtectedRegion> getProtectedRegionsByLocation(Location location) {
@@ -230,7 +217,6 @@ public class ProtectionUtils {
      *
      * @param location         the {@link com.sk89q.worldedit.util.Location}
      * @param withGlobalRegion if the global region should be included
-     *
      * @return the Set of {@link ProtectedRegion} or an empty list
      */
     public static Set<ProtectedRegion> getProtectedRegionsByLocation(Location location, boolean withGlobalRegion) {
@@ -253,7 +239,6 @@ public class ProtectionUtils {
      *
      * @param protectedRegion the {@link ProtectedRegion}
      * @param location        the {@link Location}
-     *
      * @return the {@link Double} distance
      */
     public static double getDistanceToRegion(ProtectedRegion protectedRegion, Location location) {
@@ -276,7 +261,6 @@ public class ProtectionUtils {
      * Gets the area for the given region
      *
      * @param region the region
-     *
      * @return the area
      */
     public static long getArea(ProtectedRegion region) {
@@ -293,13 +277,12 @@ public class ProtectionUtils {
      * Returns the price per block for the given location
      *
      * @param protectionLocation the location
-     *
      * @return the price per block
      */
     public static double getProtectionPricePerBlock(Location protectionLocation) {
         Location spawnLocation = protectionLocation.getWorld().getSpawnLocation();
 
-        spawnLocation.clone().setY(0);
+        spawnLocation.clone().setY(0); // TODO: does nothing?
         protectionLocation.clone().setY(0);
 
         double distance = protectionLocation.distance(spawnLocation);
@@ -320,7 +303,6 @@ public class ProtectionUtils {
      * Returns the member names of a region
      *
      * @param region the region
-     *
      * @return the member names
      */
     public static List<String> getMemberNames(ProtectedRegion region) {
@@ -337,7 +319,6 @@ public class ProtectionUtils {
      * Returns the owner names of a region
      *
      * @param region the region
-     *
      * @return the owner names
      */
     public static List<String> getOwnerNames(ProtectedRegion region) {
