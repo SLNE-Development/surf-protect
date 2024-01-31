@@ -1,9 +1,12 @@
+import net.minecrell.pluginyml.paper.PaperPluginDescription
+
 plugins {
     `java-library`
     `maven-publish`
 
     id("org.hibernate.build.maven-repo-auth") version "3.0.4"
     id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("net.minecrell.plugin-yml.paper") version "0.6.0"
 }
 
 repositories {
@@ -24,7 +27,6 @@ dependencies {
     compileOnly(libs.dev.slne.surf.gui.bukkit)
     compileOnly(libs.dev.jorel.commandapi.bukkit.core)
     compileOnly(libs.com.sk89q.worldguard.worldguard.bukkit)
-//    compileOnly("net.kyori:adventure-nbt:4.13.1") // TODO: 31.01.2024 12:38 - needed?
     compileOnly(libs.dev.slne.surf.surf.api.bukkit.api)
 }
 
@@ -67,4 +69,30 @@ tasks {
     javadoc {
         options.encoding = Charsets.UTF_8.name()
     }
+}
+
+paper {
+    main = "dev.slne.protect.bukkit.BukkitMain"
+    loader = "dev.slne.protect.bukkit.BukkitLoader"
+    apiVersion = "1.20"
+    authors = listOf("ammo", "SLNE Development")
+
+    serverDependencies {
+        registerDepend("CommandAPI")
+        registerDepend("surf-data-bukkit")
+        registerDepend("surf-transactions-bukkit")
+        registerDepend("WorldGuard")
+        registerDepend("surf-gui-bukkit")
+    }
+}
+
+fun NamedDomainObjectContainerScope<PaperPluginDescription.DependencyDefinition>.registerDepend(
+    name: String,
+    required: Boolean = true,
+    load: PaperPluginDescription.RelativeLoadOrder = PaperPluginDescription.RelativeLoadOrder.BEFORE,
+    joinClasspath: Boolean = true
+) = register(name) {
+    this.required = required
+    this.load = load
+    this.joinClasspath = joinClasspath
 }

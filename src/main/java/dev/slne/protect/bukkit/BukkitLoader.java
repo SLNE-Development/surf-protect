@@ -1,5 +1,6 @@
 package dev.slne.protect.bukkit;
 
+import com.google.gson.Gson;
 import io.papermc.paper.plugin.loader.PluginClasspathBuilder;
 import io.papermc.paper.plugin.loader.PluginLoader;
 import io.papermc.paper.plugin.loader.library.impl.MavenLibraryResolver;
@@ -7,36 +8,49 @@ import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.graph.Dependency;
 import org.eclipse.aether.repository.RemoteRepository;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
+
 @SuppressWarnings("UnstableApiUsage")
 public class BukkitLoader implements PluginLoader {
 
     @Override
     @SuppressWarnings({ "java:S1192", "unstable" })
     public void classloader(PluginClasspathBuilder classpathBuilder) {
-        MavenLibraryResolver mavenResolver = new MavenLibraryResolver();
+        MavenLibraryResolver resolver = new MavenLibraryResolver();
+        PluginLibraries pluginLibraries = load();
 
-        // Repositories
-        mavenResolver.addRepository(
-                new RemoteRepository.Builder("central", "default", "https://repo1.maven.org/maven2/")
-                        .build());
-        mavenResolver.addRepository(
-                new RemoteRepository.Builder("sonatype-oss-snapshots1", "default",
-                        "https://s01.oss.sonatype.org/content/repositories/snapshots/")
-                        .build());
-        mavenResolver.addRepository(
-                new RemoteRepository.Builder("codemc-snapshots", "default",
-                        "https://repo.codemc.io/repository/maven-snapshots/")
-                        .build());
+        pluginLibraries.asDependencies().forEach(resolver::addDependency);
+        pluginLibraries.asRepositories().forEach(resolver::addRepository);
 
-        // Dependencies
-        mavenResolver.addDependency(
-                new Dependency(new DefaultArtifact("net.kyori:adventure-nbt:4.13.1"), null));
-        mavenResolver.addDependency(
-                new Dependency(new DefaultArtifact(
-                        "com.github.retrooper.packetevents:spigot:2.0.0-SNAPSHOT"), null));
-
-        // Resolve
-        classpathBuilder.addLibrary(mavenResolver);
+        classpathBuilder.addLibrary(resolver);
     }
 
+    private PluginLibraries load() {
+        try (var in = getClass().getResourceAsStream("/paper-libraries.json")) {
+            if (in != null) {
+                return new Gson().fromJson(new InputStreamReader(in, StandardCharsets.UTF_8), PluginLibraries.class);
+            }
+
+            return new PluginLibraries(Map.of(), List.of());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private record PluginLibraries(Map<String, String> repositories, List<String> dependencies) {
+        public Stream<Dependency> asDependencies() {
+            return dependencies.stream()
+                    .map(d -> new Dependency(new DefaultArtifact(d), null));
+        }
+
+        public Stream<RemoteRepository> asRepositories() {
+            return repositories.entrySet().stream()
+                    .map(e -> new RemoteRepository.Builder(e.getKey(), "default", e.getValue()).build());
+        }
+    }
 }
