@@ -1,5 +1,7 @@
 package dev.slne.protect.bukkit.user;
 
+import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayWorldBorderLerpSize;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import dev.slne.protect.bukkit.BukkitMain;
@@ -14,10 +16,7 @@ import dev.slne.transaction.api.transaction.Transaction;
 import dev.slne.transaction.api.transaction.data.TransactionData;
 import dev.slne.transaction.api.transaction.result.TransactionAddResult;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.WorldBorder;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.NotNull;
@@ -52,7 +51,6 @@ public class ProtectionUser {
      * Returns the {@link ProtectionUser} for the given {@link Player}
      *
      * @param player The player
-     *
      * @return The {@link ProtectionUser}
      */
     public static ProtectionUser getProtectionUser(OfflinePlayer player) {
@@ -63,7 +61,6 @@ public class ProtectionUser {
      * Returns the {@link ProtectionUser} for the given {@link UUID}
      *
      * @param uuid The UUID of the user
-     *
      * @return The {@link ProtectionUser}
      */
     public static ProtectionUser getProtectionUser(UUID uuid) {
@@ -89,7 +86,6 @@ public class ProtectionUser {
      * @param amount   The amount of the transaction
      * @param currency The currency of the transaction
      * @param data     The data of the transaction
-     *
      * @return the future when the transaction is completed
      */
     public CompletableFuture<TransactionAddResult> addTransaction(@Nullable UUID sender,
@@ -107,7 +103,6 @@ public class ProtectionUser {
      *
      * @param amount   The amount to check
      * @param currency The currency to check
-     *
      * @return The future when the check is completed
      */
     public CompletableFuture<Boolean> hasEnoughCurrency(BigDecimal amount, Currency currency) {
@@ -172,14 +167,23 @@ public class ProtectionUser {
         creationCooldown.put(player.getName(), System.currentTimeMillis());
 
         final WorldBorder worldBorder = Bukkit.createWorldBorder();
-        worldBorder.setCenter(player.getLocation());
-        worldBorder.setSize(ProtectionSettings.MAX_DISTANCE_FROM_PROTECTION_START * 2);
+        final Location location = player.getLocation();
+        final double worldBorderSize = ProtectionSettings.MAX_DISTANCE_FROM_PROTECTION_START;
+
+        worldBorder.setCenter(location.getBlockX(), location.getBlockZ());
+        worldBorder.setSize(worldBorderSize);
+        worldBorder.setWarningDistance(0);
 
         player.getInventory().clear();
         player.setAllowFlight(true);
         player.setFlying(true);
         player.setCollidable(false);
         player.setWorldBorder(worldBorder);
+
+        PacketEvents.getAPI().getPlayerManager().sendPacketSilently(
+                player,
+                new WrapperPlayWorldBorderLerpSize(worldBorderSize, worldBorderSize - 0.001, Long.MAX_VALUE)
+        );
 
         Inventory inventory = player.getInventory();
         inventory.setItem(0, ProtectionHotbarListener.markerItem);

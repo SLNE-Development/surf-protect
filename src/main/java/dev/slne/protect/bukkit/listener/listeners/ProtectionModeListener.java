@@ -39,7 +39,7 @@ public class ProtectionModeListener implements Listener {
             Location protectionModeLocation = regionCreation.getStartLocation();
 
             Location to = event.getTo();
-            if (to.distanceSquared(protectionModeLocation) > (ProtectionSettings.MAX_DISTANCE_FROM_PROTECTION_START + 4)) {
+            if (to.distanceSquared(protectionModeLocation) > (ProtectionSettings.MAX_DISTANCE_FROM_PROTECTION_START_SQUARED + 4)) {
                 event.getPlayer().teleport(protectionModeLocation);
             }
         }
@@ -49,7 +49,7 @@ public class ProtectionModeListener implements Listener {
      * Throwback the player with a given force
      */
     private void throwbackPlayer(Player player, Location protectionModeLocation) {
-        int maxRange = ProtectionSettings.MAX_DISTANCE_FROM_PROTECTION_START;
+        int maxRange = ProtectionSettings.MAX_DISTANCE_FROM_PROTECTION_START_SQUARED;
         int teleportMaxRange = ProtectionSettings.MAX_DISTANCE_FROM_PROTECTION_START_TELEPORT;
         double throwbackForce = ProtectionSettings.MAX_DISTANCE_FROM_PROTECTION_START_FORCE;
 

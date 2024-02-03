@@ -79,8 +79,8 @@ paper {
 
     serverDependencies {
         registerDepend("CommandAPI")
-        registerDepend("surf-data-bukkit")
-        registerDepend("surf-transactions-bukkit")
+        registerDepend("SurfBukkitAPI")
+        registerDepend("surf-transaction-bukkit")
         registerDepend("WorldGuard")
         registerDepend("surf-gui-bukkit")
     }

@@ -71,13 +71,19 @@ public class ProtectionSettings {
      * The max distance a user is allowed to go from the protection start before
      * being thrown back
      */
-    public static final int MAX_DISTANCE_FROM_PROTECTION_START = 150 * 150;
+    public static final int MAX_DISTANCE_FROM_PROTECTION_START = 150;
+
+    /**
+     * The max distance a user is allowed to go from the protection start before
+     * being thrown back
+     */
+    public static final int MAX_DISTANCE_FROM_PROTECTION_START_SQUARED = 150 * 150;
 
     /**
      * The max distance a user is allowed to go from the protection start before
      * being teleported back
      */
-    public static final int MAX_DISTANCE_FROM_PROTECTION_START_TELEPORT = MAX_DISTANCE_FROM_PROTECTION_START
+    public static final int MAX_DISTANCE_FROM_PROTECTION_START_TELEPORT = MAX_DISTANCE_FROM_PROTECTION_START_SQUARED
             + (int) Math.pow(100, 2);
 
     /**
