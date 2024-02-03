@@ -14,12 +14,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
-import org.bukkit.event.player.PlayerAttemptPickupItemEvent;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerPortalEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerSwapHandItemsEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.util.Vector;
 
@@ -41,10 +36,12 @@ public class ProtectionModeListener implements Listener {
         ProtectionRegion regionCreation = protectionUser.getRegionCreation();
 
         if (regionCreation != null) {
-            Player player = event.getPlayer();
             Location protectionModeLocation = regionCreation.getStartLocation();
 
-            throwbackPlayer(player, protectionModeLocation);
+            Location to = event.getTo();
+            if (to.distanceSquared(protectionModeLocation) > (ProtectionSettings.MAX_DISTANCE_FROM_PROTECTION_START + 4)) {
+                event.getPlayer().teleport(protectionModeLocation);
+            }
         }
     }
 

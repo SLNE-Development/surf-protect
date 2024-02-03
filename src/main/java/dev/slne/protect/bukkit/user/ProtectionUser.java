@@ -17,6 +17,7 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.WorldBorder;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.NotNull;
@@ -137,15 +138,16 @@ public class ProtectionUser {
      * @param regionCreation The {@link ProtectionRegion} to create
      */
     public boolean startRegionCreation(ProtectionRegion regionCreation) {
+        Player player = getBukkitPlayer();
         if (this.regionCreation != null) {
-            getBukkitPlayer().sendMessage(MessageManager.prefix()
+            player.sendMessage(MessageManager.prefix()
                     .append(Component.text("Du befindest dich bereits im ProtectionMode.", MessageManager.ERROR)));
             return false;
         }
 
-        if (getBukkitPlayer().getLocation().getWorld().getName().contains("_nether") ||
-                getBukkitPlayer().getLocation().getWorld().getName().contains("_end")) {
-            getBukkitPlayer().sendMessage(MessageManager.prefix()
+        if (player.getLocation().getWorld().getName().contains("_nether") ||
+                player.getLocation().getWorld().getName().contains("_end")) {
+            player.sendMessage(MessageManager.prefix()
                     .append(Component.text("Du befindest dich nicht in der Overworld.", MessageManager.ERROR)));
             return false;
         }
@@ -159,7 +161,7 @@ public class ProtectionUser {
             if (secondsLeft > 0) {
                 String time = String.format("%1$2d:%2$2d", secondsLeft / 60, secondsLeft % 60).replace(" ", "0");
 
-                getBukkitPlayer().sendMessage(Component.text().append(MessageManager.prefix())
+                player.sendMessage(Component.text().append(MessageManager.prefix())
                         .append(Component.text("Du kannst den ProtectionMode erst wieder in ", MessageManager.ERROR))
                         .append(Component.text(time, MessageManager.VARIABLE_VALUE)
                                 .append(Component.text(" Minuten verwenden.", MessageManager.ERROR))).build());
@@ -167,19 +169,24 @@ public class ProtectionUser {
                 return false;
             }
         }
-        creationCooldown.put(getBukkitPlayer().getName(), System.currentTimeMillis());
+        creationCooldown.put(player.getName(), System.currentTimeMillis());
 
-        getBukkitPlayer().getInventory().clear();
-        getBukkitPlayer().setAllowFlight(true);
-        getBukkitPlayer().setFlying(true);
-        getBukkitPlayer().setCollidable(false);
+        final WorldBorder worldBorder = Bukkit.createWorldBorder();
+        worldBorder.setCenter(player.getLocation());
+        worldBorder.setSize(ProtectionSettings.MAX_DISTANCE_FROM_PROTECTION_START * 2);
 
-        Inventory inventory = getBukkitPlayer().getInventory();
+        player.getInventory().clear();
+        player.setAllowFlight(true);
+        player.setFlying(true);
+        player.setCollidable(false);
+        player.setWorldBorder(worldBorder);
+
+        Inventory inventory = player.getInventory();
         inventory.setItem(0, ProtectionHotbarListener.markerItem);
         inventory.setItem(7, ProtectionHotbarListener.acceptItem);
         inventory.setItem(8, ProtectionHotbarListener.cancelItem);
 
-        getBukkitPlayer().openBook(new ProtectionBook().getBook());
+        player.openBook(new ProtectionBook().getBook());
 
         this.regionCreation = regionCreation;
 
@@ -206,14 +213,16 @@ public class ProtectionUser {
         ProtectionRegion creation = regionCreation;
         regionCreation = null;
 
-        getBukkitPlayer().setFallDistance(0);
-        getBukkitPlayer().teleport(creation.getStartLocation());
+        Player player = getBukkitPlayer();
+        player.setFallDistance(0);
+        player.teleport(creation.getStartLocation());
 
-        getBukkitPlayer().getInventory().setContents(creation.getStartingInventoryContent());
+        player.getInventory().setContents(creation.getStartingInventoryContent());
 
-        getBukkitPlayer().setAllowFlight(getBukkitPlayer().getGameMode().equals(GameMode.CREATIVE));
-        getBukkitPlayer().setFlying(getBukkitPlayer().getGameMode().equals(GameMode.CREATIVE));
-        getBukkitPlayer().setCollidable(true);
+        player.setAllowFlight(player.getGameMode().equals(GameMode.CREATIVE));
+        player.setFlying(player.getGameMode().equals(GameMode.CREATIVE));
+        player.setCollidable(true);
+        player.setWorldBorder(null);
 
     }
 
