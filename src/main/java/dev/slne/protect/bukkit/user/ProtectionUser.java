@@ -217,16 +217,18 @@ public class ProtectionUser {
         ProtectionRegion creation = regionCreation;
         regionCreation = null;
 
-        Player player = getBukkitPlayer();
-        player.setFallDistance(0);
-        player.teleport(creation.getStartLocation());
+        Bukkit.getScheduler().runTask(BukkitMain.getInstance(), () -> {
+            Player player = getBukkitPlayer();
+            player.setFallDistance(0);
+            player.teleportAsync(creation.getStartLocation());
 
-        player.getInventory().setContents(creation.getStartingInventoryContent());
+            player.getInventory().setContents(creation.getStartingInventoryContent());
 
-        player.setAllowFlight(player.getGameMode().equals(GameMode.CREATIVE));
-        player.setFlying(player.getGameMode().equals(GameMode.CREATIVE));
-        player.setCollidable(true);
-        player.setWorldBorder(null);
+            player.setAllowFlight(player.getGameMode().equals(GameMode.CREATIVE));
+            player.setFlying(player.getGameMode().equals(GameMode.CREATIVE));
+            player.setCollidable(true);
+            player.setWorldBorder(null);
+        });
 
     }
 

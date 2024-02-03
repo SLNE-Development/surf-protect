@@ -482,4 +482,8 @@ public class MessageManager {
     public static Component getNoTeleportLocationComponent() {
         return prefix().append(Component.text("Es wurde kein Teleportationspunkt gefunden.", ERROR));
     }
+
+    public static Component getProtectionAlreadyProcessingComponent() {
+        return prefix().append(Component.text("Bitte gedulde dich einen Moment.", ERROR));
+    }
 }

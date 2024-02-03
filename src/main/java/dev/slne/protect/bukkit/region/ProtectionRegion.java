@@ -19,7 +19,9 @@ import dev.slne.protect.bukkit.user.ProtectionUser;
 import dev.slne.transaction.api.TransactionApi;
 import dev.slne.transaction.api.currency.Currency;
 import dev.slne.transaction.api.transaction.result.TransactionAddResult;
+import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -35,6 +37,8 @@ import java.util.Optional;
 
 public class ProtectionRegion {
 
+    private static final ComponentLogger LOGGER  = ComponentLogger.logger("ProtectionRegion");
+
     private final Location startLocation;
     private final ProtectedRegion expandingProtection;
     private final ProtectionUser protectionUser;
@@ -43,6 +47,8 @@ public class ProtectionRegion {
     private final ItemStack[] startingInventoryContent;
     private TemporaryProtectionRegion temporaryRegion;
     private List<Marker> boundingMarkers;
+
+    private boolean isProcessingTransaction = false;
 
     public ProtectionRegion(ProtectionUser protectionUser, ProtectedRegion expandingProtection) {
         this.protectionUser = protectionUser;
@@ -98,7 +104,7 @@ public class ProtectionRegion {
         }
 
         // Perform actual state operation
-        RegionCreationState state = offerAccepting();
+        RegionCreationState state = offerAccepting(false);
 
         if (state.equals(RegionCreationState.OVERLAPPING)) {
             this.removeMarker(marker);
@@ -134,7 +140,7 @@ public class ProtectionRegion {
      *
      * @return the {@link RegionCreationState}
      */
-    protected RegionCreationState offerAccepting() {
+    protected RegionCreationState offerAccepting(boolean calculatePrice) {
         if (boundingMarkers.size() < ProtectionSettings.MIN_MARKERS) {
             protectionUser.sendMessage(MessageManager.getMoreMarkersComponent(boundingMarkers.size()));
             temporaryRegion = null;
@@ -206,17 +212,15 @@ public class ProtectionRegion {
         double pricePerBlock = ProtectionUtils.getProtectionPricePerBlock(teleportLocation);
         double effectiveCost = this.calculateProtectionPrice(temporaryRegion, pricePerBlock);
         effectiveCost = Math.round(effectiveCost * 100.0) / 100.0;
-        BigDecimal effectiveCostBigDecimal = BigDecimal.valueOf(effectiveCost);
-        boolean hasEnoughCurrency = // FIXME: 31.01.2024 15:02 - wtf are the joins doing here? We should make this async
-                Boolean.TRUE.equals(protectionUser.hasEnoughCurrency(effectiveCostBigDecimal, currency.get()).join());
+//        BigDecimal effectiveCostBigDecimal = BigDecimal.valueOf(effectiveCost);
+//        boolean hasEnoughCurrency = // FIXME: 31.01.2024 15:02 - wtf are the joins doing here? We should make this async
+//                Boolean.TRUE.equals(protectionUser.hasEnoughCurrency(effectiveCostBigDecimal, currency.get()).join());
 
-        if (!hasEnoughCurrency) {
-            MessageManager.sendAreaTooExpensiveComponent(protectionUser, area, effectiveCost, currency.get(), pricePerBlock
-                    , distanceToSpawn);
-        } else {
-            MessageManager.sendAreaBuyableComponent(protectionUser, area, effectiveCost, currency.get(), pricePerBlock,
-                    distanceToSpawn);
-        }
+//        if (!hasEnoughCurrency) {
+//            MessageManager.sendAreaTooExpensiveComponent(protectionUser, area, effectiveCost, currency.get(), pricePerBlock,distanceToSpawn);
+//        } else {
+            MessageManager.sendAreaBuyableComponent(protectionUser, area, effectiveCost, currency.get(), pricePerBlock,distanceToSpawn);
+//        }
 
         this.setTemporaryRegion(temporaryRegion);
         return RegionCreationState.SUCCESS;
@@ -232,7 +236,7 @@ public class ProtectionRegion {
         calculateBoundingMarkers(null);
         handleTrails();
 
-        offerAccepting();
+        offerAccepting(false);
     }
 
     /**
@@ -323,8 +327,7 @@ public class ProtectionRegion {
      */
     public void finishProtection() {
         if (temporaryRegion == null) {
-            offerAccepting();
-            return;
+            offerAccepting(true);
         }
 
         if (temporaryRegion.overlapsUnownedRegion(protectionUser.getLocalPlayer())) {
@@ -353,32 +356,59 @@ public class ProtectionRegion {
             return;
         }
 
-        TransactionAddResult transactionResult =
-                protectionUser.addTransaction(null, effectiveCostBigDecimal, currency.get(),
-                        new ProtectionBuyData(this.startLocation != null ? this.startLocation.getWorld() : null,
-                                this.temporaryRegion.getRegion())).join();
-
-        if (transactionResult != null && transactionResult.equals(TransactionAddResult.SUCCESS)) {
-            this.temporaryRegion.protect();
-
-            this.removeAllMarkers();
-            protectionUser.resetRegionCreation();
-            protectionUser.sendMessage(MessageManager.getProtectionCreatedComponent());
-        } else {
-            protectionUser.sendMessage(MessageManager.getTooExpensiveToBuyComponent());
+        if (isProcessingTransaction) {
+            protectionUser.sendMessage(MessageManager.getProtectionAlreadyProcessingComponent());
+            return;
         }
+
+        isProcessingTransaction = true;
+
+        protectionUser.hasEnoughCurrency(BigDecimal.valueOf(effectiveCost), currency.get()).thenAcceptAsync(hasEnoughCurrency -> {
+            if (!hasEnoughCurrency) {
+                protectionUser.sendMessage(MessageManager.getTooExpensiveToBuyComponent());
+                isProcessingTransaction = false;
+            } else {
+                protectionUser.addTransaction(
+                        null,
+                        effectiveCostBigDecimal,
+                        currency.get(),
+                        new ProtectionBuyData(this.startLocation != null ? this.startLocation.getWorld() : null, this.temporaryRegion.getRegion())
+                ).thenAcceptAsync(transactionAddResult -> {
+                    if (transactionAddResult != null && transactionAddResult.equals(TransactionAddResult.SUCCESS)) {
+                        this.temporaryRegion.protect();
+
+                        this.removeAllMarkers();
+                        protectionUser.resetRegionCreation();
+                        protectionUser.sendMessage(MessageManager.getProtectionCreatedComponent());
+                    } else {
+                        protectionUser.sendMessage(MessageManager.getTooExpensiveToBuyComponent());
+                    }
+
+                    isProcessingTransaction = false;
+                }).exceptionally(throwable -> {
+                    LOGGER.error("Error while buying protection", throwable);
+                    return null;
+                });
+            }
+
+        }).exceptionally(throwable -> {
+            LOGGER.error("Error while checking if user has enough currency", throwable);
+            return null;
+        });
     }
 
     /**
      * Removes all markers
      */
     public void removeAllMarkers() {
-        for (Marker marker : new ArrayList<>(markers)) {
-            removeMarker0(marker);
-        }
+        Bukkit.getScheduler().runTask(BukkitMain.getInstance(), () -> {
+            for (Marker marker : new ArrayList<>(markers)) {
+                removeMarker0(marker);
+            }
 
-        calculateBoundingMarkers(null);
-        handleTrails();
+            calculateBoundingMarkers(null);
+            handleTrails();
+        });
     }
 
     /**
