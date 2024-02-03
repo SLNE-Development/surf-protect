@@ -45,39 +45,6 @@ public class ProtectionModeListener implements Listener {
         }
     }
 
-    /**
-     * Throwback the player with a given force
-     */
-    private void throwbackPlayer(Player player, Location protectionModeLocation) {
-        int maxRange = ProtectionSettings.MAX_DISTANCE_FROM_PROTECTION_START_SQUARED;
-        int teleportMaxRange = ProtectionSettings.MAX_DISTANCE_FROM_PROTECTION_START_TELEPORT;
-        double throwbackForce = ProtectionSettings.MAX_DISTANCE_FROM_PROTECTION_START_FORCE;
-
-        Location playerLocation = player.getLocation();
-        Location playerLocationYZero = playerLocation.clone();
-        playerLocationYZero.setY(0); // Ignore Y
-        Location protectionModeLocationYZero = protectionModeLocation.clone();
-        protectionModeLocationYZero.setY(0); // Ignore Y
-
-        Vector playerLocationVector = playerLocation.toVector();
-        Vector protectionModeLocationVector = protectionModeLocation.toVector();
-        Vector throwbackVector =
-                protectionModeLocationVector.subtract(playerLocationVector).multiply(throwbackForce).setY(0);
-
-        double currentDistance = playerLocationYZero.distanceSquared(protectionModeLocationYZero);
-
-        if (currentDistance >= maxRange && currentDistance < teleportMaxRange) {
-            player.setVelocity(throwbackVector);
-        } else if (currentDistance >= teleportMaxRange) {
-            player.teleport(protectionModeLocation);
-        } else {
-            return;
-        }
-
-        player.sendMessage(MessageManager.getTooFarAwayFromStartComponent());
-        player.playSound(playerLocation, Sound.ENTITY_ENDER_DRAGON_FLAP, .75f, 2);
-    }
-
     @EventHandler
     public void onItemDrop(PlayerDropItemEvent event) {
         ProtectionUser protectionUser = ProtectionUser.getProtectionUser(event.getPlayer());
