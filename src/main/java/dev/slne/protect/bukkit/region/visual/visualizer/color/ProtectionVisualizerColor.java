@@ -1,5 +1,6 @@
 package dev.slne.protect.bukkit.region.visual.visualizer.color;
 
+import com.github.retrooper.packetevents.protocol.world.states.WrappedBlockState;
 import dev.slne.protect.bukkit.BukkitMain;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import org.bukkit.Material;
@@ -42,7 +43,7 @@ public class ProtectionVisualizerColor {
         RED(Material.RED_STAINED_GLASS.createBlockData()),
         BLACK(Material.BLACK_STAINED_GLASS.createBlockData());
 
-        private final int id;
+        private final WrappedBlockState blockState;
 
         /**
          * Create a new color
@@ -50,7 +51,7 @@ public class ProtectionVisualizerColor {
          * @param blockState the block state
          */
         VisualizerColor(BlockData blockState) {
-            this.id = SpigotConversionUtil.fromBukkitBlockData(blockState).getGlobalId();
+            this.blockState = SpigotConversionUtil.fromBukkitBlockData(blockState);
         }
 
         /**
@@ -58,8 +59,10 @@ public class ProtectionVisualizerColor {
          *
          * @return the id
          */
-        public int getId() {
-            return id;
+        public WrappedBlockState getBlockState() {
+            return blockState;
         }
+
+
     }
 }

@@ -5,6 +5,7 @@ import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import com.github.retrooper.packetevents.protocol.entity.type.EntityType;
 import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes;
+import com.github.retrooper.packetevents.protocol.world.states.type.StateTypes;
 import com.github.retrooper.packetevents.util.Vector3d;
 import com.github.retrooper.packetevents.util.Vector3f;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDestroyEntities;
@@ -15,10 +16,16 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import dev.slne.protect.bukkit.BukkitMain;
 import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
 import dev.slne.protect.bukkit.region.visual.visualizer.color.ProtectionVisualizerColor.VisualizerColor;
+import dev.slne.surf.surfapi.bukkit.api.SurfBukkitApi;
+import dev.slne.surf.surfapi.bukkit.api.packet.entity.SurfBukkitPacketEntityApi;
+import dev.slne.surf.surfapi.core.api.packet.entity.entities.display.PacketBlockDisplay;
+import dev.slne.surf.surfapi.core.api.util.LocationFactory;
+import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.spongepowered.math.GenericMath;
 
 import java.util.*;
 
@@ -136,12 +143,16 @@ public abstract class ProtectionVisualizer<T extends ProtectedRegion> {
      * @param entityId The entity id of the visualizer.
      */
     private void killVisualizer(Player player, int entityId) {
-        WrapperPlayServerDestroyEntities destroyEntities = new WrapperPlayServerDestroyEntities(entityId);
-        PacketEvents.getAPI().getPlayerManager().sendPacket(player, destroyEntities);
+        final SurfBukkitPacketEntityApi api = SurfBukkitPacketEntityApi.get();
+        api.getEntity(entityId).ifPresent(api::deleteEntity);
 
-        Location location = this.entityIds.keySet().stream().filter(loc -> this.entityIds.get(loc) == entityId)
-                .findFirst().orElse(null);
-        this.entityIds.remove(location);
+        List<Map.Entry<Location, Integer>> toDelete = entityIds.entrySet().stream()
+                .filter(entry -> entry.getValue() == entityId)
+                .toList();
+
+        for (Map.Entry<Location, Integer> entry : toDelete) {
+            entityIds.remove(entry.getKey());
+        }
     }
 
     /**
@@ -205,33 +216,18 @@ public abstract class ProtectionVisualizer<T extends ProtectedRegion> {
             return;
         }
 
-        int entityId = getRandomEntityId();
-        UUID uuid = UUID.randomUUID();
-        EntityType entityType = EntityTypes.BLOCK_DISPLAY;
-        Vector3d position = new Vector3d(location.getX(), location.getY(), location.getZ());
-        float pitch = 0;
-        float yaw = 0;
-        float headYaw = 0;
-        int data = 0;
-        Vector3d velocity = new Vector3d(0, 0, 0);
+        PacketBlockDisplay display = SurfBukkitPacketEntityApi.get().spawnEntity(PacketBlockDisplay.class, UUID.randomUUID(), displayInit -> {
+            displayInit.blockState(color.getBlockState());
 
-        WrapperPlayServerSpawnEntity spawnEntity = new WrapperPlayServerSpawnEntity(entityId, Optional.of(uuid),
-                entityType, position, pitch, yaw, headYaw, data, Optional.of(velocity));
+            if (this.scaleUp) {
+                displayInit.scale(new org.spongepowered.math.vector.Vector3f(1, ProtectionSettings.PROTECTION_VISUALIZER_HEIGHT, 1));
+            }
+        });
 
-        List<EntityData> entityData = new ArrayList<>();
-        entityData.add(new EntityData(22, EntityDataTypes.BLOCK_STATE, color.getId()));
+        display.addViewer(player.getUniqueId());
+        display.spawn(SpigotConversionUtil.fromBukkitLocation(location));
 
-        if (this.scaleUp) {
-            Vector3f scale = new Vector3f(1, ProtectionSettings.PROTECTION_VISUALIZER_HEIGHT, 1);
-            entityData.add(new EntityData(11, EntityDataTypes.VECTOR3F, scale));
-        }
-
-        WrapperPlayServerEntityMetadata metaData = new WrapperPlayServerEntityMetadata(entityId, entityData);
-
-        PacketEvents.getAPI().getPlayerManager().sendPacket(player, spawnEntity);
-        PacketEvents.getAPI().getPlayerManager().sendPacket(player, metaData);
-
-        this.entityIds.put(location, entityId);
+        this.entityIds.put(location, display.entityId());
     }
 
     /**
@@ -244,23 +240,6 @@ public abstract class ProtectionVisualizer<T extends ProtectedRegion> {
      */
     private int clamp(int value, int min, int max) {
         return Math.max(min, Math.min(max, value));
-    }
-
-    /**
-     * Get a random entity id.
-     *
-     * @return The entity id.
-     */
-    private int getRandomEntityId() {
-        Random random = BukkitMain.getRandom();
-        int entityId = random.nextInt(Integer.MAX_VALUE);
-        Collection<Integer> usedEntityIds = new ArrayList<>(this.entityIds.values());
-
-        while (usedEntityIds.contains(entityId)) {
-            entityId = random.nextInt(Integer.MAX_VALUE);
-        }
-
-        return entityId;
     }
 
     /**
