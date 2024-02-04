@@ -219,7 +219,7 @@ public class ProtectionHotbarListener implements Listener, Colors {
                 }
 
                 BlockData previousData = event.getBlockReplacedState().getBlockData();
-                final Marker marker = regionCreation.createMarker(event.getBlock(), previousData);
+                final Marker marker = regionCreation.createMarker(event.getBlock(), previousData, false);
 
                 if (marker == null) {
                     event.setCancelled(true);

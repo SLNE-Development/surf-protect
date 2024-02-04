@@ -80,7 +80,7 @@ public class ProtectionRegion {
                 Location location = new Location(world, vector.getX(), 0, vector.getZ());
                 location.setY(world.getHighestBlockYAt(location, ProtectionSettings.PROTECTION_HEIGHTMAP) + (double) 1);
 
-                createMarker(location.getBlock(), location.getBlock().getBlockData());
+                createMarker(location.getBlock(), location.getBlock().getBlockData(), true);
             }
         }
     }
@@ -99,10 +99,11 @@ public class ProtectionRegion {
      *
      * @param block        the block of the location
      * @param previousData the previous data in that location
+     * @param isExpanding  if the markers get placed because the plugin is expanding the region
      *
      * @return the new marker or null, if marker could not be created
      */
-    public Marker createMarker(Block block, BlockData previousData) {
+    public Marker createMarker(Block block, BlockData previousData, boolean isExpanding) {
         Marker marker = new Marker(this, block.getLocation(), previousData);
         calculateBoundingMarkers(marker);
 
@@ -111,14 +112,16 @@ public class ProtectionRegion {
         }
 
         // Perform actual state operation
-        RegionCreationState state = offerAccepting(false);
+        if (!isExpanding) {
+            RegionCreationState state = offerAccepting(false);
 
-        if (state.equals(RegionCreationState.OVERLAPPING)) {
-            this.removeMarker(marker);
-            this.handleTrails();
-            this.calculateBoundingMarkers(marker);
+            if (state.equals(RegionCreationState.OVERLAPPING)) {
+                this.removeMarker(marker);
+                this.handleTrails();
+                this.calculateBoundingMarkers(marker);
 
-            return null;
+                return null;
+            }
         }
 
         markers.add(marker);
@@ -222,6 +225,11 @@ public class ProtectionRegion {
         double pricePerBlock = ProtectionUtils.getProtectionPricePerBlock(teleportLocation);
         double effectiveCost = this.calculateProtectionPrice(temporaryRegion, pricePerBlock);
         effectiveCost = Math.round(effectiveCost * 100.0) / 100.0;
+
+        if (effectiveCost <= 0) {
+            protectionUser.sendMessage(MessageManager.getAreaTooSmallComponent());
+            return RegionCreationState.TOO_SMALL;
+        }
 
         MessageManager.sendAreaBuyableComponent(protectionUser, area, effectiveCost, currency.get(), pricePerBlock,distanceToSpawn);
 

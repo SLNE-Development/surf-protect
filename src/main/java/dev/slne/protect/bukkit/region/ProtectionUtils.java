@@ -280,12 +280,13 @@ public class ProtectionUtils {
      * @return the price per block
      */
     public static double getProtectionPricePerBlock(Location protectionLocation) {
-        Location spawnLocation = protectionLocation.getWorld().getSpawnLocation();
+        Location protectionLocationClone = protectionLocation.clone();
+        Location spawnLocation = protectionLocation.getWorld().getSpawnLocation().clone();
 
-        spawnLocation.clone().setY(0); // TODO: does nothing?
-        protectionLocation.clone().setY(0);
+        spawnLocation.setY(0);
+        protectionLocationClone.setY(0);
 
-        double distance = protectionLocation.distance(spawnLocation);
+        double distance = protectionLocationClone.distance(spawnLocation);
         double pricePerBlock = ProtectionSettings.PRICE_PER_BLOCK;
         double spawnProtection = ProtectionSettings.PRICE_PER_BLOCK_SPAWN_PROTECTION;
 
