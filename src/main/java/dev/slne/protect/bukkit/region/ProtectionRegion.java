@@ -22,6 +22,7 @@ import dev.slne.transaction.api.transaction.result.TransactionAddResult;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -378,7 +379,7 @@ public class ProtectionRegion {
                         this.temporaryRegion.protect();
 
                         this.removeAllMarkers();
-                        protectionUser.resetRegionCreation();
+                        Bukkit.getScheduler().runTask(BukkitMain.getInstance(), protectionUser::resetRegionCreation);
                         protectionUser.sendMessage(MessageManager.getProtectionCreatedComponent());
                     } else {
                         protectionUser.sendMessage(MessageManager.getTooExpensiveToBuyComponent());
