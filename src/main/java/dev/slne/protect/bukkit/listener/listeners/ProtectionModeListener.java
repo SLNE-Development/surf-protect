@@ -45,9 +45,8 @@ public class ProtectionModeListener implements Listener {
     @EventHandler
     public void onItemDrop(PlayerDropItemEvent event) {
         ProtectionUser protectionUser = ProtectionUser.getProtectionUser(event.getPlayer());
-        ProtectionRegion regionCreation = protectionUser.getRegionCreation();
 
-        if (regionCreation != null) {
+        if (protectionUser.hasRegionCreation()) {
             event.setCancelled(true);
         }
     }
@@ -55,9 +54,8 @@ public class ProtectionModeListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPortal(PlayerPortalEvent event) {
         ProtectionUser protectionUser = ProtectionUser.getProtectionUser(event.getPlayer());
-        ProtectionRegion regionCreation = protectionUser.getRegionCreation();
 
-        if (regionCreation != null || protectionUser.hasRegionCreation()) {
+        if (protectionUser.hasRegionCreation()) {
             event.setCancelled(true);
         }
     }
@@ -69,9 +67,8 @@ public class ProtectionModeListener implements Listener {
         }
 
         ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
-        ProtectionRegion regionCreation = protectionUser.getRegionCreation();
 
-        if (regionCreation != null) {
+        if (protectionUser.hasRegionCreation()) {
             event.setCancelled(true);
         }
     }
@@ -79,9 +76,8 @@ public class ProtectionModeListener implements Listener {
     @EventHandler
     public void onItemPickup(PlayerAttemptPickupItemEvent event) {
         ProtectionUser protectionUser = ProtectionUser.getProtectionUser(event.getPlayer());
-        ProtectionRegion regionCreation = protectionUser.getRegionCreation();
 
-        if (regionCreation != null) {
+        if (protectionUser.hasRegionCreation()) {
             event.setCancelled(true);
         }
     }
@@ -89,9 +85,8 @@ public class ProtectionModeListener implements Listener {
     @EventHandler
     public void onHandSwap(PlayerSwapHandItemsEvent event) {
         ProtectionUser protectionUser = ProtectionUser.getProtectionUser(event.getPlayer());
-        ProtectionRegion regionCreation = protectionUser.getRegionCreation();
 
-        if (regionCreation != null) {
+        if (protectionUser.hasRegionCreation()) {
             event.setCancelled(true);
         }
     }
@@ -100,9 +95,8 @@ public class ProtectionModeListener implements Listener {
     public void onEntityAttack(PrePlayerAttackEntityEvent event) {
         Player player = event.getPlayer();
         ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
-        ProtectionRegion regionCreation = protectionUser.getRegionCreation();
 
-        if (regionCreation != null) {
+        if (protectionUser.hasRegionCreation()) {
             event.setCancelled(true);
         }
     }
@@ -114,15 +108,14 @@ public class ProtectionModeListener implements Listener {
         }
 
         ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
-        ProtectionRegion regionCreation = protectionUser.getRegionCreation();
 
-        if (regionCreation != null) {
+        if (protectionUser.hasRegionCreation()) {
             event.setCancelled(true);
         }
     }
 
     @EventHandler
-    public void onServerStop(PluginDisableEvent event) {
+    public void onServerStop(PluginDisableEvent event) { // TODO: 04.02.2024 11:10 - move to a better place
         for (ProtectionUser protectionUser : BukkitMain.getBukkitInstance().getUserManager().getUsers()) {
             if (protectionUser.hasRegionCreation()) {
                 protectionUser.getRegionCreation().cancelProtection();
