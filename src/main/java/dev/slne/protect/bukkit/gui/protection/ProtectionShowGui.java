@@ -344,21 +344,21 @@ public class ProtectionShowGui extends SurfChestGui {
     @SuppressWarnings("java:S3776")
     private GuiItem getProtectionSellItem() {
         return new GuiItem(
-                ItemUtils.item(Material.BEDROCK, 1, 0, Component.text("Grundstück löschen", MessageManager.PRIMARY),
-                        Component.empty(), Component.text("Löscht das Grundstück", NamedTextColor.GRAY),
+                ItemUtils.item(Material.BEDROCK, 1, 0, Component.text("Grundstück verkaufen", MessageManager.PRIMARY),
+                        Component.empty(), Component.text("Verkauft das Grundstück", NamedTextColor.GRAY),
                         Component.empty()),
                 event -> {
                     Player player = (Player) event.getWhoClicked();
 
                     List<Component> confirmLore = new ArrayList<>(
-                            ItemUtils.splitComponent("Bist du dir sicher, dass du das Grundstück löschen möchtest?", 50,
+                            ItemUtils.splitComponent("Bist du dir sicher, dass du das Grundstück verkaufen möchtest?", 50,
                                     MessageManager.ERROR));
                     confirmLore.add(Component.empty());
                     confirmLore.add(Component.text("Achtung: Das Grundstück kann nicht wiederhergestellt werden!",
                             MessageManager.ERROR));
                     confirmLore.add(Component.empty());
                     confirmLore
-                            .add(Component.text("Das Grundstück wird dir für einen Anteil des Kaufpreises erstattet.",
+                            .add(Component.text("Für das Grundstück wird dir ein Anteil des Kaufpreises erstattet.",
                                     NamedTextColor.GRAY));
 
                     ConfirmationGui confirmationGui = new ConfirmationGui(this, confirmEvent -> {
@@ -380,20 +380,6 @@ public class ProtectionShowGui extends SurfChestGui {
                                     .append(Component.text("Das Grundstück wird gerade bearbeitet!",
                                             MessageManager.ERROR)));
                             return;
-                        }
-
-                        List<UUID> members = new ArrayList<>();
-                        members.addAll(protectedRegion.getOwners().getPlayerDomain().getUniqueIds());
-                        members.addAll(protectedRegion.getMembers().getPlayerDomain().getUniqueIds());
-
-                        for (UUID member : members) {
-                            Player memberPlayer = Bukkit.getPlayer(member);
-
-                            if (memberPlayer == null || !memberPlayer.isOnline()) {
-                                continue;
-                            }
-
-                            notifyDeletion(player, regionInfo);
                         }
 
                         BigDecimal refund = BigDecimal.valueOf(regionInfo.getRetailPrice());
@@ -419,6 +405,20 @@ public class ProtectionShowGui extends SurfChestGui {
                             }.runTask(BukkitMain.getInstance());
 
                             return;
+                        }
+
+                        List<UUID> members = new ArrayList<>();
+                        members.addAll(protectedRegion.getOwners().getPlayerDomain().getUniqueIds());
+                        members.addAll(protectedRegion.getMembers().getPlayerDomain().getUniqueIds());
+
+                        for (UUID member : members) {
+                            Player memberPlayer = Bukkit.getPlayer(member);
+
+                            if (memberPlayer == null || !memberPlayer.isOnline()) {
+                                continue;
+                            }
+
+                            notifyDeletion(player, regionInfo);
                         }
 
                         regionManager.removeRegion(protectedRegion.getId());
