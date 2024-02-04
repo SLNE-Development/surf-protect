@@ -3,6 +3,7 @@ package dev.slne.protect.bukkit.command;
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.slne.protect.bukkit.command.commands.ProtectionWhoCommand;
+import dev.slne.protect.bukkit.command.commands.protection.MigrateFlagCommand;
 import dev.slne.protect.bukkit.command.commands.protection.ProtectionCommand;
 
 import java.util.HashSet;
@@ -18,6 +19,7 @@ public class BukkitCommandManager {
     public void registerCommands() {
         register(new ProtectionCommand());
         register(new ProtectionWhoCommand());
+        register(new MigrateFlagCommand());
     }
 
     public void unregisterCommands() {
