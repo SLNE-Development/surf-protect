@@ -1,7 +1,9 @@
 package dev.slne.protect.bukkit.listener.listeners;
 
-import java.util.ArrayList;
-
+import com.sk89q.worldguard.protection.flags.Flags;
+import com.sk89q.worldguard.protection.flags.StateFlag.State;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import dev.slne.protect.bukkit.region.ProtectionUtils;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -10,53 +12,50 @@ import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockIgniteEvent.IgniteCause;
 import org.bukkit.event.entity.EntityExplodeEvent;
 
-import com.sk89q.worldguard.protection.flags.Flags;
-import com.sk89q.worldguard.protection.flags.StateFlag.State;
-import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-
-import dev.slne.protect.bukkit.region.ProtectionUtils;
+import java.util.List;
 
 public class RegionListener implements Listener {
 
-	@EventHandler
-	public void onIgnite(BlockIgniteEvent event) {
-		boolean valid = event.getCause().equals(IgniteCause.FLINT_AND_STEEL)
-				|| event.getCause().equals(IgniteCause.FIREBALL);
-		event.setCancelled(!(valid) && !(ProtectionUtils.isGlobalRegion(event.getBlock().getLocation())));
-	}
+    @EventHandler
+    public void onIgnite(BlockIgniteEvent event) {
+        IgniteCause cause = event.getCause();
 
-	@EventHandler
-	public void onEntityExplode(EntityExplodeEvent event) {
-		for (Block block : new ArrayList<>(event.blockList())) {
-			for (ProtectedRegion protectedRegion : ProtectionUtils.getProtectedRegionsByLocation(block.getLocation())) {
-				State state = protectedRegion.getFlag(Flags.OTHER_EXPLOSION);
+        if (cause.equals(IgniteCause.FLINT_AND_STEEL) || cause.equals(IgniteCause.FIREBALL)) {
+            return; // Allow
+        }
 
-				if (state == null) {
-					state = State.DENY;
-				}
+        if (ProtectionUtils.isGlobalRegion(event.getBlock().getLocation())) {
+            return; // Allow
+        }
 
-				if (state.equals(State.DENY)) {
-					event.blockList().remove(block);
-				}
-			}
-		}
-	}
+        event.setCancelled(true);
+    }
 
-	@EventHandler
-	public void onBlockExplode(BlockExplodeEvent event) {
-		for (Block block : new ArrayList<>(event.blockList())) {
-			for (ProtectedRegion protectedRegion : ProtectionUtils.getProtectedRegionsByLocation(block.getLocation())) {
-				State state = protectedRegion.getFlag(Flags.OTHER_EXPLOSION);
+    @EventHandler
+    public void onEntityExplode(EntityExplodeEvent event) {
+        performBlockRemove(event.blockList());
+    }
 
-				if (state == null) {
-					state = State.DENY;
-				}
+    @EventHandler
+    public void onBlockExplode(BlockExplodeEvent event) {
+        performBlockRemove(event.blockList());
+    }
 
-				if (state.equals(State.DENY)) {
-					event.blockList().remove(block);
-				}
-			}
-		}
-	}
+    private void performBlockRemove(List<Block> blocks) {
+        blocks.removeIf(block -> {
+            for (ProtectedRegion protectedRegion : ProtectionUtils.getProtectedRegionsByLocation(block.getLocation())) {
+                State state = protectedRegion.getFlag(Flags.OTHER_EXPLOSION);
 
+                if (state == null) {
+                    state = State.DENY;
+                }
+
+                if (state.equals(State.DENY)) {
+                    return true;
+                }
+            }
+
+            return false;
+        });
+    }
 }
