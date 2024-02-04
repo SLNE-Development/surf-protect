@@ -31,7 +31,6 @@ public class BorderCrossingHandler extends Handler {
 		// Check if player is entering a region
 		for(ProtectedRegion region : entered) {
 			handleEntryOrExitMessage(player, region, true);
-
 		}
 
 		// Check if player is leaving a region

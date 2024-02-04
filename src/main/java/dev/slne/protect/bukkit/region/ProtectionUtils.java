@@ -10,6 +10,7 @@ import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
 import com.sk89q.worldguard.protection.regions.RegionQuery;
+import dev.slne.protect.bukkit.math.Mth;
 import dev.slne.protect.bukkit.region.flags.ProtectionFlagsRegistry;
 import dev.slne.protect.bukkit.region.info.RegionInfo;
 import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
@@ -287,17 +288,13 @@ public class ProtectionUtils {
         protectionLocationClone.setY(0);
 
         double distance = protectionLocationClone.distance(spawnLocation);
-        double pricePerBlock = ProtectionSettings.PRICE_PER_BLOCK;
         double spawnProtection = ProtectionSettings.PRICE_PER_BLOCK_SPAWN_PROTECTION;
 
         if (distance < spawnProtection) {
             return Long.MAX_VALUE;
         }
 
-        double calculation = -0.0016666666667 * distance + 12.3333333333;
-        calculation = Math.round(calculation * 100.0) / 100.0;
-
-        return Math.max(pricePerBlock, calculation);
+        return Mth.calculatePricePerBlock(distance);
     }
 
     /**
