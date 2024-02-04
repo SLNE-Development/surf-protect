@@ -23,8 +23,6 @@ public class ProtectionCommand extends CommandAPICommand {
 
             gui.show(player);
         });
-
-        register();
     }
 
 }

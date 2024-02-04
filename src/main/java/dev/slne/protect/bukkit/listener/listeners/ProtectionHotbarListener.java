@@ -8,8 +8,8 @@ import dev.slne.protect.bukkit.region.ProtectionUtils;
 import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
 import dev.slne.protect.bukkit.region.visual.Marker;
 import dev.slne.protect.bukkit.user.ProtectionUser;
+import dev.slne.surf.surfapi.core.api.messages.Colors;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -18,41 +18,54 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockExplodeEvent;
-import org.bukkit.event.block.BlockFromToEvent;
-import org.bukkit.event.block.BlockPistonExtendEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.*;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 
-public class ProtectionHotbarListener implements Listener {
+public class ProtectionHotbarListener implements Listener, Colors {
 
     /**
      * The marker {@link ItemStack}
      */
-    public static final ItemStack markerItem = ItemUtils.item(Material.REDSTONE_TORCH, ProtectionSettings.MARKERS, 0,
-            Component.text("Marker", NamedTextColor.YELLOW), Component.empty(),
-            Component.text("Platziere die Marker um dein Grundstück" + " zu " + "definieren",
-                    NamedTextColor.GRAY),
-            Component.empty());
+    public static final ItemStack markerItem = ItemUtils.item(
+            Material.REDSTONE_TORCH,
+            ProtectionSettings.MARKERS,
+            0,
+            Component.text("Marker", YELLOW),
+            Component.empty(),
+            Component.text("Platziere die Marker um dein Grundstück zu definieren", GRAY),
+            Component.empty()
+    );
 
     /**
      * The {@link ItemStack} to accept the protection
      */
-    public static final ItemStack acceptItem = ItemUtils.item(Material.LIME_CONCRETE, 1, 0,
-            Component.text("Kaufen", NamedTextColor.GREEN),
-            Component.empty(), Component.text("Kaufe das Grundstück", NamedTextColor.GRAY), Component.empty());
+    public static final ItemStack acceptItem = ItemUtils.item(
+            Material.LIME_CONCRETE,
+            1,
+            0,
+            Component.text("Kaufen", GREEN),
+            Component.empty(),
+            Component.text("Kaufe das Grundstück", GRAY),
+            Component.empty()
+    );
 
     /**
      * The {@link ItemStack} to cancel the protection
      */
-    public static final ItemStack cancelItem = ItemUtils.item(Material.RED_CONCRETE, 1, 0,
-            Component.text("Abbrechen", NamedTextColor.RED),
-            Component.empty(), Component.text("Bricht den Kauf ab", NamedTextColor.GRAY), Component.empty());
+    public static final ItemStack cancelItem = ItemUtils.item(
+            Material.RED_CONCRETE,
+            1,
+            0,
+            Component.text("Abbrechen", RED),
+            Component.empty(),
+            Component.text("Bricht den Kauf ab", GRAY),
+            Component.empty()
+    );
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
@@ -60,34 +73,39 @@ public class ProtectionHotbarListener implements Listener {
             return;
         }
 
-        ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
-        ProtectionRegion regionCreation = protectionUser.getRegionCreation();
-
-        if (regionCreation != null) {
+        if (isInRegionCreation(player)) {
             event.setCancelled(true);
         }
     }
 
     @EventHandler
     public void onClick(PlayerInteractEvent event) {
-        Player player = event.getPlayer();
-        ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
+        final Player player = event.getPlayer();
+        final ProtectionRegion regionCreation = getRegionCreation(player);
 
-        ProtectionRegion regionCreation = protectionUser.getRegionCreation();
-
-        if (regionCreation == null) {
+        if (!isInRegionCreation(player)) {
             return;
         }
 
-        ItemStack clickedItem = event.getItem();
-        if (clickedItem == null || clickedItem.getItemMeta() == null || !clickedItem.getItemMeta().hasDisplayName()) {
+        final ItemStack clickedItem = event.getItem();
+
+        if (clickedItem == null || !clickedItem.hasItemMeta()) {
             return;
         }
 
-        if (clickedItem.getItemMeta().displayName().equals(acceptItem.getItemMeta().displayName())) {
+        final ItemMeta itemMeta = clickedItem.getItemMeta();
+        if (itemMeta == null || !itemMeta.hasDisplayName()) {
+            return;
+        }
+
+        final Component displayName = itemMeta.displayName();
+
+        assert displayName != null;
+
+        if (displayName.equals(acceptItem.getItemMeta().displayName())) { // TODO: 04.02.2024 09:54 - Use pdc instead of display name
             regionCreation.finishProtection();
             event.setCancelled(true);
-        } else if (clickedItem.getItemMeta().displayName().equals(cancelItem.getItemMeta().displayName())) {
+        } else if (displayName.equals(cancelItem.getItemMeta().displayName())) {
             regionCreation.cancelProtection();
             event.setCancelled(true);
         }
@@ -183,11 +201,15 @@ public class ProtectionHotbarListener implements Listener {
         if (ProtectionUtils.isInProtectionRegion(location)) {
             ItemStack clickedItem = event.getItemInHand();
 
-            if (clickedItem.getItemMeta() == null || !clickedItem.getItemMeta().hasDisplayName()) {
+            final ItemMeta itemMeta = clickedItem.getItemMeta();
+            if (itemMeta == null || !itemMeta.hasDisplayName()) {
                 return;
             }
 
-            if (clickedItem.getItemMeta().displayName().equals(markerItem.getItemMeta().displayName())) {
+            final Component displayName = itemMeta.displayName();
+            assert displayName != null;
+
+            if (displayName.equals(markerItem.getItemMeta().displayName())) {
                 ProtectionRegion regionCreation = protectionUser.getRegionCreation();
 
                 if (regionCreation == null) {
@@ -216,4 +238,11 @@ public class ProtectionHotbarListener implements Listener {
         }
     }
 
+    private ProtectionRegion getRegionCreation(Player player) {
+        return ProtectionUser.getProtectionUser(player).getRegionCreation();
+    }
+
+    private boolean isInRegionCreation(Player player) {
+        return getRegionCreation(player) != null;
+    }
 }

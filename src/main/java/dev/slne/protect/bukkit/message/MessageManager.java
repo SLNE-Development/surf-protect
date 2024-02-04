@@ -7,13 +7,13 @@ import com.sk89q.worldguard.util.profile.cache.ProfileCache;
 import dev.slne.protect.bukkit.region.info.RegionInfo;
 import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
 import dev.slne.protect.bukkit.user.ProtectionUser;
+import dev.slne.surf.surfapi.core.api.messages.Colors;
 import dev.slne.transaction.api.currency.Currency;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 
 import java.math.BigDecimal;
@@ -24,20 +24,7 @@ import java.util.List;
 /**
  * Represents the message manager
  */
-public class MessageManager {
-
-    public static final TextColor PRIMARY = TextColor.fromHexString("#3b92d1");
-    public static final TextColor SECONDARY = TextColor.fromHexString("#5b5b5b");
-
-    public static final TextColor INFO = TextColor.fromHexString("#40d1db");
-    public static final TextColor SUCCESS = TextColor.fromHexString("#65ff64");
-    public static final TextColor WARNING = TextColor.fromHexString("#f9c353");
-    public static final TextColor ERROR = TextColor.fromHexString("#ee3d51");
-
-    public static final TextColor VARIABLE_KEY = MessageManager.INFO;
-    public static final TextColor VARIABLE_VALUE = MessageManager.WARNING;
-    public static final TextColor SPACER = NamedTextColor.GRAY;
-    public static final TextColor DARK_SPACER = NamedTextColor.DARK_GRAY;
+public class MessageManager implements Colors {
 
     /**
      * Utility class
@@ -61,13 +48,7 @@ public class MessageManager {
      * @return The prefix for the plugin.
      */
     public static Component prefix() {
-        TextComponent.Builder builder = Component.text();
-
-        builder.append(Component.text(">> ", NamedTextColor.DARK_GRAY));
-        builder.append(Component.text("SP", MessageManager.PRIMARY));
-        builder.append(Component.text(" | ", NamedTextColor.DARK_GRAY));
-
-        return builder.build();
+       return PREFIX;
     }
 
     /**

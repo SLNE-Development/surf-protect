@@ -1,15 +1,13 @@
 package dev.slne.protect.bukkit.command.commands;
 
-import java.util.Set;
-
-import org.bukkit.Location;
-
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.slne.protect.bukkit.message.MessageManager;
 import dev.slne.protect.bukkit.region.ProtectionUtils;
 import dev.slne.protect.bukkit.region.info.RegionInfo;
+import org.bukkit.Location;
+
+import java.util.Set;
 
 public class ProtectionWhoCommand extends CommandAPICommand {
 
@@ -35,8 +33,6 @@ public class ProtectionWhoCommand extends CommandAPICommand {
 				player.sendMessage(MessageManager.getPWhoComponent(regionInfo));
 			}
 		});
-
-		register();
 	}
 
 }

@@ -5,7 +5,6 @@ import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
 import net.kyori.adventure.inventory.Book;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,20 +17,22 @@ public class ProtectionBook {
      * Creates a new protection book
      */
     public ProtectionBook() {
-        List<Component> pages = new ArrayList<>();
+        final List<Component> pages = new ArrayList<>();
+        final TextComponent.Builder pageOne = Component.text();
+        final TextComponent.Builder pageTwo = Component.text();
 
-        TextComponent.Builder pageOne = Component.text();
+        final Component titel = Component.text("Protection System", MessageManager.PRIMARY);
+
         pageOne.append(Component.text("Willkommen im Protection System!", MessageManager.PRIMARY));
         pageOne.append(Component.newline());
         pageOne.append(Component.newline());
         pageOne.append(Component.text("Wenn du den ProtectionMode betrittst, erhältst du vorübergehend Fly um dein " +
-                "Grundstück besser definieren zu können.", NamedTextColor.BLACK));
+                "Grundstück besser definieren zu können.", MessageManager.BLACK));
 
-        TextComponent.Builder pageTwo = Component.text();
-        pageTwo.append(Component.text("Du definierst dein Grundstück indem du bis zu ", NamedTextColor.BLACK));
+        pageTwo.append(Component.text("Du definierst dein Grundstück indem du bis zu ", MessageManager.BLACK));
         pageTwo.append(Component.text(ProtectionSettings.MARKERS, MessageManager.VARIABLE_VALUE));
         pageTwo.append(Component.text(" Marker platzierst und anschließend mit dem grünen Block bestätigst.",
-                NamedTextColor.BLACK));
+                MessageManager.BLACK));
         pageTwo.append(Component.newline());
         pageTwo.append(Component.text("Mit dem roten Block kannst du die Protection jederzeit abbrechen und zu deinem" +
                 " Ausgangspunkt zurückkehren."));
@@ -39,9 +40,9 @@ public class ProtectionBook {
         pages.add(pageOne.build());
         pages.add(pageTwo.build());
 
-        this.book =
-                Book.builder().pages(pages).author(Component.text("SLNE Dev Team", MessageManager.PRIMARY))
-                        .title(Component.text("Protection System", MessageManager.PRIMARY)).build();
+        final Component author = Component.text("SLNE Dev Team", MessageManager.PRIMARY);
+
+       this.book = Book.book(titel, author, pages);
     }
 
     /**
