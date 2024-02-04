@@ -2,10 +2,14 @@ package dev.slne.protect.bukkit.region;
 
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.math.BlockVector2;
+import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.math.Vector3;
+import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import com.sk89q.worldguard.protection.util.WorldEditRegionConverter;
 import dev.slne.protect.bukkit.BukkitMain;
 import dev.slne.protect.bukkit.gui.protection.flags.ProtectionFlagsMap;
 import dev.slne.protect.bukkit.message.MessageManager;
@@ -160,8 +164,6 @@ public class ProtectionRegion {
         RegionManager manager = ProtectionUtils.getRegionManager(player.getWorld());
         ProtectedRegion region;
 
-        Location teleportLocation = boundingMarkers.get(0).getLocation();
-
         if (this.isExpandingRegion()) {
             region =
                     new ProtectedPolygonalRegion(expandingProtection.getId(), vectors, ProtectionSettings.MIN_Y_WORLD,
@@ -173,7 +175,6 @@ public class ProtectionRegion {
                     new ProtectedPolygonalRegion(name, vectors, ProtectionSettings.MIN_Y_WORLD,
                             ProtectionSettings.MAX_Y_WORLD);
             region.getOwners().addPlayer(protectionUser.getLocalPlayer());
-            region.setFlag(Flags.TELE_LOC, BukkitAdapter.adapt(teleportLocation));
 
             for (ProtectionFlagsMap flagsMap : ProtectionFlagsMap.values()) {
                 region.setFlag(flagsMap.getFlag(), flagsMap.getInitialState());
@@ -183,6 +184,12 @@ public class ProtectionRegion {
             owners.add(protectionUser.getLocalPlayer().getUniqueId().toString());
             region.setFlag(Flags.NONPLAYER_PROTECTION_DOMAINS, owners);
         }
+
+        // Get the center of the region and set the teleport location
+        Region worldeditRegion = WorldEditRegionConverter.convertToRegion(region);
+        Vector3 center = worldeditRegion.getCenter();
+        Location teleportLocation = new Location(player.getWorld(), center.getX(), center.getY(), center.getZ());
+        region.setFlag(Flags.TELE_LOC, BukkitAdapter.adapt(teleportLocation));
 
         this.temporaryRegion = new TemporaryProtectionRegion(player.getWorld(), region, manager);
         long area = temporaryRegion.getArea();
@@ -215,15 +222,8 @@ public class ProtectionRegion {
         double pricePerBlock = ProtectionUtils.getProtectionPricePerBlock(teleportLocation);
         double effectiveCost = this.calculateProtectionPrice(temporaryRegion, pricePerBlock);
         effectiveCost = Math.round(effectiveCost * 100.0) / 100.0;
-//        BigDecimal effectiveCostBigDecimal = BigDecimal.valueOf(effectiveCost);
-//        boolean hasEnoughCurrency = // FIXME: 31.01.2024 15:02 - wtf are the joins doing here? We should make this async
-//                Boolean.TRUE.equals(protectionUser.hasEnoughCurrency(effectiveCostBigDecimal, currency.get()).join());
 
-//        if (!hasEnoughCurrency) {
-//            MessageManager.sendAreaTooExpensiveComponent(protectionUser, area, effectiveCost, currency.get(), pricePerBlock,distanceToSpawn);
-//        } else {
-            MessageManager.sendAreaBuyableComponent(protectionUser, area, effectiveCost, currency.get(), pricePerBlock,distanceToSpawn);
-//        }
+        MessageManager.sendAreaBuyableComponent(protectionUser, area, effectiveCost, currency.get(), pricePerBlock,distanceToSpawn);
 
         this.setTemporaryRegion(temporaryRegion);
         return RegionCreationState.SUCCESS;
