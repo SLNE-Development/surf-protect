@@ -73,7 +73,7 @@ public class ProtectionHotbarListener implements Listener, Colors {
             return;
         }
 
-        if (isInRegionCreation(player)) {
+        if (getProtectionUser(player).hasRegionCreation()) {
             event.setCancelled(true);
         }
     }
@@ -81,9 +81,10 @@ public class ProtectionHotbarListener implements Listener, Colors {
     @EventHandler
     public void onClick(PlayerInteractEvent event) {
         final Player player = event.getPlayer();
-        final ProtectionRegion regionCreation = getRegionCreation(player);
+        final ProtectionUser protectionUser = getProtectionUser(player);
+        final ProtectionRegion regionCreation = protectionUser.getRegionCreation();
 
-        if (!isInRegionCreation(player)) {
+        if (!protectionUser.hasRegionCreation()) {
             return;
         }
 
@@ -115,7 +116,7 @@ public class ProtectionHotbarListener implements Listener, Colors {
     public void onMarkerBreak(BlockBreakEvent event) {
         Block block = event.getBlock();
         Player player = event.getPlayer();
-        ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
+        ProtectionUser protectionUser = getProtectionUser(player);
 
         if (block.getState().hasMetadata(ProtectionSettings.MARKER_KEY)) {
             Object markerObject = block.getState().getMetadata(ProtectionSettings.MARKER_KEY).get(0).value();
@@ -196,7 +197,7 @@ public class ProtectionHotbarListener implements Listener, Colors {
         Block block = event.getBlock();
         Location location = block.getLocation();
         Player player = event.getPlayer();
-        ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
+        ProtectionUser protectionUser = getProtectionUser(player);
 
         if (ProtectionUtils.isInProtectionRegion(location)) {
             ItemStack clickedItem = event.getItemInHand();
@@ -238,11 +239,7 @@ public class ProtectionHotbarListener implements Listener, Colors {
         }
     }
 
-    private ProtectionRegion getRegionCreation(Player player) {
-        return ProtectionUser.getProtectionUser(player).getRegionCreation();
-    }
-
-    private boolean isInRegionCreation(Player player) {
-        return getRegionCreation(player) != null;
+    private ProtectionUser getProtectionUser(Player player) {
+        return ProtectionUser.getProtectionUser(player);
     }
 }
