@@ -18,6 +18,8 @@ import dev.slne.protect.bukkit.region.ProtectionUtils;
 import dev.slne.protect.bukkit.region.flags.ProtectionFlagsRegistry;
 import dev.slne.protect.bukkit.region.info.RegionInfo;
 import dev.slne.protect.bukkit.region.transaction.ProtectionSellData;
+import dev.slne.protect.bukkit.region.visual.visualizer.ProtectionVisualizer;
+import dev.slne.protect.bukkit.region.visual.visualizer.ProtectionVisualizerThread;
 import dev.slne.protect.bukkit.user.ProtectionUser;
 import dev.slne.transaction.api.TransactionApi;
 import dev.slne.transaction.api.currency.Currency;
@@ -421,9 +423,17 @@ public class ProtectionShowGui extends SurfChestGui {
                             notifyDeletion(player, regionInfo);
                         }
 
+                        // Delete the region
                         regionManager.removeRegion(protectedRegion.getId());
+                        // Add transaction to the user
                         protectionUser.addTransaction(null, refund, currency.get(),
                                 new ProtectionSellData(event.getWhoClicked().getWorld(), protectedRegion));
+                        // Remove visualizers
+                        ProtectionVisualizerThread visualizerThread = BukkitMain.getBukkitInstance().getProtectionVisualizerThread();
+                        ProtectionVisualizer<?> visualizer = visualizerThread.getVisualizers().stream()
+                                .filter(protectionVisualizer -> protectionVisualizer.getRegion().equals(protectedRegion)).findFirst().orElseThrow();
+                        visualizerThread.removeVisualizer(visualizer);
+                        visualizer.remove();
 
                         new BukkitRunnable() {
                             @Override

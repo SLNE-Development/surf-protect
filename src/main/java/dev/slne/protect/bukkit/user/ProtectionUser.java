@@ -189,8 +189,6 @@ public class ProtectionUser {
             regionCreation.setWorldBorderSize(worldBorderSize);
         }
 
-        System.out.println(location);
-        System.out.println(worldBorderSize);
         worldBorder.setCenter(location.getBlockX(), location.getBlockZ());
         worldBorder.setSize(worldBorderSize);
         worldBorder.setWarningDistance(0);
