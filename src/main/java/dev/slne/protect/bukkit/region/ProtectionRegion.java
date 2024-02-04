@@ -12,6 +12,8 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.util.WorldEditRegionConverter;
 import dev.slne.protect.bukkit.BukkitMain;
 import dev.slne.protect.bukkit.gui.protection.flags.ProtectionFlagsMap;
+import dev.slne.protect.bukkit.math.Mth;
+import dev.slne.protect.bukkit.math.Mth.EffectiveCostResult;
 import dev.slne.protect.bukkit.message.MessageManager;
 import dev.slne.protect.bukkit.region.flags.ProtectionFlagsRegistry;
 import dev.slne.protect.bukkit.region.info.RegionCreationState;
@@ -43,7 +45,7 @@ import java.util.Optional;
 
 public class ProtectionRegion {
 
-    private static final ComponentLogger LOGGER  = ComponentLogger.logger("ProtectionRegion");
+    private static final ComponentLogger LOGGER = ComponentLogger.logger("ProtectionRegion");
 
     private final Location startLocation;
     private final ProtectedRegion expandingProtection;
@@ -101,7 +103,6 @@ public class ProtectionRegion {
      * @param block        the block of the location
      * @param previousData the previous data in that location
      * @param isExpanding  if the markers get placed because the plugin is expanding the region
-     *
      * @return the new marker or null, if marker could not be created
      */
     public Marker createMarker(Block block, BlockData previousData, boolean isExpanding) {
@@ -230,17 +231,15 @@ public class ProtectionRegion {
             return RegionCreationState.NO_CURRENCY;
         }
 
-        double distanceToSpawn = teleportLocation.distance(teleportLocation.getWorld().getSpawnLocation());
-        double pricePerBlock = ProtectionUtils.getProtectionPricePerBlock(teleportLocation);
-        double effectiveCost = this.calculateProtectionPrice(temporaryRegion, pricePerBlock);
-        effectiveCost = Math.round(effectiveCost * 100.0) / 100.0;
+        final EffectiveCostResult effectiveCostResult = Mth.calculateEffectiveCost(teleportLocation, temporaryRegion);
+        final double distanceToSpawn = teleportLocation.distance(teleportLocation.getWorld().getSpawnLocation());
 
-        if (effectiveCost <= 0) {
+        if (effectiveCostResult.effectiveCost() <= 0) {
             protectionUser.sendMessage(MessageManager.getAreaTooSmallComponent());
             return RegionCreationState.TOO_SMALL;
         }
 
-        MessageManager.sendAreaBuyableComponent(protectionUser, area, effectiveCost, currency.get(), pricePerBlock,distanceToSpawn);
+        MessageManager.sendAreaBuyableComponent(protectionUser, area, effectiveCostResult.effectiveCost(), currency.get(), effectiveCostResult.pricePerBlock(), distanceToSpawn);
 
         this.setTemporaryRegion(temporaryRegion);
         return RegionCreationState.SUCCESS;
@@ -308,7 +307,6 @@ public class ProtectionRegion {
      *
      * @param region        the region
      * @param pricePerBlock the price per block
-     *
      * @return the price
      */
     protected double calculateProtectionPrice(TemporaryProtectionRegion region, double pricePerBlock) {

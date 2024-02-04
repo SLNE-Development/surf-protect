@@ -6,9 +6,9 @@ import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.domains.DefaultDomain;
 import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import dev.slne.protect.bukkit.math.Mth;
 import dev.slne.protect.bukkit.region.ProtectionUtils;
 import dev.slne.protect.bukkit.region.flags.ProtectionFlagsRegistry;
-import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
 import dev.slne.protect.bukkit.user.ProtectionUserFinder;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -72,18 +72,7 @@ public class RegionInfo {
      * @return The price
      */
     public double getPrice() {
-        BlockVector2 smallestDistance = getSmallestDistance(region.getPoints());
-
-        com.sk89q.worldedit.util.Location worldeditLocation = region.getFlag(Flags.TELE_LOC);
-
-        if (worldeditLocation == null) {
-            return Double.MAX_VALUE;
-        }
-
-        Location teleportLocation = BukkitAdapter.adapt(worldeditLocation);
-        double pricePerBlock = ProtectionUtils.getProtectionPricePerBlock(teleportLocation);
-
-        return (double) getArea() * pricePerBlock;
+        return Mth.getRegionPrice(this.region);
     }
 
     /**
@@ -93,7 +82,7 @@ public class RegionInfo {
      *
      * @return The smallest distance
      */
-    private BlockVector2 getSmallestDistance(List<BlockVector2> points) {
+    private BlockVector2 getSmallestDistance(List<BlockVector2> points) { // TODO: 04.02.2024 18:01 - remove?
         BlockVector2 smallestDistance = null;
         BlockVector2 spawnPoint = BukkitAdapter.asBlockVector(world.getSpawnLocation()).toBlockVector2();
 
@@ -117,7 +106,7 @@ public class RegionInfo {
      * @return The retail price
      */
     public double getRetailPrice() {
-        return getPrice() * ProtectionSettings.RETAIL_MODIFIER;
+        return Mth.getRegionRetailPrice(this.region);
     }
 
     /**
