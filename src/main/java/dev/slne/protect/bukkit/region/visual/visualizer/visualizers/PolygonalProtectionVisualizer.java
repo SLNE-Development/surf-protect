@@ -2,6 +2,7 @@ package dev.slne.protect.bukkit.region.visual.visualizer.visualizers;
 
 import com.sk89q.worldedit.math.BlockVector2;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import dev.slne.protect.bukkit.math.Mth;
 import dev.slne.protect.bukkit.region.visual.visualizer.ProtectionVisualizer;
 import org.bukkit.HeightMap;
 import org.bukkit.Location;
@@ -129,38 +130,8 @@ public class PolygonalProtectionVisualizer extends ProtectionVisualizer<Protecte
     private List<BlockVector2> walkPointAToB(BlockVector2 pointStart, BlockVector2 pointEnd) {
         List<BlockVector2> points = new ArrayList<>();
 
-        int x1 = pointStart.getBlockX();
-        int z1 = pointStart.getBlockZ();
-        int x2 = pointEnd.getBlockX();
-        int z2 = pointEnd.getBlockZ();
-
-        int dx = Math.abs(x2 - x1);
-        int dz = Math.abs(z2 - z1);
-
-        int sx = x1 < x2 ? 1 : -1;
-        int sz = z1 < z2 ? 1 : -1;
-
-        int err = dx - dz;
-
-        while (true) {
-            points.add(BlockVector2.at(x1, z1));
-
-            if (x1 == x2 && z1 == z2) {
-                break;
-            }
-
-            int e2 = 2 * err;
-
-            if (e2 > -dz) {
-                err -= dz;
-                x1 += sx;
-            }
-
-            if (e2 < dx) {
-                err += dx;
-                z1 += sz;
-            }
-        }
+        Mth.walkCoordinatesAToB(pointStart.getBlockX(), pointStart.getBlockZ(), pointEnd.getBlockX(), pointEnd.getBlockZ(),
+                (x, z) -> points.add(BlockVector2.at(x, z)));
 
         return points;
     }

@@ -9,6 +9,8 @@ import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.function.BiConsumer;
+
 public final class Mth {
 
     private Mth() {
@@ -62,6 +64,36 @@ public final class Mth {
         long currentTimeSeconds = System.currentTimeMillis() / 1000;
 
         return (playerCooldownSeconds + cooldownTimeSeconds) - currentTimeSeconds;
+    }
+
+    public static void walkCoordinatesAToB(int x1, int z1, int x2, int z2, BiConsumer<Integer, Integer> consumer) {
+        int dx = Math.abs(x2 - x1);
+        int dz = Math.abs(z2 - z1);
+
+        int sx = x1 < x2 ? 1 : -1;
+        int sz = z1 < z2 ? 1 : -1;
+
+        int err = dx - dz;
+
+        while (true) {
+            consumer.accept(x1, z1);
+
+            if (x1 == x2 && z1 == z2) {
+                break;
+            }
+
+            int e2 = 2 * err;
+
+            if (e2 > -dz) {
+                err -= dz;
+                x1 += sx;
+            }
+
+            if (e2 < dx) {
+                err += dx;
+                z1 += sz;
+            }
+        }
     }
 
     public record EffectiveCostResult(double effectiveCost, double pricePerBlock) {
