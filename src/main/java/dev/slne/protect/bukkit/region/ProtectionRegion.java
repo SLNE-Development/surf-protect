@@ -339,6 +339,7 @@ public class ProtectionRegion {
     public void finishProtection() {
         if (temporaryRegion == null) {
             offerAccepting(true);
+            return;
         }
 
         if (temporaryRegion.overlapsUnownedRegion(protectionUser.getLocalPlayer())) {
