@@ -12,11 +12,13 @@ import dev.slne.gui.api.utils.ItemUtils;
 import dev.slne.protect.bukkit.BukkitMain;
 import dev.slne.protect.bukkit.gui.protection.flags.ProtectionFlagsGui;
 import dev.slne.protect.bukkit.gui.protection.members.ProtectionMembersGui;
+import dev.slne.protect.bukkit.gui.protection.rename.RenameAnvilGUI;
 import dev.slne.protect.bukkit.message.MessageManager;
 import dev.slne.protect.bukkit.region.ProtectionRegion;
 import dev.slne.protect.bukkit.region.ProtectionUtils;
 import dev.slne.protect.bukkit.region.flags.ProtectionFlagsRegistry;
 import dev.slne.protect.bukkit.region.info.RegionInfo;
+import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
 import dev.slne.protect.bukkit.region.transaction.ProtectionSellData;
 import dev.slne.protect.bukkit.region.visual.visualizer.ProtectionVisualizer;
 import dev.slne.protect.bukkit.region.visual.visualizer.ProtectionVisualizerThread;
@@ -101,8 +103,12 @@ public class ProtectionShowGui extends SurfChestGui {
             staticPane.addItem(getProtectionExpandItem(), 1, 3);
         }
 
+        if (viewingPlayer.hasPermission("surf.protect.view.rename")) {
+            staticPane.addItem(getRenameItem(), 2, 3);
+        }
+
         if (viewingPlayer.hasPermission("surf.protect.flags.edit")) {
-            staticPane.addItem(getFlagsItem(), 2, 3);
+            staticPane.addItem(getFlagsItem(), 3, 3);
         }
 
         if (viewingPlayer.hasPermission("surf.protect.view.sell")) {
@@ -185,6 +191,23 @@ public class ProtectionShowGui extends SurfChestGui {
 
         return new GuiItem(ItemUtils.item(Material.COMPASS, 1, 0, Component.text("Position", MessageManager.PRIMARY),
                 lore.toArray(Component[]::new)));
+    }
+
+    /**
+     * Returns the rename item
+     *
+     * @return The item
+     */
+    private GuiItem getRenameItem() {
+        return new GuiItem(ItemUtils.item(Material.NAME_TAG, 1, 0, Component.text("Grundstück umbennnen", MessageManager.PRIMARY),
+                Component.empty(), Component.text("Ermöglicht es dir dein Grundstück umzubennnen", NamedTextColor.GRAY),
+                Component.empty(), Component.text("Achtung:", NamedTextColor.RED)
+                        .append(Component.text(" Für diese Aktion wird eine Gebühr in Höhe von ", NamedTextColor.GRAY)
+                                .append(Component.text(ProtectionSettings.PROTECTION_RENAME_PRICE + " CastCoins", NamedTextColor.YELLOW))
+                                .append(Component.text(" berechnet.", NamedTextColor.GRAY)))), event -> {
+            RenameAnvilGUI renameAnvilGui = new RenameAnvilGUI(this, region);
+            renameAnvilGui.show(event.getWhoClicked());
+        });
     }
 
     /**
