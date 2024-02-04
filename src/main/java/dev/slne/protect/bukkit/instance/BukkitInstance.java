@@ -4,7 +4,7 @@ import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.flags.registry.FlagRegistry;
 import dev.slne.protect.bukkit.command.BukkitCommandManager;
 import dev.slne.protect.bukkit.listener.BukkitListenerManager;
-import dev.slne.protect.bukkit.region.flags.ProtectionFlags;
+import dev.slne.protect.bukkit.region.flags.ProtectionFlagsRegistry;
 import dev.slne.protect.bukkit.region.visual.visualizer.ProtectionVisualizerState;
 import dev.slne.protect.bukkit.region.visual.visualizer.ProtectionVisualizerThread;
 import dev.slne.protect.bukkit.user.ProtectionUserManager;
@@ -29,11 +29,11 @@ public class BukkitInstance {
 
         // Register flags
         final FlagRegistry flagRegistry = WorldGuard.getInstance().getFlagRegistry();
-        flagRegistry.register(ProtectionFlags.SURF_PROTECT);
-        flagRegistry.register(ProtectionFlags.SURF_PROTECT_FLAG);
-        flagRegistry.register(ProtectionFlags.SURF_CAN_SELL_FLAG);
-        flagRegistry.register(ProtectionFlags.SURF_BIG_PROTECTION_FLAG);
-        flagRegistry.register(ProtectionFlags.SURF_PROTECT_VISUALIZE);
+        flagRegistry.register(ProtectionFlagsRegistry.SURF_PROTECT);
+        flagRegistry.register(ProtectionFlagsRegistry.SURF_PROTECT_FLAG);
+        flagRegistry.register(ProtectionFlagsRegistry.SURF_CAN_SELL_FLAG);
+        flagRegistry.register(ProtectionFlagsRegistry.SURF_BIG_PROTECTION_FLAG);
+        flagRegistry.register(ProtectionFlagsRegistry.SURF_PROTECT_VISUALIZE);
     }
 
     /**

@@ -18,7 +18,7 @@ public class ProtectionFlag extends Flag<ProtectionFlagInfo> {
      *
      * @param name The name of the flag
      */
-    public ProtectionFlag(String name) {
+    ProtectionFlag(String name) {
         super(name);
     }
 

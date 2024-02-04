@@ -13,7 +13,7 @@ import dev.slne.protect.bukkit.gui.list.ProtectionListGui;
 import dev.slne.protect.bukkit.message.MessageManager;
 import dev.slne.protect.bukkit.region.ProtectionRegion;
 import dev.slne.protect.bukkit.region.ProtectionUtils;
-import dev.slne.protect.bukkit.region.flags.ProtectionFlags;
+import dev.slne.protect.bukkit.region.flags.ProtectionFlagsRegistry;
 import dev.slne.protect.bukkit.region.visual.visualizer.ProtectionVisualizer;
 import dev.slne.protect.bukkit.user.ProtectionUser;
 import net.kyori.adventure.text.Component;
@@ -103,7 +103,7 @@ public class ProtectionMainMenu extends SurfChestGui {
 
             if (!state) {
                 for (ProtectedRegion region : regions) {
-                    State visualizeState = region.getFlag(ProtectionFlags.SURF_PROTECT_VISUALIZE);
+                    State visualizeState = region.getFlag(ProtectionFlagsRegistry.SURF_PROTECT_VISUALIZE);
 
                     if (visualizeState != null && visualizeState.equals(State.DENY)) {
                         continue;

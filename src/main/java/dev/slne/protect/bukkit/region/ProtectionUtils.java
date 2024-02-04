@@ -10,7 +10,7 @@ import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
 import com.sk89q.worldguard.protection.regions.RegionQuery;
-import dev.slne.protect.bukkit.region.flags.ProtectionFlags;
+import dev.slne.protect.bukkit.region.flags.ProtectionFlagsRegistry;
 import dev.slne.protect.bukkit.region.info.RegionInfo;
 import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
 import dev.slne.protect.bukkit.user.ProtectionUserFinder;
@@ -143,7 +143,7 @@ public class ProtectionUtils {
         }
 
         ApplicableRegionSet regions = manager.getApplicableRegions(BukkitAdapter.asBlockVector(location));
-        return regions.testState(null, ProtectionFlags.SURF_PROTECT);
+        return regions.testState(null, ProtectionFlagsRegistry.SURF_PROTECT);
     }
 
     /**

@@ -7,7 +7,7 @@ import com.sk89q.worldguard.domains.DefaultDomain;
 import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import dev.slne.protect.bukkit.region.ProtectionUtils;
-import dev.slne.protect.bukkit.region.flags.ProtectionFlags;
+import dev.slne.protect.bukkit.region.flags.ProtectionFlagsRegistry;
 import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
 import dev.slne.protect.bukkit.user.ProtectionUserFinder;
 import org.bukkit.Location;
@@ -39,7 +39,7 @@ public class RegionInfo {
      */
     public RegionInfo(World world, ProtectedRegion region) {
         this.region = region;
-        this.info = region.getFlag(ProtectionFlags.SURF_PROTECT_FLAG);
+        this.info = region.getFlag(ProtectionFlagsRegistry.SURF_PROTECT_FLAG);
         this.world = world;
 
         if (this.info == null) {
@@ -150,7 +150,7 @@ public class RegionInfo {
      */
     public ProtectionFlagInfo setProtectionInfoToRegion(ProtectionFlagInfo info) {
         this.info = info;
-        this.region.setFlag(ProtectionFlags.SURF_PROTECT_FLAG, this.info);
+        this.region.setFlag(ProtectionFlagsRegistry.SURF_PROTECT_FLAG, this.info);
 
         return this.info;
     }

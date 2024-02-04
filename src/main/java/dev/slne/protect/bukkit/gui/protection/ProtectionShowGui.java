@@ -15,7 +15,7 @@ import dev.slne.protect.bukkit.gui.protection.members.ProtectionMembersGui;
 import dev.slne.protect.bukkit.message.MessageManager;
 import dev.slne.protect.bukkit.region.ProtectionRegion;
 import dev.slne.protect.bukkit.region.ProtectionUtils;
-import dev.slne.protect.bukkit.region.flags.ProtectionFlags;
+import dev.slne.protect.bukkit.region.flags.ProtectionFlagsRegistry;
 import dev.slne.protect.bukkit.region.info.RegionInfo;
 import dev.slne.protect.bukkit.region.transaction.ProtectionSellData;
 import dev.slne.protect.bukkit.user.ProtectionUser;
@@ -285,7 +285,7 @@ public class ProtectionShowGui extends SurfChestGui {
                                 regionInfo.getRegion());
 
                         ProtectedRegion protectedRegion = regionInfo.getRegion();
-                        State canSellState = protectedRegion.getFlag(ProtectionFlags.SURF_CAN_SELL_FLAG);
+                        State canSellState = protectedRegion.getFlag(ProtectionFlagsRegistry.SURF_CAN_SELL_FLAG);
                         boolean canExpand = canSellState == State.ALLOW || canSellState == null;
 
                         if (!canExpand) {
@@ -365,7 +365,7 @@ public class ProtectionShowGui extends SurfChestGui {
                         ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
 
                         ProtectedRegion protectedRegion = regionInfo.getRegion();
-                        State canSellState = protectedRegion.getFlag(ProtectionFlags.SURF_CAN_SELL_FLAG);
+                        State canSellState = protectedRegion.getFlag(ProtectionFlagsRegistry.SURF_CAN_SELL_FLAG);
                         boolean canSell = canSellState == State.ALLOW || canSellState == null;
 
                         if (!canSell) {
