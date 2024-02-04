@@ -5,12 +5,15 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
 import dev.slne.protect.bukkit.region.visual.visualizer.color.VisualizerColor;
 import dev.slne.surf.surfapi.bukkit.api.packet.entity.SurfBukkitPacketEntityApi;
+import dev.slne.surf.surfapi.core.api.packet.SurfCorePacketEntityApi;
 import dev.slne.surf.surfapi.core.api.packet.entity.entities.display.PacketBlockDisplay;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.spongepowered.math.GenericMath;
+import org.spongepowered.math.vector.Vector3f;
 
 import java.util.*;
 
@@ -19,7 +22,7 @@ public abstract class ProtectionVisualizer<T extends ProtectedRegion> {
     private final World world;
     private final T region;
     private final Player player;
-    private final Map<Location, Integer> entityIds;
+    private final Map<Location, PacketBlockDisplay> displays;
     private List<Location> locations;
     private List<Location> oldLocations;
     private VisualizerColor color;
@@ -39,7 +42,7 @@ public abstract class ProtectionVisualizer<T extends ProtectedRegion> {
 
         this.locations = new ArrayList<>();
         this.oldLocations = new ArrayList<>();
-        this.entityIds = new HashMap<>();
+        this.displays = new HashMap<>();
         this.applyProtectionColor();
 
         this.scaleUp = false;
@@ -65,12 +68,13 @@ public abstract class ProtectionVisualizer<T extends ProtectedRegion> {
         this.locations = this.visualize();
         this.locations = this.performDistanceCheck();
 
-        List<Location> toRemoves = this.getToRemoveLocations();
+        final SurfCorePacketEntityApi entityApi = SurfCorePacketEntityApi.get();
+        final List<Location> toRemoves = this.getToRemoveLocations();
 
         for (Location toRemove : toRemoves) {
-            if (this.entityIds.containsKey(toRemove)) {
-                this.killVisualizer(player, this.entityIds.get(toRemove));
-                this.entityIds.remove(toRemove);
+            if (this.displays.containsKey(toRemove)) {
+                entityApi.deleteEntity(displays.get(toRemove));
+                this.displays.remove(toRemove);
             }
         }
 
@@ -123,24 +127,6 @@ public abstract class ProtectionVisualizer<T extends ProtectedRegion> {
     }
 
     /**
-     * Kill one of the visualizers.
-     *
-     * @param entityId The entity id of the visualizer.
-     */
-    private void killVisualizer(Player player, int entityId) {
-        final SurfBukkitPacketEntityApi api = SurfBukkitPacketEntityApi.get();
-        api.getEntity(entityId).ifPresent(api::deleteEntity);
-
-        List<Map.Entry<Location, Integer>> toDelete = entityIds.entrySet().stream()
-                .filter(entry -> entry.getValue() == entityId)
-                .toList();
-
-        for (Map.Entry<Location, Integer> entry : toDelete) {
-            entityIds.remove(entry.getKey());
-        }
-    }
-
-    /**
      * Visualize a list of locations.
      */
     private void visualizeLocations() {
@@ -169,7 +155,7 @@ public abstract class ProtectionVisualizer<T extends ProtectedRegion> {
         viewDistance = viewDistance * 10;
         viewDistance = viewDistance * viewDistance;
 
-        return clamp(viewDistance, minViewDistance, maxViewDistance);
+        return GenericMath.clamp(viewDistance, minViewDistance, maxViewDistance);
     }
 
     /**
@@ -197,7 +183,7 @@ public abstract class ProtectionVisualizer<T extends ProtectedRegion> {
      * @param location The location to visualize.
      */
     private void visualizeLocation(Player player, Location location) {
-        if (this.entityIds.containsKey(location)) {
+        if (this.displays.containsKey(location)) {
             return;
         }
 
@@ -205,35 +191,27 @@ public abstract class ProtectionVisualizer<T extends ProtectedRegion> {
             displayInit.blockState(color.getBlockState());
 
             if (this.scaleUp) {
-                displayInit.scale(new org.spongepowered.math.vector.Vector3f(1, ProtectionSettings.PROTECTION_VISUALIZER_HEIGHT, 1));
+                displayInit.scale(new Vector3f(1, ProtectionSettings.PROTECTION_VISUALIZER_HEIGHT, 1));
             }
         });
 
         display.addViewer(player.getUniqueId());
         display.spawn(SpigotConversionUtil.fromBukkitLocation(location));
 
-        this.entityIds.put(location, display.entityId());
-    }
-
-    /**
-     * Clamp a value between a minimum and maximum value.
-     *
-     * @param value The value to clamp.
-     * @param min   The minimum value.
-     * @param max   The maximum value.
-     * @return The clamped value.
-     */
-    private int clamp(int value, int min, int max) {
-        return Math.max(min, Math.min(max, value));
+        this.displays.put(location, display);
     }
 
     /**
      * Remove the visualizers
      */
     public void remove() {
-        for (Map.Entry<Location, Integer> entry : new ArrayList<>(this.entityIds.entrySet())) {
-            this.killVisualizer(player, entry.getValue());
+        final SurfBukkitPacketEntityApi entityApi = SurfBukkitPacketEntityApi.get();
+
+        for (Map.Entry<Location, PacketBlockDisplay> entry : displays.entrySet()) {
+            entityApi.deleteEntity(entry.getValue());
         }
+
+        displays.clear();
     }
 
     /**
