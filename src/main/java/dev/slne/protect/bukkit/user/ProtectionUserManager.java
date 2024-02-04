@@ -1,6 +1,8 @@
 package dev.slne.protect.bukkit.user;
 
-import java.util.ArrayList;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -9,13 +11,14 @@ import java.util.UUID;
  */
 public class ProtectionUserManager {
 
-    private final List<ProtectionUser> users;
+    private final LoadingCache<UUID, ProtectionUser> users;
 
     /**
      * Create a new user manager
      */
     public ProtectionUserManager() {
-        this.users = new ArrayList<>();
+        this.users = Caffeine.newBuilder()
+                .build(ProtectionUser::new);
     }
 
     /**
@@ -24,23 +27,16 @@ public class ProtectionUserManager {
      * @return All users
      */
     public List<ProtectionUser> getUsers() {
-        return users;
+        return users.asMap().values().stream().toList();
     }
 
     /**
      * Get a user by their UUID
      *
      * @param uuid The UUID of the user
-     *
      * @return The user
      */
     public ProtectionUser getProtectionUser(UUID uuid) {
-        return this.users.stream().filter(user -> user.getUuid().equals(uuid)).findFirst().orElseGet(() -> {
-            ProtectionUser user = new ProtectionUser(uuid);
-            users.add(user);
-
-            return user;
-        });
+        return users.get(uuid);
     }
-
 }
