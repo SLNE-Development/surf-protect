@@ -1,13 +1,11 @@
 package dev.slne.protect.bukkit.listener.listeners;
 
 import dev.slne.protect.bukkit.BukkitMain;
-import dev.slne.protect.bukkit.message.MessageManager;
 import dev.slne.protect.bukkit.region.ProtectionRegion;
 import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
 import dev.slne.protect.bukkit.user.ProtectionUser;
 import io.papermc.paper.event.player.PrePlayerAttackEntityEvent;
 import org.bukkit.Location;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -16,7 +14,6 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.server.PluginDisableEvent;
-import org.bukkit.util.Vector;
 
 public class ProtectionModeListener implements Listener {
 
@@ -39,7 +36,7 @@ public class ProtectionModeListener implements Listener {
             Location protectionModeLocation = regionCreation.getStartLocation();
 
             Location to = event.getTo();
-            if (to.distanceSquared(protectionModeLocation) > (ProtectionSettings.MAX_DISTANCE_FROM_PROTECTION_START_SQUARED + 4)) {
+            if (to.distanceSquared(protectionModeLocation) > (ProtectionSettings.MAX_DISTANCE_FROM_PROTECTION_START_SQUARED + 2)) {
                 event.getPlayer().teleport(protectionModeLocation);
             }
         }
