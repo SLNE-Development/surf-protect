@@ -5,7 +5,6 @@ dev-slne-surf-transaction-api = "3.1.0-SNAPSHOT"
 dev-jorel-commandapi-bukkit-core = "9.3.0"
 com-sk89q-worldguard-worldguard-bukkit = "7.1.0-SNAPSHOT"
 net-kyori-adventure-nbt = "4.15.0"
-com-github-retrooper-packetevents-spigot = "2.2.0"
 dev-slne-surf-gui-bukkit = "1.1.0-SNAPSHOT"
 dev-slne-surf-surf-api-bukkit-api = "1.0-SNAPSHOT"
 
@@ -15,6 +14,5 @@ dev-slne-surf-transaction-api = {module = "dev.slne:surf-transaction-api", versi
 dev-jorel-commandapi-bukkit-core = {module = "dev.jorel:commandapi-bukkit-core", version.ref = "dev-jorel-commandapi-bukkit-core"}
 com-sk89q-worldguard-worldguard-bukkit = {module = "com.sk89q.worldguard:worldguard-bukkit", version.ref = "com-sk89q-worldguard-worldguard-bukkit"}
 net-kyori-adventure-nbt = {module = "net.kyori:adventure-nbt", version.ref = "net-kyori-adventure-nbt"}
-com-github-retrooper-packetevents-spigot = {module = "com.github.retrooper.packetevents:spigot", version.ref = "com-github-retrooper-packetevents-spigot"}
 dev-slne-surf-gui-bukkit = {module = "dev.slne:surf-gui-bukkit", version.ref = "dev-slne-surf-gui-bukkit"}
 dev-slne-surf-surf-api-bukkit-api = {module = "dev.slne.surf:surf-api-bukkit-api", version.ref = "dev-slne-surf-surf-api-bukkit-api"}
