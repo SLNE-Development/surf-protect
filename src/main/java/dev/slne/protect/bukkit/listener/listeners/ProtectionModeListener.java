@@ -6,6 +6,7 @@ import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
 import dev.slne.protect.bukkit.user.ProtectionUser;
 import io.papermc.paper.event.player.PrePlayerAttackEntityEvent;
 import org.bukkit.Location;
+import org.bukkit.WorldBorder;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -34,11 +35,14 @@ public class ProtectionModeListener implements Listener {
 
         if (regionCreation != null) {
             Location protectionModeLocation = regionCreation.getStartLocation();
+            Player player = event.getPlayer();
+            WorldBorder worldBorder = player.getWorldBorder();
 
             Location to = event.getTo();
-            if (to.distanceSquared(protectionModeLocation) > (ProtectionSettings.MAX_DISTANCE_FROM_PROTECTION_START_SQUARED + 2)) {
+            if (worldBorder != null && !worldBorder.isInside(to)) {
                 event.getPlayer().teleport(protectionModeLocation);
             }
+
         }
     }
 

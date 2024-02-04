@@ -49,6 +49,8 @@ public class ProtectionRegion {
     private TemporaryProtectionRegion temporaryRegion;
     private List<Marker> boundingMarkers;
 
+    private double worldBorderSize = ProtectionSettings.MAX_DISTANCE_FROM_PROTECTION_START;
+
     private boolean isProcessingTransaction = false;
 
     public ProtectionRegion(ProtectionUser protectionUser, ProtectedRegion expandingProtection) {
@@ -490,5 +492,23 @@ public class ProtectionRegion {
      */
     public ProtectionUser getProtectionUser() {
         return protectionUser;
+    }
+
+    /**
+     * Returns the worldBorderSize
+     *
+     * @return the worldBorderSize
+     */
+    public double getWorldBorderSize() {
+        return worldBorderSize;
+    }
+
+    /**
+     * Sets the worldBorderSize
+     *
+     * @param worldBorderSize the worldBorderSize
+     */
+    public void setWorldBorderSize(double worldBorderSize) {
+        this.worldBorderSize = worldBorderSize;
     }
 }

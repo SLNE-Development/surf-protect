@@ -2,13 +2,21 @@ package dev.slne.protect.bukkit.user;
 
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayWorldBorderLerpSize;
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldedit.math.BlockVector2;
+import com.sk89q.worldedit.math.Vector2;
+import com.sk89q.worldedit.math.Vector3;
+import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import com.sk89q.worldguard.protection.util.WorldEditRegionConverter;
 import dev.slne.protect.bukkit.BukkitMain;
 import dev.slne.protect.bukkit.book.ProtectionBook;
 import dev.slne.protect.bukkit.listener.listeners.ProtectionHotbarListener;
 import dev.slne.protect.bukkit.message.MessageManager;
 import dev.slne.protect.bukkit.region.ProtectionRegion;
+import dev.slne.protect.bukkit.region.ProtectionUtils;
 import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
 import dev.slne.transaction.api.TransactionApi;
 import dev.slne.transaction.api.currency.Currency;
@@ -167,9 +175,22 @@ public class ProtectionUser {
         creationCooldown.put(player.getName(), System.currentTimeMillis());
 
         final WorldBorder worldBorder = Bukkit.createWorldBorder();
-        final Location location = player.getLocation();
-        final double worldBorderSize = ProtectionSettings.MAX_DISTANCE_FROM_PROTECTION_START;
 
+        Location location = player.getLocation();
+        double worldBorderSize = ProtectionSettings.MAX_DISTANCE_FROM_PROTECTION_START;
+
+        if (regionCreation.isExpandingRegion()) {
+            ProtectedRegion expandingProtection = regionCreation.getExpandingProtection();
+            Region regionConverter = WorldEditRegionConverter.convertToRegion(expandingProtection);
+            BlockVector2 center = regionConverter.getCenter().toBlockPoint().toBlockVector2();
+            location = new Location(player.getWorld(), center.getX(), 0, center.getZ());
+
+            worldBorderSize = getWorldBorderSize(expandingProtection, worldBorderSize, center);
+            regionCreation.setWorldBorderSize(worldBorderSize);
+        }
+
+        System.out.println(location);
+        System.out.println(worldBorderSize);
         worldBorder.setCenter(location.getBlockX(), location.getBlockZ());
         worldBorder.setSize(worldBorderSize);
         worldBorder.setWarningDistance(0);
@@ -228,6 +249,17 @@ public class ProtectionUser {
         player.setCollidable(true);
         player.setWorldBorder(null);
 
+    }
+
+    public double getWorldBorderSize(ProtectedRegion expandingProtection, double worldBorderSize, BlockVector2 center) {
+        BlockVector2 furthestPoint = expandingProtection.getPoints().stream().reduce((first, second) -> {
+            int firstDistance = first.distanceSq(center);
+            int secondDistance = second.distanceSq(center);
+
+            return firstDistance > secondDistance ? first : second;
+        }).orElseThrow();
+        double distance = furthestPoint.distance(center);
+        return worldBorderSize + distance;
     }
 
     /**
