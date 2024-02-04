@@ -2,10 +2,10 @@ package dev.slne.protect.bukkit.region;
 
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.math.BlockVector2;
-import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldguard.protection.flags.Flags;
+import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
@@ -13,7 +13,9 @@ import com.sk89q.worldguard.protection.util.WorldEditRegionConverter;
 import dev.slne.protect.bukkit.BukkitMain;
 import dev.slne.protect.bukkit.gui.protection.flags.ProtectionFlagsMap;
 import dev.slne.protect.bukkit.message.MessageManager;
+import dev.slne.protect.bukkit.region.flags.ProtectionFlagsRegistry;
 import dev.slne.protect.bukkit.region.info.RegionCreationState;
+import dev.slne.protect.bukkit.region.info.RegionInfo;
 import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
 import dev.slne.protect.bukkit.region.transaction.ProtectionBuyData;
 import dev.slne.protect.bukkit.region.visual.Marker;
@@ -26,7 +28,6 @@ import dev.slne.transaction.api.transaction.result.TransactionAddResult;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -192,7 +193,15 @@ public class ProtectionRegion {
         Region worldeditRegion = WorldEditRegionConverter.convertToRegion(region);
         Vector3 center = worldeditRegion.getCenter();
         Location teleportLocation = new Location(player.getWorld(), center.getX(), center.getY(), center.getZ());
+
+        // Set TELE_LOC flag to the center of the region
         region.setFlag(Flags.TELE_LOC, BukkitAdapter.adapt(teleportLocation));
+
+        // Set SURF_PROTECT_FLAG if it does not exist already
+        new RegionInfo(player.getWorld(), region);
+
+        // Set SURF_PROTECTION flag to ALLOW
+        region.setFlag(ProtectionFlagsRegistry.SURF_PROTECTION, StateFlag.State.ALLOW);
 
         this.temporaryRegion = new TemporaryProtectionRegion(player.getWorld(), region, manager);
         long area = temporaryRegion.getArea();

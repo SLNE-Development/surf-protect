@@ -31,4 +31,9 @@ public interface ProtectionFlagsRegistry {
      * This flag contains the protection flag info
      */
     StateFlag SURF_PROTECT_VISUALIZE = new StateFlag("surf-protect-visualize", true);
+
+    /**
+     * This flag is used to determine if a region was protected using the protection system
+     */
+    StateFlag SURF_PROTECTION = new StateFlag("surf-protection", false);
 }

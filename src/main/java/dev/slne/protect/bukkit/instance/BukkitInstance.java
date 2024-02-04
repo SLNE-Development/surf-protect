@@ -2,8 +2,10 @@ package dev.slne.protect.bukkit.instance;
 
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.flags.registry.FlagRegistry;
+import com.sk89q.worldguard.session.SessionManager;
 import dev.slne.protect.bukkit.command.BukkitCommandManager;
 import dev.slne.protect.bukkit.listener.BukkitListenerManager;
+import dev.slne.protect.bukkit.listener.listeners.BorderCrossingHandler;
 import dev.slne.protect.bukkit.region.flags.ProtectionFlagsRegistry;
 import dev.slne.protect.bukkit.region.visual.visualizer.ProtectionVisualizerState;
 import dev.slne.protect.bukkit.region.visual.visualizer.ProtectionVisualizerThread;
@@ -34,6 +36,7 @@ public class BukkitInstance {
         flagRegistry.register(ProtectionFlagsRegistry.SURF_CAN_SELL_FLAG);
         flagRegistry.register(ProtectionFlagsRegistry.SURF_BIG_PROTECTION_FLAG);
         flagRegistry.register(ProtectionFlagsRegistry.SURF_PROTECT_VISUALIZE);
+        flagRegistry.register(ProtectionFlagsRegistry.SURF_PROTECTION);
     }
 
     /**
@@ -47,6 +50,10 @@ public class BukkitInstance {
 
         protectionVisualizerThread = new ProtectionVisualizerThread();
         protectionVisualizerThread.start();
+
+        SessionManager sessionManager = WorldGuard.getInstance().getPlatform().getSessionManager();
+        sessionManager.registerHandler(BorderCrossingHandler.FACTORY, null);
+
     }
 
     /**

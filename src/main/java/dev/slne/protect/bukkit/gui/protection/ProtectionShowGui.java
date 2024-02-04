@@ -425,15 +425,20 @@ public class ProtectionShowGui extends SurfChestGui {
 
                         // Delete the region
                         regionManager.removeRegion(protectedRegion.getId());
+
                         // Add transaction to the user
                         protectionUser.addTransaction(null, refund, currency.get(),
                                 new ProtectionSellData(event.getWhoClicked().getWorld(), protectedRegion));
+
                         // Remove visualizers
                         ProtectionVisualizerThread visualizerThread = BukkitMain.getBukkitInstance().getProtectionVisualizerThread();
                         ProtectionVisualizer<?> visualizer = visualizerThread.getVisualizers().stream()
-                                .filter(protectionVisualizer -> protectionVisualizer.getRegion().equals(protectedRegion)).findFirst().orElseThrow();
-                        visualizerThread.removeVisualizer(visualizer);
-                        visualizer.remove();
+                                .filter(protectionVisualizer -> protectionVisualizer.getRegion().equals(protectedRegion)).findFirst().orElse(null);
+
+                        if (visualizer != null) {
+                            visualizerThread.removeVisualizer(visualizer);
+                            visualizer.remove();
+                        }
 
                         new BukkitRunnable() {
                             @Override
