@@ -94,7 +94,7 @@ public class RenameAnvilGUI extends SurfAnvilGui {
 
 							protectionUser.hasEnoughCurrency(BigDecimal.valueOf(ProtectionSettings.PROTECTION_RENAME_PRICE), currency).thenAcceptAsync(hasEnoughCurrency -> {
 								if (!hasEnoughCurrency) {
-									player.sendMessage(MessageManager.getTooExpensiveToBuyComponent());
+									player.sendMessage(MessageManager.getTooExpensiveToRenameComponent());
 									isProcessingTransaction = false;
 								} else {
 									protectionUser.addTransaction(
@@ -111,7 +111,7 @@ public class RenameAnvilGUI extends SurfAnvilGui {
 													.append(Component.text(newName, Colors.VARIABLE_VALUE))
 													.append(Component.text(" umbenannt.", Colors.INFO)));
 										} else {
-											protectionUser.sendMessage(MessageManager.getTooExpensiveToBuyComponent());
+											protectionUser.sendMessage(MessageManager.getTooExpensiveToRenameComponent());
 										}
 
 										isProcessingTransaction = false;
