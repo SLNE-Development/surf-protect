@@ -28,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.UUID;
@@ -173,6 +174,7 @@ public class ProtectionUser {
         Location location = player.getLocation();
         double worldBorderSize = ProtectionSettings.MAX_DISTANCE_FROM_PROTECTION_START;
 
+
         if (regionCreation.isExpandingRegion()) {
             ProtectedRegion expandingProtection = regionCreation.getExpandingProtection();
             Region regionConverter = WorldEditRegionConverter.convertToRegion(expandingProtection);
@@ -184,12 +186,13 @@ public class ProtectionUser {
         }
 
         worldBorder.setCenter(location.getBlockX(), location.getBlockZ());
-        worldBorder.setSize(worldBorderSize);
+        worldBorder.setSize(worldBorderSize * 2); // We want to set the diameter not the radius
         worldBorder.setWarningDistance(0);
 
         player.getInventory().clear();
         player.setAllowFlight(true);
         player.setFlying(true);
+        player.setFlySpeed(3);
         player.setCollidable(false);
         player.setWorldBorder(worldBorder);
 
@@ -238,18 +241,15 @@ public class ProtectionUser {
 
         player.setAllowFlight(player.getGameMode().equals(GameMode.CREATIVE));
         player.setFlying(player.getGameMode().equals(GameMode.CREATIVE));
+        player.setFlySpeed(2);
         player.setCollidable(true);
         player.setWorldBorder(null);
 
     }
 
     public double getWorldBorderSize(ProtectedRegion expandingProtection, double worldBorderSize, BlockVector2 center) {
-        BlockVector2 furthestPoint = expandingProtection.getPoints().stream().reduce((first, second) -> {
-            int firstDistance = first.distanceSq(center);
-            int secondDistance = second.distanceSq(center);
+        BlockVector2 furthestPoint = expandingProtection.getPoints().stream().max(Comparator.comparingDouble(point -> point.distance(center))).orElseThrow();
 
-            return firstDistance > secondDistance ? first : second;
-        }).orElseThrow();
         double distance = furthestPoint.distance(center);
         return worldBorderSize + distance;
     }
