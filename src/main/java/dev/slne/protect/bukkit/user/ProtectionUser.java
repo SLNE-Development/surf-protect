@@ -186,13 +186,14 @@ public class ProtectionUser {
         }
 
         worldBorder.setCenter(location.getBlockX(), location.getBlockZ());
-        worldBorder.setSize(worldBorderSize * 2); // We want to set the diameter not the radius
+        worldBorderSize = worldBorderSize * 2; // We want to set the diameter not the radius so we need to multiply it by 2. Doing it directly in the set method didn't work for some reason
+        worldBorder.setSize(worldBorderSize);
         worldBorder.setWarningDistance(0);
 
         player.getInventory().clear();
         player.setAllowFlight(true);
         player.setFlying(true);
-        player.setFlySpeed(3);
+        player.setFlySpeed(0.3f);
         player.setCollidable(false);
         player.setWorldBorder(worldBorder);
 
@@ -241,7 +242,7 @@ public class ProtectionUser {
 
         player.setAllowFlight(player.getGameMode().equals(GameMode.CREATIVE));
         player.setFlying(player.getGameMode().equals(GameMode.CREATIVE));
-        player.setFlySpeed(2);
+        player.setFlySpeed(0.2f);
         player.setCollidable(true);
         player.setWorldBorder(null);
 
