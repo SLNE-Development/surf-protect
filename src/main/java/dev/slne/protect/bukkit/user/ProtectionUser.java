@@ -236,7 +236,7 @@ public class ProtectionUser {
 
         Player player = getBukkitPlayer();
         player.setFallDistance(0);
-        player.teleportAsync(creation.getStartLocation());
+        player.teleport(creation.getStartLocation());
 
         player.getInventory().setContents(creation.getStartingInventoryContent());
 
