@@ -2,8 +2,8 @@ package dev.slne.protect.bukkit.listener.listeners;
 
 import dev.slne.protect.bukkit.BukkitMain;
 import dev.slne.protect.bukkit.region.ProtectionRegion;
-import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
 import dev.slne.protect.bukkit.user.ProtectionUser;
+import io.papermc.paper.event.player.PlayerItemFrameChangeEvent;
 import io.papermc.paper.event.player.PrePlayerAttackEntityEvent;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -129,6 +129,26 @@ public class ProtectionModeListener implements Listener {
         boolean isBreakingRedstoneTorch = event.getAction() == Action.LEFT_CLICK_BLOCK && event.getClickedBlock().getType() == Material.REDSTONE_TORCH;
 
         if (regionCreation != null && !isPlacingRedstoneTorch && !isBreakingRedstoneTorch) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onItemFrameChange(PlayerItemFrameChangeEvent event) {
+        ProtectionUser protectionUser = ProtectionUser.getProtectionUser(event.getPlayer());
+        ProtectionRegion regionCreation = protectionUser.getRegionCreation();
+
+        if (regionCreation != null) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onArmorstandManipulate(PlayerArmorStandManipulateEvent event) {
+        ProtectionUser protectionUser = ProtectionUser.getProtectionUser(event.getPlayer());
+        ProtectionRegion regionCreation = protectionUser.getRegionCreation();
+
+        if (regionCreation != null) {
             event.setCancelled(true);
         }
     }
