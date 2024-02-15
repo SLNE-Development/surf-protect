@@ -9,6 +9,9 @@ import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
 import dev.slne.protect.bukkit.user.ProtectionUser;
 import dev.slne.surf.surfapi.core.api.messages.Colors;
 import dev.slne.transaction.api.currency.Currency;
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.util.List;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.TextComponent.Builder;
@@ -16,10 +19,6 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.jetbrains.annotations.NotNull;
-
-import java.math.BigDecimal;
-import java.text.DecimalFormat;
-import java.util.List;
 
 /**
  * Represents the message manager
@@ -446,5 +445,12 @@ public final class MessageManager implements Colors {
             }
         }
         return Component.text(name == null ? "#UNKNOWN" : name, VARIABLE_VALUE);
+    }
+
+    public static Component getPlotMessagesChangedComponent(boolean newState) {
+        return prefix()
+            .append(Component.text("Die Nachrichten beim Betreten/Verlassen eines Grundstücks wurden ", INFO))
+            .append(Component.text(newState ? "aktiviert" : "deaktiviert", newState ? SUCCESS : ERROR))
+            .append(Component.text(".", INFO));
     }
 }

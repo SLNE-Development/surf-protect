@@ -9,62 +9,78 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.session.MoveType;
 import com.sk89q.worldguard.session.Session;
 import com.sk89q.worldguard.session.handler.Handler;
+import dev.slne.protect.bukkit.gui.ProtectionMainMenu;
 import dev.slne.protect.bukkit.region.flags.ProtectionFlagsRegistry;
 import dev.slne.protect.bukkit.region.info.ProtectionFlagInfo;
 import dev.slne.surf.surfapi.core.api.messages.Colors;
+import java.util.Set;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import org.bukkit.entity.Player;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 
-import java.util.Set;
 public class BorderCrossingHandler extends Handler {
 
-	public static final Factory FACTORY = new Factory();
-	public BorderCrossingHandler(Session session) {
-		super(session);
-	}
+  public static final Factory FACTORY = new Factory();
 
-	@Override
-	public boolean onCrossBoundary(LocalPlayer player, Location from, Location to, ApplicableRegionSet toSet,
-								   Set<ProtectedRegion> entered, Set<ProtectedRegion> exited, MoveType moveType) {
+  public BorderCrossingHandler(Session session) {
+    super(session);
+  }
 
-		// Check if player is entering a region
-		for(ProtectedRegion region : entered) {
-			handleEntryOrExitMessage(player, region, true);
-		}
+  @Override
+  public boolean onCrossBoundary(LocalPlayer player, Location from, Location to,
+      ApplicableRegionSet toSet, Set<ProtectedRegion> entered, Set<ProtectedRegion> exited,
+      MoveType moveType) {
 
-		// Check if player is leaving a region
-		for(ProtectedRegion region : exited) {
-			handleEntryOrExitMessage(player, region, false);
-		}
+    // Check if player is entering a region
+    for (ProtectedRegion region : entered) {
+      handleEntryOrExitMessage(player, region, true);
+    }
 
-		return true;
-	}
+    // Check if player is leaving a region
+    for (ProtectedRegion region : exited) {
+      handleEntryOrExitMessage(player, region, false);
+    }
 
-	public void handleEntryOrExitMessage(LocalPlayer player, ProtectedRegion region, boolean entered) {
-		ProtectionFlagInfo protectionFlagInfo = region.getFlag(ProtectionFlagsRegistry.SURF_PROTECT_FLAG);
-		StateFlag.State surfProtectionFlag = region.getFlag(ProtectionFlagsRegistry.SURF_PROTECTION);
+    return true;
+  }
 
-		// Check if it is a player protection
-		if(surfProtectionFlag == null || surfProtectionFlag == StateFlag.State.DENY || protectionFlagInfo == null) {
-			return;
-		}
+  public void handleEntryOrExitMessage(LocalPlayer player, ProtectedRegion region,
+      boolean entered) {
+    ProtectionFlagInfo protectionFlagInfo = region.getFlag(
+        ProtectionFlagsRegistry.SURF_PROTECT_FLAG);
+    StateFlag.State surfProtectionFlag = region.getFlag(ProtectionFlagsRegistry.SURF_PROTECTION);
 
-		Player bukkitPlayer = BukkitAdapter.adapt(player);
+    // Check if it is a player protection
+    if (surfProtectionFlag == null || surfProtectionFlag == StateFlag.State.DENY
+        || protectionFlagInfo == null) {
+      return;
+    }
 
-		TextComponent.Builder builder = Component.text();
-		builder.append(Colors.PREFIX);
-		builder.append(Component.text("Du hast das Grundstück ", Colors.INFO));
-		builder.append(Component.text(protectionFlagInfo.name(), Colors.VARIABLE_VALUE));
-		builder.append(Component.text(entered ? " betreten." : " verlassen.", Colors.INFO));
+    Player bukkitPlayer = BukkitAdapter.adapt(player);
+    PersistentDataContainer pdc = bukkitPlayer.getPersistentDataContainer();
+    boolean sendMessage = pdc.getOrDefault(ProtectionMainMenu.PLOT_MESSAGES_KEY,
+        PersistentDataType.BOOLEAN, ProtectionMainMenu.DEFAULT_PLOT_MESSAGES);
 
-		bukkitPlayer.sendMessage(builder.build());
-	}
+    if (!sendMessage) {
+      return;
+    }
 
-	public static class Factory extends Handler.Factory<BorderCrossingHandler> {
-		@Override
-		public BorderCrossingHandler create(Session session) {
-			return new BorderCrossingHandler(session);
-		}
-	}
+    TextComponent.Builder builder = Component.text();
+    builder.append(Colors.PREFIX);
+    builder.append(Component.text("Du hast das Grundstück ", Colors.INFO));
+    builder.append(Component.text(protectionFlagInfo.name(), Colors.VARIABLE_VALUE));
+    builder.append(Component.text(entered ? " betreten." : " verlassen.", Colors.INFO));
+
+    bukkitPlayer.sendMessage(builder.build());
+  }
+
+  public static class Factory extends Handler.Factory<BorderCrossingHandler> {
+
+    @Override
+    public BorderCrossingHandler create(Session session) {
+      return new BorderCrossingHandler(session);
+    }
+  }
 }
