@@ -54,19 +54,19 @@ public class ProtectionMainMenu extends SurfChestGui {
     StaticPane navigationPane = new StaticPane(0, 0, 9, 5);
 
     if (viewingPlayer.hasPermission("surf.protect.list")) {
-      navigationPane.addItem(getProtectionListItem(), 1, 2);
+      navigationPane.addItem(getProtectionListItem(), 2, 2);
     }
 
     if (viewingPlayer.hasPermission("surf.protect.visualize")) {
-      navigationPane.addItem(getVisualizerItem(), 2, 2);
+      navigationPane.addItem(getVisualizerItem(), 7, 2);
     }
 
     if (viewingPlayer.hasPermission("surf.protect.create")) {
-      navigationPane.addItem(getProtectionCreateItem(), 7, 2);
+      navigationPane.addItem(getProtectionCreateItem(), 1, 2);
     }
 
     if (viewingPlayer.hasPermission("surf.protect.plotmessages")) {
-      navigationPane.addItem(getPlotMessagesItem(), 1, 3);
+      navigationPane.addItem(getPlotMessagesItem(), 6, 2);
     }
 
     addPane(navigationPane);
