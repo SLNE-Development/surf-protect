@@ -179,7 +179,7 @@ public class ProtectionUser {
             ProtectedRegion expandingProtection = regionCreation.getExpandingProtection();
             Region regionConverter = WorldEditRegionConverter.convertToRegion(expandingProtection);
             BlockVector2 center = regionConverter.getCenter().toBlockPoint().toBlockVector2();
-            location = new Location(player.getWorld(), center.getX(), 0, center.getZ());
+            location = new Location(player.getWorld(), center.x(), 0, center.z());
 
             worldBorderSize = getWorldBorderSize(expandingProtection, worldBorderSize, center);
             regionCreation.setWorldBorderSize(worldBorderSize);

@@ -266,7 +266,7 @@ public class ProtectionUtils {
      */
     public static long getArea(ProtectedRegion region) {
         Polygonal2DRegion worldEditRegion = new Polygonal2DRegion(null, region.getPoints(),
-                region.getMinimumPoint().getBlockY(), region.getMaximumPoint().getBlockY());
+                region.getMinimumPoint().y(), region.getMaximumPoint().y());
 
         worldEditRegion.setMaximumY(0);
         worldEditRegion.setMinimumY(0);

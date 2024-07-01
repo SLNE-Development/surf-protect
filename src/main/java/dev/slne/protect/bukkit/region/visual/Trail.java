@@ -116,7 +116,7 @@ public class Trail extends BukkitRunnable {
 
 		DustOptions dustOptions = new DustOptions(color, 1);
 		World world = this.currentLocation.getWorld();
-		world.spawnParticle(Particle.REDSTONE, this.currentLocation.clone().add(0.5, 0.5, 0.5), 1, dustOptions);
+		world.spawnParticle(Particle.DUST, this.currentLocation.clone().add(0.5, 0.5, 0.5), 1, dustOptions);
 	}
 
 	@Override
