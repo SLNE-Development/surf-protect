@@ -1,66 +1,62 @@
 package dev.slne.protect.bukkit;
 
-import dev.slne.protect.bukkit.instance.BukkitApi;
-import dev.slne.protect.bukkit.instance.BukkitInstance;
+import dev.slne.protect.bukkit.listener.ListenerManager;
+import dev.slne.protect.bukkit.region.flag.ProtectionFlagsRegistry;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.Random;
-
+/**
+ * The type Bukkit main.
+ */
 public class BukkitMain extends JavaPlugin {
 
-    private static BukkitMain instance;
-    private static BukkitInstance bukkitInstance;
+  private ProtectionFlagsRegistry flagsRegistry;
+  private ListenerManager listenerManager;
 
-    private Random random;
+  @Override
+  public void onLoad() {
+    listenerManager = ListenerManager.INSTANCE;
 
-    @Override
-    @SuppressWarnings("java:S2696")
-    public void onLoad() {
-        instance = this;
-        bukkitInstance = new BukkitInstance();
+    flagsRegistry = ProtectionFlagsRegistry.INSTANCE;
+    flagsRegistry.registerFlags();
+  }
 
-        this.random = new Random();
+  @Override
+  public void onEnable() {
+    listenerManager.registerWorldEditHandlers();
+    listenerManager.registerListeners();
+  }
 
-        BukkitApi.setInstance(bukkitInstance);
+  @Override
+  public void onDisable() {
+    listenerManager.unregisterWorldEditHandlers();
+    listenerManager.unregisterListeners();
+  }
 
-        bukkitInstance.onLoad();
-    }
+  /**
+   * Returns the plugin instance
+   *
+   * @return the plugin instance, which is collected by using the getPlugin Method in
+   * {@link JavaPlugin#getPlugin}
+   */
+  public static BukkitMain getInstance() {
+    return getPlugin(BukkitMain.class);
+  }
 
-    @Override
-    public void onEnable() {
-        bukkitInstance.onEnable();
-    }
+  /**
+   * Gets flags registry.
+   *
+   * @return the flags registry
+   */
+  public ProtectionFlagsRegistry getFlagsRegistry() {
+    return flagsRegistry;
+  }
 
-    @Override
-    public void onDisable() {
-        bukkitInstance.onDisable();
-    }
-
-    /**
-     * Returns the instance of the plugin
-     *
-     * @return The instance of the plugin
-     */
-    public static BukkitMain getInstance() {
-        return instance;
-    }
-
-    /**
-     * Returns the core instance of the plugin
-     *
-     * @return The core instance of the plugin
-     */
-    public static BukkitInstance getBukkitInstance() {
-        return bukkitInstance;
-    }
-
-    /**
-     * Returns the random instance
-     *
-     * @return The random instance
-     */
-    public static Random getRandom() {
-        return instance.random;
-    }
-
+  /**
+   * Gets listener manager.
+   *
+   * @return the listener manager
+   */
+  public ListenerManager getListenerManager() {
+    return listenerManager;
+  }
 }

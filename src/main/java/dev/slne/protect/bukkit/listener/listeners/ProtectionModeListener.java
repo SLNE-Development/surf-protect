@@ -1,9 +1,10 @@
 package dev.slne.protect.bukkit.listener.listeners;
 
 import com.destroystokyo.paper.MaterialSetTag;
-import dev.slne.protect.bukkit.BukkitMain;
+import dev.slne.protect.bukkit.player.ProtectionPlayer;
+import dev.slne.protect.bukkit.player.ProtectionPlayerManager;
 import dev.slne.protect.bukkit.region.ProtectionRegion;
-import dev.slne.protect.bukkit.user.ProtectionUser;
+import dev.slne.protect.bukkitold.BukkitMain;
 import io.papermc.paper.event.player.PlayerItemFrameChangeEvent;
 import io.papermc.paper.event.player.PrePlayerAttackEntityEvent;
 import org.bukkit.Location;
@@ -28,13 +29,12 @@ import org.bukkit.event.player.PlayerPortalEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.event.server.PluginDisableEvent;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 
 public class ProtectionModeListener implements Listener {
 
   private static final MaterialSetTag INTERACTABLE = new MaterialSetTag(
-      key("interactable")).contains("BUTTON").contains("DOOR").contains("LEVER").contains("GATE")
+      new NamespacedKey(BukkitMain.getInstance(), "interactable")).contains("BUTTON")
+      .contains("DOOR").contains("LEVER").contains("GATE")
       .contains("TRAPDOOR").contains("ANVIL").contains("TABLE").contains("FURNACE")
       .contains("SMOKER").contains("BREWING_STAND").contains("LECTERN").contains("STONECUTTER")
       .contains("GRINDSTONE").contains("HOPPER").contains("DROPPER").contains("DISPENSER")
@@ -44,77 +44,57 @@ public class ProtectionModeListener implements Listener {
       .contains("BELL").contains("CAMPFIRE").contains("POT").add(Material.LOOM)
       .add(Material.REPEATER).add(Material.OBSERVER).add(Material.CHISELED_BOOKSHELF).lock();
 
-  @Contract("_ -> new")
-  private static @NotNull NamespacedKey key(String name) {
-    return new NamespacedKey(BukkitMain.getInstance(), name);
-  }
-
   /**
-   * Checks if the would interact instead of placing a block
+   * Checks if the player would interact instead of placing a block
    *
-   * @param material the material
    * @return true if the material would be interacted with
    */
   private boolean isInteractive(Block block) {
-
     if (block == null) {
       return false;
     }
-
-//    Material material = block.getType();
-//    String name = material.toString();
-//    Pattern pattern = Pattern.compile(
-//        ".*(BUTTON|DOOR|LEVER|GATE|TRAPDOOR|ANVIL|TABLE|FURNACE|SMOKER|BREWING_STAND|LECTERN|STONECUTTER|LOOM|GRINDSTONE|HOPPER|DROPPER|DISPENSER|CHEST|"
-//            + "SHULKER_BOX|BARREL|BEACON|BED|CAULDRON|COMPARATOR|DAYLIGHT_DETECTOR|REPEATER|OBSERVER|SIGN|PRESSURE_PLATE|JUKEBOX|NOTE_BLOCK|BELL|CAMPFIRE|POT|BOOKSHELF).*",
-//        Pattern.CASE_INSENSITIVE);
-//
-//    return pattern.matcher(name).matches();
 
     return INTERACTABLE.isTagged(block);
   }
 
   @EventHandler(priority = EventPriority.LOWEST)
   public void onQuit(PlayerQuitEvent event) {
-    ProtectionUser protectionUser = ProtectionUser.getProtectionUser(event.getPlayer());
+    ProtectionPlayer protectionPlayer = ProtectionPlayer.get(event.getPlayer());
 
-    if (protectionUser.hasRegionCreation()) {
-      protectionUser.getRegionCreation().cancelProtection();
-      protectionUser.resetRegionCreation();
+    if (protectionPlayer.hasCurrentRegion()) {
+//      protectionPlayer.getCurrentRegion().cancelProtection();  // FIXME: 01.07.2024 16:46
+      protectionPlayer.toggleRegionCreation(false);
     }
   }
 
   @EventHandler
   public void onMove(PlayerMoveEvent event) {
-    ProtectionUser protectionUser = ProtectionUser.getProtectionUser(event.getPlayer());
-    ProtectionRegion regionCreation = protectionUser.getRegionCreation();
+    ProtectionPlayer protectionPlayer = ProtectionPlayer.get(event.getPlayer());
+    ProtectionRegion protectionRegion = protectionPlayer.getCurrentRegion();
 
-    if (regionCreation != null) {
-      Location protectionModeLocation = regionCreation.getStartLocation();
+    if (protectionRegion != null) {
+      Location centerLocation = protectionRegion.getCenterLocation(event.getPlayer().getWorld());
       Player player = event.getPlayer();
       WorldBorder worldBorder = player.getWorldBorder();
 
       Location to = event.getTo();
-      if (worldBorder != null && !worldBorder.isInside(to)) {
-        event.getPlayer().teleport(protectionModeLocation);
-      }
 
+      if (worldBorder != null && !worldBorder.isInside(to)) {
+        event.getPlayer().teleport(centerLocation);
+      }
     }
   }
 
   @EventHandler
   public void onItemDrop(PlayerDropItemEvent event) {
-    ProtectionUser protectionUser = ProtectionUser.getProtectionUser(event.getPlayer());
-
-    if (protectionUser.hasRegionCreation()) {
+    if (ProtectionPlayer.get(event.getPlayer()).hasCurrentRegion()) {
       event.setCancelled(true);
     }
   }
 
   @EventHandler(priority = EventPriority.HIGHEST)
   public void onPortal(PlayerPortalEvent event) {
-    ProtectionUser protectionUser = ProtectionUser.getProtectionUser(event.getPlayer());
-
-    if (protectionUser.hasRegionCreation()) {
+    if (ProtectionPlayer.get(event.getPlayer()).hasCurrentRegion()) {
       event.setCancelled(true);
     }
   }
@@ -125,37 +105,28 @@ public class ProtectionModeListener implements Listener {
       return;
     }
 
-    ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
-
-    if (protectionUser.hasRegionCreation()) {
+    if (ProtectionPlayer.get(player).hasCurrentRegion()) {
       event.setCancelled(true);
     }
   }
 
   @EventHandler
   public void onItemPickup(PlayerAttemptPickupItemEvent event) {
-    ProtectionUser protectionUser = ProtectionUser.getProtectionUser(event.getPlayer());
-
-    if (protectionUser.hasRegionCreation()) {
+    if (ProtectionPlayer.get(event.getPlayer()).hasCurrentRegion()) {
       event.setCancelled(true);
     }
   }
 
   @EventHandler
   public void onHandSwap(PlayerSwapHandItemsEvent event) {
-    ProtectionUser protectionUser = ProtectionUser.getProtectionUser(event.getPlayer());
-
-    if (protectionUser.hasRegionCreation()) {
+    if (ProtectionPlayer.get(event.getPlayer()).hasCurrentRegion()) {
       event.setCancelled(true);
     }
   }
 
   @EventHandler
   public void onEntityAttack(PrePlayerAttackEntityEvent event) {
-    Player player = event.getPlayer();
-    ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
-
-    if (protectionUser.hasRegionCreation()) {
+    if (ProtectionPlayer.get(event.getPlayer()).hasCurrentRegion()) {
       event.setCancelled(true);
     }
   }
@@ -166,20 +137,19 @@ public class ProtectionModeListener implements Listener {
       return;
     }
 
-    ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
-
-    if (protectionUser.hasRegionCreation()) {
+    if (ProtectionPlayer.get(player).hasCurrentRegion()) {
       event.setCancelled(true);
     }
   }
 
+  @SuppressWarnings("DataFlowIssue")
   @EventHandler
   public void onInteract(PlayerInteractEvent event) {
-    ProtectionUser protectionUser = ProtectionUser.getProtectionUser(event.getPlayer());
-    ProtectionRegion regionCreation = protectionUser.getRegionCreation();
+    ProtectionPlayer protectionPlayer = ProtectionPlayer.get(event.getPlayer());
+    ProtectionRegion protectionRegion = protectionPlayer.getCurrentRegion();
     Block block = event.getClickedBlock();
 
-    boolean isInProtectionMode = regionCreation != null;
+    boolean isInProtectionMode = protectionRegion != null;
     boolean isPlacingRedstoneTorch = event.getAction() == Action.RIGHT_CLICK_BLOCK
         && event.getMaterial() == Material.REDSTONE_TORCH;
     boolean isBreakingRedstoneTorch =
@@ -202,47 +172,35 @@ public class ProtectionModeListener implements Listener {
     if (!isPlacingRedstoneTorch && !isBreakingRedstoneTorch) {
       event.setCancelled(true);
     }
-
   }
 
   @EventHandler
   public void onItemFrameChange(PlayerItemFrameChangeEvent event) {
-    ProtectionUser protectionUser = ProtectionUser.getProtectionUser(event.getPlayer());
-    ProtectionRegion regionCreation = protectionUser.getRegionCreation();
-
-    if (regionCreation != null) {
+    if (ProtectionPlayer.get(event.getPlayer()).hasCurrentRegion()) {
       event.setCancelled(true);
     }
   }
 
   @EventHandler
   public void onArmorstandManipulate(PlayerArmorStandManipulateEvent event) {
-    ProtectionUser protectionUser = ProtectionUser.getProtectionUser(event.getPlayer());
-    ProtectionRegion regionCreation = protectionUser.getRegionCreation();
-
-    if (regionCreation != null) {
+    if (ProtectionPlayer.get(event.getPlayer()).hasCurrentRegion()) {
       event.setCancelled(true);
     }
   }
 
   @EventHandler
   public void onEntityRide(PlayerInteractEntityEvent event) {
-    ProtectionUser protectionUser = ProtectionUser.getProtectionUser(event.getPlayer());
-    ProtectionRegion regionCreation = protectionUser.getRegionCreation();
-
-    if (regionCreation != null) {
+    if (ProtectionPlayer.get(event.getPlayer()).hasCurrentRegion()) {
       event.setCancelled(true);
     }
   }
 
   @EventHandler
-  public void onServerStop(
-      PluginDisableEvent event) { // TODO: 04.02.2024 11:10 - move to a better place
-    for (ProtectionUser protectionUser : BukkitMain.getBukkitInstance().getUserManager()
-        .getUsers()) {
-      if (protectionUser.hasRegionCreation()) {
-        protectionUser.getRegionCreation().cancelProtection();
+  public void onServerStop(PluginDisableEvent event) {
+    ProtectionPlayerManager.INSTANCE.getPlayerMap().values().forEach(player -> {
+      if (player.hasCurrentRegion()) {
+//        player.getCurrentRegion().cancelProtection(); // FIXME: 01.07.2024 16:51
       }
-    }
+    });
   }
 }
