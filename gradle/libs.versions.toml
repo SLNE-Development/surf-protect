@@ -3,7 +3,7 @@ io-papermc-paper-api = "1.21-R0.1-SNAPSHOT"
 dev-jorel-commandapi-bukkit-core = "9.5.1"
 com-sk89q-worldguard-worldguard-bukkit = "7.1.0-SNAPSHOT"
 net-kyori-adventure-nbt = "4.17.0"
-net-wesjd-anvilgui = "1.9.6-SNAPSHOT"
+net-wesjd-anvilgui = "1.10.0-SNAPSHOT"
 com-github-stefvanschie-inventoryframework-if = "0.10.15"
 
 dev-slne-surf-transaction-api = "1.21-+"
@@ -16,6 +16,5 @@ com-sk89q-worldguard-worldguard-bukkit = { module = "com.sk89q.worldguard:worldg
 net-kyori-adventure-nbt = { module = "net.kyori:adventure-nbt", version.ref = "net-kyori-adventure-nbt" }
 net-wesjd-anvilgui = { module = "net.wesjd:anvilgui", version.ref = "net-wesjd-anvilgui" }
 com-github-stefvanschie-inventoryframework = { module = "com.github.stefvanschie.inventoryframework:IF", version.ref = "com-github-stefvanschie-inventoryframework-if" }
-
 dev-slne-surf-transaction-api = { module = "dev.slne:surf-transaction-api", version.ref = "dev-slne-surf-transaction-api" }
 dev-slne-surf-surf-api-bukkit-api = { module = "dev.slne.surf:surf-api-bukkit-api", version.ref = "dev-slne-surf-surf-api-bukkit-api" }
