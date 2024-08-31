@@ -27,6 +27,11 @@ import dev.slne.protect.bukkit.user.ProtectionUser;
 import dev.slne.transaction.api.TransactionApi;
 import dev.slne.transaction.api.currency.Currency;
 import dev.slne.transaction.api.transaction.result.TransactionAddResult;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.bukkit.Bukkit;
@@ -36,12 +41,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
 
 public class ProtectionRegion {
 
@@ -80,7 +79,7 @@ public class ProtectionRegion {
             List<BlockVector2> vector2s = expandingProtection.getPoints();
 
             for (BlockVector2 vector : vector2s) {
-                Location location = new Location(world, vector.x(), 0, vector.z());
+                Location location = new Location(world, vector.getX(), 0, vector.getZ());
                 location.setY(world.getHighestBlockYAt(location, ProtectionSettings.PROTECTION_HEIGHTMAP) + (double) 1);
 
                 createMarker(location.getBlock(), location.getBlock().getBlockData(), true);
@@ -193,7 +192,7 @@ public class ProtectionRegion {
         // Get the center of the region and set the teleport location
         Region worldeditRegion = WorldEditRegionConverter.convertToRegion(region);
         Vector3 center = worldeditRegion.getCenter();
-        Location teleportLocation = new Location(player.getWorld(), center.x(), center.y(), center.z());
+        Location teleportLocation = new Location(player.getWorld(), center.getX(), center.getY(), center.getZ());
 
         // Set TELE_LOC flag to the center of the region
         region.setFlag(Flags.TELE_LOC, BukkitAdapter.adapt(teleportLocation));

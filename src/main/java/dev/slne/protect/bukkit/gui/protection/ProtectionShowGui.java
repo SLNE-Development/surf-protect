@@ -20,7 +20,6 @@ import dev.slne.protect.bukkit.region.flags.ProtectionFlagsRegistry;
 import dev.slne.protect.bukkit.region.info.RegionInfo;
 import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
 import dev.slne.protect.bukkit.region.transaction.ProtectionSellData;
-import dev.slne.protect.bukkit.region.visual.visualizer.ProtectionVisualizer;
 import dev.slne.protect.bukkit.region.visual.visualizer.ProtectionVisualizerThread;
 import dev.slne.protect.bukkit.user.ProtectionUser;
 import dev.slne.transaction.api.TransactionApi;
@@ -474,14 +473,10 @@ public class ProtectionShowGui extends SurfChestGui {
             // Remove visualizers
             ProtectionVisualizerThread visualizerThread = BukkitMain.getBukkitInstance()
                 .getProtectionVisualizerThread();
-            ProtectionVisualizer<?> visualizer = visualizerThread.getVisualizers().stream()
+            visualizerThread.getVisualizers().stream()
                 .filter(protectionVisualizer -> protectionVisualizer.getRegion()
-                    .equals(protectedRegion)).findFirst().orElse(null);
-
-            if (visualizer != null) {
-              visualizerThread.removeVisualizer(visualizer);
-              visualizer.remove();
-            }
+                    .equals(protectedRegion)).findFirst()
+                .ifPresent(visualizerThread::closeVisualizer);
 
             new BukkitRunnable() {
               @Override

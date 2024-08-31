@@ -14,7 +14,6 @@ import dev.slne.protect.bukkit.message.MessageManager;
 import dev.slne.protect.bukkit.region.ProtectionRegion;
 import dev.slne.protect.bukkit.region.ProtectionUtils;
 import dev.slne.protect.bukkit.region.flags.ProtectionFlagsRegistry;
-import dev.slne.protect.bukkit.region.visual.visualizer.ProtectionVisualizer;
 import dev.slne.protect.bukkit.user.ProtectionUser;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -150,12 +149,6 @@ public class ProtectionMainMenu extends SurfChestGui {
               .addVisualizer(player.getWorld(), region, player);
         }
       } else {
-        for (ProtectionVisualizer<?> visualizer : new ArrayList<>(
-            BukkitMain.getBukkitInstance().getProtectionVisualizerThread()
-                .getVisualizers(player))) {
-          visualizer.remove();
-        }
-
         BukkitMain.getBukkitInstance().getProtectionVisualizerThread().removeVisualizers(player);
       }
 

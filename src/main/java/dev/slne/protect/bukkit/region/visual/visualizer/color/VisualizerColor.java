@@ -1,33 +1,31 @@
 package dev.slne.protect.bukkit.region.visual.visualizer.color;
 
-import com.github.retrooper.packetevents.protocol.world.states.WrappedBlockState;
-import com.github.retrooper.packetevents.protocol.world.states.type.StateTypes;
-import dev.slne.surf.surfapi.core.api.util.BlockStateFactory;
+import org.bukkit.Material;
+import org.bukkit.block.data.BlockData;
 
 public enum VisualizerColor {
 
-    OWNING(BlockStateFactory.of(StateTypes.LIME_STAINED_GLASS)),
-    MEMBER(BlockStateFactory.of(StateTypes.LIGHT_BLUE_STAINED_GLASS)),
-    NOT_OWNING(BlockStateFactory.of(StateTypes.RED_STAINED_GLASS));
+  OWNING(Material.LIME_STAINED_GLASS.createBlockData()),
+  MEMBER(Material.LIGHT_BLUE_STAINED_GLASS.createBlockData()),
+  NOT_OWNING(Material.RED_STAINED_GLASS.createBlockData());
 
-    private final WrappedBlockState blockState;
+  private final BlockData blockState;
 
-    /**
-     * Create a new color
-     *
-     * @param blockState the block state
-     */
-    VisualizerColor(WrappedBlockState blockState) {
-        this.blockState = blockState;
-    }
+  /**
+   * Create a new color
+   *
+   * @param blockState the block state
+   */
+  VisualizerColor(BlockData blockState) {
+    this.blockState = blockState;
+  }
 
-    /**
-     * Returns the id of the color
-     *
-     * @return the id
-     */
-    public WrappedBlockState getBlockState() {
-        return blockState;
-    }
-
+  /**
+   * Returns the id of the color
+   *
+   * @return the id
+   */
+  public BlockData getBlockData() {
+    return blockState;
+  }
 }

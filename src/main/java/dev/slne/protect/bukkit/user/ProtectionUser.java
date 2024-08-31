@@ -20,19 +20,22 @@ import dev.slne.transaction.api.currency.Currency;
 import dev.slne.transaction.api.transaction.Transaction;
 import dev.slne.transaction.api.transaction.data.TransactionData;
 import dev.slne.transaction.api.transaction.result.TransactionAddResult;
-import net.kyori.adventure.text.Component;
-import org.bukkit.*;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.WorldBorder;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class ProtectionUser {
 
@@ -179,7 +182,7 @@ public class ProtectionUser {
             ProtectedRegion expandingProtection = regionCreation.getExpandingProtection();
             Region regionConverter = WorldEditRegionConverter.convertToRegion(expandingProtection);
             BlockVector2 center = regionConverter.getCenter().toBlockPoint().toBlockVector2();
-            location = new Location(player.getWorld(), center.x(), 0, center.z());
+            location = new Location(player.getWorld(), center.getX(), 0, center.getX());
 
             worldBorderSize = getWorldBorderSize(expandingProtection, worldBorderSize, center);
             regionCreation.setWorldBorderSize(worldBorderSize);

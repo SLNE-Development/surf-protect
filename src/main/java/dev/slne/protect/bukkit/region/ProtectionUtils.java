@@ -15,13 +15,17 @@ import dev.slne.protect.bukkit.region.flags.ProtectionFlagsRegistry;
 import dev.slne.protect.bukkit.region.info.RegionInfo;
 import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
 import dev.slne.protect.bukkit.user.ProtectionUserFinder;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Represents the protection utils
@@ -266,7 +270,7 @@ public class ProtectionUtils {
      */
     public static long getArea(ProtectedRegion region) {
         Polygonal2DRegion worldEditRegion = new Polygonal2DRegion(null, region.getPoints(),
-                region.getMinimumPoint().y(), region.getMaximumPoint().y());
+                region.getMinimumPoint().getY(), region.getMaximumPoint().getY());
 
         worldEditRegion.setMaximumY(0);
         worldEditRegion.setMinimumY(0);
