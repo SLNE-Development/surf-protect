@@ -67,10 +67,7 @@ public enum ProtectionFlagsMap {
             "Aktiviere/Deaktiviere das Formen von Eis",
             Flags.ICE_FORM, null, State.DENY),
     ICE_MELT(Material.ICE, Component.text("Ice Melt", MessageManager.PRIMARY),
-            "Aktiviere/Deaktiviere das Schmelzen von Eis", Flags.ICE_MELT, null, State.DENY),
-    REALISTIC_SEASONS_BLOCK_CHANGE(Material.GRASS_BLOCK, Component.text("Realistic Seasons Block Change", MessageManager.PRIMARY),
-            "Aktiviere/Deaktiviere das Ändern von Blöcken durch die Jahreszeiten",
-            new StateFlag("season-block-changes", true), null, State.DENY);
+            "Aktiviere/Deaktiviere das Schmelzen von Eis", Flags.ICE_MELT, null, State.DENY);
 
     private final Material material;
     private final Component displayName;

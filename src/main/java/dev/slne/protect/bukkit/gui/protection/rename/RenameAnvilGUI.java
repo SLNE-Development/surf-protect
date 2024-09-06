@@ -12,6 +12,7 @@ import dev.slne.protect.bukkit.gui.anvil.requirement.requirements.AnvilNoSpaceRe
 import dev.slne.protect.bukkit.gui.anvil.requirement.requirements.AnvilNoSpecialCharacterRequirement;
 import dev.slne.protect.bukkit.gui.confirmation.ConfirmationGui;
 import dev.slne.protect.bukkit.message.MessageManager;
+import dev.slne.protect.bukkit.region.flags.ProtectionFlagsRegistry;
 import dev.slne.protect.bukkit.region.info.ProtectionFlagInfo;
 import dev.slne.protect.bukkit.region.info.RegionInfo;
 import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
@@ -28,6 +29,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import net.wesjd.anvilgui.AnvilGUI;
+import net.wesjd.anvilgui.AnvilGUI.ResponseAction;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -45,9 +47,24 @@ public class RenameAnvilGUI extends SurfAnvilGui {
    * @param region    the region to add the member to
    */
   public RenameAnvilGUI(SurfGui parentGui, ProtectedRegion region) {
-    super(parentGui, Component.text("Grundstück umbennnen"), MessageManager.prefix());
+    super(
+        parentGui,
+        getDefaultInput(region),
+        Component.text("Grundstück umbenennen"),
+        MessageManager.prefix()
+    );
 
     this.region = region;
+  }
+
+  private static String getDefaultInput(ProtectedRegion region) {
+    final ProtectionFlagInfo flag = region.getFlag(ProtectionFlagsRegistry.SURF_PROTECT_FLAG);
+
+    if (flag != null) {
+      return flag.name();
+    }
+
+    return region.getId();
   }
 
   @Override
@@ -68,7 +85,12 @@ public class RenameAnvilGUI extends SurfAnvilGui {
   public List<AnvilGUI.ResponseAction> onSubmit(Player player, String input) {
     List<AnvilGUI.ResponseAction> responseActions = new ArrayList<>();
 
-    Currency currency = TransactionApi.getCurrency("CastCoin").get();
+    if (isProcessingTransaction) {
+      player.sendMessage(MessageManager.getAlreadyProcessingTransactionComponent());
+      return responseActions;
+    }
+
+    Currency currency = TransactionApi.getCurrency("CastCoin").orElseThrow();
 
     RegionInfo regionInfo = new RegionInfo(player.getWorld(), region);
     String oldName = regionInfo.getName();
@@ -106,7 +128,7 @@ public class RenameAnvilGUI extends SurfAnvilGui {
                           null,
                           BigDecimal.valueOf(ProtectionSettings.PROTECTION_RENAME_PRICE).negate(),
                           currency,
-                          new ProtectionRenameData(Bukkit.getWorlds().get(0), region, oldName,
+                          new ProtectionRenameData(Bukkit.getWorlds().getFirst(), region, oldName,
                               newName)
                       ).thenAcceptAsync(transactionAddResult -> {
                         if (transactionAddResult != null && transactionAddResult.equals(

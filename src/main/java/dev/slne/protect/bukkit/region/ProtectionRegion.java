@@ -79,7 +79,7 @@ public class ProtectionRegion {
             List<BlockVector2> vector2s = expandingProtection.getPoints();
 
             for (BlockVector2 vector : vector2s) {
-                Location location = new Location(world, vector.getX(), 0, vector.getZ());
+                Location location = new Location(world, vector.x(), 0, vector.z());
                 location.setY(world.getHighestBlockYAt(location, ProtectionSettings.PROTECTION_HEIGHTMAP) + (double) 1);
 
                 createMarker(location.getBlock(), location.getBlock().getBlockData(), true);
@@ -192,7 +192,7 @@ public class ProtectionRegion {
         // Get the center of the region and set the teleport location
         Region worldeditRegion = WorldEditRegionConverter.convertToRegion(region);
         Vector3 center = worldeditRegion.getCenter();
-        Location teleportLocation = new Location(player.getWorld(), center.getX(), center.getY(), center.getZ());
+        Location teleportLocation = new Location(player.getWorld(), center.x(), center.y(), center.z());
 
         // Set TELE_LOC flag to the center of the region
         region.setFlag(Flags.TELE_LOC, BukkitAdapter.adapt(teleportLocation));
@@ -200,7 +200,7 @@ public class ProtectionRegion {
         // Set SURF_PROTECT_FLAG if it does not exist already
         new RegionInfo(player.getWorld(), region);
 
-        // Set SURF_PROTECTION flag to ALLOW
+        // Set SURF_PROTECTION flag to ALLO
         region.setFlag(ProtectionFlagsRegistry.SURF_PROTECTION, StateFlag.State.ALLOW);
 
         this.temporaryRegion = new TemporaryProtectionRegion(player.getWorld(), region, manager);

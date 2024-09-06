@@ -453,4 +453,8 @@ public final class MessageManager implements Colors {
             .append(Component.text(newState ? "aktiviert" : "deaktiviert", newState ? SUCCESS : ERROR))
             .append(Component.text(".", INFO));
     }
+
+    public static Component getAlreadyProcessingTransactionComponent() {
+        return prefix().append(Component.text("Bitte warte einen Moment.", ERROR));
+    }
 }

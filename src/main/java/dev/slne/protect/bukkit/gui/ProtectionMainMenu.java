@@ -22,6 +22,7 @@ import java.util.Map;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
@@ -31,6 +32,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.scheduler.BukkitScheduler;
 
 public class ProtectionMainMenu extends SurfChestGui {
 
@@ -192,7 +194,10 @@ public class ProtectionMainMenu extends SurfChestGui {
         if (!(cancelEvent instanceof InventoryCloseEvent closeEvent && closeEvent.getReason()
             .equals(
                 InventoryCloseEvent.Reason.PLUGIN))) {
-          new ProtectionMainMenu(player, getTargetProtectionPlayer()).show(player);
+          Bukkit.getScheduler().runTaskLater(BukkitMain.getInstance(), () -> {
+            new ProtectionMainMenu(player, getTargetProtectionPlayer()).show(player);
+          }, 1);
+
         }
       }, Component.text("Grundstück erstellen", MessageManager.PRIMARY), confirmLore);
 
