@@ -1,11 +1,13 @@
 package dev.slne.protect.bukkit.gui.anvil.requirement.requirements.player;
 
+import dev.slne.data.api.util.PlayerFinder;
 import dev.slne.protect.bukkit.gui.anvil.requirement.AnvilRequirement;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 
 public class AnvilOfflinePlayerRequirement implements AnvilRequirement {
 
@@ -25,6 +27,15 @@ public class AnvilOfflinePlayerRequirement implements AnvilRequirement {
       return CompletableFuture.completedFuture(false);
     }
 
-    return CompletableFuture.completedFuture(Bukkit.getOfflinePlayer(input).hasPlayedBefore());
+    return PlayerFinder.getUuidByPlayerName(input).thenApplyAsync(uuid -> {
+      if (uuid == null) {
+        return false;
+      }
+
+      OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
+      player.getPlayerProfile().complete(false);
+
+      return player.hasPlayedBefore();
+    });
   }
 }
