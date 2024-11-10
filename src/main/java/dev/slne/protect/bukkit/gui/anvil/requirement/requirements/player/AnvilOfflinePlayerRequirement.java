@@ -36,6 +36,6 @@ public class AnvilOfflinePlayerRequirement implements AnvilRequirement {
       player.getPlayerProfile().complete(false);
 
       return player.hasPlayedBefore();
-    });
+    }).exceptionally(exception -> false);
   }
 }

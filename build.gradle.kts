@@ -10,7 +10,7 @@ plugins {
 }
 
 repositories {
-    mavenLocal()
+    mavenCentral()
     gradlePluginPortal()
     maven("https://repo.slne.dev/repository/maven-public/") { name = "maven-public" }
     maven("https://repo.slne.dev/repository/maven-snapshots/") { name = "maven-snapshots" }
@@ -25,8 +25,15 @@ dependencies {
     implementation(libs.net.wesjd.anvilgui)
 }
 
+configurations.all {
+    resolutionStrategy {
+        force("it.unimi.dsi:fastutil:8.5.12") // TODO: WTF
+    }
+}
+
+
 group = "dev.slne.surf"
-version = "1.21-1.0.0-SNAPSHOT"
+version = "1.21-1.0.1-SNAPSHOT"
 description = "surf-protect"
 
 java {
