@@ -353,6 +353,10 @@ public class ProtectionRegion {
             return;
         }
 
+        if (temporaryRegion.getArea() <= ProtectionSettings.AREA_MIN_BLOCKS) {
+        protectionUser.sendMessage(MessageManager.getAreaTooSmallComponent());
+            return;
+        }
 
         com.sk89q.worldedit.util.Location worldeditLocation = temporaryRegion.getRegion().getFlag(Flags.TELE_LOC);
 
