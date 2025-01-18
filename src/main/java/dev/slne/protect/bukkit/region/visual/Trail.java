@@ -11,7 +11,7 @@ import org.bukkit.World;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
-import dev.slne.protect.bukkit.BukkitMain;
+import dev.slne.protect.bukkit.PaperMain;
 import dev.slne.protect.bukkit.region.ProtectionRegion;
 
 public class Trail extends BukkitRunnable {
@@ -73,7 +73,7 @@ public class Trail extends BukkitRunnable {
 	public void start() {
 		if (!started.getAndSet(true)) {
 			this.init();
-			this.runTaskTimerAsynchronously(BukkitMain.getInstance(), 0, 1);
+			this.runTaskTimerAsynchronously(PaperMain.getInstance(), 0, 1);
 		}
 	}
 

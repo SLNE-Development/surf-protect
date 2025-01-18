@@ -10,7 +10,7 @@ import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.util.WorldEditRegionConverter;
-import dev.slne.protect.bukkit.BukkitMain;
+import dev.slne.protect.bukkit.PaperMain;
 import dev.slne.protect.bukkit.gui.protection.flags.ProtectionFlagsMap;
 import dev.slne.protect.bukkit.math.Mth;
 import dev.slne.protect.bukkit.math.Mth.EffectiveCostResult;
@@ -332,7 +332,7 @@ public class ProtectionRegion {
             marker.restorePreviousData();
 
             if (block.getState().hasMetadata(ProtectionSettings.MARKER_KEY)) {
-                block.getState().removeMetadata(ProtectionSettings.MARKER_KEY, BukkitMain.getInstance());
+                block.getState().removeMetadata(ProtectionSettings.MARKER_KEY, PaperMain.getInstance());
             }
         }
 
@@ -400,7 +400,7 @@ public class ProtectionRegion {
                         this.temporaryRegion.protect();
 
                         this.removeAllMarkers();
-                        Bukkit.getScheduler().runTask(BukkitMain.getInstance(), protectionUser::resetRegionCreation);
+                        Bukkit.getScheduler().runTask(PaperMain.getInstance(), protectionUser::resetRegionCreation);
                         protectionUser.sendMessage(MessageManager.getProtectionCreatedComponent());
                     } else {
                         protectionUser.sendMessage(MessageManager.getTooExpensiveToBuyComponent());
@@ -423,7 +423,7 @@ public class ProtectionRegion {
      * Removes all markers
      */
     public void removeAllMarkers() {
-        Bukkit.getScheduler().runTask(BukkitMain.getInstance(), () -> {
+        Bukkit.getScheduler().runTask(PaperMain.getInstance(), () -> {
             for (Marker marker : new ArrayList<>(markers)) {
                 removeMarker0(marker);
             }

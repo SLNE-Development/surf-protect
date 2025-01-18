@@ -1,7 +1,7 @@
 package dev.slne.protect.bukkit.listener.listeners;
 
 import com.destroystokyo.paper.event.block.BlockDestroyEvent;
-import dev.slne.protect.bukkit.BukkitMain;
+import dev.slne.protect.bukkit.PaperMain;
 import dev.slne.protect.bukkit.gui.utils.ItemUtils;
 import dev.slne.protect.bukkit.region.ProtectionRegion;
 import dev.slne.protect.bukkit.region.ProtectionUtils;
@@ -135,7 +135,7 @@ public class ProtectionHotbarListener implements Listener, Colors {
         }
 
         creation.removeMarker(marker);
-        block.getState().removeMetadata(ProtectionSettings.MARKER_KEY, BukkitMain.getInstance());
+        block.getState().removeMetadata(ProtectionSettings.MARKER_KEY, PaperMain.getInstance());
 
         event.setDropItems(false);
         this.setMarkerAmount(protectionUser);
@@ -235,7 +235,7 @@ public class ProtectionHotbarListener implements Listener, Colors {
         }
 
         location.getBlock().getState().setMetadata(ProtectionSettings.MARKER_KEY,
-            new FixedMetadataValue(BukkitMain.getInstance(), marker));
+            new FixedMetadataValue(PaperMain.getInstance(), marker));
         setMarkerAmount(protectionUser);
 
         return;

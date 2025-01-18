@@ -1,7 +1,7 @@
 package dev.slne.protect.bukkit.listener.listeners;
 
 import com.destroystokyo.paper.MaterialSetTag;
-import dev.slne.protect.bukkit.BukkitMain;
+import dev.slne.protect.bukkit.PaperMain;
 import dev.slne.protect.bukkit.region.ProtectionRegion;
 import dev.slne.protect.bukkit.user.ProtectionUser;
 import io.papermc.paper.event.player.PlayerItemFrameChangeEvent;
@@ -46,7 +46,7 @@ public class ProtectionModeListener implements Listener {
 
   @Contract("_ -> new")
   private static @NotNull NamespacedKey key(String name) {
-    return new NamespacedKey(BukkitMain.getInstance(), name);
+    return new NamespacedKey(PaperMain.getInstance(), name);
   }
 
   /**
@@ -238,7 +238,7 @@ public class ProtectionModeListener implements Listener {
   @EventHandler
   public void onServerStop(
       PluginDisableEvent event) { // TODO: 04.02.2024 11:10 - move to a better place
-    for (ProtectionUser protectionUser : BukkitMain.getBukkitInstance().getUserManager()
+    for (ProtectionUser protectionUser : PaperMain.getBukkitInstance().getUserManager()
         .getUsers()) {
       if (protectionUser.hasRegionCreation()) {
         protectionUser.getRegionCreation().cancelProtection();

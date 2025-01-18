@@ -5,7 +5,7 @@ import com.github.stefvanschie.inventoryframework.pane.StaticPane;
 import com.sk89q.worldguard.protection.flags.StateFlag.State;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-import dev.slne.protect.bukkit.BukkitMain;
+import dev.slne.protect.bukkit.PaperMain;
 import dev.slne.protect.bukkit.gui.SurfGui;
 import dev.slne.protect.bukkit.gui.chest.SurfChestGui;
 import dev.slne.protect.bukkit.gui.confirmation.ConfirmationGui;
@@ -444,7 +444,7 @@ public class ProtectionShowGui extends SurfChestGui {
                 public void run() {
                   event.getWhoClicked().closeInventory();
                 }
-              }.runTask(BukkitMain.getInstance());
+              }.runTask(PaperMain.getInstance());
 
               return;
             }
@@ -471,7 +471,7 @@ public class ProtectionShowGui extends SurfChestGui {
                 new ProtectionSellData(event.getWhoClicked().getWorld(), protectedRegion));
 
             // Remove visualizers
-            ProtectionVisualizerThread visualizerThread = BukkitMain.getBukkitInstance()
+            ProtectionVisualizerThread visualizerThread = PaperMain.getBukkitInstance()
                 .getProtectionVisualizerThread();
             visualizerThread.getVisualizers().stream()
                 .filter(protectionVisualizer -> protectionVisualizer.getRegion()
@@ -483,7 +483,7 @@ public class ProtectionShowGui extends SurfChestGui {
               public void run() {
                 event.getWhoClicked().closeInventory();
               }
-            }.runTask(BukkitMain.getInstance());
+            }.runTask(PaperMain.getInstance());
 
             protectionUser.sendMessage(
                 MessageManager.getProtectionSoldComponent(refund, currency.get()));
@@ -501,7 +501,7 @@ public class ProtectionShowGui extends SurfChestGui {
    * @return Whether the region is edited
    */
   private boolean isRegionEdited() {
-    List<ProtectionUser> protectionUsers = BukkitMain.getBukkitInstance().getUserManager()
+    List<ProtectionUser> protectionUsers = PaperMain.getBukkitInstance().getUserManager()
         .getUsers();
     boolean isEdited = false;
 

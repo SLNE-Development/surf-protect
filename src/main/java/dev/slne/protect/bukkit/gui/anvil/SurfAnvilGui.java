@@ -3,7 +3,7 @@ package dev.slne.protect.bukkit.gui.anvil;
 import com.github.stefvanschie.inventoryframework.adventuresupport.ComponentHolder;
 import com.github.stefvanschie.inventoryframework.gui.type.util.Gui;
 import com.github.stefvanschie.inventoryframework.gui.type.util.NamedGui;
-import dev.slne.protect.bukkit.BukkitMain;
+import dev.slne.protect.bukkit.PaperMain;
 import dev.slne.protect.bukkit.gui.SurfGui;
 import dev.slne.protect.bukkit.gui.anvil.requirement.AnvilRequirement;
 import dev.slne.protect.bukkit.gui.utils.sound.GuiSound;
@@ -75,7 +75,7 @@ public abstract class SurfAnvilGui extends NamedGui implements SurfGui, AnvilGUI
     });
 
     anvilGuiBuilder.jsonTitle(GsonComponentSerializer.gson().serialize(title));
-    anvilGuiBuilder.plugin(BukkitMain.getInstance());
+    anvilGuiBuilder.plugin(PaperMain.getInstance());
 
     anvilGuiBuilder.onClickAsync(this);
 

@@ -2,7 +2,7 @@ package dev.slne.protect.bukkit.gui;
 
 import com.github.stefvanschie.inventoryframework.gui.type.util.Gui;
 import com.github.stefvanschie.inventoryframework.gui.type.util.NamedGui;
-import dev.slne.protect.bukkit.BukkitMain;
+import dev.slne.protect.bukkit.PaperMain;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -51,7 +51,7 @@ public interface SurfGui {
 
         viewer.closeInventory(InventoryCloseEvent.Reason.PLUGIN);
       }
-    }.runTask(BukkitMain.getInstance());
+    }.runTask(PaperMain.getInstance());
   }
 
   /**

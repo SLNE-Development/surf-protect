@@ -8,7 +8,7 @@ import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.util.WorldEditRegionConverter;
-import dev.slne.protect.bukkit.BukkitMain;
+import dev.slne.protect.bukkit.PaperMain;
 import dev.slne.protect.bukkit.book.ProtectionBook;
 import dev.slne.protect.bukkit.listener.listeners.ProtectionHotbarListener;
 import dev.slne.protect.bukkit.math.Mth;
@@ -73,7 +73,7 @@ public class ProtectionUser {
      * @return The {@link ProtectionUser}
      */
     public static ProtectionUser getProtectionUser(UUID uuid) {
-        return BukkitMain.getBukkitInstance().getUserManager().getProtectionUser(uuid);
+        return PaperMain.getBukkitInstance().getUserManager().getProtectionUser(uuid);
     }
 
     /**

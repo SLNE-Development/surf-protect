@@ -5,7 +5,7 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import dev.slne.protect.bukkit.BukkitMain;
+import dev.slne.protect.bukkit.PaperMain;
 import dev.slne.protect.bukkit.listener.listeners.ProtectionHotbarListener;
 import dev.slne.protect.bukkit.listener.listeners.ProtectionModeListener;
 import dev.slne.protect.bukkit.listener.listeners.RegionListener;
@@ -17,7 +17,7 @@ public class BukkitListenerManager {
      */
     public void registerListeners() {
         PluginManager pluginManager = Bukkit.getPluginManager();
-        JavaPlugin plugin = BukkitMain.getInstance();
+        JavaPlugin plugin = PaperMain.getInstance();
 
         pluginManager.registerEvents(new ProtectionModeListener(), plugin);
         pluginManager.registerEvents(new ProtectionHotbarListener(), plugin);
@@ -28,7 +28,7 @@ public class BukkitListenerManager {
      * Unregister all {@link org.bukkit.event.Listener}s
      */
     public void unregisterListeners() {
-        HandlerList.unregisterAll(BukkitMain.getInstance());
+        HandlerList.unregisterAll(PaperMain.getInstance());
     }
 
 }

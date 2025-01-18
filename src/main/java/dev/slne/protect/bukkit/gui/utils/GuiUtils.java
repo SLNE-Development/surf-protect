@@ -4,7 +4,7 @@ import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.pane.OutlinePane;
 import com.github.stefvanschie.inventoryframework.pane.Pane;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
-import dev.slne.protect.bukkit.BukkitMain;
+import dev.slne.protect.bukkit.PaperMain;
 import dev.slne.protect.bukkit.gui.SurfGui;
 import dev.slne.protect.bukkit.gui.utils.sound.GuiSound;
 import net.kyori.adventure.sound.Sound;
@@ -36,7 +36,7 @@ public class GuiUtils {
    * @param player The player to play the sound to.
    */
   public static void playSound(org.bukkit.Sound toPlay, Player player) {
-    Sound sound = Sound.sound().type(toPlay.getKey()).volume(.5f).pitch(1f)
+    Sound sound = Sound.sound().type(toPlay).volume(.5f).pitch(1f)
         .source(Sound.Source.MASTER).build();
     Sound.Emitter emitter = Sound.Emitter.self();
 
@@ -87,7 +87,7 @@ public class GuiUtils {
         public void run() {
           event.getWhoClicked().closeInventory();
         }
-      }.runTaskLater(BukkitMain.getInstance(), 1);
+      }.runTaskLater(PaperMain.getInstance(), 1);
     }), closeX, 0);
 
     return navigation;

@@ -6,9 +6,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Random;
 
-public class BukkitMain extends JavaPlugin {
+public class PaperMain extends JavaPlugin {
 
-    private static BukkitMain instance;
+    private static PaperMain instance;
     private static BukkitInstance bukkitInstance;
 
     private Random random;
@@ -41,7 +41,7 @@ public class BukkitMain extends JavaPlugin {
      *
      * @return The instance of the plugin
      */
-    public static BukkitMain getInstance() {
+    public static PaperMain getInstance() {
         return instance;
     }
 

@@ -5,7 +5,7 @@ import com.github.stefvanschie.inventoryframework.pane.StaticPane;
 import com.sk89q.worldguard.protection.flags.StateFlag.State;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.regions.RegionType;
-import dev.slne.protect.bukkit.BukkitMain;
+import dev.slne.protect.bukkit.PaperMain;
 import dev.slne.protect.bukkit.gui.chest.SurfChestGui;
 import dev.slne.protect.bukkit.gui.confirmation.ConfirmationGui;
 import dev.slne.protect.bukkit.gui.list.ProtectionListGui;
@@ -32,7 +32,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.scheduler.BukkitScheduler;
 
 public class ProtectionMainMenu extends SurfChestGui {
 
@@ -136,7 +135,7 @@ public class ProtectionMainMenu extends SurfChestGui {
           ProtectionUtils.getRegionManager(player.getWorld()).getRegions().values().stream()
               .filter(region -> !region.getType().equals(RegionType.GLOBAL)).toList();
 
-      boolean state = BukkitMain.getBukkitInstance().getProtectionVisualizerState()
+      boolean state = PaperMain.getBukkitInstance().getProtectionVisualizerState()
           .getPlayerState(player);
 
       if (!state) {
@@ -147,11 +146,11 @@ public class ProtectionMainMenu extends SurfChestGui {
             continue;
           }
 
-          BukkitMain.getBukkitInstance().getProtectionVisualizerThread()
+          PaperMain.getBukkitInstance().getProtectionVisualizerThread()
               .addVisualizer(player.getWorld(), region, player);
         }
       } else {
-        BukkitMain.getBukkitInstance().getProtectionVisualizerThread().removeVisualizers(player);
+        PaperMain.getBukkitInstance().getProtectionVisualizerThread().removeVisualizers(player);
       }
 
       player.sendMessage(MessageManager.getProtectionVisualizeComponent(!state));
@@ -163,7 +162,7 @@ public class ProtectionMainMenu extends SurfChestGui {
           Component.text("Visualizer " + (state ? "deaktiviert" : "aktiviert"),
               NamedTextColor.GRAY),
           Title.Times.times(fadeDuration, stayDuration, fadeDuration)));
-      BukkitMain.getBukkitInstance().getProtectionVisualizerState().togglePlayerState(player);
+      PaperMain.getBukkitInstance().getProtectionVisualizerState().togglePlayerState(player);
     });
   }
 
@@ -194,7 +193,7 @@ public class ProtectionMainMenu extends SurfChestGui {
         if (!(cancelEvent instanceof InventoryCloseEvent closeEvent && closeEvent.getReason()
             .equals(
                 InventoryCloseEvent.Reason.PLUGIN))) {
-          Bukkit.getScheduler().runTaskLater(BukkitMain.getInstance(), () -> {
+          Bukkit.getScheduler().runTaskLater(PaperMain.getInstance(), () -> {
             new ProtectionMainMenu(player, getTargetProtectionPlayer()).show(player);
           }, 1);
 

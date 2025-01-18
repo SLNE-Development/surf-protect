@@ -1,6 +1,6 @@
 package dev.slne.protect.bukkit.region.visual.visualizer;
 
-import dev.slne.protect.bukkit.BukkitMain;
+import dev.slne.protect.bukkit.PaperMain;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -21,7 +21,7 @@ public class ProtectionVisualizerState implements Listener {
     public ProtectionVisualizerState() {
         this.playerState = new HashMap<>();
 
-        Bukkit.getPluginManager().registerEvents(this, BukkitMain.getInstance());
+        Bukkit.getPluginManager().registerEvents(this, PaperMain.getInstance());
     }
 
     @EventHandler

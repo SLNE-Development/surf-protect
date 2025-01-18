@@ -3,7 +3,7 @@ package dev.slne.protect.bukkit.gui.protection.rename;
 import static dev.slne.protect.bukkit.user.ProtectionUser.getProtectionUser;
 
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-import dev.slne.protect.bukkit.BukkitMain;
+import dev.slne.protect.bukkit.PaperMain;
 import dev.slne.protect.bukkit.gui.SurfGui;
 import dev.slne.protect.bukkit.gui.anvil.SurfAnvilGui;
 import dev.slne.protect.bukkit.gui.anvil.requirement.AnvilRequirement;
@@ -29,7 +29,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import net.wesjd.anvilgui.AnvilGUI;
-import net.wesjd.anvilgui.AnvilGUI.ResponseAction;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -163,7 +162,7 @@ public class RenameAnvilGUI extends SurfAnvilGui {
         }, Component.text("Möchtest du das Grundstück wirklich umbenennen?", Colors.WARNING),
             questionLore).show(player);
       }
-    }.runTask(BukkitMain.getInstance());
+    }.runTask(PaperMain.getInstance());
 
     return responseActions;
   }

@@ -4,8 +4,10 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
 import dev.slne.protect.bukkit.region.visual.visualizer.color.VisualizerColor;
 import dev.slne.surf.surfapi.bukkit.api.nms.bridges.SurfBukkitNmsCommonBridge;
+import dev.slne.surf.surfapi.bukkit.api.nms.bridges.SurfBukkitNmsCommonBridgeKt;
 import dev.slne.surf.surfapi.bukkit.api.nms.bridges.packets.PacketOperation;
 import dev.slne.surf.surfapi.bukkit.api.nms.bridges.packets.entity.SurfBukkitNmsSpawnPackets;
+import dev.slne.surf.surfapi.bukkit.api.nms.bridges.packets.entity.SurfBukkitNmsSpawnPacketsKt;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -18,6 +20,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.UUID;
+import kotlin.Unit;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -81,7 +84,7 @@ public abstract class ProtectionVisualizer<T extends ProtectedRegion> implements
 
     final IntList toRemoveEntityIds = getToRemoveEntityIds();
 
-    SurfBukkitNmsSpawnPackets.get().despawn(toRemoveEntityIds);
+    SurfBukkitNmsSpawnPacketsKt.getNmsSpawnPackets().despawn(toRemoveEntityIds);
     toRemoveEntityIds.forEach(displays::removeInt);
 
     this.visualizeLocations();
@@ -180,17 +183,18 @@ public abstract class ProtectionVisualizer<T extends ProtectedRegion> implements
       return null;
     }
 
-    final int entityId = SurfBukkitNmsCommonBridge.getNextEntityId();
-    final PacketOperation operation = SurfBukkitNmsSpawnPackets.get().spawnBlockDisplay(
+    final int entityId = SurfBukkitNmsCommonBridge.Companion.getNextEntityId();
+    final PacketOperation operation = SurfBukkitNmsSpawnPacketsKt.getNmsSpawnPackets().spawnBlockDisplay(
         entityId,
         location,
         settings -> {
 
           if (this.scaleUp) {
-            settings.scale(new Vector3f(1, ProtectionSettings.PROTECTION_VISUALIZER_HEIGHT, 1));
+            settings.setScale(new Vector3f(1, ProtectionSettings.PROTECTION_VISUALIZER_HEIGHT, 1));
           }
 
-          return settings.blockData(color.getBlockData());
+          settings.setBlockData(color.getBlockData());
+          return Unit.INSTANCE;
         }
     );
 
@@ -202,7 +206,7 @@ public abstract class ProtectionVisualizer<T extends ProtectedRegion> implements
   @Override
   public void close() throws IOException {
     displays.values().intStream()
-        .mapToObj(SurfBukkitNmsSpawnPackets.get()::despawn)
+        .mapToObj(SurfBukkitNmsSpawnPacketsKt.getNmsSpawnPackets()::despawn)
         .reduce(PacketOperation::add)
         .ifPresent(packetOperation -> packetOperation.execute(getPlayer()));
 

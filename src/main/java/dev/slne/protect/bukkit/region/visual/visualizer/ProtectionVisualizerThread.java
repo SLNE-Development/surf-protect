@@ -2,7 +2,7 @@ package dev.slne.protect.bukkit.region.visual.visualizer;
 
 import com.google.common.flogger.FluentLogger;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-import dev.slne.protect.bukkit.BukkitMain;
+import dev.slne.protect.bukkit.PaperMain;
 import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
 import dev.slne.protect.bukkit.region.visual.visualizer.visualizers.PolygonalProtectionVisualizer;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -38,7 +38,7 @@ public class ProtectionVisualizerThread extends BukkitRunnable {
    * Start the visualizer thread
    */
   public void start() {
-    this.runTaskTimerAsynchronously(BukkitMain.getInstance(), 0,
+    this.runTaskTimerAsynchronously(PaperMain.getInstance(), 0,
         ProtectionSettings.PROTECTION_VISUALIZER_UPDATE_INTERVAL * 20L);
   }
 

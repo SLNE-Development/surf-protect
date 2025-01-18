@@ -38,7 +38,7 @@ public enum GuiSound {
    * @param player The player to play the sound to.
    */
   public void playSound(Player player, float volume, float pitch) {
-    net.kyori.adventure.sound.Sound kyoriSound = net.kyori.adventure.sound.Sound.sound(sound.key(),
+    net.kyori.adventure.sound.Sound kyoriSound = net.kyori.adventure.sound.Sound.sound(sound,
         net.kyori.adventure.sound.Sound.Source.MASTER, volume, pitch);
 
     player.playSound(kyoriSound, net.kyori.adventure.sound.Sound.Emitter.self());
