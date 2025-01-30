@@ -343,13 +343,15 @@ public class ProtectionShowGui extends SurfChestGui {
                       "Du befindest dich nicht auf dem zu erweiternden Grundstück.",
                       MessageManager.ERROR)));
             }
-          }, cancelEvent -> {
+          }, (cancelEvent, parent) -> {
             if (!(cancelEvent instanceof InventoryCloseEvent closeEvent && closeEvent.getReason()
                 .equals(
                     InventoryCloseEvent.Reason.PLUGIN))) {
-              new ProtectionShowGui(this, region, area, distance, regionInfo,
-                  (Player) event.getWhoClicked()).show(
-                  event.getWhoClicked());
+              Bukkit.getScheduler().runTaskLater(PaperMain.getInstance(), () -> {
+                new ProtectionShowGui(parent.getParent(), region, area, distance, regionInfo,
+                    (Player) event.getWhoClicked()).show(
+                    event.getWhoClicked());
+              }, 1);
             }
           }, Component.text("Grundstück erweitern", MessageManager.PRIMARY), confirmLore);
 
@@ -487,9 +489,12 @@ public class ProtectionShowGui extends SurfChestGui {
 
             protectionUser.sendMessage(
                 MessageManager.getProtectionSoldComponent(refund, currency.get()));
-          }, clickEvent -> new ProtectionShowGui(this, region, area, distance, regionInfo,
-              (Player) event.getWhoClicked()).show(event.getWhoClicked()),
-              Component.text("Grundstück löschen?", MessageManager.PRIMARY), confirmLore);
+          }, (clickEvent, parent) -> {
+            Bukkit.getScheduler().runTaskLater(PaperMain.getInstance(), () -> {
+              new ProtectionShowGui(parent.getParent(), region, area, distance, regionInfo,
+                  (Player) event.getWhoClicked()).show(event.getWhoClicked());
+            }, 1);
+          }, Component.text("Grundstück löschen?", MessageManager.PRIMARY), confirmLore);
 
           confirmationGui.show(player);
         });

@@ -9,12 +9,14 @@ import dev.slne.protect.bukkit.gui.utils.GuiUtils;
 import dev.slne.protect.bukkit.gui.utils.ItemUtils;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryEvent;
+import org.gradle.launcher.daemon.protocol.Cancel;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,7 +25,7 @@ public class ConfirmationGui extends ChestGui implements SurfGui {
   private final SurfGui parent;
 
   private final Consumer<InventoryClickEvent> onConfirm;
-  private final Consumer<InventoryEvent> onCancel;
+  private final BiConsumer<InventoryEvent, SurfGui> onCancel;
 
   /**
    * Creates a new confirmation gui.
@@ -35,7 +37,7 @@ public class ConfirmationGui extends ChestGui implements SurfGui {
    * @param questionLore  the lore of the question
    */
   public ConfirmationGui(SurfGui previousGui, Consumer<InventoryClickEvent> onConfirm,
-      Consumer<InventoryEvent> onCancel, Component questionLabel, List<Component> questionLore) {
+      BiConsumer<InventoryEvent, SurfGui> onCancel, Component questionLabel, List<Component> questionLore) {
     super(5, "Bestätigung erforderlich");
 
     this.parent = previousGui;
@@ -80,7 +82,7 @@ public class ConfirmationGui extends ChestGui implements SurfGui {
    */
   public void cancel(InventoryEvent event) {
     if (onCancel != null) {
-      onCancel.accept(event);
+      onCancel.accept(event, parent);
     }
   }
 

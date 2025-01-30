@@ -6,6 +6,7 @@ import com.github.stefvanschie.inventoryframework.pane.Pane;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import dev.slne.protect.bukkit.PaperMain;
 import dev.slne.protect.bukkit.gui.SurfGui;
 import dev.slne.protect.bukkit.gui.chest.SurfChestGui;
 import dev.slne.protect.bukkit.gui.confirmation.ConfirmationGui;
@@ -100,8 +101,11 @@ public class ProtectionMembersGui extends SurfChestGui {
               region.getMembers().removePlayer(localPlayer);
 
               new ProtectionMembersGui(getParent(), region).show(event.getWhoClicked());
-            }, clickEvent -> {
-              new ProtectionMembersGui(getParent(), region).show(event.getWhoClicked());
+            }, (clickEvent, parent) -> {
+              Bukkit.getScheduler().runTaskLater(PaperMain.getInstance(), () -> {
+                new ProtectionMembersGui(parent.getParent(), region).show(event.getWhoClicked());
+              }, 1L);
+
             }, Component.text("Bestätigung erforderlich", MessageManager.PRIMARY), lore).show(
                 event.getWhoClicked());
           }));

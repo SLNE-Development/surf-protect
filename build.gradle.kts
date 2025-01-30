@@ -27,6 +27,12 @@ dependencies {
     implementation(libs.net.wesjd.anvilgui)
 }
 
+tasks.shadowJar {
+    manifest {
+        attributes["paperweight-mappings-namespace"] = "spigot"
+    }
+}
+
 group = "dev.slne.surf.protect"
-version = "1.21.4-1.0.1-SNAPSHOT"
+version = "1.21.4-1.0.2-SNAPSHOT"
 

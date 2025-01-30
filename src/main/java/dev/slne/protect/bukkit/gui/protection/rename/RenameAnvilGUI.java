@@ -157,7 +157,7 @@ public class RenameAnvilGUI extends SurfAnvilGui {
                   });
 
               backToParent(player);
-            }, cancelEvent -> {
+            }, (cancelEvent, parent) -> {
           backToParent(player);
         }, Component.text("Möchtest du das Grundstück wirklich umbenennen?", Colors.WARNING),
             questionLore).show(player);

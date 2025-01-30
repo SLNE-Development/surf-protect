@@ -189,7 +189,7 @@ public class ProtectionMainMenu extends SurfChestGui {
 
         confirmEvent.getWhoClicked().closeInventory(InventoryCloseEvent.Reason.PLUGIN);
         protectionUser.startRegionCreation(regionCreation);
-      }, cancelEvent -> {
+      }, (cancelEvent, parent) -> {
         if (!(cancelEvent instanceof InventoryCloseEvent closeEvent && closeEvent.getReason()
             .equals(
                 InventoryCloseEvent.Reason.PLUGIN))) {
