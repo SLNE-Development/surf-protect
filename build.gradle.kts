@@ -39,5 +39,5 @@ tasks.shadowJar {
 }
 
 group = "dev.slne.surf.protect"
-version = "1.21.4-1.0.2-SNAPSHOT"
+version = "1.21.4-1.0.3-SNAPSHOT"
 
