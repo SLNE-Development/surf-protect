@@ -4,8 +4,8 @@ io-papermc-paper-api = "1.21.4-R0.1-SNAPSHOT"
 com-sk89q-worldguard-worldguard-bukkit = "7.1.0-SNAPSHOT"
 net-wesjd-anvilgui = "1.10.4-SNAPSHOT"
 
-dev-slne-surf-transaction-api = "1.21-+"
-dev-slne-surf-surf-api-bukkit-api = "1.21-+"
+dev-slne-surf-transaction-api = "1.21.4-+"
+dev-slne-surf-surf-api-bukkit-api = "1.21.4-+"
 
 [libraries]
 io-papermc-paper-api = { module = "io.papermc.paper:paper-api", version.ref = "io-papermc-paper-api" }
