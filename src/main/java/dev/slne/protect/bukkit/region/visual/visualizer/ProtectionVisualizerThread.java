@@ -2,32 +2,37 @@ package dev.slne.protect.bukkit.region.visual.visualizer;
 
 import com.google.common.flogger.FluentLogger;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-import dev.slne.protect.bukkit.PaperMain;
 import dev.slne.protect.bukkit.region.settings.ProtectionSettings;
 import dev.slne.protect.bukkit.region.visual.visualizer.visualizers.PolygonalProtectionVisualizer;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import it.unimi.dsi.fastutil.objects.ObjectListIterator;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
-import java.io.IOException;
-import java.util.List;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
+import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.plugin.Plugin;
 
-public class ProtectionVisualizerThread extends BukkitRunnable {
+import java.io.IOException;
+import java.util.List;
+
+public class ProtectionVisualizerThread {
 
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
   private final ObjectList<ProtectionVisualizer<?>> visualizers;
+  private ScheduledTask task;
+  private final Plugin plugin;
 
-  /**
-   * Create a new visualizer thread
-   */
-  public ProtectionVisualizerThread() {
+  // Konstruktor: Stellt sicher, dass 'plugin' und 'visualizers' initialisiert werden
+  public ProtectionVisualizerThread(Plugin plugin) {
+    this.plugin = plugin;
     this.visualizers = ObjectLists.synchronize(new ObjectArrayList<>());
   }
 
-  @Override
+  /**
+   * Führt den Update-Loop aus, der alle Visualizer updatet.
+   */
   public void run() {
     for (final ProtectionVisualizer<?> visualizer : this.visualizers) {
       visualizer.update();
@@ -35,74 +40,60 @@ public class ProtectionVisualizerThread extends BukkitRunnable {
   }
 
   /**
-   * Start the visualizer thread
+   * Startet den Scheduler mithilfe von Folia's GlobalRegionScheduler.
    */
   public void start() {
-    this.runTaskTimerAsynchronously(PaperMain.getInstance(), 0,
-        ProtectionSettings.PROTECTION_VISUALIZER_UPDATE_INTERVAL * 20L);
+    task = Bukkit.getGlobalRegionScheduler().runAtFixedRate(plugin, context -> run(), 20L, ProtectionSettings.PROTECTION_VISUALIZER_UPDATE_INTERVAL * 20L);
   }
 
   /**
-   * Stop the visualizer thread
+   * Stoppt den Scheduler und schließt alle aktiven Visualizer.
    */
   public void stop() {
     try {
-      if (!this.isCancelled()) {
+      if (task != null && !task.isCancelled()) {
         for (final ProtectionVisualizer<?> visualizer : this.visualizers) {
           visualizer.close();
         }
-
-        this.cancel();
+        task.cancel();
       }
     } catch (Exception exception) {
-      // IGNORE
+      // Fehler beim Stoppen ignorieren
     }
   }
 
   /**
-   * Add a visualizer to the task
-   *
-   * @param world           the world
-   * @param protectedRegion the region
-   * @param player          the player
+   * Fügt einen Visualizer anhand der übergebenen Parameter hinzu.
    */
   public void addVisualizer(World world, ProtectedRegion protectedRegion, Player player) {
     this.addVisualizer(new PolygonalProtectionVisualizer(world, protectedRegion, player));
   }
 
   /**
-   * Add a visualizer to the thread
-   *
-   * @param visualizer the visualizer
+   * Fügt einen Visualizer zur internen Liste hinzu.
    */
   public void addVisualizer(ProtectionVisualizer<?> visualizer) {
     this.visualizers.add(visualizer);
   }
 
   /**
-   * Get all visualizers
-   *
-   * @return the visualizers
+   * Gibt alle aktiven Visualizer zurück.
    */
   public List<ProtectionVisualizer<? extends ProtectedRegion>> getVisualizers() {
     return visualizers;
   }
 
   /**
-   * Get all visualizers for a player
-   *
-   * @param player the player
-   * @return the visualizers
+   * Gibt alle Visualizer eines bestimmten Spielers zurück.
    */
   public List<ProtectionVisualizer<? extends ProtectedRegion>> getVisualizers(Player player) {
-    return this.visualizers.stream().filter(visualizer -> visualizer.getPlayer().equals(player))
+    return this.visualizers.stream()
+        .filter(visualizer -> visualizer.getPlayer().equals(player))
         .toList();
   }
 
   /**
-   * Remove a visualizer from the thread
-   *
-   * @param visualizer the visualizer
+   * Entfernt einen bestimmten Visualizer.
    */
   public void closeVisualizer(ProtectionVisualizer<?> visualizer) {
     this.closeVisualizer(visualizer, true);
@@ -112,7 +103,6 @@ public class ProtectionVisualizerThread extends BukkitRunnable {
     if (remove) {
       this.visualizers.remove(visualizer);
     }
-
     try {
       visualizer.close();
     } catch (IOException e) {
@@ -121,16 +111,12 @@ public class ProtectionVisualizerThread extends BukkitRunnable {
   }
 
   /**
-   * Remove all visualizers for a player
-   *
-   * @param player the player
+   * Entfernt alle Visualizer eines bestimmten Spielers.
    */
   public void removeVisualizers(Player player) {
     final ObjectListIterator<ProtectionVisualizer<?>> iterator = visualizers.iterator();
-
     while (iterator.hasNext()) {
       final ProtectionVisualizer<?> visualizer = iterator.next();
-
       if (visualizer.getPlayer().equals(player)) {
         this.closeVisualizer(visualizer, false);
         iterator.remove();

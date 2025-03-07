@@ -2,11 +2,13 @@ package dev.slne.protect.bukkit.region.visual.visualizer.visualizers;
 
 import com.sk89q.worldedit.math.BlockVector2;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import dev.slne.protect.bukkit.PaperMain;
 import dev.slne.protect.bukkit.math.Mth;
 import dev.slne.protect.bukkit.region.visual.visualizer.ProtectionVisualizer;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import java.util.List;
+import org.bukkit.Bukkit;
 import org.bukkit.HeightMap;
 import org.bukkit.Location;
 import org.bukkit.World;

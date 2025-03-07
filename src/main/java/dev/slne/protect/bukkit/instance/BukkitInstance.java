@@ -3,6 +3,7 @@ package dev.slne.protect.bukkit.instance;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.flags.registry.FlagRegistry;
 import com.sk89q.worldguard.session.SessionManager;
+import dev.slne.protect.bukkit.PaperMain;
 import dev.slne.protect.bukkit.command.BukkitCommandManager;
 import dev.slne.protect.bukkit.listener.BukkitListenerManager;
 import dev.slne.protect.bukkit.listener.listeners.BorderCrossingHandler;
@@ -48,7 +49,7 @@ public class BukkitInstance {
         protectionVisualizerState = new ProtectionVisualizerState();
         listenerManager.registerListeners();
 
-        protectionVisualizerThread = new ProtectionVisualizerThread();
+        protectionVisualizerThread = new ProtectionVisualizerThread(PaperMain.getInstance());
         protectionVisualizerThread.start();
 
         SessionManager sessionManager = WorldGuard.getInstance().getPlatform().getSessionManager();
