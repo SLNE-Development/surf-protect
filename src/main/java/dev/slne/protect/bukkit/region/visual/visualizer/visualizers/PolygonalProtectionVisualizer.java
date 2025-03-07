@@ -71,7 +71,7 @@ public class PolygonalProtectionVisualizer extends ProtectionVisualizer<Protecte
 
       for (final BlockVector2 point : walkPointAToB(currentPoint, nextPoint)) {
         addedLinePoints.add(point);
-        locations.add(new Location(getWorld(), point.getX(), 0, point.getZ()));
+        locations.add(new Location(getWorld(), point.x(), 0, point.z()));
       }
     }
 
@@ -113,8 +113,8 @@ public class PolygonalProtectionVisualizer extends ProtectionVisualizer<Protecte
 
   private void addHighestBlockIfLoaded(List<Location> finalLocations, BlockVector2 point) {
     final World world = getWorld();
-    final int pointX = point.getX();
-    final int pointZ = point.getZ();
+    final int pointX = point.x();
+    final int pointZ = point.z();
 
     if (world.isChunkLoaded(pointX >> 4, pointZ >> 4)) {
       final Block highestYBlock = world.getHighestBlockAt(pointX, pointZ,
@@ -134,8 +134,8 @@ public class PolygonalProtectionVisualizer extends ProtectionVisualizer<Protecte
   private ObjectList<BlockVector2> walkPointAToB(BlockVector2 pointStart, BlockVector2 pointEnd) {
     final ObjectList<BlockVector2> points = new ObjectArrayList<>();
 
-    Mth.walkCoordinatesAToB(pointStart.getX(), pointStart.getZ(), pointEnd.getX(),
-        pointEnd.getZ(),
+    Mth.walkCoordinatesAToB(pointStart.x(), pointStart.z(), pointEnd.x(),
+        pointEnd.z(),
         (x, z) -> points.add(BlockVector2.at(x, z)));
 
     return points;
