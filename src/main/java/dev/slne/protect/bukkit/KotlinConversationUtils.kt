@@ -8,9 +8,11 @@ import java.util.UUID
 import java.util.concurrent.CompletableFuture
 
 object KotlinConversationUtils {
+    private val scope = CoroutineScope(Dispatchers.IO)
+
     fun getUuidAsync(username: String): CompletableFuture<UUID?> {
         val future = CompletableFuture<UUID?>()
-        CoroutineScope(Dispatchers.IO).launch {
+        scope.launch {
             try {
                 val result = PlayerLookupService.getUuid(username)
                 future.complete(result)
