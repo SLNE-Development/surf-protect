@@ -27,7 +27,7 @@ public class AnvilOfflinePlayerRequirement implements AnvilRequirement {
       return CompletableFuture.completedFuture(false);
     }
 
-    return KotlinConversationUtils.INSTANCE.getUuidAsync(input).thenApplyAsync(uuid -> {
+    return KotlinConversationUtils.INSTANCE.getUuidAsync(input).thenApply(uuid -> {
       if (uuid == null) {
         return false;
       }
