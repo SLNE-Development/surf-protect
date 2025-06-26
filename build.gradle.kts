@@ -1,7 +1,12 @@
 import dev.slne.surf.surfapi.gradle.util.registerRequired
+import dev.slne.surf.surfapi.gradle.util.slnePrivate
 
 plugins {
     id("dev.slne.surf.surfapi.gradle.paper-plugin") version "1.21.4+"
+}
+
+repositories {
+    slnePrivate()
 }
 
 surfPaperPluginApi {
