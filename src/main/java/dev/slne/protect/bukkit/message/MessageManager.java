@@ -260,7 +260,6 @@ public final class MessageManager implements Colors {
      * Returns the region owners and members component for the given region info
      *
      * @param regionInfo The region info
-     * @return The region owners and members component
      */
     public static void appendRegionOwnersMembersComponent(Builder builder, RegionInfo regionInfo) {
         final List<LocalPlayer> regionOwners = regionInfo.getOwners();
@@ -285,7 +284,6 @@ public final class MessageManager implements Colors {
      * Returns the region user component for the given users
      *
      * @param regionUsers The users
-     * @return The region user component
      */
     public static void appendRegionUsersComponent(Builder builder, List<LocalPlayer> regionUsers) {
         final JoinConfiguration joinConfiguration = JoinConfiguration.builder()
