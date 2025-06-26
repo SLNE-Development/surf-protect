@@ -1,6 +1,6 @@
 package dev.slne.protect.bukkit.gui.anvil.requirement.requirements.player;
 
-import dev.slne.data.api.util.PlayerFinder;
+import dev.slne.protect.bukkit.KotlinConversationUtils;
 import dev.slne.protect.bukkit.gui.anvil.requirement.AnvilRequirement;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -27,7 +27,7 @@ public class AnvilOfflinePlayerRequirement implements AnvilRequirement {
       return CompletableFuture.completedFuture(false);
     }
 
-    return PlayerFinder.getUuidByPlayerName(input).thenApplyAsync(uuid -> {
+    return KotlinConversationUtils.INSTANCE.getUuidAsync(input).thenApplyAsync(uuid -> {
       if (uuid == null) {
         return false;
       }
