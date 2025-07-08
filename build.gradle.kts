@@ -2,20 +2,21 @@ import dev.slne.surf.surfapi.gradle.util.registerRequired
 import dev.slne.surf.surfapi.gradle.util.slnePrivate
 
 plugins {
-    id("dev.slne.surf.surfapi.gradle.paper-plugin") version "1.21.4+"
+    id("dev.slne.surf.surfapi.gradle.paper-plugin") version "1.21.7+"
 }
 
 repositories {
+    mavenLocal()
     slnePrivate()
 }
 
 surfPaperPluginApi {
-    mainClass("dev.slne.protect.bukkit.PaperMain")
+    mainClass("dev.slne.protect.paper.PaperMain")
     foliaSupported(false)
     generateLibraryLoader(false)
 
     serverDependencies {
-        registerRequired("surf-transaction-bukkit")
+        registerRequired("surf-transaction-paper")
         registerRequired("WorldGuard")
     }
 }
