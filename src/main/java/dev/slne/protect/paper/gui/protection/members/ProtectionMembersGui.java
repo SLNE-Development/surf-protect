@@ -6,15 +6,14 @@ import com.github.stefvanschie.inventoryframework.pane.Pane;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-import dev.slne.protect.paper.PaperMain;
 import dev.slne.protect.paper.gui.SurfGui;
 import dev.slne.protect.paper.gui.chest.SurfChestGui;
 import dev.slne.protect.paper.gui.confirmation.ConfirmationGui;
 import dev.slne.protect.paper.gui.utils.ItemUtils;
 import dev.slne.protect.paper.gui.utils.pagination.PageController;
 import dev.slne.protect.paper.message.MessageManager;
-import dev.slne.protect.paper.region.ProtectionUtils;
-import dev.slne.protect.paper.user.ProtectionUserFinder;
+import dev.slne.surf.protect.paper.PaperMain;
+import dev.slne.surf.protect.paper.util.UtilKt;
 import java.util.ArrayList;
 import java.util.List;
 import net.kyori.adventure.text.Component;
@@ -72,7 +71,7 @@ public class ProtectionMembersGui extends SurfChestGui {
   @Override
   public void update() {
     List<GuiItem> items = new ArrayList<>();
-    List<String> memberNames = ProtectionUtils.getMemberNames(region);
+    List<String> memberNames = UtilKt.getMemberNames(region);
 
     for (String memberName : memberNames) {
       OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(memberName);
@@ -97,7 +96,7 @@ public class ProtectionMembersGui extends SurfChestGui {
           Component.text(memberName, MessageManager.PRIMARY), itemLore.toArray(Component[]::new)),
           event -> {
             new ConfirmationGui(this, clickEvent -> {
-              LocalPlayer localPlayer = ProtectionUserFinder.findLocalPlayer(memberName);
+              LocalPlayer localPlayer = UtilKt.toLocalPlayer(memberName);
               region.getMembers().removePlayer(localPlayer);
 
               new ProtectionMembersGui(getParent(), region).show(event.getWhoClicked());

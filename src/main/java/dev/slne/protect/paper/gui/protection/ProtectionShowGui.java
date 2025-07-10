@@ -2,10 +2,10 @@ package dev.slne.protect.paper.gui.protection;
 
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldguard.protection.flags.StateFlag.State;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-import dev.slne.protect.paper.PaperMain;
 import dev.slne.protect.paper.gui.SurfGui;
 import dev.slne.protect.paper.gui.chest.SurfChestGui;
 import dev.slne.protect.paper.gui.confirmation.ConfirmationGui;
@@ -14,14 +14,15 @@ import dev.slne.protect.paper.gui.protection.members.ProtectionMembersGui;
 import dev.slne.protect.paper.gui.protection.rename.RenameAnvilGUI;
 import dev.slne.protect.paper.gui.utils.ItemUtils;
 import dev.slne.protect.paper.message.MessageManager;
-import dev.slne.protect.paper.region.ProtectionRegion;
-import dev.slne.protect.paper.region.ProtectionUtils;
-import dev.slne.protect.paper.region.flags.ProtectionFlagsRegistry;
-import dev.slne.protect.paper.region.info.RegionInfo;
-import dev.slne.protect.paper.region.settings.ProtectionSettings;
-import dev.slne.protect.paper.region.transaction.ProtectionSellData;
-import dev.slne.protect.paper.region.visual.visualizer.ProtectionVisualizerThread;
-import dev.slne.protect.paper.user.ProtectionUser;
+import dev.slne.surf.protect.paper.PaperMain;
+import dev.slne.surf.protect.paper.region.ProtectionRegion;
+import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry;
+import dev.slne.surf.protect.paper.region.info.RegionInfo;
+import dev.slne.surf.protect.paper.region.settings.ProtectionSettings;
+import dev.slne.surf.protect.paper.region.transaction.ProtectionSellData;
+import dev.slne.surf.protect.paper.region.visual.visualizer.ProtectionVisualizerThread;
+import dev.slne.surf.protect.paper.user.ProtectionUser;
+import dev.slne.surf.protect.paper.util.UtilKt;
 import dev.slne.transaction.api.TransactionApi;
 import dev.slne.transaction.api.currency.Currency;
 import java.math.BigDecimal;
@@ -68,7 +69,8 @@ public class ProtectionShowGui extends SurfChestGui {
     this.area = area;
     this.distance = distance;
 
-    Location teleportLocation = regionInfo.getTeleportLocation();
+    Location teleportLocation = Optional.ofNullable(regionInfo.getCenterLocation()).map(
+        BukkitAdapter::adapt).orElse(null);
 
     GuiItem regionNameItem = new GuiItem(ItemUtils.item(Material.NAME_TAG, 1, 0,
         Component.text(regionInfo.getName(), MessageManager.PRIMARY)));
@@ -219,7 +221,7 @@ public class ProtectionShowGui extends SurfChestGui {
    * @return The item
    */
   private GuiItem getOwnersItem() {
-    List<String> ownerNames = ProtectionUtils.getOwnerNames(getRegion());
+    List<String> ownerNames = UtilKt.getOwnerNames(getRegion());
     List<Component> lore = new ArrayList<>();
 
     lore.add(Component.empty());
@@ -243,7 +245,7 @@ public class ProtectionShowGui extends SurfChestGui {
    * @return The item
    */
   private GuiItem getMembersItem() {
-    List<String> memberNames = ProtectionUtils.getMemberNames(getRegion());
+    List<String> memberNames = UtilKt.getMemberNames(getRegion());
     List<Component> lore = new ArrayList<>();
 
     lore.add(Component.empty());
@@ -316,9 +318,9 @@ public class ProtectionShowGui extends SurfChestGui {
           ConfirmationGui confirmationGui = new ConfirmationGui(this, confirmEvent -> {
             ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
             ProtectionRegion protectionRegion = new ProtectionRegion(protectionUser,
-                regionInfo.getRegion());
+                regionInfo.region);
 
-            ProtectedRegion protectedRegion = regionInfo.getRegion();
+            ProtectedRegion protectedRegion = regionInfo.region;
             State canSellState = protectedRegion.getFlag(
                 ProtectionFlagsRegistry.SURF_CAN_SELL_FLAG);
             boolean canExpand = canSellState == State.ALLOW || canSellState == null;
@@ -332,10 +334,10 @@ public class ProtectionShowGui extends SurfChestGui {
 
             confirmEvent.getWhoClicked().closeInventory();
 
-            if (ProtectionUtils.standsInProtectedRegion(protectionUser.getBukkitPlayer(),
-                regionInfo.getRegion())) {
-              if (protectionUser.startRegionCreation(protectionRegion, true)) {
-                protectionRegion.setExpandingMarkers();
+            if (UtilKt.standsInProtectedRegion(protectionUser.getBukkitPlayer(),
+                regionInfo.region)) {
+              if (protectionUser.startRegionCreation(protectionRegion)) {
+                protectionRegion.setCornerMarkers();
               }
             } else {
               protectionUser.sendMessage(MessageManager.prefix()
@@ -407,7 +409,7 @@ public class ProtectionShowGui extends SurfChestGui {
           ConfirmationGui confirmationGui = new ConfirmationGui(this, confirmEvent -> {
             ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
 
-            ProtectedRegion protectedRegion = regionInfo.getRegion();
+            ProtectedRegion protectedRegion = regionInfo.region;
             State canSellState = protectedRegion.getFlag(
                 ProtectionFlagsRegistry.SURF_CAN_SELL_FLAG);
             boolean canSell = canSellState == State.ALLOW || canSellState == null;
@@ -434,7 +436,7 @@ public class ProtectionShowGui extends SurfChestGui {
               return;
             }
 
-            RegionManager regionManager = ProtectionUtils.getRegionManager(player.getWorld());
+            RegionManager regionManager = UtilKt.getRegionManager(player.getWorld());
 
             if (!regionManager.hasRegion(protectedRegion.getId())) {
               protectionUser.sendMessage(MessageManager.prefix()
@@ -507,13 +509,13 @@ public class ProtectionShowGui extends SurfChestGui {
    */
   private boolean isRegionEdited() {
     List<ProtectionUser> protectionUsers = PaperMain.getBukkitInstance().getUserManager()
-        .getUsers();
+        .all();
     boolean isEdited = false;
 
     for (ProtectionUser user : protectionUsers) {
       if (user.hasRegionCreation()) {
         ProtectionRegion protectionRegion = user.getRegionCreation();
-        ProtectedRegion protectedRegion = protectionRegion.getExpandingProtection();
+        ProtectedRegion protectedRegion = protectionRegion.expandingProtection;
 
         if (protectedRegion != null && protectedRegion.getId().equals(region.getId())) {
           isEdited = true;

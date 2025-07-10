@@ -11,7 +11,7 @@ repositories {
 }
 
 surfPaperPluginApi {
-    mainClass("dev.slne.protect.paper.PaperMain")
+    mainClass("dev.slne.surf.protect.paper.PaperMain")
     foliaSupported(false)
     generateLibraryLoader(false)
 
@@ -31,6 +31,7 @@ dependencies {
 
     compileOnly(libs.dev.slne.surf.transaction.api)
     implementation(libs.net.wesjd.anvilgui)
+    implementation("io.github.kotlin-graphics:glm:0.9.9.1-15")
 }
 
 tasks.shadowJar {
@@ -40,5 +41,5 @@ tasks.shadowJar {
 }
 
 group = "dev.slne.surf.protect"
-version = "1.21.7-1.0.4-SNAPSHOT"
+version = "1.21.7-2.0.0"
 

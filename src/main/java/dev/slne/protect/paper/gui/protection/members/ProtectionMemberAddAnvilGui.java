@@ -10,7 +10,7 @@ import dev.slne.protect.paper.gui.anvil.requirement.requirements.AnvilNoSpaceReq
 import dev.slne.protect.paper.gui.anvil.requirement.requirements.AnvilNoSpecialCharacterRequirement;
 import dev.slne.protect.paper.gui.anvil.requirement.requirements.player.AnvilOfflinePlayerRequirement;
 import dev.slne.protect.paper.message.MessageManager;
-import dev.slne.protect.paper.user.ProtectionUserFinder;
+import dev.slne.surf.protect.paper.util.UtilKt;
 import java.util.ArrayList;
 import java.util.List;
 import net.kyori.adventure.text.Component;
@@ -52,7 +52,7 @@ public class ProtectionMemberAddAnvilGui extends SurfAnvilGui {
   public List<AnvilGUI.ResponseAction> onSubmit(Player player, String input) {
     List<AnvilGUI.ResponseAction> responseActions = new ArrayList<>();
 
-    LocalPlayer memberPlayer = ProtectionUserFinder.findLocalPlayer(input);
+    LocalPlayer memberPlayer = UtilKt.toLocalPlayer(input);
     region.getMembers().addPlayer(memberPlayer);
 
     player.sendMessage(MessageManager.prefix().append(Component.text("Du hast ",

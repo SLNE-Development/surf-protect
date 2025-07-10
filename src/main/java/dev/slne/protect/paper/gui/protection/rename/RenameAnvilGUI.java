@@ -16,7 +16,7 @@ import dev.slne.protect.paper.region.flags.ProtectionFlagsRegistry;
 import dev.slne.protect.paper.region.info.ProtectionFlagInfo;
 import dev.slne.protect.paper.region.info.RegionInfo;
 import dev.slne.protect.paper.region.settings.ProtectionSettings;
-import dev.slne.protect.paper.region.transaction.ProtectionRenameData;
+import dev.slne.surf.protect.paper.region.transaction.ProtectionRenameData;
 import dev.slne.protect.paper.user.ProtectionUser;
 import dev.slne.surf.surfapi.core.api.messages.Colors;
 import dev.slne.transaction.api.TransactionApi;
@@ -60,7 +60,7 @@ public class RenameAnvilGUI extends SurfAnvilGui {
     final ProtectionFlagInfo flag = region.getFlag(ProtectionFlagsRegistry.SURF_PROTECT_FLAG);
 
     if (flag != null) {
-      return flag.name();
+      return flag.name;
     }
 
     return region.getId();

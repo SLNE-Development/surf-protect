@@ -1,7 +1,7 @@
 package dev.slne.protect.paper.book;
 
 import dev.slne.protect.paper.message.MessageManager;
-import dev.slne.protect.paper.region.settings.ProtectionSettings;
+import dev.slne.surf.protect.paper.region.settings.ProtectionSettings;
 import net.kyori.adventure.inventory.Book;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;

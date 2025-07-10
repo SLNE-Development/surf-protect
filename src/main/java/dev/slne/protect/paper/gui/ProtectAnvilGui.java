@@ -4,7 +4,7 @@ import com.github.stefvanschie.inventoryframework.adventuresupport.ComponentHold
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
 import com.github.stefvanschie.inventoryframework.gui.type.util.Gui;
 import com.github.stefvanschie.inventoryframework.gui.type.util.NamedGui;
-import dev.slne.protect.paper.PaperMain;
+import dev.slne.surf.protect.paper.PaperMain;
 import java.util.ArrayList;
 import java.util.List;
 import net.kyori.adventure.text.Component;

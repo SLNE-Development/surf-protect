@@ -1,0 +1,392 @@
+@file:Suppress("UnstableApiUsage")
+
+package dev.slne.surf.protect.paper.region
+
+import com.sk89q.worldedit.math.BlockVector2
+import com.sk89q.worldguard.protection.flags.Flags
+import com.sk89q.worldguard.protection.flags.StateFlag
+import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion
+import com.sk89q.worldguard.protection.regions.ProtectedRegion
+import dev.slne.protect.paper.gui.protection.flags.ProtectionFlagsMap
+import dev.slne.protect.paper.message.MessageManager
+import dev.slne.surf.protect.paper.config.config
+import dev.slne.surf.protect.paper.math.Mth
+import dev.slne.surf.protect.paper.message.Messages
+import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry
+import dev.slne.surf.protect.paper.region.info.RegionCreationState
+import dev.slne.surf.protect.paper.region.info.RegionInfo
+import dev.slne.surf.protect.paper.region.settings.ProtectionSettings
+import dev.slne.surf.protect.paper.region.transaction.ProtectionBuyData
+import dev.slne.surf.protect.paper.region.visual.Marker
+import dev.slne.surf.protect.paper.region.visual.QuickHull
+import dev.slne.surf.protect.paper.region.visual.Trail
+import dev.slne.surf.protect.paper.user.ProtectionUser
+import dev.slne.surf.protect.paper.util.*
+import dev.slne.surf.surfapi.core.api.util.*
+import dev.slne.transaction.api.TransactionApi
+import dev.slne.transaction.api.transaction.result.TransactionAddResult
+import io.papermc.paper.math.BlockPosition
+import it.unimi.dsi.fastutil.objects.ObjectList
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.future.await
+import org.apache.commons.lang3.RandomStringUtils
+import org.bukkit.Chunk
+import org.bukkit.ChunkSnapshot
+import org.bukkit.block.data.BlockData
+import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
+import java.util.concurrent.atomic.AtomicBoolean
+
+class ProtectionRegion(
+    val protectionUser: ProtectionUser,
+    val player: Player,
+    playerInventoryContent: Array<ItemStack?>,
+    val expandingProtection: ProtectedRegion? = null
+) {
+    val startLocation = player.location
+    val startingInventoryContent = playerInventoryContent
+    var worldBorderSize = config.maxDistanceFromProtectionStart
+
+    private val markers = mutableObjectListOf<Marker>(ProtectionSettings.MARKERS)
+    private val trails = mutableObjectSetOf<Trail>(ProtectionSettings.MARKERS)
+    private var hullList = mutableObjectListOf<Marker>()
+    private var hullSet = mutableObjectSetOf<Marker>()
+
+    private val tmpBuffer = mutableObjectListOf<Marker>()
+    private var tempRegion: TempProtectionRegion? = null
+
+    private val isProcessingTransaction = AtomicBoolean(false)
+
+    val markerCountLeft: Int get() = maxMarkerCount - currentMarkerCount
+    val maxMarkerCount: Int
+        get() = ProtectionSettings.MARKERS + (expandingProtection?.points?.size ?: 0)
+    val currentMarkerCount: Int get() = markers.size
+
+    suspend fun setCornerMarkers() {
+        val region = expandingProtection ?: return
+        val world = player.world
+        val points = region.points
+
+        val byChunk = mutableLong2ObjectMapOf<ObjectList<BlockVector2>>(points.size / 4 + 1)
+        for (point in points) {
+            val key = Chunk.getChunkKey(point.x() shr 4, point.z() shr 4)
+            val list = byChunk.computeIfAbsent(key) { mutableObjectListOf() }
+            list.add(point)
+        }
+
+        val snapshots = mutableLong2ObjectMapOf<ChunkSnapshot>(byChunk.size)
+        coroutineScope {
+            byChunk.keys.map { key ->
+                async {
+                    val snapshot =
+                        world.getChunkAtAsync(getXFromChunkKey(key), getZFromChunkKey(key))
+                            .await()
+                            .getChunkSnapshot(true, false, false, false)
+                    snapshots.put(key, snapshot)
+                }
+            }.awaitAll()
+        }
+
+        val it = byChunk.long2ObjectEntrySet().fastIterator()
+        while (it.hasNext()) {
+            val entry = it.next()
+            val key = entry.longKey
+            val pointsInChunk = entry.value
+            val snapshot = snapshots[key] ?: error("ChunkSnapshot for key $key not found")
+            for (point in pointsInChunk) {
+                val y = snapshot.getHighestBlockYAtBlockCoordinates(point.x(), point.z())
+                val pos = point.toBlockPosition(y)
+                val data = snapshot.getBlockDataAt(pos.blockX(), pos.blockY(), pos.blockZ())
+                createMarker(pos, data, isExpanding = true)
+            }
+        }
+    }
+
+    fun createMarker(pos: BlockPosition, previousData: BlockData, isExpanding: Boolean): Marker? {
+        val candidate = Marker(this, pos, previousData)
+        if (!updateHullPreview(candidate)) return null
+
+        // Check overlap state when not expanding
+        if (!isExpanding && offerAccepting() == RegionCreationState.OVERLAPPING) {
+            handleTrails()
+            restoreHull()
+            return null
+        }
+
+        markers.add(candidate)
+        handleTrails()
+
+        return candidate
+    }
+
+    private fun updateHullPreview(candidate: Marker): Boolean {
+        tmpBuffer.clear()
+        tmpBuffer.addAll(markers)
+        tmpBuffer.add(candidate)
+        val preview = QuickHull.compute(tmpBuffer)
+        return if (preview.contains(candidate)) {
+            hullList.clear()
+            hullList.addAll(preview)
+            hullSet.clear()
+            hullSet.addAll(preview)
+            true
+        } else false
+    }
+
+    private fun restoreHull() {
+        if (markers.size < 3) {
+            hullList.clear()
+            hullSet.clear()
+            hullSet.addAll(markers)
+            return
+        }
+        val newHull = QuickHull.compute(markers)
+        hullList.clear()
+        hullList.addAll(newHull)
+        hullSet.clear()
+        hullSet.addAll(newHull)
+    }
+
+    /**
+     * Accepts the protection
+     *
+     * @return the [RegionCreationState]
+     */
+    private fun offerAccepting(): RegionCreationState {
+        if (hullSet.size < ProtectionSettings.MIN_MARKERS) {
+            protectionUser.sendMessage(Messages.Protecting.moreMarkers(hullSet.size))
+            tempRegion = null
+            return RegionCreationState.MORE_MARKERS_NEEDED
+        }
+
+        val vectors = mutableObjectListOf<BlockVector2>()
+        for (marker in hullSet) {
+            vectors.add(marker.toBlockVector2())
+        }
+
+        val manager = player.world.getRegionManager()
+        val region: ProtectedRegion
+
+        if (expandingProtection != null) {
+            region = ProtectedPolygonalRegion(
+                expandingProtection.id,
+                vectors,
+                config.minYWorld,
+                config.maxYWorld
+            )
+            region.copyFrom(expandingProtection)
+        } else {
+            val name = player.name + "-" + RandomStringUtils.secureStrong()
+                .nextAlphabetic(ProtectionSettings.RANDOM_NAME_LENGTH)
+                .uppercase()
+
+            region = ProtectedPolygonalRegion(
+                name,
+                vectors,
+                config.minYWorld,
+                config.maxYWorld
+            )
+            region.owners.addPlayer(protectionUser.localPlayer)
+
+            for (flagsMap in ProtectionFlagsMap.entries) {
+                region.setFlag(
+                    flagsMap.flag,
+                    flagsMap.initialState
+                )
+            }
+
+            region.setFlag(
+                Flags.NONPLAYER_PROTECTION_DOMAINS,
+                objectSetOf(player.uniqueId.toString())
+            )
+        }
+
+        // Get the center of the region and set the teleport location
+        val center = region.fastCenter().toVector3()
+        val centerLoc = com.sk89q.worldedit.util.Location(
+            player.world.toWorldEdit(),
+            center.x(),
+            center.y(),
+            center.z()
+        )
+
+        region.setFlag(Flags.TELE_LOC, centerLoc)
+
+        // Set SURF_PROTECT_FLAG if it does not exist already
+        RegionInfo(region)
+
+        // Set SURF_PROTECTION flag to ALLOW
+        region.setFlag(ProtectionFlagsRegistry.SURF_PROTECTION, StateFlag.State.ALLOW)
+
+
+        val tmpRegion = TempProtectionRegion(player.world, region, manager).also { tempRegion = it }
+        val tmpVolume = tmpRegion.volume
+        if (expandingProtection != null) {
+            tmpRegion.effectiveVolume = tmpVolume - expandingProtection.fixedVolume()
+        }
+
+        return when {
+            tmpRegion.overlaps(expandingProtection) -> RegionCreationState.OVERLAPPING.also {
+                protectionUser.sendMessage(Messages.Protecting.overlappingRegions)
+            }
+
+            tmpVolume <= config.areaMinBlocks -> RegionCreationState.TOO_SMALL.also {
+                protectionUser.sendMessage(Messages.Protecting.areaTooSmall)
+            }
+
+            tmpVolume > config.areaMaxBlocks -> RegionCreationState.TOO_LARGE.also {
+                protectionUser.sendMessage(Messages.Protecting.areaTooBig)
+            }
+
+            else -> {
+                val currency =
+                    TransactionApi.getCurrency(ProtectionSettings.CURRENCY_NAME).orElseThrow()
+                val (effectiveCost, pricePerBlock, spawnDistance) = Mth.calculateEffectiveCost(
+                    centerLoc,
+                    tmpRegion
+                )
+
+                if (effectiveCost <= 0) {
+                    protectionUser.sendMessage(Messages.Protecting.areaTooSmall)
+                    RegionCreationState.TOO_SMALL
+                } else {
+                    protectionUser.sendMessage(
+                        Messages.Protecting.offer(
+                            tmpVolume,
+                            effectiveCost,
+                            currency,
+                            pricePerBlock,
+                            spawnDistance
+                        )
+                    )
+                    RegionCreationState.SUCCESS
+                }
+            }
+        }
+    }
+
+    /**
+     * Handles removal of marker
+     *
+     * @param marker the marker
+     */
+    suspend fun removeMarker(marker: Marker) {
+        marker.restorePreviousData(player.world)
+        markers.remove(marker)
+        restoreHull()
+        handleTrails()
+        offerAccepting()
+    }
+
+    /**
+     * Handles trails for the markers
+     */
+    fun handleTrails() {
+        val newTrails = mutableObjectSetOf<Trail>()
+        val size = hullList.size
+        if (size < 2) return
+
+        fun ensureTrail(a: Marker, b: Marker) {
+            val trail = Trail(a, b, this, expandingProtection == null)
+            trails.add(trail)
+            newTrails.add(trail)
+        }
+
+        for (i in 0 until size - 1) {
+            ensureTrail(hullList[i], hullList[i + 1])
+        }
+
+        // Add last trail
+        if (size >= ProtectionSettings.MIN_MARKERS_LAST_CONNECTION) {
+            ensureTrail(hullList[size - 1], hullList[0])
+        }
+
+        // Remove obsolete trails
+        trails.removeIf { trail ->
+            if (!newTrails.contains(trail)) {
+                trail.close()
+                true
+            } else false
+        }
+    }
+
+    suspend fun finishProtection() {
+        val tempRegion = tempRegion ?: return run {
+            offerAccepting()
+        }
+
+        if (tempRegion.overlapsUnownedRegion(protectionUser.localPlayer)) {
+            protectionUser.sendMessage(Messages.Protecting.overlappingRegions)
+            return
+        }
+
+        if (tempRegion.volume <= config.areaMinBlocks) {
+            protectionUser.sendMessage(Messages.Protecting.areaTooSmall)
+            return
+        }
+
+        val centerLoc = tempRegion.region.getFlag(Flags.TELE_LOC) ?: return run {
+            protectionUser.sendMessage(Messages.Protecting.noTpPointFound)
+        }
+
+        val (pricePerBlock) = centerLoc.getProtectionPricePerBlock()
+        val cost = tempRegion.effectiveVolume * pricePerBlock
+        val costBD = (-cost).toBigDecimal()
+        val currency = TransactionApi.getCurrency(ProtectionSettings.CURRENCY_NAME).orElseThrow()
+
+        if (isProcessingTransaction.compareAndSet(false, true)) {
+            protectionUser.sendMessage(Messages.Protecting.alreadyProcessingTransaction)
+            return
+        }
+
+        try {
+            if (!protectionUser.hasEnoughCurrency(costBD.abs(), currency)) {
+                protectionUser.sendMessage(Messages.Protecting.tooExpensiveToBuy)
+                return
+            }
+
+            val buyData = ProtectionBuyData(startLocation.world, tempRegion.region)
+            val result = protectionUser.addTransaction(null, costBD, currency, buyData)
+
+            if (result == TransactionAddResult.SUCCESS) {
+                tempRegion.protect()
+                removeAllMarkers()
+                protectionUser.resetRegionCreation(false)
+                protectionUser.sendMessage(MessageManager.getProtectionCreatedComponent()) // TODO: 09.07.2025 14:36 - open dialog
+            } else {
+                protectionUser.sendMessage(Messages.Protecting.tooExpensiveToBuy)
+            }
+
+        } finally {
+            isProcessingTransaction.set(false)
+        }
+    }
+
+    /**
+     * Removes all markers
+     */
+    suspend fun removeAllMarkers() {
+        coroutineScope {
+            markers.toObjectList().map { marker ->
+                async {
+                    marker.restorePreviousData(player.world)
+                }
+            }.awaitAll()
+        }
+        markers.clear()
+        restoreHull()
+        handleTrails()
+    }
+
+    /**
+     * Cancel the protection
+     */
+    suspend fun cancelProtection() {
+        removeAllMarkers()
+
+        protectionUser.sendMessage(MessageManager.getProtectionCanceledComponent()) // TODO: 09.07.2025 14:39 - open dialog
+        protectionUser.resetRegionCreation(true)
+    }
+}

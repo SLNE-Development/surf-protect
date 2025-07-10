@@ -12,21 +12,19 @@ import dev.slne.protect.paper.gui.list.ProtectionListGui;
 import dev.slne.protect.paper.gui.utils.ItemUtils;
 import dev.slne.protect.paper.message.MessageManager;
 import dev.slne.protect.paper.region.ProtectionRegion;
-import dev.slne.protect.paper.region.ProtectionUtils;
 import dev.slne.protect.paper.region.flags.ProtectionFlagsRegistry;
-import dev.slne.protect.paper.settings.ProtectionUserSettings;
+import dev.slne.surf.protect.paper.settings.ProtectionUserSettings;
 import dev.slne.protect.paper.user.ProtectionUser;
+import dev.slne.surf.protect.paper.util.UtilKt;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.World;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -100,8 +98,9 @@ public class ProtectionMainMenu extends SurfChestGui {
         event -> {
           Player viewingPlayer = (Player) event.getWhoClicked();
           ProtectionUser user = ProtectionUser.getProtectionUser(getTargetProtectionPlayer());
-          Map<World, List<ProtectedRegion>> regions = ProtectionUtils.getRegionListFor(
-              user.getLocalPlayer());
+
+
+          List<ProtectedRegion> regions = UtilKt.allRegions(user.getLocalPlayer());
 
           ProtectionListGui listGui = new ProtectionListGui(this, regions, viewingPlayer);
           listGui.show(viewingPlayer);
@@ -124,7 +123,7 @@ public class ProtectionMainMenu extends SurfChestGui {
       player.closeInventory();
 
       List<ProtectedRegion> regions =
-          ProtectionUtils.getRegionManager(player.getWorld()).getRegions().values().stream()
+          UtilKt.getRegionManager(player.getWorld()).getRegions().values().stream()
               .filter(region -> !region.getType().equals(RegionType.GLOBAL)).toList();
 
       boolean state = PaperMain.getBukkitInstance().getProtectionVisualizerState()
@@ -180,7 +179,7 @@ public class ProtectionMainMenu extends SurfChestGui {
         ProtectionRegion regionCreation = new ProtectionRegion(protectionUser, null);
 
         confirmEvent.getWhoClicked().closeInventory(InventoryCloseEvent.Reason.PLUGIN);
-        protectionUser.startRegionCreation(regionCreation, true);
+        protectionUser.startRegionCreation(regionCreation);
       }, (cancelEvent, parent) -> {
         if (!(cancelEvent instanceof InventoryCloseEvent closeEvent && closeEvent.getReason()
             .equals(

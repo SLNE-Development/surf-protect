@@ -2,7 +2,7 @@ package dev.slne.protect.paper.gui;
 
 import com.github.stefvanschie.inventoryframework.gui.type.util.Gui;
 import com.github.stefvanschie.inventoryframework.gui.type.util.NamedGui;
-import dev.slne.protect.paper.PaperMain;
+import dev.slne.surf.protect.paper.PaperMain;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
