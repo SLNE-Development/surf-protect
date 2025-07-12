@@ -20,13 +20,14 @@ import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry;
 import dev.slne.surf.protect.paper.region.info.RegionInfo;
 import dev.slne.surf.protect.paper.region.settings.ProtectionSettings;
 import dev.slne.surf.protect.paper.region.transaction.ProtectionSellData;
-import dev.slne.surf.protect.paper.region.visual.visualizer.ProtectionVisualizerThread;
 import dev.slne.surf.protect.paper.user.ProtectionUser;
+import dev.slne.surf.protect.paper.user.ProtectionUserManager;
 import dev.slne.surf.protect.paper.util.UtilKt;
 import dev.slne.transaction.api.TransactionApi;
 import dev.slne.transaction.api.currency.Currency;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -315,49 +316,49 @@ public class ProtectionShowGui extends SurfChestGui {
           Player player = (Player) event.getWhoClicked();
           player.closeInventory();
 
-          ConfirmationGui confirmationGui = new ConfirmationGui(this, confirmEvent -> {
-            ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
-            ProtectionRegion protectionRegion = new ProtectionRegion(protectionUser,
-                regionInfo.region);
+//          ConfirmationGui confirmationGui = new ConfirmationGui(this, confirmEvent -> {
+//            ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
+//            ProtectionRegion protectionRegion = new ProtectionRegion(protectionUser,
+//                regionInfo.region);
+//
+//            ProtectedRegion protectedRegion = regionInfo.region;
+//            State canSellState = protectedRegion.getFlag(
+//                ProtectionFlagsRegistry.SURF_CAN_SELL_FLAG);
+//            boolean canExpand = canSellState == State.ALLOW || canSellState == null;
+//
+//            if (!canExpand) {
+//              protectionUser.sendMessage(MessageManager.prefix()
+//                  .append(Component.text("Das Grundstück darf nicht erweitert werden.",
+//                      MessageManager.ERROR)));
+//              return;
+//            }
+//
+//            confirmEvent.getWhoClicked().closeInventory();
+//
+//            if (UtilKt.standsInProtectedRegion(protectionUser.getBukkitPlayer(),
+//                regionInfo.region)) {
+//              if (protectionUser.startRegionCreation(protectionRegion)) {
+//                protectionRegion.setCornerMarkers();
+//              }
+//            } else {
+//              protectionUser.sendMessage(MessageManager.prefix()
+//                  .append(Component.text(
+//                      "Du befindest dich nicht auf dem zu erweiternden Grundstück.",
+//                      MessageManager.ERROR)));
+//            }
+//          }, (cancelEvent, parent) -> {
+//            if (!(cancelEvent instanceof InventoryCloseEvent closeEvent && closeEvent.getReason()
+//                .equals(
+//                    InventoryCloseEvent.Reason.PLUGIN))) {
+//              Bukkit.getScheduler().runTaskLater(PaperMain.getInstance(), () -> {
+//                new ProtectionShowGui(parent.getParent(), region, area, distance, regionInfo,
+//                    (Player) event.getWhoClicked()).show(
+//                    event.getWhoClicked());
+//              }, 1);
+//            }
+//          }, Component.text("Grundstück erweitern", MessageManager.PRIMARY), confirmLore);
 
-            ProtectedRegion protectedRegion = regionInfo.region;
-            State canSellState = protectedRegion.getFlag(
-                ProtectionFlagsRegistry.SURF_CAN_SELL_FLAG);
-            boolean canExpand = canSellState == State.ALLOW || canSellState == null;
-
-            if (!canExpand) {
-              protectionUser.sendMessage(MessageManager.prefix()
-                  .append(Component.text("Das Grundstück darf nicht erweitert werden.",
-                      MessageManager.ERROR)));
-              return;
-            }
-
-            confirmEvent.getWhoClicked().closeInventory();
-
-            if (UtilKt.standsInProtectedRegion(protectionUser.getBukkitPlayer(),
-                regionInfo.region)) {
-              if (protectionUser.startRegionCreation(protectionRegion)) {
-                protectionRegion.setCornerMarkers();
-              }
-            } else {
-              protectionUser.sendMessage(MessageManager.prefix()
-                  .append(Component.text(
-                      "Du befindest dich nicht auf dem zu erweiternden Grundstück.",
-                      MessageManager.ERROR)));
-            }
-          }, (cancelEvent, parent) -> {
-            if (!(cancelEvent instanceof InventoryCloseEvent closeEvent && closeEvent.getReason()
-                .equals(
-                    InventoryCloseEvent.Reason.PLUGIN))) {
-              Bukkit.getScheduler().runTaskLater(PaperMain.getInstance(), () -> {
-                new ProtectionShowGui(parent.getParent(), region, area, distance, regionInfo,
-                    (Player) event.getWhoClicked()).show(
-                    event.getWhoClicked());
-              }, 1);
-            }
-          }, Component.text("Grundstück erweitern", MessageManager.PRIMARY), confirmLore);
-
-          confirmationGui.show(player);
+//          confirmationGui.show(player);
         });
   }
 
@@ -406,99 +407,99 @@ public class ProtectionShowGui extends SurfChestGui {
                   "Für das Grundstück wird dir ein Anteil des Kaufpreises erstattet.",
                   NamedTextColor.GRAY));
 
-          ConfirmationGui confirmationGui = new ConfirmationGui(this, confirmEvent -> {
-            ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
-
-            ProtectedRegion protectedRegion = regionInfo.region;
-            State canSellState = protectedRegion.getFlag(
-                ProtectionFlagsRegistry.SURF_CAN_SELL_FLAG);
-            boolean canSell = canSellState == State.ALLOW || canSellState == null;
-
-            if (!canSell) {
-              protectionUser.sendMessage(MessageManager.prefix()
-                  .append(Component.text("Das Grundstück darf nicht verkauft werden.",
-                      MessageManager.ERROR)));
-              return;
-            }
-
-            if (isRegionEdited()) {
-              protectionUser.sendMessage(MessageManager.prefix()
-                  .append(Component.text("Das Grundstück wird gerade bearbeitet!",
-                      MessageManager.ERROR)));
-              return;
-            }
-
-            BigDecimal refund = BigDecimal.valueOf(regionInfo.getRetailPrice());
-            Optional<Currency> currency = TransactionApi.getCurrency("CastCoin");
-
-            if (currency.isEmpty()) {
-              protectionUser.sendMessage(MessageManager.getNoCurrencyComponent());
-              return;
-            }
-
-            RegionManager regionManager = UtilKt.getRegionManager(player.getWorld());
-
-            if (!regionManager.hasRegion(protectedRegion.getId())) {
-              protectionUser.sendMessage(MessageManager.prefix()
-                  .append(Component.text("Das Grundstück existiert nicht mehr!",
-                      MessageManager.ERROR)));
-
-              new BukkitRunnable() {
-                @Override
-                public void run() {
-                  event.getWhoClicked().closeInventory();
-                }
-              }.runTask(PaperMain.getInstance());
-
-              return;
-            }
-
-            List<UUID> members = new ArrayList<>();
-            members.addAll(protectedRegion.getOwners().getPlayerDomain().getUniqueIds());
-            members.addAll(protectedRegion.getMembers().getPlayerDomain().getUniqueIds());
-
-            for (UUID member : members) {
-              Player memberPlayer = Bukkit.getPlayer(member);
-
-              if (memberPlayer == null || !memberPlayer.isOnline()) {
-                continue;
-              }
-
-              notifyDeletion(player, regionInfo);
-            }
-
-            // Delete the region
-            regionManager.removeRegion(protectedRegion.getId());
-
-            // Add transaction to the user
-            protectionUser.addTransaction(null, refund, currency.get(),
-                new ProtectionSellData(event.getWhoClicked().getWorld(), protectedRegion));
-
-            // Remove visualizers
-            ProtectionVisualizerThread visualizerThread = PaperMain.getBukkitInstance()
-                .getProtectionVisualizerThread();
-            visualizerThread.getVisualizers().stream()
-                .filter(protectionVisualizer -> protectionVisualizer.getRegion()
-                    .equals(protectedRegion)).findFirst()
-                .ifPresent(visualizerThread::closeVisualizer);
-
-            new BukkitRunnable() {
-              @Override
-              public void run() {
-                event.getWhoClicked().closeInventory();
-              }
-            }.runTask(PaperMain.getInstance());
-
-            protectionUser.sendMessage(
-                MessageManager.getProtectionSoldComponent(refund, currency.get()));
-          }, (clickEvent, parent) -> {
-            Bukkit.getScheduler().runTaskLater(PaperMain.getInstance(), () -> {
-              new ProtectionShowGui(parent.getParent(), region, area, distance, regionInfo,
-                  (Player) event.getWhoClicked()).show(event.getWhoClicked());
-            }, 1);
-          }, Component.text("Grundstück löschen?", MessageManager.PRIMARY), confirmLore);
-
-          confirmationGui.show(player);
+//          ConfirmationGui confirmationGui = new ConfirmationGui(this, confirmEvent -> {
+//            ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
+//
+//            ProtectedRegion protectedRegion = regionInfo.region;
+//            State canSellState = protectedRegion.getFlag(
+//                ProtectionFlagsRegistry.SURF_CAN_SELL_FLAG);
+//            boolean canSell = canSellState == State.ALLOW || canSellState == null;
+//
+//            if (!canSell) {
+//              protectionUser.sendMessage(MessageManager.prefix()
+//                  .append(Component.text("Das Grundstück darf nicht verkauft werden.",
+//                      MessageManager.ERROR)));
+//              return;
+//            }
+//
+//            if (isRegionEdited()) {
+//              protectionUser.sendMessage(MessageManager.prefix()
+//                  .append(Component.text("Das Grundstück wird gerade bearbeitet!",
+//                      MessageManager.ERROR)));
+//              return;
+//            }
+//
+//            BigDecimal refund = BigDecimal.valueOf(regionInfo.getRetailPrice());
+//            Optional<Currency> currency = TransactionApi.getCurrency("CastCoin");
+//
+//            if (currency.isEmpty()) {
+//              protectionUser.sendMessage(MessageManager.getNoCurrencyComponent());
+//              return;
+//            }
+//
+//            RegionManager regionManager = UtilKt.getRegionManager(player.getWorld());
+//
+//            if (!regionManager.hasRegion(protectedRegion.getId())) {
+//              protectionUser.sendMessage(MessageManager.prefix()
+//                  .append(Component.text("Das Grundstück existiert nicht mehr!",
+//                      MessageManager.ERROR)));
+//
+//              new BukkitRunnable() {
+//                @Override
+//                public void run() {
+//                  event.getWhoClicked().closeInventory();
+//                }
+//              }.runTask(PaperMain.getInstance());
+//
+//              return;
+//            }
+//
+//            List<UUID> members = new ArrayList<>();
+//            members.addAll(protectedRegion.getOwners().getPlayerDomain().getUniqueIds());
+//            members.addAll(protectedRegion.getMembers().getPlayerDomain().getUniqueIds());
+//
+//            for (UUID member : members) {
+//              Player memberPlayer = Bukkit.getPlayer(member);
+//
+//              if (memberPlayer == null || !memberPlayer.isOnline()) {
+//                continue;
+//              }
+//
+//              notifyDeletion(player, regionInfo);
+//            }
+//
+//            // Delete the region
+//            regionManager.removeRegion(protectedRegion.getId());
+//
+//            // Add transaction to the user
+//            protectionUser.addTransaction(null, refund, currency.get(),
+//                new ProtectionSellData(event.getWhoClicked().getWorld(), protectedRegion));
+//
+//            // Remove visualizers
+//            ProtectionVisualizerThread visualizerThread = PaperMain.getBukkitInstance()
+//                .getProtectionVisualizerThread();
+//            visualizerThread.getVisualizers().stream()
+//                .filter(protectionVisualizer -> protectionVisualizer.getRegion()
+//                    .equals(protectedRegion)).findFirst()
+//                .ifPresent(visualizerThread::closeVisualizer);
+//
+//            new BukkitRunnable() {
+//              @Override
+//              public void run() {
+//                event.getWhoClicked().closeInventory();
+//              }
+//            }.runTask(PaperMain.getInstance());
+//
+//            protectionUser.sendMessage(
+//                MessageManager.getProtectionSoldComponent(refund, currency.get()));
+//          }, (clickEvent, parent) -> {
+//            Bukkit.getScheduler().runTaskLater(PaperMain.getInstance(), () -> {
+//              new ProtectionShowGui(parent.getParent(), region, area, distance, regionInfo,
+//                  (Player) event.getWhoClicked()).show(event.getWhoClicked());
+//            }, 1);
+//          }, Component.text("Grundstück löschen?", MessageManager.PRIMARY), confirmLore);
+//
+//          confirmationGui.show(player);
         });
   }
 
@@ -508,14 +509,13 @@ public class ProtectionShowGui extends SurfChestGui {
    * @return Whether the region is edited
    */
   private boolean isRegionEdited() {
-    List<ProtectionUser> protectionUsers = PaperMain.getBukkitInstance().getUserManager()
-        .all();
+    Collection<ProtectionUser> protectionUsers = ProtectionUserManager.INSTANCE.all();
     boolean isEdited = false;
 
     for (ProtectionUser user : protectionUsers) {
-      if (user.hasRegionCreation()) {
+      if (user.isCreatingRegion()) {
         ProtectionRegion protectionRegion = user.getRegionCreation();
-        ProtectedRegion protectedRegion = protectionRegion.expandingProtection;
+        ProtectedRegion protectedRegion = protectionRegion.getExpandingProtection();
 
         if (protectedRegion != null && protectedRegion.getId().equals(region.getId())) {
           isEdited = true;

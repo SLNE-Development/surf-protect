@@ -8,7 +8,7 @@ import net.kyori.adventure.text.TextComponent.Builder;
 /**
  * Represents the message manager
  */
-@Deprecated(forRemoval = true, since = "1.0.4")
+@Deprecated(since = "1.0.4")
 public final class MessageManager implements Colors {
 
   /**

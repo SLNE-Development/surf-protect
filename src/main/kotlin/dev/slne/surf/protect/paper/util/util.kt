@@ -161,10 +161,6 @@ fun Position.distanceSquared(other: Position): Double {
     return dx * dx + dy * dy + dz * dz
 }
 
-
-suspend fun World.getHighestBlockYAtAsync(blockX: Int, blockZ: Int) =
-    getChunkSnapshotAsync(blockX, blockZ).getHighestBlockYAtBlockCoordinates(blockX, blockZ)
-
 suspend fun World.getChunkSnapshotAsync(
     blockX: Int,
     blockZ: Int,
@@ -174,13 +170,6 @@ suspend fun World.getChunkSnapshotAsync(
     includeLightData: Boolean = false
 ) = getChunkAtAsync(blockX shr 4, blockZ shr 4).await()
     .getChunkSnapshot(includeMaxblockY, includeBiome, includeBiomeTempRain, includeLightData)
-
-fun ChunkSnapshot.getHighestBlockYAtBlockCoordinates(
-    blockX: Int,
-    blockZ: Int
-): Int {
-    return getHighestBlockYAt(blockX and 15, blockZ and 15)
-}
 
 fun ChunkSnapshot.getBlockDataAt(
     blockX: Int,

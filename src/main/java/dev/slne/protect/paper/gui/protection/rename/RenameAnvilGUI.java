@@ -1,9 +1,7 @@
 package dev.slne.protect.paper.gui.protection.rename;
 
-import static dev.slne.protect.paper.user.ProtectionUser.getProtectionUser;
 
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-import dev.slne.protect.paper.PaperMain;
 import dev.slne.protect.paper.gui.SurfGui;
 import dev.slne.protect.paper.gui.anvil.SurfAnvilGui;
 import dev.slne.protect.paper.gui.anvil.requirement.AnvilRequirement;
@@ -12,24 +10,22 @@ import dev.slne.protect.paper.gui.anvil.requirement.requirements.AnvilNoSpaceReq
 import dev.slne.protect.paper.gui.anvil.requirement.requirements.AnvilNoSpecialCharacterRequirement;
 import dev.slne.protect.paper.gui.confirmation.ConfirmationGui;
 import dev.slne.protect.paper.message.MessageManager;
-import dev.slne.protect.paper.region.flags.ProtectionFlagsRegistry;
-import dev.slne.protect.paper.region.info.ProtectionFlagInfo;
-import dev.slne.protect.paper.region.info.RegionInfo;
-import dev.slne.protect.paper.region.settings.ProtectionSettings;
-import dev.slne.surf.protect.paper.region.transaction.ProtectionRenameData;
-import dev.slne.protect.paper.user.ProtectionUser;
+import dev.slne.surf.protect.paper.PaperMain;
+import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry;
+import dev.slne.surf.protect.paper.region.info.ProtectionFlagInfo;
+import dev.slne.surf.protect.paper.region.info.RegionInfo;
+import dev.slne.surf.protect.paper.region.settings.ProtectionSettings;
+import dev.slne.surf.protect.paper.user.ProtectionUser;
+import dev.slne.surf.protect.paper.user.ProtectionUserManagerKt;
 import dev.slne.surf.surfapi.core.api.messages.Colors;
 import dev.slne.transaction.api.TransactionApi;
 import dev.slne.transaction.api.currency.Currency;
-import dev.slne.transaction.api.transaction.result.TransactionAddResult;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import net.wesjd.anvilgui.AnvilGUI;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -60,7 +56,7 @@ public class RenameAnvilGUI extends SurfAnvilGui {
     final ProtectionFlagInfo flag = region.getFlag(ProtectionFlagsRegistry.SURF_PROTECT_FLAG);
 
     if (flag != null) {
-      return flag.name;
+      return flag.name();
     }
 
     return region.getId();
@@ -91,7 +87,7 @@ public class RenameAnvilGUI extends SurfAnvilGui {
 
     Currency currency = TransactionApi.getCurrency("CastCoin").orElseThrow();
 
-    RegionInfo regionInfo = new RegionInfo(player.getWorld(), region);
+    RegionInfo regionInfo = new RegionInfo(region);
     String oldName = regionInfo.getName();
     String newName = input;
 
@@ -113,48 +109,48 @@ public class RenameAnvilGUI extends SurfAnvilGui {
       public void run() {
         new ConfirmationGui(getParent(),
             confirmEvent -> {
-              ProtectionUser protectionUser = getProtectionUser(player);
+              ProtectionUser protectionUser = ProtectionUserManagerKt.protectionUser(player);
               isProcessingTransaction = true;
 
-              protectionUser.hasEnoughCurrency(
-                      BigDecimal.valueOf(ProtectionSettings.PROTECTION_RENAME_PRICE), currency)
-                  .thenAcceptAsync(hasEnoughCurrency -> {
-                    if (!hasEnoughCurrency) {
-                      player.sendMessage(MessageManager.getTooExpensiveToRenameComponent());
-                      isProcessingTransaction = false;
-                    } else {
-                      protectionUser.addTransaction(
-                          null,
-                          BigDecimal.valueOf(ProtectionSettings.PROTECTION_RENAME_PRICE).negate(),
-                          currency,
-                          new ProtectionRenameData(Bukkit.getWorlds().getFirst(), region, oldName,
-                              newName)
-                      ).thenAcceptAsync(transactionAddResult -> {
-                        if (transactionAddResult != null && transactionAddResult.equals(
-                            TransactionAddResult.SUCCESS)) {
-                          regionInfo.setProtectionInfoToRegion(new ProtectionFlagInfo(newName));
-                          player.sendMessage(Colors.PREFIX.append(
-                                  Component.text("Du hast das Grundstück ", Colors.INFO))
-                              .append(Component.text(oldName, Colors.VARIABLE_VALUE))
-                              .append(Component.text(" in ", Colors.INFO))
-                              .append(Component.text(newName, Colors.VARIABLE_VALUE))
-                              .append(Component.text(" umbenannt.", Colors.INFO)));
-                        } else {
-                          protectionUser.sendMessage(
-                              MessageManager.getTooExpensiveToRenameComponent());
-                        }
-
-                        isProcessingTransaction = false;
-                      }).exceptionally(throwable -> {
-                        LOGGER.error("Error while buying protection", throwable);
-                        return null;
-                      });
-                    }
-
-                  }).exceptionally(throwable -> {
-                    LOGGER.error("Error while checking if user has enough currency", throwable);
-                    return null;
-                  });
+//              protectionUser.hasEnoughCurrency(
+//                      BigDecimal.valueOf(ProtectionSettings.PROTECTION_RENAME_PRICE), currency)
+//                  .thenAcceptAsync(hasEnoughCurrency -> {
+//                    if (!hasEnoughCurrency) {
+//                      player.sendMessage(MessageManager.getTooExpensiveToRenameComponent());
+//                      isProcessingTransaction = false;
+//                    } else {
+//                      protectionUser.addTransaction(
+//                          null,
+//                          BigDecimal.valueOf(ProtectionSettings.PROTECTION_RENAME_PRICE).negate(),
+//                          currency,
+//                          new ProtectionRenameData(Bukkit.getWorlds().getFirst(), region, oldName,
+//                              newName)
+//                      ).thenAcceptAsync(transactionAddResult -> {
+//                        if (transactionAddResult != null && transactionAddResult.equals(
+//                            TransactionAddResult.SUCCESS)) {
+//                          regionInfo.setProtectionInfoToRegion(new ProtectionFlagInfo(newName));
+//                          player.sendMessage(Colors.PREFIX.append(
+//                                  Component.text("Du hast das Grundstück ", Colors.INFO))
+//                              .append(Component.text(oldName, Colors.VARIABLE_VALUE))
+//                              .append(Component.text(" in ", Colors.INFO))
+//                              .append(Component.text(newName, Colors.VARIABLE_VALUE))
+//                              .append(Component.text(" umbenannt.", Colors.INFO)));
+//                        } else {
+//                          protectionUser.sendMessage(
+//                              MessageManager.getTooExpensiveToRenameComponent());
+//                        }
+//
+//                        isProcessingTransaction = false;
+//                      }).exceptionally(throwable -> {
+//                        LOGGER.error("Error while buying protection", throwable);
+//                        return null;
+//                      });
+//                    }
+//
+//                  }).exceptionally(throwable -> {
+//                    LOGGER.error("Error while checking if user has enough currency", throwable);
+//                    return null;
+//                  });
 
               backToParent(player);
             }, (cancelEvent, parent) -> {

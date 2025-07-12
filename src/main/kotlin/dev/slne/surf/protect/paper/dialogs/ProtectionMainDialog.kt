@@ -2,15 +2,11 @@
 
 package dev.slne.surf.protect.paper.dialogs
 
-import com.sk89q.worldguard.protection.flags.StateFlag
-import com.sk89q.worldguard.protection.regions.RegionType
-import dev.slne.surf.protect.paper.bukkitInstance
 import dev.slne.surf.protect.paper.dialogs.sub.ProtectionCreateDialog
 import dev.slne.surf.protect.paper.dialogs.sub.ProtectionListDialog
 import dev.slne.surf.protect.paper.dialogs.sub.ProtectionSettingsDialog
 import dev.slne.surf.protect.paper.permission.ProtectPermissionRegistry
-import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry
-import dev.slne.surf.protect.paper.util.getRegionManager
+import dev.slne.surf.protect.paper.region.visual.visualizer.ProtectionVisualizerManager
 import dev.slne.surf.surfapi.bukkit.api.dialog.base
 import dev.slne.surf.surfapi.bukkit.api.dialog.builder.actionButton
 import dev.slne.surf.surfapi.bukkit.api.dialog.dialog
@@ -60,23 +56,8 @@ object ProtectionMainDialog {
         tooltip { info("Aktiviert/Deaktiviert den Visualizer") }
         action {
             playerCallback { viewer ->
-                val state = bukkitInstance.protectionVisualizerState.getPlayerState(viewer)
-                if (!state) {
-                    viewer.world.getRegionManager().regions.values
-                        .filterNot { it.type == RegionType.GLOBAL }
-                        .filterNot { it.getFlag(ProtectionFlagsRegistry.SURF_PROTECT_VISUALIZE) == StateFlag.State.DENY }
-                        .forEach { region ->
-                            bukkitInstance.protectionVisualizerThread.addVisualizer(
-                                viewer.world,
-                                region,
-                                viewer
-                            )
-                        }
-                } else {
-                    bukkitInstance.protectionVisualizerThread.removeVisualizers(viewer)
-                }
-                viewer.showDialog(visualizerStateChangedDialog(!state))
-                bukkitInstance.protectionVisualizerState.togglePlayerState(viewer)
+                val state = ProtectionVisualizerManager.switchVisualizing(viewer)
+                viewer.showDialog(visualizerStateChangedDialog(state))
             }
         }
     }

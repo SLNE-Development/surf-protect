@@ -22,6 +22,9 @@ import dev.slne.surf.protect.paper.region.visual.QuickHull
 import dev.slne.surf.protect.paper.region.visual.Trail
 import dev.slne.surf.protect.paper.user.ProtectionUser
 import dev.slne.surf.protect.paper.util.*
+import dev.slne.surf.surfapi.bukkit.api.util.getHighestBlockYAtBlockCoordinates
+import dev.slne.surf.surfapi.bukkit.api.util.getXFromChunkKey
+import dev.slne.surf.surfapi.bukkit.api.util.getZFromChunkKey
 import dev.slne.surf.surfapi.core.api.util.*
 import dev.slne.transaction.api.TransactionApi
 import dev.slne.transaction.api.transaction.result.TransactionAddResult
@@ -76,17 +79,12 @@ class ProtectionRegion(
             list.add(point)
         }
 
-        val snapshots = mutableLong2ObjectMapOf<ChunkSnapshot>(byChunk.size)
-        coroutineScope {
-            byChunk.keys.map { key ->
-                async {
-                    val snapshot =
-                        world.getChunkAtAsync(getXFromChunkKey(key), getZFromChunkKey(key))
-                            .await()
-                            .getChunkSnapshot(true, false, false, false)
-                    snapshots.put(key, snapshot)
-                }
-            }.awaitAll()
+        val snapshots = coroutineScope {
+            byChunk.keys.mapAsync { key ->
+                key to world.getChunkAtAsync(getXFromChunkKey(key), getZFromChunkKey(key))
+                    .await()
+                    .getChunkSnapshot(true, false, false, false)
+            }.toMap(mutableLong2ObjectMapOf<ChunkSnapshot>(byChunk.size))
         }
 
         val it = byChunk.long2ObjectEntrySet().fastIterator()

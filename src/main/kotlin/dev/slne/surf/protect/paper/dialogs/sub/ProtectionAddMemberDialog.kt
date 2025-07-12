@@ -5,6 +5,7 @@ package dev.slne.surf.protect.paper.dialogs.sub
 import com.github.shynixn.mccoroutine.folia.launch
 import dev.slne.surf.protect.paper.plugin
 import dev.slne.surf.protect.paper.region.info.RegionInfo
+import dev.slne.surf.protect.paper.region.visual.visualizer.ProtectionVisualizerManager
 import dev.slne.surf.protect.paper.util.toLocalPlayer
 import dev.slne.surf.surfapi.bukkit.api.dialog.base
 import dev.slne.surf.surfapi.bukkit.api.dialog.builder.actionButton
@@ -77,6 +78,7 @@ object ProtectionAddMemberDialog {
 
                         val memberPlayer = memberName.toLocalPlayer()
                         info.region.members.addPlayer(memberPlayer)
+                        ProtectionVisualizerManager.updateVisualizer(info.region)
 
                         viewer.showDialog(
                             createMemberAddedNotice(target, info, memberName)

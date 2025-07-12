@@ -5,12 +5,12 @@ package dev.slne.surf.protect.paper.dialogs.sub
 import com.github.shynixn.mccoroutine.folia.launch
 import com.sk89q.worldguard.protection.flags.StateFlag
 import com.sk89q.worldguard.protection.regions.ProtectedRegion
-import dev.slne.surf.protect.paper.bukkitInstance
 import dev.slne.surf.protect.paper.plugin
 import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry
 import dev.slne.surf.protect.paper.region.info.RegionInfo
 import dev.slne.surf.protect.paper.region.settings.ProtectionSettings
 import dev.slne.surf.protect.paper.region.transaction.ProtectionSellData
+import dev.slne.surf.protect.paper.region.visual.visualizer.ProtectionVisualizerManager
 import dev.slne.surf.protect.paper.user.ProtectionUser
 import dev.slne.surf.protect.paper.user.ProtectionUserManager
 import dev.slne.surf.surfapi.bukkit.api.dialog.base
@@ -87,10 +87,7 @@ object ProtectionSellDialog {
                     .forEach { notifyDeletion(it, info) }
 
                 regionManager.removeRegion(region.id)
-                val visualizerThread = bukkitInstance.protectionVisualizerThread
-                visualizerThread.visualizers
-                    .find { it.region == region }
-                    ?.let { visualizerThread.closeVisualizer(it) }
+                ProtectionVisualizerManager.stopVisualizer(region)
 
                 plugin.launch {
                     protectionViewer.addTransaction(

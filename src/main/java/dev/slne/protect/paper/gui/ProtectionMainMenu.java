@@ -5,16 +5,16 @@ import com.github.stefvanschie.inventoryframework.pane.StaticPane;
 import com.sk89q.worldguard.protection.flags.StateFlag.State;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.regions.RegionType;
-import dev.slne.protect.paper.PaperMain;
 import dev.slne.protect.paper.gui.chest.SurfChestGui;
 import dev.slne.protect.paper.gui.confirmation.ConfirmationGui;
 import dev.slne.protect.paper.gui.list.ProtectionListGui;
 import dev.slne.protect.paper.gui.utils.ItemUtils;
 import dev.slne.protect.paper.message.MessageManager;
-import dev.slne.protect.paper.region.ProtectionRegion;
-import dev.slne.protect.paper.region.flags.ProtectionFlagsRegistry;
+import dev.slne.surf.protect.paper.PaperMain;
+import dev.slne.surf.protect.paper.region.ProtectionRegion;
+import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry;
 import dev.slne.surf.protect.paper.settings.ProtectionUserSettings;
-import dev.slne.protect.paper.user.ProtectionUser;
+import dev.slne.surf.protect.paper.user.ProtectionUser;
 import dev.slne.surf.protect.paper.util.UtilKt;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -126,34 +126,34 @@ public class ProtectionMainMenu extends SurfChestGui {
           UtilKt.getRegionManager(player.getWorld()).getRegions().values().stream()
               .filter(region -> !region.getType().equals(RegionType.GLOBAL)).toList();
 
-      boolean state = PaperMain.getBukkitInstance().getProtectionVisualizerState()
-          .getPlayerState(player);
+//      boolean state = PaperMain.getBukkitInstance().getProtectionVisualizerState()
+//          .getPlayerState(player);
+//
+//      if (!state) {
+//        for (ProtectedRegion region : regions) {
+//          State visualizeState = region.getFlag(ProtectionFlagsRegistry.SURF_PROTECT_VISUALIZE);
+//
+//          if (visualizeState != null && visualizeState.equals(State.DENY)) {
+//            continue;
+//          }
+//
+//          PaperMain.getBukkitInstance().getProtectionVisualizerThread()
+//              .addVisualizer(player.getWorld(), region, player);
+//        }
+//      } else {
+//        PaperMain.getBukkitInstance().getProtectionVisualizerThread().removeVisualizers(player);
+//      }
 
-      if (!state) {
-        for (ProtectedRegion region : regions) {
-          State visualizeState = region.getFlag(ProtectionFlagsRegistry.SURF_PROTECT_VISUALIZE);
+//      player.sendMessage(MessageManager.getProtectionVisualizeComponent(!state));
 
-          if (visualizeState != null && visualizeState.equals(State.DENY)) {
-            continue;
-          }
+//      Duration fadeDuration = Duration.ofMillis(150);
+//      Duration stayDuration = Duration.ofSeconds(1);
 
-          PaperMain.getBukkitInstance().getProtectionVisualizerThread()
-              .addVisualizer(player.getWorld(), region, player);
-        }
-      } else {
-        PaperMain.getBukkitInstance().getProtectionVisualizerThread().removeVisualizers(player);
-      }
-
-      player.sendMessage(MessageManager.getProtectionVisualizeComponent(!state));
-
-      Duration fadeDuration = Duration.ofMillis(150);
-      Duration stayDuration = Duration.ofSeconds(1);
-
-      player.showTitle(Title.title(Component.text("Visualizer", MessageManager.PRIMARY),
-          Component.text("Visualizer " + (state ? "deaktiviert" : "aktiviert"),
-              NamedTextColor.GRAY),
-          Title.Times.times(fadeDuration, stayDuration, fadeDuration)));
-      PaperMain.getBukkitInstance().getProtectionVisualizerState().togglePlayerState(player);
+//      player.showTitle(Title.title(Component.text("Visualizer", MessageManager.PRIMARY),
+//          Component.text("Visualizer " + (state ? "deaktiviert" : "aktiviert"),
+//              NamedTextColor.GRAY),
+//          Title.Times.times(fadeDuration, stayDuration, fadeDuration)));
+//      PaperMain.getBukkitInstance().getProtectionVisualizerState().togglePlayerState(player);
     });
   }
 
@@ -174,24 +174,24 @@ public class ProtectionMainMenu extends SurfChestGui {
           ItemUtils.splitComponent("Bist du dir sicher, dass du ein Grundstück erstellen möchtest?",
               50, NamedTextColor.GRAY));
 
-      ConfirmationGui confirmationGui = new ConfirmationGui(this, confirmEvent -> {
-        ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
-        ProtectionRegion regionCreation = new ProtectionRegion(protectionUser, null);
-
-        confirmEvent.getWhoClicked().closeInventory(InventoryCloseEvent.Reason.PLUGIN);
-        protectionUser.startRegionCreation(regionCreation);
-      }, (cancelEvent, parent) -> {
-        if (!(cancelEvent instanceof InventoryCloseEvent closeEvent && closeEvent.getReason()
-            .equals(
-                InventoryCloseEvent.Reason.PLUGIN))) {
-          Bukkit.getScheduler().runTaskLater(PaperMain.getInstance(), () -> {
-            new ProtectionMainMenu(player, getTargetProtectionPlayer()).show(player);
-          }, 1);
-
-        }
-      }, Component.text("Grundstück erstellen", MessageManager.PRIMARY), confirmLore);
-
-      confirmationGui.show(player);
+//      ConfirmationGui confirmationGui = new ConfirmationGui(this, confirmEvent -> {
+//        ProtectionUser protectionUser = ProtectionUser.getProtectionUser(player);
+//        ProtectionRegion regionCreation = new ProtectionRegion(protectionUser, null);
+//
+//        confirmEvent.getWhoClicked().closeInventory(InventoryCloseEvent.Reason.PLUGIN);
+//        protectionUser.startRegionCreation(regionCreation);
+//      }, (cancelEvent, parent) -> {
+//        if (!(cancelEvent instanceof InventoryCloseEvent closeEvent && closeEvent.getReason()
+//            .equals(
+//                InventoryCloseEvent.Reason.PLUGIN))) {
+//          Bukkit.getScheduler().runTaskLater(PaperMain.getInstance(), () -> {
+//            new ProtectionMainMenu(player, getTargetProtectionPlayer()).show(player);
+//          }, 1);
+//
+//        }
+//      }, Component.text("Grundstück erstellen", MessageManager.PRIMARY), confirmLore);
+//
+//      confirmationGui.show(player);
     });
   }
 

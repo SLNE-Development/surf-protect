@@ -65,7 +65,7 @@ object QuickHull {
         }
 
         for (i in input.indices) {
-            val marker = input.get(i)
+            val marker = input[i]
 
             if (pointSide(a, b, marker) == -1) {
                 left.add(marker)

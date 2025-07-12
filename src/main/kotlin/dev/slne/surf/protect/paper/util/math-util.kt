@@ -23,11 +23,3 @@ inline fun Double.fastFloorToInt(): Int {
     val floor = toInt()
     return if (floor.toDouble() == this) floor else floor - (toRawBits() ushr 63).toInt()
 }
-
-fun getXFromChunkKey(key: Long): Int {
-    return (key and 0xFFFF_FFFFL).toInt()
-}
-
-fun getZFromChunkKey(key: Long): Int {
-    return (key ushr 32).toInt()
-}
