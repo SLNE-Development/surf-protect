@@ -1,6 +1,7 @@
 package dev.slne.surf.protect.paper
 
 import com.github.shynixn.mccoroutine.folia.SuspendingJavaPlugin
+import dev.slne.protect.paper.metrics.Metrics
 import dev.slne.surf.protect.paper.command.CommandManager
 import dev.slne.surf.protect.paper.listener.ListenerManager
 import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry
@@ -9,8 +10,10 @@ import org.bukkit.plugin.java.JavaPlugin
 
 class PaperMain : SuspendingJavaPlugin() {
 
-    override suspend fun onLoadAsync() {
+    lateinit var metrics: Metrics
 
+    override suspend fun onLoadAsync() {
+        metrics = Metrics(this, 26498)
         ProtectionFlagsRegistry.registerFlags()
     }
 
@@ -27,6 +30,10 @@ class PaperMain : SuspendingJavaPlugin() {
         }
 
         ListenerManager.unregisterListeners()
+
+        if (::metrics.isInitialized) {
+            metrics.shutdown()
+        }
     }
 
     companion object {
