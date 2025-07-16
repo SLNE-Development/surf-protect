@@ -3,6 +3,7 @@
 package dev.slne.surf.protect.paper.dialogs.sub
 
 import com.github.shynixn.mccoroutine.folia.launch
+import dev.slne.surf.protect.paper.config.config
 import dev.slne.surf.protect.paper.permission.ProtectPermissionRegistry
 import dev.slne.surf.protect.paper.plugin
 import dev.slne.surf.protect.paper.region.info.RegionInfo
@@ -97,11 +98,11 @@ object ProtectionInfoDialog {
                 if (viewer.hasPermission(ProtectPermissionRegistry.PROTECTION_EDIT_FLAGS)) {
                     action(editFlagsButton(info, target))
                 }
-                if (viewer.hasPermission(ProtectPermissionRegistry.PROTECTION_SELL)) {
-                    action(sellButton(info, target))
-                }
                 if (viewer.hasPermission(ProtectPermissionRegistry.PROTECTION_MEMBER)) {
                     action(membersButton(info, target))
+                }
+                if (viewer.hasPermission(ProtectPermissionRegistry.PROTECTION_SELL)) {
+                    action(sellButton(info, target))
                 }
 
                 exitAction(backButton(target))
@@ -157,7 +158,8 @@ object ProtectionInfoDialog {
             appendNewline(2)
             error("Achtung:")
             warning(" Für diese Aktion wird eine Gebühr in Höhe von ")
-            variableValue("${ProtectionSettings.PROTECTION_RENAME_PRICE} ${ProtectionSettings.CURRENCY_NAME}")
+            variableValue("${config.protection.renamePrice} ")
+            append(config.currency.currency.displayName.colorIfAbsent(Colors.VARIABLE_VALUE))
             warning(" berechnet.")
         }
         action {

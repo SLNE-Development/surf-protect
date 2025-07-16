@@ -3,6 +3,7 @@ package dev.slne.surf.protect.paper.math
 import com.sk89q.worldedit.util.Location
 import com.sk89q.worldguard.protection.flags.Flags
 import com.sk89q.worldguard.protection.regions.ProtectedRegion
+import dev.slne.surf.protect.paper.config.config
 import dev.slne.surf.protect.paper.region.TempProtectionRegion
 import dev.slne.surf.protect.paper.region.getProtectionPricePerBlock
 import dev.slne.surf.protect.paper.region.settings.ProtectionSettings
@@ -26,7 +27,7 @@ object Mth {
 
     @JvmStatic
     fun getRegionRetailPrice(region: ProtectedRegion): Double {
-        return getRegionPrice(region) * ProtectionSettings.RETAIL_MODIFIER
+        return getRegionPrice(region) * config.protection.retailModifier
     }
 
     @JvmStatic
@@ -48,7 +49,7 @@ object Mth {
     fun calculatePricePerBlock(distance: Double): Double {
         val raw = PRICE_GRADIENT * distance + PRICE_INTERCEPT
         val rounded = (raw * 100.0).roundToInt() / 100.0
-        return max(ProtectionSettings.PRICE_PER_BLOCK, rounded)
+        return max(config.pricing.minPerBlock, rounded)
     }
 
     inline fun calculateProtectionPrice(

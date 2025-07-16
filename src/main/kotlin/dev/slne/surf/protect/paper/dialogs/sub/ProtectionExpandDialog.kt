@@ -25,7 +25,7 @@ object ProtectionExpandDialog {
         dialog {
             base {
                 title { primary("Protection — Erweitern") }
-                afterAction(DialogBase.DialogAfterAction.WAIT_FOR_RESPONSE)
+                afterAction(DialogBase.DialogAfterAction.NONE)
                 body { // TODO: 08.07.2025 23:58 - more infos like in create dialog
                     plainMessage { info("Bist du dir sicher, dass du das Grundstück erweitern möchtest?") }
                 }

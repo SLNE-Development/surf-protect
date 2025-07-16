@@ -1,6 +1,7 @@
 package dev.slne.protect.paper.book;
 
 import dev.slne.protect.paper.message.MessageManager;
+import dev.slne.surf.protect.paper.config.ProtectionConfigKt;
 import dev.slne.surf.protect.paper.region.settings.ProtectionSettings;
 import net.kyori.adventure.inventory.Book;
 import net.kyori.adventure.text.Component;
@@ -30,7 +31,7 @@ public class ProtectionBook {
                 "Grundstück besser definieren zu können.", MessageManager.BLACK));
 
         pageTwo.append(Component.text("Du definierst dein Grundstück indem du bis zu ", MessageManager.BLACK));
-        pageTwo.append(Component.text(ProtectionSettings.MARKERS, MessageManager.VARIABLE_VALUE));
+        pageTwo.append(Component.text(ProtectionConfigKt.getConfig().getMarkers().getAmount(), MessageManager.VARIABLE_VALUE));
         pageTwo.append(Component.text(" Marker platzierst und anschließend mit dem grünen Block bestätigst.",
                 MessageManager.BLACK));
         pageTwo.append(Component.newline());

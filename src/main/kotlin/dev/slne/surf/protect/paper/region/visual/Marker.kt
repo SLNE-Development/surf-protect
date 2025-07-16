@@ -4,6 +4,7 @@ package dev.slne.surf.protect.paper.region.visual
 
 import com.github.shynixn.mccoroutine.folia.regionDispatcher
 import com.sk89q.worldedit.math.BlockVector2
+import dev.slne.surf.protect.paper.items.ProtectionItems
 import dev.slne.surf.protect.paper.plugin
 import dev.slne.surf.protect.paper.region.ProtectionRegion
 import dev.slne.surf.surfapi.bukkit.api.util.key
@@ -12,6 +13,7 @@ import kotlinx.coroutines.future.await
 import kotlinx.coroutines.withContext
 import org.bukkit.World
 import org.bukkit.block.data.BlockData
+import org.bukkit.entity.Player
 
 data class Marker(
     val regionCreation: ProtectionRegion,
@@ -33,6 +35,29 @@ data class Marker(
 
     init {
         MarkerCache.put(this)
+    }
+
+    fun placeVirtually(player: Player) {
+        val markerBlockData = ProtectionItems.MARKER.item.type.asBlockType()?.createBlockData()
+        if (markerBlockData != null) {
+            val world = player.world
+            player.sendBlockChange(pos.toLocation(world), markerBlockData)
+        }
+    }
+
+    fun removeVirtually(player: Player) {
+        if (restored || previousData == null) return
+        val world = player.world
+        player.sendBlockChange(pos.toLocation(world), previousData)
+    }
+
+    suspend fun place(world: World) {
+        val markerBlockData = ProtectionItems.MARKER.item.type.asBlockType()?.createBlockData()
+        if (markerBlockData == null) return
+        val chunk = world.getChunkAtAsync(chunkX, chunkZ).await()
+        withContext(plugin.regionDispatcher(world, chunk.x, chunk.z)) {
+            chunk.getBlock(chunkBlockX, blockY, chunkBlockZ).blockData = markerBlockData
+        }
     }
 
     suspend fun restorePreviousData(world: World) {

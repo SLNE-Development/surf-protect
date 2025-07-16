@@ -2,6 +2,7 @@
 
 package dev.slne.surf.protect.paper.region
 
+import com.github.shynixn.mccoroutine.folia.launch
 import com.sk89q.worldedit.math.BlockVector2
 import com.sk89q.worldguard.protection.flags.Flags
 import com.sk89q.worldguard.protection.flags.StateFlag
@@ -12,6 +13,7 @@ import dev.slne.protect.paper.message.MessageManager
 import dev.slne.surf.protect.paper.config.config
 import dev.slne.surf.protect.paper.math.Mth
 import dev.slne.surf.protect.paper.message.Messages
+import dev.slne.surf.protect.paper.plugin
 import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry
 import dev.slne.surf.protect.paper.region.info.RegionCreationState
 import dev.slne.surf.protect.paper.region.info.RegionInfo
@@ -41,6 +43,7 @@ import org.bukkit.block.data.BlockData
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.math.min
 
 class ProtectionRegion(
     val protectionUser: ProtectionUser,
@@ -50,10 +53,10 @@ class ProtectionRegion(
 ) {
     val startLocation = player.location
     val startingInventoryContent = playerInventoryContent
-    var worldBorderSize = config.maxDistanceFromProtectionStart
+    var worldBorderSize = config.protection.maxDistanceFromStart
 
-    private val markers = mutableObjectListOf<Marker>(ProtectionSettings.MARKERS)
-    private val trails = mutableObjectSetOf<Trail>(ProtectionSettings.MARKERS)
+    private val markers = mutableObjectListOf<Marker>(config.markers.amount)
+    private val trails = mutableObjectSetOf<Trail>(config.markers.amount)
     private var hullList = mutableObjectListOf<Marker>()
     private var hullSet = mutableObjectSetOf<Marker>()
 
@@ -64,7 +67,7 @@ class ProtectionRegion(
 
     val markerCountLeft: Int get() = maxMarkerCount - currentMarkerCount
     val maxMarkerCount: Int
-        get() = ProtectionSettings.MARKERS + (expandingProtection?.points?.size ?: 0)
+        get() = config.markers.amount + (expandingProtection?.points?.size ?: 0)
     val currentMarkerCount: Int get() = markers.size
 
     suspend fun setCornerMarkers() {
@@ -94,7 +97,10 @@ class ProtectionRegion(
             val pointsInChunk = entry.value
             val snapshot = snapshots[key] ?: error("ChunkSnapshot for key $key not found")
             for (point in pointsInChunk) {
-                val y = snapshot.getHighestBlockYAtBlockCoordinates(point.x(), point.z())
+                val x = point.x()
+                val z = point.z()
+                val y =
+                    min(snapshot.getHighestBlockYAtBlockCoordinates(x, z) + 1, world.maxHeight - 1)
                 val pos = point.toBlockPosition(y)
                 val data = snapshot.getBlockDataAt(pos.blockX(), pos.blockY(), pos.blockZ())
                 createMarker(pos, data, isExpanding = true)
@@ -114,6 +120,7 @@ class ProtectionRegion(
         }
 
         markers.add(candidate)
+        plugin.launch { candidate.place(player.world) }
         handleTrails()
 
         return candidate
@@ -153,7 +160,7 @@ class ProtectionRegion(
      * @return the [RegionCreationState]
      */
     private fun offerAccepting(): RegionCreationState {
-        if (hullSet.size < ProtectionSettings.MIN_MARKERS) {
+        if (hullSet.size < config.markers.minAmount) {
             protectionUser.sendMessage(Messages.Protecting.moreMarkers(hullSet.size))
             tempRegion = null
             return RegionCreationState.MORE_MARKERS_NEEDED
@@ -164,15 +171,16 @@ class ProtectionRegion(
             vectors.add(marker.toBlockVector2())
         }
 
-        val manager = player.world.getRegionManager()
+        val world = player.world
+        val manager = world.getRegionManager()
         val region: ProtectedRegion
 
         if (expandingProtection != null) {
             region = ProtectedPolygonalRegion(
                 expandingProtection.id,
                 vectors,
-                config.minYWorld,
-                config.maxYWorld
+                world.minHeight,
+                world.maxHeight - 1
             )
             region.copyFrom(expandingProtection)
         } else {
@@ -183,8 +191,8 @@ class ProtectionRegion(
             region = ProtectedPolygonalRegion(
                 name,
                 vectors,
-                config.minYWorld,
-                config.maxYWorld
+                world.minHeight,
+                world.maxHeight - 1
             )
             region.owners.addPlayer(protectionUser.localPlayer)
 
@@ -204,7 +212,7 @@ class ProtectionRegion(
         // Get the center of the region and set the teleport location
         val center = region.fastCenter().toVector3()
         val centerLoc = com.sk89q.worldedit.util.Location(
-            player.world.toWorldEdit(),
+            world.toWorldEdit(),
             center.x(),
             center.y(),
             center.z()
@@ -219,7 +227,7 @@ class ProtectionRegion(
         region.setFlag(ProtectionFlagsRegistry.SURF_PROTECTION, StateFlag.State.ALLOW)
 
 
-        val tmpRegion = TempProtectionRegion(player.world, region, manager).also { tempRegion = it }
+        val tmpRegion = TempProtectionRegion(world, region, manager).also { tempRegion = it }
         val tmpVolume = tmpRegion.volume
         if (expandingProtection != null) {
             tmpRegion.effectiveVolume = tmpVolume - expandingProtection.fixedVolume()
@@ -230,17 +238,16 @@ class ProtectionRegion(
                 protectionUser.sendMessage(Messages.Protecting.overlappingRegions)
             }
 
-            tmpVolume <= config.areaMinBlocks -> RegionCreationState.TOO_SMALL.also {
+            tmpVolume <= config.area.minBlocks -> RegionCreationState.TOO_SMALL.also {
                 protectionUser.sendMessage(Messages.Protecting.areaTooSmall)
             }
 
-            tmpVolume > config.areaMaxBlocks -> RegionCreationState.TOO_LARGE.also {
+            tmpVolume > config.area.maxBlocks -> RegionCreationState.TOO_LARGE.also {
                 protectionUser.sendMessage(Messages.Protecting.areaTooBig)
             }
 
             else -> {
-                val currency =
-                    TransactionApi.getCurrency(ProtectionSettings.CURRENCY_NAME).orElseThrow()
+                val currency = config.currency
                 val (effectiveCost, pricePerBlock, spawnDistance) = Mth.calculateEffectiveCost(
                     centerLoc,
                     tmpRegion
@@ -254,7 +261,7 @@ class ProtectionRegion(
                         Messages.Protecting.offer(
                             tmpVolume,
                             effectiveCost,
-                            currency,
+                            currency.currency,
                             pricePerBlock,
                             spawnDistance
                         )
@@ -284,7 +291,11 @@ class ProtectionRegion(
     fun handleTrails() {
         val newTrails = mutableObjectSetOf<Trail>()
         val size = hullList.size
-        if (size < 2) return
+        if (size < 2) {
+            trails.forEach { it.close() }
+            trails.clear()
+            return
+        }
 
         fun ensureTrail(a: Marker, b: Marker) {
             val trail = Trail(a, b, this, expandingProtection == null)
@@ -320,7 +331,7 @@ class ProtectionRegion(
             return
         }
 
-        if (tempRegion.volume <= config.areaMinBlocks) {
+        if (tempRegion.volume <= config.area.minBlocks) {
             protectionUser.sendMessage(Messages.Protecting.areaTooSmall)
             return
         }
@@ -332,7 +343,7 @@ class ProtectionRegion(
         val (pricePerBlock) = centerLoc.getProtectionPricePerBlock()
         val cost = tempRegion.effectiveVolume * pricePerBlock
         val costBD = (-cost).toBigDecimal()
-        val currency = TransactionApi.getCurrency(ProtectionSettings.CURRENCY_NAME).orElseThrow()
+        val currency = config.currency.currency
 
         if (isProcessingTransaction.compareAndSet(false, true)) {
             protectionUser.sendMessage(Messages.Protecting.alreadyProcessingTransaction)

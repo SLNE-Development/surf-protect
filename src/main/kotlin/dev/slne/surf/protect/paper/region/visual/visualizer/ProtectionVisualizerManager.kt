@@ -19,11 +19,12 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectMap
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerQuitEvent
 import org.spongepowered.math.vector.Vector3d
+import org.spongepowered.math.vector.Vector3f
 import java.util.*
 import kotlin.time.Duration.Companion.hours
 
 @OptIn(ExperimentalVisualizerApi::class)
-object ProtectionVisualizerManager {
+object ProtectionVisualizerManager { // TODO: 13.07.2025 17:17 - add region
     private val visualizers = Caffeine.newBuilder()
         .expireAfterAccess(3.hours)
         .build<UUID, Object2ObjectMap<String, SurfVisualizerArea>>()
@@ -108,6 +109,7 @@ object ProtectionVisualizerManager {
         val corners = region.points.map { Vector3d(it.x().toDouble(), 0.0, it.z().toDouble()) }
         visualizer.settings {
             blockData = VisualizerColor.selectColor(player, region).blockState
+            scale = Vector3f(1.0f, 5.0f, 1.0f)
         }
         visualizer.setCornerLocations(corners)
     }

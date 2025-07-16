@@ -1,11 +1,13 @@
 package dev.slne.surf.protect.paper
 
 import com.github.shynixn.mccoroutine.folia.SuspendingJavaPlugin
+import com.sk89q.worldguard.protection.flags.StateFlag
 import dev.slne.protect.paper.metrics.Metrics
 import dev.slne.surf.protect.paper.command.CommandManager
 import dev.slne.surf.protect.paper.listener.ListenerManager
 import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry
 import dev.slne.surf.protect.paper.user.ProtectionUserManager
+import dev.slne.surf.protect.paper.util.getRegionManagerOrNull
 import org.bukkit.plugin.java.JavaPlugin
 
 class PaperMain : SuspendingJavaPlugin() {
@@ -18,9 +20,17 @@ class PaperMain : SuspendingJavaPlugin() {
     }
 
     override suspend fun onEnableAsync() {
-        config // Load the configuration
+        dev.slne.surf.protect.paper.config.config // Load the configuration
         ListenerManager.registerListeners()
         CommandManager.registerCommands()
+
+        metrics.addCustomChart(Metrics.SingleLineChart("protected_regions") {
+            server.worlds.sumOf { world ->
+                world.getRegionManagerOrNull()?.regions?.values?.count { region ->
+                    region.getFlag(ProtectionFlagsRegistry.SURF_PROTECTION) == StateFlag.State.ALLOW
+                } ?: 0
+            }
+        })
     }
 
     override suspend fun onDisableAsync() {

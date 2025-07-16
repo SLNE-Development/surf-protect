@@ -14,6 +14,8 @@ import dev.slne.surf.protect.paper.items.ProtectionItems
 import dev.slne.surf.protect.paper.plugin
 import dev.slne.surf.protect.paper.region.ProtectionRegion
 import dev.slne.surf.protect.paper.util.fastCenter
+import dev.slne.surf.protect.paper.util.isInProtectionRegion
+import dev.slne.surf.protect.paper.util.standsInProtectedRegion
 import dev.slne.surf.protect.paper.util.toLocalPlayer
 import dev.slne.surf.surfapi.bukkit.api.extensions.server
 import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
@@ -34,6 +36,7 @@ import java.math.BigDecimal
 import java.util.*
 import kotlin.math.sqrt
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.DurationUnit
 
 class ProtectionUser(val uuid: UUID) {
 
@@ -78,8 +81,8 @@ class ProtectionUser(val uuid: UUID) {
                 return false
             }
 
-            player.world.name !in config.worldAllowList -> {
-                player.showDialog(errorBuilder(buildText { error("Du kannst in dieser Welt keinen ProtectionMode starten.") }))
+            !player.location.isInProtectionRegion() -> {
+                player.showDialog(errorBuilder(buildText { error("Du kannst hier keinen ProtectionMode starten.") }))
                 return false
             }
 
@@ -87,7 +90,7 @@ class ProtectionUser(val uuid: UUID) {
                 val left = protectionModeCooldown.timeLeft.milliseconds
                 player.showDialog(errorBuilder(buildText {
                     error("Du kannst den ProtectionMode erst wieder in ")
-                    variableValue(left.toString())
+                    variableValue(left.toString(DurationUnit.SECONDS))
                     error(" verwenden.")
                 }))
                 return false
@@ -168,10 +171,10 @@ class ProtectionUser(val uuid: UUID) {
         val expanding = region.expandingProtection
         return if (expanding != null) {
             val center = expanding.fastCenter().toBlockVector2()
-            val size = config.maxDistanceFromProtectionStart + maxDistanceFromCenter(expanding, center)
+            val size = config.protection.maxDistanceFromStart + maxDistanceFromCenter(expanding, center)
             Position.block(center.x(), 0, center.z()) to size
         } else {
-            player.location to config.maxDistanceFromProtectionStart
+            player.location to config.protection.maxDistanceFromStart
         }
     }
 

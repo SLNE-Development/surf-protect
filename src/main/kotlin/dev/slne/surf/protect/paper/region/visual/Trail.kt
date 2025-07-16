@@ -16,9 +16,9 @@ data class Trail(
 ) : Closeable {
     private val startPos = markerStart.pos
     private val increase = Vector3d(
-        markerStart.blockX - startPos.x(),
-        markerStart.blockY - startPos.y(),
-        markerStart.blockZ - startPos.z()
+        markerEnd.blockX - startPos.x(),
+        markerEnd.blockY - startPos.y(),
+        markerEnd.blockZ - startPos.z()
     ).normalize().mul(0.4)
 
     private val distanceSquared = startPos.distanceSquared(markerEnd.pos)

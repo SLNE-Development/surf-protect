@@ -10,6 +10,10 @@ import kotlinx.coroutines.isActive
 object TrailRunTask {
     private val tasks = mutableObjectSetOf<Trail>()
 
+    init {
+        launchUpdateTask()
+    }
+
     fun trackTrail(trail: Trail) {
         tasks.add(trail)
     }
@@ -18,7 +22,7 @@ object TrailRunTask {
         tasks.remove(trail)
     }
 
-     fun tickTrails() {
+    fun tickTrails() {
         for (trail in tasks) {
             trail.tick()
         }
@@ -26,7 +30,7 @@ object TrailRunTask {
 
     private fun launchUpdateTask() = plugin.launch {
         while (isActive) {
-            delay(5.ticks)
+            delay(1.ticks)
             tickTrails()
         }
     }

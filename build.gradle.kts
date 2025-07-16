@@ -15,7 +15,7 @@ surfPaperPluginApi {
     generateLibraryLoader(false)
 
     serverDependencies {
-        registerRequired("surf-transaction-paper")
+        registerRequired("surf-transaction-bukkit")
         registerRequired("WorldGuard")
     }
 }
@@ -30,7 +30,7 @@ dependencies {
 
     compileOnly(libs.dev.slne.surf.transaction.api)
     implementation(libs.net.wesjd.anvilgui)
-    implementation("io.github.kotlin-graphics:glm:0.9.9.1-15")
+    implementation("pl.allegro.finance:tradukisto:4.1.0")
 }
 
 tasks.shadowJar {

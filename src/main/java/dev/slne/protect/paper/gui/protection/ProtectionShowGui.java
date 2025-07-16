@@ -15,6 +15,7 @@ import dev.slne.protect.paper.gui.protection.rename.RenameAnvilGUI;
 import dev.slne.protect.paper.gui.utils.ItemUtils;
 import dev.slne.protect.paper.message.MessageManager;
 import dev.slne.surf.protect.paper.PaperMain;
+import dev.slne.surf.protect.paper.config.ProtectionConfigKt;
 import dev.slne.surf.protect.paper.region.ProtectionRegion;
 import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry;
 import dev.slne.surf.protect.paper.region.info.RegionInfo;
@@ -208,7 +209,7 @@ public class ProtectionShowGui extends SurfChestGui {
         Component.empty(), Component.text("Achtung:", NamedTextColor.RED)
             .append(Component.text(" Für diese Aktion wird eine Gebühr in Höhe von ",
                     NamedTextColor.GRAY)
-                .append(Component.text(ProtectionSettings.PROTECTION_RENAME_PRICE + " CastCoins",
+                .append(Component.text(ProtectionConfigKt.getConfig().getProtection().getRenamePrice() + " CastCoins",
                     NamedTextColor.YELLOW))
                 .append(Component.text(" berechnet.", NamedTextColor.GRAY)))), event -> {
       RenameAnvilGUI renameAnvilGui = new RenameAnvilGUI(this, region);

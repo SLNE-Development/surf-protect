@@ -11,6 +11,7 @@ import dev.slne.protect.paper.gui.anvil.requirement.requirements.AnvilNoSpecialC
 import dev.slne.protect.paper.gui.confirmation.ConfirmationGui;
 import dev.slne.protect.paper.message.MessageManager;
 import dev.slne.surf.protect.paper.PaperMain;
+import dev.slne.surf.protect.paper.config.ProtectionConfigKt;
 import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry;
 import dev.slne.surf.protect.paper.region.info.ProtectionFlagInfo;
 import dev.slne.surf.protect.paper.region.info.RegionInfo;
@@ -100,7 +101,7 @@ public class RenameAnvilGUI extends SurfAnvilGui {
         .append(
             Component.text(" Für diese Aktion wird eine Gebühr in Höhe von ", NamedTextColor.GRAY)
                 .append(Component.text(
-                    ProtectionSettings.PROTECTION_RENAME_PRICE + " " + currency.getName(),
+                    ProtectionConfigKt.getConfig().getProtection().getRenamePrice() + " " + currency.getName(),
                     NamedTextColor.YELLOW))
                 .append(Component.text(" berechnet.", NamedTextColor.GRAY))));
 

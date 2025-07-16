@@ -13,6 +13,7 @@ import dev.slne.surf.protect.paper.util.isInProtectionRegion
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
 import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
 import dev.slne.surf.surfapi.bukkit.api.builder.displayName
+import dev.slne.surf.surfapi.bukkit.api.pdc.block.pdc
 import dev.slne.surf.surfapi.bukkit.api.util.key
 import kotlinx.coroutines.launch
 import org.bukkit.Material
@@ -140,8 +141,9 @@ enum class ProtectionItems(val id: String, template: ItemStack, val cancelEvent:
         }
 
         fun isProtectionBlock(block: Block): Boolean {
-           return block.hasMetadata(key.asString())
-            val pdc = block.chunk.persistentDataContainer.get(itemsKey, itemsPdcType) ?: return false
+            return block.pdc().has(key)
+            val pdc =
+                block.chunk.persistentDataContainer.get(itemsKey, itemsPdcType) ?: return false
             return pdc.containsKey(block.location.toBlock())
         }
 
@@ -150,20 +152,27 @@ enum class ProtectionItems(val id: String, template: ItemStack, val cancelEvent:
         }
 
         fun getProtectionBlock(block: Block): ProtectionItems? {
-            val pdc = block.chunk.persistentDataContainer.get(itemsKey, itemsPdcType) ?: return null
-            return pdc[block.location.toBlock()]
+//            val pdc = block.chunk.persistentDataContainer.get(itemsKey, itemsPdcType) ?: return null
+//            return pdc[block.location.toBlock()]
+            return block.pdc().get(key, pdcType)
         }
 
         fun makeProtectionBlock(item: ProtectionItems, block: Block) {
-            val pdc = block.chunk.persistentDataContainer.getOrDefault(itemsKey, itemsPdcType, mutableMapOf())
-            pdc[block.location.toBlock()] = item
-            block.chunk.persistentDataContainer.set(itemsKey, itemsPdcType, pdc)
+//            val pdc = block.chunk.persistentDataContainer.getOrDefault(
+//                itemsKey,
+//                itemsPdcType,
+//                mutableMapOf()
+//            )
+//            pdc[block.location.toBlock()] = item
+//            block.chunk.persistentDataContainer.set(itemsKey, itemsPdcType, pdc)
+            block.pdc().set(key, pdcType, item)
         }
 
         fun removeProtectionBlock(block: Block) {
-            val pdc = block.chunk.persistentDataContainer.get(itemsKey, itemsPdcType) ?: return
-            pdc.remove(block.location.toBlock())
-            block.chunk.persistentDataContainer.set(itemsKey, itemsPdcType, pdc)
+//            val pdc = block.chunk.persistentDataContainer.get(itemsKey, itemsPdcType) ?: return
+//            pdc.remove(block.location.toBlock())
+//            block.chunk.persistentDataContainer.set(itemsKey, itemsPdcType, pdc)
+            block.pdc().remove(key)
         }
     }
 }

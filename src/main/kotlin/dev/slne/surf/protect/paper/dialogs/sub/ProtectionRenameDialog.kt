@@ -3,6 +3,7 @@
 package dev.slne.surf.protect.paper.dialogs.sub
 
 import com.github.shynixn.mccoroutine.folia.launch
+import dev.slne.surf.protect.paper.config.config
 import dev.slne.surf.protect.paper.plugin
 import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry
 import dev.slne.surf.protect.paper.region.info.ProtectionFlagInfo
@@ -14,6 +15,7 @@ import dev.slne.surf.surfapi.bukkit.api.dialog.base
 import dev.slne.surf.surfapi.bukkit.api.dialog.builder.actionButton
 import dev.slne.surf.surfapi.bukkit.api.dialog.dialog
 import dev.slne.surf.surfapi.bukkit.api.dialog.type
+import dev.slne.surf.surfapi.core.api.messages.Colors
 import dev.slne.transaction.api.TransactionApi
 import dev.slne.transaction.api.transaction.result.TransactionAddResult
 import io.papermc.paper.dialog.Dialog
@@ -34,7 +36,8 @@ object ProtectionRenameDialog {
                     error("Achtung:")
                     appendNewline()
                     info("Für diese Aktion wird eine Gebühr in Höhe von ")
-                    variableValue("${ProtectionSettings.PROTECTION_RENAME_PRICE} ${ProtectionSettings.CURRENCY_NAME}")
+                    variableValue("${config.protection.renamePrice} ")
+                    append(config.currency.currency.displayName.colorIfAbsent(Colors.VARIABLE_VALUE))
                     info(" berechnet.")
                 }
             }
@@ -69,9 +72,8 @@ object ProtectionRenameDialog {
                     return@customPlayerClick
                 }
 
-                val cost = ProtectionSettings.PROTECTION_RENAME_PRICE.toBigDecimal()
-                val currency =
-                    TransactionApi.getCurrency(ProtectionSettings.CURRENCY_NAME).orElseThrow()
+                val cost = config.protection.renamePrice.toBigDecimal()
+                val currency = config.currency.currency
                 val protectionViewer = ProtectionUser.getProtectionUser(viewer)
 
                 plugin.launch {

@@ -1,5 +1,6 @@
 package dev.slne.surf.protect.paper.message
 
+import dev.slne.surf.protect.paper.config.config
 import dev.slne.surf.protect.paper.region.info.RegionInfo
 import dev.slne.surf.protect.paper.region.settings.ProtectionSettings
 import dev.slne.surf.surfapi.core.api.messages.Colors
@@ -117,7 +118,7 @@ object Messages {
         }
 
         fun moreMarkers(placedMarkers: Int) = buildText {
-            val missingMarkers = ProtectionSettings.MIN_MARKERS - placedMarkers
+            val missingMarkers = config.markers.minAmount - placedMarkers
 
             appendPrefix()
             error("Du musst mindestens ")

@@ -133,7 +133,7 @@ object ProtectionModeListener : Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     fun onBlockPlace(event: BlockPlaceEvent) {
         if (!event.player.protectionUser().isCreatingRegion) return
-        if (!(ProtectionItems.isProtectionBlock(event.blockPlaced))) {
+        if (!(ProtectionItems.isProtectionItem(event.itemInHand))) {
             event.isCancelled = true
         }
     }

@@ -26,8 +26,8 @@ object ProtectionEditFlagsDialog {
             body {
                 plainMessage(400) {
                     info("Eine Liste aller Flags und ihrer Funktionen findest du in unserer Dokumentation: ")
-                    append {
-                        info("https://server.castcrafter.de/plot-edit-flags.html#plot-flags")
+                    appendNewline {
+                        variableValue("https://server.castcrafter.de/plot-edit-flags.html#plot-flags")
                         clickOpensUrl("https://server.castcrafter.de/plot-edit-flags.html#plot-flags")
                     }
                 }

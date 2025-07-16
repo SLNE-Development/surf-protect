@@ -5,6 +5,7 @@ package dev.slne.surf.protect.paper.dialogs.sub
 import com.github.shynixn.mccoroutine.folia.launch
 import com.sk89q.worldguard.protection.flags.StateFlag
 import com.sk89q.worldguard.protection.regions.ProtectedRegion
+import dev.slne.surf.protect.paper.config.config
 import dev.slne.surf.protect.paper.plugin
 import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry
 import dev.slne.surf.protect.paper.region.info.RegionInfo
@@ -72,8 +73,7 @@ object ProtectionSellDialog {
                 }
 
                 val refund = info.retailPrice.toBigDecimal()
-                val currency =
-                    TransactionApi.getCurrency(ProtectionSettings.CURRENCY_NAME).orElseThrow()
+                val currency = config.currency.currency
                 val regionManager = info.regionManager
                 if (regionManager == null) {
                     viewer.showDialog(createPlotDoesNotExistNotice())
