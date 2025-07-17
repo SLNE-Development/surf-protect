@@ -15,7 +15,6 @@ import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
 import dev.slne.surf.surfapi.bukkit.api.builder.displayName
 import dev.slne.surf.surfapi.bukkit.api.pdc.block.pdc
 import dev.slne.surf.surfapi.bukkit.api.util.key
-import kotlinx.coroutines.launch
 import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.event.block.BlockBreakEvent
@@ -79,8 +78,8 @@ enum class ProtectionItems(val id: String, template: ItemStack, val cancelEvent:
             MarkerCache.invalidate(marker)
 
             plugin.launch {
-                launch { markerRegionCreation.removeMarker(marker) }
-                launch { user.updateMarkerItems() }
+                markerRegionCreation.removeMarker(marker)
+                user.updateMarkerItems()
             }
         }
 

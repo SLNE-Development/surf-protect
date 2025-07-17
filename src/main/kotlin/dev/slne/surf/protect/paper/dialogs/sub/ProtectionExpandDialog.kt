@@ -62,6 +62,7 @@ object ProtectionExpandDialog {
                         }
                         if (started) {
                             protectionRegion.setCornerMarkers()
+                            protectionViewer.updateMarkerItems()
                             viewer.clearDialogs()
                         }
                     } else {
