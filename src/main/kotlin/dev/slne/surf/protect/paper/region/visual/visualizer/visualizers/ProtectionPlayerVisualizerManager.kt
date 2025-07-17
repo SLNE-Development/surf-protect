@@ -25,6 +25,11 @@ import kotlin.time.Duration.Companion.hours
 class ProtectionPlayerVisualizerManager(val uuid: UUID) {
     private val cache = Caffeine.newBuilder()
         .expireAfterAccess(3.hours)
+        .removalListener<String, SurfVisualizerArea> { id, visualizer, cause ->
+            if (cause.wasEvicted()) {
+                visualizer?.stopVisualizing()
+            }
+        }
         .build<String, SurfVisualizerArea>()
 
     private val visualizing = AtomicBoolean(false)
