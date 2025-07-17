@@ -4,6 +4,7 @@ package dev.slne.surf.protect.paper.dialogs.sub
 
 import com.sk89q.worldguard.LocalPlayer
 import dev.slne.surf.protect.paper.region.info.RegionInfo
+import dev.slne.surf.protect.paper.region.visual.visualizer.ProtectionVisualizerManager
 import dev.slne.surf.surfapi.bukkit.api.dialog.base
 import dev.slne.surf.surfapi.bukkit.api.dialog.builder.actionButton
 import dev.slne.surf.surfapi.bukkit.api.dialog.dialog
@@ -28,7 +29,7 @@ object ProtectionRemoveMembersDialog {
             }
             input {
                 for (member in info.members) {
-                    boolean(member.uniqueId.toString()) {
+                    boolean(member.uniqueId.toString().replace("-", "")) {
                         label { text(member.name ?: member.uniqueId.toString()) }
                         initial(false)
                     }
@@ -54,7 +55,7 @@ object ProtectionRemoveMembersDialog {
         action {
             customClick { response, viewer ->
                 val membersToRemove = info.members.filter { member ->
-                    response.getBoolean(member.uniqueId.toString()) ?: false
+                    response.getBoolean(member.uniqueId.toString().replace("-", "")) ?: false
                 }
 
                 if (membersToRemove.isEmpty()) {
@@ -66,6 +67,8 @@ object ProtectionRemoveMembersDialog {
                 for (member in membersToRemove) {
                     members.removePlayer(member)
                 }
+
+                ProtectionVisualizerManager.onRegionMemberChange(info.region)
 
                 viewer.showDialog(createMembersRemovedNotice(target, info, membersToRemove))
             }
