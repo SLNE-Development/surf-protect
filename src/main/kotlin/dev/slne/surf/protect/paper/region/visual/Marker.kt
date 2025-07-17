@@ -56,7 +56,9 @@ data class Marker(
         if (markerBlockData == null) return
         val chunk = world.getChunkAtAsync(chunkX, chunkZ).await()
         withContext(plugin.regionDispatcher(world, chunk.x, chunk.z)) {
-            chunk.getBlock(chunkBlockX, blockY, chunkBlockZ).blockData = markerBlockData
+            val block = chunk.getBlock(chunkBlockX, blockY, chunkBlockZ)
+            block.blockData = markerBlockData
+            ProtectionItems.makeProtectionBlock(ProtectionItems.MARKER, block)
         }
     }
 

@@ -14,8 +14,6 @@ import com.sk89q.worldguard.protection.managers.RegionManager
 import com.sk89q.worldguard.protection.regions.ProtectedRegion
 import com.sk89q.worldguard.protection.regions.RegionContainer
 import com.sk89q.worldguard.protection.util.WorldEditRegionConverter
-import com.sk89q.worldedit.util.Location as WorldEditLocation
-import com.sk89q.worldedit.world.World as WorldEditWorld
 import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry
 import dev.slne.surf.surfapi.core.api.util.mutableObjectSetOf
 import dev.slne.surf.surfapi.core.api.util.toObjectList
@@ -30,6 +28,8 @@ import org.bukkit.block.data.BlockData
 import org.bukkit.entity.Player
 import java.util.*
 import kotlin.math.abs
+import com.sk89q.worldedit.util.Location as WorldEditLocation
+import com.sk89q.worldedit.world.World as WorldEditWorld
 
 fun ProtectedRegion.toRegionOrNull(): Region? = WorldEditRegionConverter.convertToRegion(this)
 fun ProtectedRegion.toRegion(): Region =
@@ -65,7 +65,7 @@ fun ProtectedRegion.getRegionManager(): RegionManager =
     getRegionManagerOrNull() ?: error("Region manager not found for region: ${this.id}")
 
 // copy the volume calculation from WorldEdit, since the worldguard developer is incapable of doing it --> https://github.com/EngineHub/WorldGuard/pull/1930
-fun ProtectedRegion.fixedVolume(): Long {
+fun ProtectedRegion.fixedVolume(flat: Boolean = true): Long {
     val n = points.size
     if (n < 3) return 0L
 
@@ -79,8 +79,10 @@ fun ProtectedRegion.fixedVolume(): Long {
     }
 
     val baseArea = abs(twiceArea) / 2L
-    val height = (maximumPoint.y() - minimumPoint.y() + 1).toLong()
-    return baseArea * height
+    return if (flat) baseArea else {
+        val height = (maximumPoint.y() - minimumPoint.y() + 1).toLong()
+        baseArea * height
+    }
 }
 
 fun String.toLocalPlayer(): LocalPlayer {

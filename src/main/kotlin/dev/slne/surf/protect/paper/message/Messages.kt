@@ -149,7 +149,7 @@ object Messages {
             appendNewPrefixedLine {
                 variableKey("Fläche: ")
                 variableValue(format.format(area))
-                variableValue(" Blöcke")
+                variableValue(" Blöcke²")
             }
             appendNewPrefixedLine {
                 variableKey("Preis pro Block: ")

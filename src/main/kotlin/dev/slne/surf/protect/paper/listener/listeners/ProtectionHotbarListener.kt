@@ -56,7 +56,7 @@ object ProtectionHotbarListener : Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     fun onBlockToFrom(event: BlockFromToEvent) {
-        if (ProtectionItems.isProtectionBlock(event.block)) {
+        if (ProtectionItems.isProtectionBlock(event.toBlock)) {
             event.isCancelled = true
         }
     }

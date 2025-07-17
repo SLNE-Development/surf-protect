@@ -45,7 +45,7 @@ object ProtectionInfoDialog {
             body {
                 plainMessage {
                     variableKey("Größe: ")
-                    variableValue("${info.volume} Blöcke")
+                    variableValue("${info.volume} Blöcke²")
                 }
                 plainMessage {
                     variableKey("Entfernung: ")
