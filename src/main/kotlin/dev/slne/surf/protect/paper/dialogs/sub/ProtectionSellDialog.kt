@@ -37,13 +37,11 @@ object ProtectionSellDialog {
             title { primary("Protection — Grundstück verkaufen") }
             afterAction(DialogBase.DialogAfterAction.WAIT_FOR_RESPONSE)
             body {
-                plainMessage {
+                plainMessage(400) {
                     error("Bist du dir sicher, dass du das Grundstück verkaufen möchtest?")
-                }
-                plainMessage {
+                    appendNewline()
                     error("Achtung: Das Grundstück kann nicht wiederhergestellt werden!")
-                }
-                plainMessage {
+                    appendNewline()
                     error("Für das Grundstück wird dir ein Anteil des Kaufpreises erstattet.")
                 }
             }

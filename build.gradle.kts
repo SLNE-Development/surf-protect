@@ -12,7 +12,7 @@ repositories {
 surfPaperPluginApi {
     mainClass("dev.slne.surf.protect.paper.PaperMain")
     foliaSupported(false)
-    generateLibraryLoader(false)
+    generateLibraryLoader(true)
 
     serverDependencies {
         registerRequired("surf-transaction-bukkit")
@@ -30,7 +30,7 @@ dependencies {
 
     compileOnly(libs.dev.slne.surf.transaction.api)
     implementation(libs.net.wesjd.anvilgui)
-    implementation("pl.allegro.finance:tradukisto:4.1.0")
+    paperLibrary("pl.allegro.finance:tradukisto:4.1.0")
 }
 
 tasks.shadowJar {

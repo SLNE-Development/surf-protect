@@ -11,6 +11,7 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion
 import dev.slne.protect.paper.gui.protection.flags.ProtectionFlagsMap
 import dev.slne.protect.paper.message.MessageManager
 import dev.slne.surf.protect.paper.config.config
+import dev.slne.surf.protect.paper.dialogs.ProtectionCreationDialogs
 import dev.slne.surf.protect.paper.math.Mth
 import dev.slne.surf.protect.paper.message.Messages
 import dev.slne.surf.protect.paper.plugin
@@ -28,9 +29,9 @@ import dev.slne.surf.surfapi.bukkit.api.util.getHighestBlockYAtBlockCoordinates
 import dev.slne.surf.surfapi.bukkit.api.util.getXFromChunkKey
 import dev.slne.surf.surfapi.bukkit.api.util.getZFromChunkKey
 import dev.slne.surf.surfapi.core.api.util.*
-import dev.slne.transaction.api.TransactionApi
 import dev.slne.transaction.api.transaction.result.TransactionAddResult
 import io.papermc.paper.math.BlockPosition
+import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet
 import it.unimi.dsi.fastutil.objects.ObjectList
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -57,8 +58,7 @@ class ProtectionRegion(
 
     private val markers = mutableObjectListOf<Marker>(config.markers.amount)
     private val trails = mutableObjectSetOf<Trail>(config.markers.amount)
-    private var hullList = mutableObjectListOf<Marker>()
-    private var hullSet = mutableObjectSetOf<Marker>()
+    private var hull = ObjectLinkedOpenHashSet<Marker>()
 
     private val tmpBuffer = mutableObjectListOf<Marker>()
     private var tempRegion: TempProtectionRegion? = null
@@ -132,26 +132,20 @@ class ProtectionRegion(
         tmpBuffer.add(candidate)
         val preview = QuickHull.compute(tmpBuffer)
         return if (preview.contains(candidate)) {
-            hullList.clear()
-            hullList.addAll(preview)
-            hullSet.clear()
-            hullSet.addAll(preview)
+            hull.clear()
+            hull.addAll(preview)
             true
         } else false
     }
 
     private fun restoreHull() {
         if (markers.size < 3) {
-            hullList.clear()
-            hullSet.clear()
-            hullSet.addAll(markers)
+            hull.clear()
+            hull.addAll(markers)
             return
         }
-        val newHull = QuickHull.compute(markers)
-        hullList.clear()
-        hullList.addAll(newHull)
-        hullSet.clear()
-        hullSet.addAll(newHull)
+        hull.clear()
+        hull.addAll(QuickHull.compute(markers))
     }
 
     /**
@@ -160,14 +154,14 @@ class ProtectionRegion(
      * @return the [RegionCreationState]
      */
     private fun offerAccepting(): RegionCreationState {
-        if (hullSet.size < config.markers.minAmount) {
-            protectionUser.sendMessage(Messages.Protecting.moreMarkers(hullSet.size))
+        if (hull.size < config.markers.minAmount) {
+            protectionUser.sendMessage(Messages.Protecting.moreMarkers(hull.size))
             tempRegion = null
             return RegionCreationState.MORE_MARKERS_NEEDED
         }
 
         val vectors = mutableObjectListOf<BlockVector2>()
-        for (marker in hullSet) {
+        for (marker in hull) {
             vectors.add(marker.toBlockVector2())
         }
 
@@ -290,7 +284,8 @@ class ProtectionRegion(
      */
     fun handleTrails() {
         val newTrails = mutableObjectSetOf<Trail>()
-        val size = hullList.size
+        val hullSeq = hull.toObjectList()
+        val size = hullSeq.size
         if (size < 2) {
             trails.forEach { it.close() }
             trails.clear()
@@ -304,12 +299,12 @@ class ProtectionRegion(
         }
 
         for (i in 0 until size - 1) {
-            ensureTrail(hullList[i], hullList[i + 1])
+            ensureTrail(hullSeq[i], hullSeq[i + 1])
         }
 
         // Add last trail
         if (size >= ProtectionSettings.MIN_MARKERS_LAST_CONNECTION) {
-            ensureTrail(hullList[size - 1], hullList[0])
+            ensureTrail(hullSeq[size - 1], hullSeq[0])
         }
 
         // Remove obsolete trails
@@ -345,7 +340,7 @@ class ProtectionRegion(
         val costBD = (-cost).toBigDecimal()
         val currency = config.currency.currency
 
-        if (isProcessingTransaction.compareAndSet(false, true)) {
+        if (!isProcessingTransaction.compareAndSet(false, true)) {
             protectionUser.sendMessage(Messages.Protecting.alreadyProcessingTransaction)
             return
         }
@@ -363,7 +358,7 @@ class ProtectionRegion(
                 tempRegion.protect()
                 removeAllMarkers()
                 protectionUser.resetRegionCreation(false)
-                protectionUser.sendMessage(MessageManager.getProtectionCreatedComponent()) // TODO: 09.07.2025 14:36 - open dialog
+                protectionUser.bukkitPlayer?.showDialog(ProtectionCreationDialogs.protectionCreatedNotice())
             } else {
                 protectionUser.sendMessage(Messages.Protecting.tooExpensiveToBuy)
             }

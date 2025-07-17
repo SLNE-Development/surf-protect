@@ -26,7 +26,7 @@ data class RegionInfo(val region: ProtectedRegion) {
         val flagInfo = region.getFlag(ProtectionFlagsRegistry.SURF_PROTECT_FLAG)
         if (flagInfo == null) {
             protectionFlagInfo = ProtectionFlagInfo(region.id)
-            region.setFlag(ProtectionFlagsRegistry.SURF_PROTECT_FLAG, flagInfo)
+            region.setFlag(ProtectionFlagsRegistry.SURF_PROTECT_FLAG, protectionFlagInfo)
         } else {
             protectionFlagInfo = flagInfo
         }
