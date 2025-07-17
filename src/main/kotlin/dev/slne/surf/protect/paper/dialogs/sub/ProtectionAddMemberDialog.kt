@@ -25,6 +25,7 @@ object ProtectionAddMemberDialog {
     fun addMemberDialog(target: OfflinePlayer, info: RegionInfo, initial: String? = null) = dialog {
         base {
             title { primary("Protection — Mitglied hinzufügen") }
+            externalTitle { text("Mitglied hinzufügen") }
             afterAction(DialogBase.DialogAfterAction.WAIT_FOR_RESPONSE)
             body {
                 plainMessage(400) {
@@ -78,7 +79,7 @@ object ProtectionAddMemberDialog {
 
                         val memberPlayer = memberName.toLocalPlayer()
                         info.region.members.addPlayer(memberPlayer)
-                        ProtectionVisualizerManager.updateVisualizer(info.region)
+                        ProtectionVisualizerManager.onRegionMemberChange(info.region)
 
                         viewer.showDialog(
                             createMemberAddedNotice(target, info, memberName)

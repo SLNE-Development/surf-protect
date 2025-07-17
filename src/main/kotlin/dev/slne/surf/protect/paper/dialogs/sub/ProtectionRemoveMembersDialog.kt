@@ -19,6 +19,7 @@ object ProtectionRemoveMembersDialog {
     fun removeMembersDialog(target: OfflinePlayer, info: RegionInfo): Dialog = dialog {
         base {
             title { primary("Protection — Mitglieder entfernen") }
+            externalTitle { text("Mitglieder entfernen") }
             afterAction(DialogBase.DialogAfterAction.NONE)
             body {
                 plainMessage(400) {

@@ -9,7 +9,6 @@ import dev.slne.surf.protect.paper.config.config
 import dev.slne.surf.protect.paper.plugin
 import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry
 import dev.slne.surf.protect.paper.region.info.RegionInfo
-import dev.slne.surf.protect.paper.region.settings.ProtectionSettings
 import dev.slne.surf.protect.paper.region.transaction.ProtectionSellData
 import dev.slne.surf.protect.paper.region.visual.visualizer.ProtectionVisualizerManager
 import dev.slne.surf.protect.paper.user.ProtectionUser
@@ -22,7 +21,6 @@ import dev.slne.surf.surfapi.bukkit.api.dialog.type
 import dev.slne.surf.surfapi.core.api.messages.Colors
 import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import dev.slne.surf.surfapi.core.api.messages.adventure.text
-import dev.slne.transaction.api.TransactionApi
 import dev.slne.transaction.api.currency.Currency
 import io.papermc.paper.registry.data.dialog.DialogBase
 import org.bukkit.Bukkit
@@ -85,7 +83,7 @@ object ProtectionSellDialog {
                     .forEach { notifyDeletion(it, info) }
 
                 regionManager.removeRegion(region.id)
-                ProtectionVisualizerManager.stopVisualizer(region)
+                ProtectionVisualizerManager.onRegionDeletion(region)
 
                 plugin.launch {
                     protectionViewer.addTransaction(

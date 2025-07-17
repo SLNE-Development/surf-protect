@@ -23,6 +23,7 @@ import dev.slne.surf.protect.paper.region.transaction.ProtectionBuyData
 import dev.slne.surf.protect.paper.region.visual.Marker
 import dev.slne.surf.protect.paper.region.visual.QuickHull
 import dev.slne.surf.protect.paper.region.visual.Trail
+import dev.slne.surf.protect.paper.region.visual.visualizer.ProtectionVisualizerManager
 import dev.slne.surf.protect.paper.user.ProtectionUser
 import dev.slne.surf.protect.paper.util.*
 import dev.slne.surf.surfapi.bukkit.api.util.getHighestBlockYAtBlockCoordinates
@@ -359,6 +360,15 @@ class ProtectionRegion(
                 removeAllMarkers()
                 protectionUser.resetRegionCreation(false)
                 protectionUser.bukkitPlayer?.showDialog(ProtectionCreationDialogs.protectionCreatedNotice())
+
+                if (expandingProtection != null) {
+                    ProtectionVisualizerManager.onRegionCornerChange(tempRegion.region)
+                } else {
+                    ProtectionVisualizerManager.onRegionCreated(
+                        startLocation.world,
+                        tempRegion.region
+                    )
+                }
             } else {
                 protectionUser.sendMessage(Messages.Protecting.tooExpensiveToBuy)
             }

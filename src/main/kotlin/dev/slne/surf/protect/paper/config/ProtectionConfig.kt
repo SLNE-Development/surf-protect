@@ -57,7 +57,7 @@ data class ProtectionConfig(
 
         init {
             require(amount >= minAmount) { "Marker amount ($amount) must be greater than or equal to minimum markers ($minAmount)" }
-            require(minAmount >= 4) { "Minimum markers must be at least 4" }
+            require(minAmount >= 3) { "Minimum markers must be at least 3" }
         }
     }
 
