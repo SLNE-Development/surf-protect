@@ -1,6 +1,8 @@
 package dev.slne.surf.protect.paper
 
+import com.github.shynixn.mccoroutine.folia.ShutdownStrategy
 import com.github.shynixn.mccoroutine.folia.SuspendingJavaPlugin
+import com.github.shynixn.mccoroutine.folia.mcCoroutineConfiguration
 import com.sk89q.worldguard.protection.flags.StateFlag
 import dev.slne.protect.paper.metrics.Metrics
 import dev.slne.surf.protect.paper.command.CommandManager
@@ -31,6 +33,8 @@ class PaperMain : SuspendingJavaPlugin() {
                 } ?: 0
             }
         })
+
+        mcCoroutineConfiguration.shutdownStrategy = ShutdownStrategy.MANUAL
     }
 
     override suspend fun onDisableAsync() {
@@ -44,6 +48,8 @@ class PaperMain : SuspendingJavaPlugin() {
         if (::metrics.isInitialized) {
             metrics.shutdown()
         }
+
+        mcCoroutineConfiguration.disposePluginSession()
     }
 
     companion object {

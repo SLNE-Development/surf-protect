@@ -29,7 +29,7 @@ object ProtectionModeListener : Listener {
 
         val regionCreation = protectionUser.regionCreation
         if (regionCreation != null) { // TODO: 09.07.2025 23:46 - does this actually work?
-            protectionUser.restorePlayerProperties(event.player)
+            protectionUser.restorePlayerProperties(event.player, regionCreation)
             plugin.launch { regionCreation.cancelProtection() }
         }
     }

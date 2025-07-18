@@ -143,14 +143,13 @@ class ProtectionUser(val uuid: UUID) {
 
         val player = this.bukkitPlayer ?: return
         plugin.launch(plugin.entityDispatcher(player)) {
-            restorePlayerProperties(player)
+            restorePlayerProperties(player, creation)
         }
 
         player.teleportAsync(creation.startLocation).await()
     }
 
-    fun restorePlayerProperties(player: Player) {
-        val creation = regionCreation ?: return
+    fun restorePlayerProperties(player: Player, creation: ProtectionRegion) {
         with(player) {
             fallDistance = 0f
             inventory.contents = creation.startingInventoryContent
