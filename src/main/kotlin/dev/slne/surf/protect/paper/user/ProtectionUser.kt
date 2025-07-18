@@ -143,18 +143,23 @@ class ProtectionUser(val uuid: UUID) {
 
         val player = this.bukkitPlayer ?: return
         plugin.launch(plugin.entityDispatcher(player)) {
-            with(player) {
-                fallDistance = 0f
-                inventory.contents = creation.startingInventoryContent
-                allowFlight = gameMode == GameMode.CREATIVE
-                isFlying = gameMode == GameMode.CREATIVE
-                flySpeed = 0.2f
-                isCollidable = true
-                worldBorder = null
-            }
+            restorePlayerProperties(player)
         }
 
         player.teleportAsync(creation.startLocation).await()
+    }
+
+    fun restorePlayerProperties(player: Player) {
+        val creation = regionCreation ?: return
+        with(player) {
+            fallDistance = 0f
+            inventory.contents = creation.startingInventoryContent
+            allowFlight = gameMode == GameMode.CREATIVE
+            isFlying = gameMode == GameMode.CREATIVE
+            flySpeed = 0.2f
+            isCollidable = true
+            worldBorder = null
+        }
     }
 
     suspend fun updateMarkerItems() {
