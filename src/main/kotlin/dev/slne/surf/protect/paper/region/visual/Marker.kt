@@ -7,15 +7,15 @@ import com.sk89q.worldedit.math.BlockVector2
 import dev.slne.surf.protect.paper.items.ProtectionItems
 import dev.slne.surf.protect.paper.plugin
 import dev.slne.surf.protect.paper.region.ProtectionRegion
-import dev.slne.surf.surfapi.bukkit.api.util.key
 import io.papermc.paper.math.BlockPosition
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.withContext
 import org.bukkit.World
 import org.bukkit.block.data.BlockData
-import org.bukkit.entity.Player
+import java.lang.ref.WeakReference
 
 data class Marker(
+    val world: WeakReference<World>,
     val regionCreation: ProtectionRegion,
     val pos: BlockPosition,
     val previousData: BlockData?,
@@ -37,9 +37,13 @@ data class Marker(
         MarkerCache.put(this)
     }
 
-    suspend fun place(world: World) {
+    fun isRestored(): Boolean = restored
+
+    suspend fun place() {
         val markerBlockData = ProtectionItems.MARKER.item.type.asBlockType()?.createBlockData()
         if (markerBlockData == null) return
+        val world = this.world.get() ?: return
+
         val chunk = world.getChunkAtAsync(chunkX, chunkZ).await()
         withContext(plugin.regionDispatcher(world, chunk.x, chunk.z)) {
             val block = chunk.getBlock(chunkBlockX, blockY, chunkBlockZ)
@@ -48,8 +52,10 @@ data class Marker(
         }
     }
 
-    suspend fun restorePreviousData(world: World) {
+    suspend fun restorePreviousData() {
         if (restored || previousData == null) return
+        val world = this.world.get() ?: return
+
         restored = true
         MarkerCache.invalidate(this)
 
@@ -79,9 +85,5 @@ data class Marker(
         result = 31 * result + blockZ
         result = 31 * result + regionCreation.hashCode()
         return result
-    }
-
-    companion object {
-        val MARKER_KEY = key("marker-uuid")
     }
 }

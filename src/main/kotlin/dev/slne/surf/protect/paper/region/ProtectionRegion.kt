@@ -43,6 +43,7 @@ import org.bukkit.ChunkSnapshot
 import org.bukkit.block.data.BlockData
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import java.lang.ref.WeakReference
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.min
 
@@ -109,7 +110,7 @@ class ProtectionRegion(
     }
 
     fun createMarker(pos: BlockPosition, previousData: BlockData, isExpanding: Boolean): Marker? {
-        val candidate = Marker(this, pos, previousData)
+        val candidate = Marker(WeakReference(player.world), this, pos, previousData)
         if (!updateHullPreview(candidate)) return null
 
         // Check overlap state when not expanding
@@ -120,7 +121,7 @@ class ProtectionRegion(
         }
 
         markers.add(candidate)
-        plugin.launch { candidate.place(player.world) }
+        plugin.launch { candidate.place() }
         handleTrails()
 
         return candidate
@@ -272,7 +273,7 @@ class ProtectionRegion(
      * @param marker the marker
      */
     suspend fun removeMarker(marker: Marker) {
-        marker.restorePreviousData(player.world)
+        marker.restorePreviousData()
         markers.remove(marker)
         restoreHull()
         handleTrails()
@@ -387,7 +388,7 @@ class ProtectionRegion(
         coroutineScope {
             markers.toObjectList().map { marker ->
                 async {
-                    marker.restorePreviousData(player.world)
+                    marker.restorePreviousData()
                 }
             }.awaitAll()
         }

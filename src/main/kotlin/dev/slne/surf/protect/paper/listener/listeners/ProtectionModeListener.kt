@@ -25,13 +25,8 @@ object ProtectionModeListener : Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     fun onQuit(event: PlayerQuitEvent) {
-        val protectionUser = event.player.protectionUser()
-
-        val regionCreation = protectionUser.regionCreation
-        if (regionCreation != null) { // TODO: 09.07.2025 23:46 - does this actually work?
-            protectionUser.restorePlayerProperties(event.player, regionCreation)
-            plugin.launch { regionCreation.cancelProtection() }
-        }
+        val player = event.player
+        player.protectionUser().handleQuit(player)
     }
 
     @EventHandler(priority = EventPriority.LOWEST)

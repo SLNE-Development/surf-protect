@@ -15,7 +15,6 @@ import dev.slne.surf.protect.paper.plugin
 import dev.slne.surf.protect.paper.region.ProtectionRegion
 import dev.slne.surf.protect.paper.util.fastCenter
 import dev.slne.surf.protect.paper.util.isInProtectionRegion
-import dev.slne.surf.protect.paper.util.standsInProtectedRegion
 import dev.slne.surf.protect.paper.util.toLocalPlayer
 import dev.slne.surf.surfapi.bukkit.api.extensions.server
 import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
@@ -189,6 +188,14 @@ class ProtectionUser(val uuid: UUID) {
 
     fun sendMessage(message: Component) {
         this.bukkitPlayer?.sendMessage(message)
+    }
+
+    fun handleQuit(player: Player) {
+        val regionCreation = regionCreation
+        if (regionCreation != null) { // TODO: 09.07.2025 23:46 - does this actually work?
+            restorePlayerProperties(player, regionCreation)
+            plugin.launch { regionCreation.cancelProtection() }
+        }
     }
 
     companion object {
