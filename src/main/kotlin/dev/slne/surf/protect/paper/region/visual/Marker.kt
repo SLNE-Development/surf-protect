@@ -37,20 +37,6 @@ data class Marker(
         MarkerCache.put(this)
     }
 
-    fun placeVirtually(player: Player) {
-        val markerBlockData = ProtectionItems.MARKER.item.type.asBlockType()?.createBlockData()
-        if (markerBlockData != null) {
-            val world = player.world
-            player.sendBlockChange(pos.toLocation(world), markerBlockData)
-        }
-    }
-
-    fun removeVirtually(player: Player) {
-        if (restored || previousData == null) return
-        val world = player.world
-        player.sendBlockChange(pos.toLocation(world), previousData)
-    }
-
     suspend fun place(world: World) {
         val markerBlockData = ProtectionItems.MARKER.item.type.asBlockType()?.createBlockData()
         if (markerBlockData == null) return

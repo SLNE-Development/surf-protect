@@ -313,7 +313,10 @@ class ProtectionRegion(
             if (!newTrails.contains(trail)) {
                 trail.close()
                 true
-            } else false
+            } else {
+                trail.start()
+                false
+            }
         }
     }
 

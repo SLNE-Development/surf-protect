@@ -1,10 +1,12 @@
 package dev.slne.surf.protect.paper.config
 
 import dev.slne.surf.protect.paper.plugin
+import dev.slne.surf.surfapi.bukkit.api.extensions.server
 import dev.slne.surf.surfapi.core.api.config.createSpongeYmlConfig
 import dev.slne.surf.surfapi.core.api.config.surfConfigApi
 import dev.slne.transaction.api.TransactionApi
 import dev.slne.transaction.api.currency.Currency
+import org.bukkit.block.BlockType
 import org.spongepowered.configurate.objectmapping.ConfigSerializable
 import pl.allegro.finance.tradukisto.ValueConverters
 
@@ -51,9 +53,13 @@ data class ProtectionConfig(
     @ConfigSerializable
     data class MarkerSettings(
         val amount: Int = 8,
-        val minAmount: Int = 4
+        val minAmount: Int = 4,
+        val creationBlockData: String = BlockType.PALE_OAK_PRESSURE_PLATE.createBlockData().asString,
+        val expandingBlockData: String = BlockType.POLISHED_DEEPSLATE_SLAB.createBlockData().asString,
     ) {
         val amountWritten: String = ValueConverters.GERMAN_INTEGER.asWords(amount)
+        val creationBlockDataParsed = server.createBlockData(creationBlockData)
+        val expandingBlockDataParsed = server.createBlockData(expandingBlockData)
 
         init {
             require(amount >= minAmount) { "Marker amount ($amount) must be greater than or equal to minimum markers ($minAmount)" }
