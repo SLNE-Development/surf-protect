@@ -4,7 +4,6 @@ import com.sk89q.worldedit.util.Location
 import com.sk89q.worldedit.world.World
 import dev.slne.surf.protect.paper.config.config
 import dev.slne.surf.protect.paper.math.Mth
-import dev.slne.surf.protect.paper.region.settings.ProtectionSettings
 
 fun Location.getProtectionPricePerBlock(): PricePerBlockResult {
     val world = extent as World
