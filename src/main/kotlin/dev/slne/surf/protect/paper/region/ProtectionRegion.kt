@@ -8,13 +8,13 @@ import com.sk89q.worldguard.protection.flags.Flags
 import com.sk89q.worldguard.protection.flags.StateFlag
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion
 import com.sk89q.worldguard.protection.regions.ProtectedRegion
-import dev.slne.protect.paper.gui.protection.flags.ProtectionFlagsMap
 import dev.slne.protect.paper.message.MessageManager
 import dev.slne.surf.protect.paper.config.config
 import dev.slne.surf.protect.paper.dialogs.ProtectionCreationDialogs
 import dev.slne.surf.protect.paper.math.Mth
 import dev.slne.surf.protect.paper.message.Messages
 import dev.slne.surf.protect.paper.plugin
+import dev.slne.surf.protect.paper.region.flags.EditableProtectionFlags
 import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry
 import dev.slne.surf.protect.paper.region.info.RegionCreationState
 import dev.slne.surf.protect.paper.region.info.RegionInfo
@@ -191,7 +191,7 @@ class ProtectionRegion(
             )
             region.owners.addPlayer(protectionUser.localPlayer)
 
-            for (flagsMap in ProtectionFlagsMap.entries) {
+            for (flagsMap in EditableProtectionFlags.entries) {
                 region.setFlag(
                     flagsMap.flag,
                     flagsMap.initialState

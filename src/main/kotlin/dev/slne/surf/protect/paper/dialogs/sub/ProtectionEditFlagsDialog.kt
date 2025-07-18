@@ -4,7 +4,7 @@ package dev.slne.surf.protect.paper.dialogs.sub
 
 import com.sk89q.worldguard.protection.flags.Flags
 import com.sk89q.worldguard.protection.flags.StateFlag
-import dev.slne.protect.paper.gui.protection.flags.ProtectionFlagsMap
+import dev.slne.surf.protect.paper.region.flags.EditableProtectionFlags
 import dev.slne.surf.protect.paper.region.info.RegionInfo
 import dev.slne.surf.surfapi.bukkit.api.dialog.base
 import dev.slne.surf.surfapi.bukkit.api.dialog.builder.actionButton
@@ -34,13 +34,13 @@ object ProtectionEditFlagsDialog {
             }
             input {
                 val region = info.region
-                for (flag in ProtectionFlagsMap.entries) {
+                for (flag in EditableProtectionFlags.entries) {
                     val flagValue = region.getFlag(flag.flag) ?: flag.initialState
                     val state = State.fromStateFlag(flagValue)
                     singleOption(flag.ordinal.toString()) {
                         label {
                             append(flag.displayName.color(null))
-                            hoverEvent(flag.description)
+//                            hoverEvent(flag.description)
                         }
                         for (possible in State.entries) {
                             option(
@@ -63,7 +63,7 @@ object ProtectionEditFlagsDialog {
         action {
             customClick { response, viewer ->
                 val region = info.region
-                for (flag in ProtectionFlagsMap.entries) {
+                for (flag in EditableProtectionFlags.entries) {
                     val newValueOrdinal =
                         response.getText(flag.ordinal.toString())?.toIntOrNull() ?: continue
                     val newValue = State.entries.getOrNull(newValueOrdinal) ?: continue
