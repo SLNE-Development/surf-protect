@@ -4,12 +4,12 @@ import com.github.shynixn.mccoroutine.folia.ShutdownStrategy
 import com.github.shynixn.mccoroutine.folia.SuspendingJavaPlugin
 import com.github.shynixn.mccoroutine.folia.mcCoroutineConfiguration
 import com.sk89q.worldguard.protection.flags.StateFlag
-import dev.slne.protect.paper.metrics.Metrics
 import dev.slne.surf.protect.paper.command.CommandManager
 import dev.slne.surf.protect.paper.listener.ListenerManager
 import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry
 import dev.slne.surf.protect.paper.user.ProtectionUserManager
 import dev.slne.surf.protect.paper.util.getRegionManagerOrNull
+import dev.slne.surf.surfapi.bukkit.api.metrics.Metrics
 import org.bukkit.plugin.java.JavaPlugin
 
 class PaperMain : SuspendingJavaPlugin() {
