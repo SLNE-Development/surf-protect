@@ -8,7 +8,6 @@ import com.sk89q.worldguard.protection.flags.Flags
 import com.sk89q.worldguard.protection.flags.StateFlag
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion
 import com.sk89q.worldguard.protection.regions.ProtectedRegion
-import dev.slne.protect.paper.message.MessageManager
 import dev.slne.surf.protect.paper.config.config
 import dev.slne.surf.protect.paper.dialogs.ProtectionCreationDialogs
 import dev.slne.surf.protect.paper.math.Mth
@@ -403,7 +402,7 @@ class ProtectionRegion(
     suspend fun cancelProtection() {
         removeAllMarkers()
 
-        protectionUser.sendMessage(MessageManager.getProtectionCanceledComponent()) // TODO: 09.07.2025 14:39 - open dialog
+        protectionUser.bukkitPlayer?.showDialog(ProtectionCreationDialogs.protectionCancelledNotice())
         protectionUser.resetRegionCreation(true)
     }
 }
