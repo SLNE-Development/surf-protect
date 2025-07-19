@@ -39,7 +39,7 @@ object ProtectionEditFlagsDialog {
                     val state = State.fromStateFlag(flagValue)
                     singleOption(flag.ordinal.toString()) {
                         label {
-                            append(flag.displayName.color(null))
+                            append(flag.displayName.color(Colors.WHITE))
 //                            hoverEvent(flag.description)
                         }
                         for (possible in State.entries) {
