@@ -11,7 +11,7 @@ repositories {
 
 surfPaperPluginApi {
     mainClass("dev.slne.surf.protect.paper.PaperMain")
-    foliaSupported(false)
+    foliaSupported(true)
     generateLibraryLoader(true)
 
     serverDependencies {
@@ -29,7 +29,6 @@ dependencies {
     }
 
     compileOnly(libs.dev.slne.surf.transaction.api)
-    implementation(libs.net.wesjd.anvilgui)
     paperLibrary("pl.allegro.finance:tradukisto:4.1.0")
 }
 
