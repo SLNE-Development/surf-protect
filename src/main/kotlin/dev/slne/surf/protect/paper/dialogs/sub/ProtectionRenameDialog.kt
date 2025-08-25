@@ -113,6 +113,7 @@ object ProtectionRenameDialog {
             body {
                 plainMessage {
                     error("Der eingegebene Name ist ungültig.")
+                    appendSpace()
                     error("Der Name darf keine Leerzeichen enthalten, muss mindestens 3 Zeichen lang sein und darf nur Buchstaben, Zahlen und Unterstriche enthalten.")
                 }
             }
@@ -135,7 +136,8 @@ object ProtectionRenameDialog {
             title { error("Ungültiger Name") }
             body {
                 plainMessage {
-                    error("Der eingegebene Name ist derselbe wie der aktuelle Name. ")
+                    error("Der eingegebene Name ist derselbe wie der aktuelle Name.")
+                    appendSpace()
                     error("Bitte gebe einen anderen Namen ein.")
                 }
             }
