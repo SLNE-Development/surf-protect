@@ -2,10 +2,9 @@ package dev.slne.surf.protect.paper.message
 
 import dev.slne.surf.protect.paper.config.config
 import dev.slne.surf.protect.paper.region.info.RegionInfo
-import dev.slne.surf.protect.paper.region.settings.ProtectionSettings
 import dev.slne.surf.surfapi.core.api.messages.Colors
 import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
-import dev.slne.transaction.api.currency.Currency
+import dev.slne.surf.transaction.api.currency.Currency
 import net.kyori.adventure.text.Component
 import java.text.NumberFormat
 import kotlin.math.roundToInt
@@ -36,7 +35,8 @@ object Messages {
              * This message is typically used when a command or action requires a player to be located in a
              * defined protected region, but there are no such regions at the player's current location.
              */
-            const val NO_PLAYER_DEFINED_REGION = "Du stehst in keiner von einem Spieler gesicherten Region."
+            const val NO_PLAYER_DEFINED_REGION =
+                "Du stehst in keiner von einem Spieler gesicherten Region."
 
             /**
              * Renders detailed information about a given region and its associated metadata.
@@ -51,7 +51,7 @@ object Messages {
                 val name = info.name.ifEmpty { "Unbenannt" }
                 val id = info.region.id
 
-                appendPrefix()
+                appendInfoPrefix()
                 info("Du befindest dich aktuell in der Region ")
                 if (name != id) {
                     variableValue("$name ($id)")
@@ -62,21 +62,19 @@ object Messages {
 
                 val owners = info.owners
                 if (owners.isNotEmpty()) {
-                    appendNewPrefixedLine {
-                        variableKey("Eigentümer: ")
-                        appendCollection(owners) {
-                            Component.text(it.name ?: "#Unbekannt", Colors.VARIABLE_VALUE)
-                        }
+                    appendNewInfoPrefixedLine()
+                    variableKey("Eigentümer: ")
+                    appendCollection(owners) {
+                        Component.text(it.name ?: "#Unbekannt", Colors.VARIABLE_VALUE)
                     }
                 }
 
                 val members = info.members
                 if (members.isNotEmpty()) {
-                    appendNewPrefixedLine {
-                        variableKey("Mitglieder: ")
-                        appendCollection(members) {
-                            Component.text(it.name ?: "#Unbekannt", Colors.VARIABLE_VALUE)
-                        }
+                    appendNewInfoPrefixedLine()
+                    variableKey("Mitglieder: ")
+                    appendCollection(members) {
+                        Component.text(it.name ?: "#Unbekannt", Colors.VARIABLE_VALUE)
                     }
                 }
             }
@@ -97,12 +95,12 @@ object Messages {
              * and guides them to wait for its completion.
              */
             val started = buildText {
-                appendPrefix()
+                appendInfoPrefix()
                 info("Updating flags, please wait...")
             }
 
             val completed = buildText {
-                appendPrefix()
+                appendSuccessPrefix()
                 success("Flags have been successfully updated.")
             }
         }
@@ -113,7 +111,7 @@ object Messages {
             regionName: String,
             entered: Boolean
         ) = buildText {
-            appendPrefix()
+            appendInfoPrefix()
             info("Du hast das Grundstück ")
             variableValue(regionName)
             appendSpace()
@@ -134,7 +132,7 @@ object Messages {
          * with another region or property during protection region creation or modification.
          */
         val overlappingRegions = buildText {
-            appendPrefix()
+            appendErrorPrefix()
             error("Die markierte Fläche kollidiert mit einem anderen Grundstück.")
         }
 
@@ -143,7 +141,7 @@ object Messages {
          *
          * This property contains a prebuilt text message intended to be displayed to*/
         val areaTooSmall = buildText {
-            appendPrefix()
+            appendErrorPrefix()
             error("Die markierte Fläche ist zu klein.")
         }
 
@@ -153,7 +151,7 @@ object Messages {
          *
          * It is used to*/
         val areaTooBig = buildText {
-            appendPrefix()
+            appendErrorPrefix()
             error("Die markierte Fläche ist zu groß.")
         }
 
@@ -163,7 +161,7 @@ object Messages {
          *
          * The message is*/
         val tooExpensiveToBuy = buildText {
-            appendPrefix()
+            appendErrorPrefix()
             error("Du hast nicht genügend Geld um dieses Grundstück zu kaufen.")
         }
 
@@ -172,7 +170,7 @@ object Messages {
          * The message includes a localized success notification.
          */
         val createdSuccessfully = buildText {
-            appendPrefix()
+            appendSuccessPrefix()
             success("Dein Grundstück wurde erfolgreich erstellt.")
         }
 
@@ -186,7 +184,7 @@ object Messages {
          * region setup or finalization processes.
          */
         val noTpPointFound = buildText {
-            appendPrefix()
+            appendErrorPrefix()
             error("Es wurde kein Teleportationspunkt für dieses Grundstück gefunden.")
         }
 
@@ -201,7 +199,7 @@ object Messages {
          * manner, ensuring a clear indication to prevent overlapping or redundant operations.
          */
         val alreadyProcessingTransaction = buildText {
-            appendPrefix()
+            appendErrorPrefix()
             error("Bitte gedulde dich einen Moment.")
         }
 
@@ -213,7 +211,7 @@ object Messages {
         fun moreMarkers(placedMarkers: Int) = buildText {
             val missingMarkers = config.markers.minAmount - placedMarkers
 
-            appendPrefix()
+            appendErrorPrefix()
             error("Du musst mindestens ")
             variableValue(missingMarkers)
             if (missingMarkers == 1) {
@@ -244,40 +242,39 @@ object Messages {
             val distanceToSpawn = (distanceToSpawn * 100).roundToInt() / 100.0
             val format = NumberFormat.getNumberInstance()
 
-            appendPrefix()
-            appendNewPrefixedLine {
-                success("Das Grundstück steht zum Verkauf!")
-            }
-            appendNewPrefixedLine()
-            appendNewPrefixedLine {
-                variableKey("Fläche: ")
-                variableValue(format.format(area))
-                variableValue(" Blöcke²")
-            }
-            appendNewPrefixedLine {
-                variableKey("Preis pro Block: ")
-                variableValue(format.format(pricePerBlock))
-                appendSpace()
-                append(currency.displayName.colorIfAbsent(Colors.VARIABLE_VALUE))
-            }
-            appendNewPrefixedLine {
-                variableKey("Distanz zum Spawn: ")
-                variableValue(format.format(distanceToSpawn))
-                variableValue(" Blöcke")
-            }
-            appendNewPrefixedLine {
-                variableKey("Gesamtkosten: ")
-                variableValue(format.format(effectiveCost))
-                appendSpace()
-                append(currency.displayName.colorIfAbsent(Colors.VARIABLE_VALUE))
-            }
-            appendNewPrefixedLine()
-            appendNewPrefixedLine {
-                info("Wenn du das Grundstück kaufen möchtest,")
-            }
-            appendNewPrefixedLine {
-                info("nutze den Bestätigungsknopf in deiner Hotbar.")
-            }
+            appendInfoPrefix()
+            appendNewInfoPrefixedLine()
+            success("Das Grundstück steht zum Verkauf!")
+
+            appendNewInfoPrefixedLine()
+            appendNewInfoPrefixedLine()
+            variableKey("Fläche: ")
+            variableValue(format.format(area))
+            variableValue(" Blöcke²")
+
+            appendNewInfoPrefixedLine()
+            variableKey("Preis pro Block: ")
+            variableValue(format.format(pricePerBlock))
+            appendSpace()
+            append(currency.displayName.colorIfAbsent(Colors.VARIABLE_VALUE))
+            appendNewInfoPrefixedLine()
+            variableKey("Distanz zum Spawn: ")
+            variableValue(format.format(distanceToSpawn))
+            variableValue(" Blöcke")
+
+            appendNewInfoPrefixedLine()
+            variableKey("Gesamtkosten: ")
+            variableValue(format.format(effectiveCost))
+            appendSpace()
+            append(currency.displayName.colorIfAbsent(Colors.VARIABLE_VALUE))
+
+            appendNewInfoPrefixedLine()
+            appendNewInfoPrefixedLine()
+            info("Wenn du das Grundstück kaufen möchtest,")
+
+            appendNewInfoPrefixedLine()
+            info("nutze den Bestätigungsknopf in deiner Hotbar.")
+
         }
     }
 }

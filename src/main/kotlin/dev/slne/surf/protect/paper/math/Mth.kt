@@ -6,7 +6,6 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion
 import dev.slne.surf.protect.paper.config.config
 import dev.slne.surf.protect.paper.region.TempProtectionRegion
 import dev.slne.surf.protect.paper.region.getProtectionPricePerBlock
-import dev.slne.surf.protect.paper.region.settings.ProtectionSettings
 import dev.slne.surf.protect.paper.util.fixedVolume
 import java.util.function.BiConsumer
 import kotlin.math.abs
@@ -52,12 +51,10 @@ object Mth {
         return max(config.pricing.minPerBlock, rounded)
     }
 
-    inline fun calculateProtectionPrice(
+    fun calculateProtectionPrice(
         region: TempProtectionRegion,
         pricePerBlock: Double
-    ): Double {
-        return region.effectiveVolume * pricePerBlock
-    }
+    ) = region.effectiveVolume * pricePerBlock
 
     fun walkCoordinatesAToB(
         x1: Int, z1: Int,
