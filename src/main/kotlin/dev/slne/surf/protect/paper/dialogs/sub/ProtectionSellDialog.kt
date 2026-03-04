@@ -9,7 +9,6 @@ import dev.slne.surf.protect.paper.config.config
 import dev.slne.surf.protect.paper.plugin
 import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry
 import dev.slne.surf.protect.paper.region.info.RegionInfo
-import dev.slne.surf.protect.paper.region.transaction.ProtectionSellData
 import dev.slne.surf.protect.paper.region.visual.visualizer.ProtectionVisualizerManager
 import dev.slne.surf.protect.paper.user.ProtectionUser
 import dev.slne.surf.protect.paper.user.ProtectionUserManager
@@ -21,7 +20,7 @@ import dev.slne.surf.surfapi.bukkit.api.dialog.type
 import dev.slne.surf.surfapi.core.api.messages.Colors
 import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import dev.slne.surf.surfapi.core.api.messages.adventure.text
-import dev.slne.transaction.api.currency.Currency
+import dev.slne.surf.transaction.api.currency.Currency
 import io.papermc.paper.registry.data.dialog.DialogBase
 import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
@@ -86,12 +85,7 @@ object ProtectionSellDialog {
                 ProtectionVisualizerManager.onRegionDeletion(region)
 
                 plugin.launch {
-                    protectionViewer.addTransaction(
-                        null,
-                        refund,
-                        currency,
-                        ProtectionSellData(region)
-                    )
+                    protectionViewer.transactionUser.deposit(refund, currency)
                     viewer.showDialog(createPlotSoldNotice(refund, currency))
                 }
             }
@@ -145,7 +139,7 @@ object ProtectionSellDialog {
         noticeDialogWithBuilder(
             text(
                 "Protection — Grundstück verkaufen",
-                Colors.Companion.PRIMARY
+                Colors.PRIMARY
             )
         ) {
             error("Das Grundstück existiert nicht mehr!")
@@ -167,7 +161,7 @@ object ProtectionSellDialog {
 
     private fun notifyDeletion(player: Player, regionInfo: RegionInfo) {
         player.sendText {
-            appendPrefix()
+            appendInfoPrefix()
             info("Das Grundstück ")
             variableValue(regionInfo.name)
             info(" wurde verkauft.")
