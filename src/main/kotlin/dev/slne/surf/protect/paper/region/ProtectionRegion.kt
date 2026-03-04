@@ -18,7 +18,6 @@ import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry
 import dev.slne.surf.protect.paper.region.info.RegionCreationState
 import dev.slne.surf.protect.paper.region.info.RegionInfo
 import dev.slne.surf.protect.paper.region.settings.ProtectionSettings
-import dev.slne.surf.protect.paper.region.transaction.ProtectionBuyData
 import dev.slne.surf.protect.paper.region.visual.Marker
 import dev.slne.surf.protect.paper.region.visual.QuickHull
 import dev.slne.surf.protect.paper.region.visual.Trail
@@ -29,7 +28,6 @@ import dev.slne.surf.surfapi.bukkit.api.util.getHighestBlockYAtBlockCoordinates
 import dev.slne.surf.surfapi.bukkit.api.util.getXFromChunkKey
 import dev.slne.surf.surfapi.bukkit.api.util.getZFromChunkKey
 import dev.slne.surf.surfapi.core.api.util.*
-import dev.slne.transaction.api.transaction.result.TransactionAddResult
 import io.papermc.paper.math.BlockPosition
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet
 import it.unimi.dsi.fastutil.objects.ObjectList
@@ -350,15 +348,14 @@ class ProtectionRegion(
         }
 
         try {
-            if (!protectionUser.hasEnoughCurrency(costBD.abs(), currency)) {
+            if (protectionUser.transactionUser.balance(currency) < costBD.abs()) {
                 protectionUser.sendMessage(Messages.Protecting.tooExpensiveToBuy)
                 return
             }
 
-            val buyData = ProtectionBuyData(startLocation.world, tempRegion.region)
-            val result = protectionUser.addTransaction(null, costBD, currency, buyData)
+            val result = protectionUser.transactionUser.withdraw(costBD, currency, false)
 
-            if (result == TransactionAddResult.SUCCESS) {
+            if (result.success) {
                 tempRegion.protect()
                 removeAllMarkers()
                 protectionUser.resetRegionCreation(false)

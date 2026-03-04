@@ -18,10 +18,7 @@ import dev.slne.surf.protect.paper.util.isInProtectionRegion
 import dev.slne.surf.protect.paper.util.toLocalPlayer
 import dev.slne.surf.surfapi.bukkit.api.extensions.server
 import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
-import dev.slne.transaction.api.TransactionApi
-import dev.slne.transaction.api.currency.Currency
-import dev.slne.transaction.api.transaction.data.TransactionData
-import dev.slne.transaction.api.transaction.result.TransactionAddResult
+import dev.slne.surf.transaction.api.user.TransactionUser
 import io.papermc.paper.dialog.Dialog
 import io.papermc.paper.math.Position
 import kotlinx.coroutines.future.await
@@ -31,7 +28,6 @@ import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.OfflinePlayer
 import org.bukkit.entity.Player
-import java.math.BigDecimal
 import java.util.*
 import kotlin.math.sqrt
 import kotlin.time.Duration.Companion.milliseconds
@@ -52,21 +48,7 @@ class ProtectionUser(val uuid: UUID) {
 
     private val protectionModeCooldown = ProtectionCooldownTracker()
 
-    suspend fun addTransaction(
-        sender: UUID?,
-        amount: BigDecimal,
-        currency: Currency,
-        data: TransactionData
-    ): TransactionAddResult = TransactionApi.getTransactionPlayer(uuid)
-        .addTransaction(
-            TransactionApi.createTransaction(sender, uuid, currency, amount)
-                .apply { setTransactionData(data) }
-        )
-        .await()
-
-    suspend fun hasEnoughCurrency(amount: BigDecimal, currency: Currency): Boolean =
-        TransactionApi.getTransactionPlayer(uuid).hasEnough(currency, amount).await()
-
+    val transactionUser get() = TransactionUser[uuid]
 
     suspend fun startRegionCreation(
         newRegion: ProtectionRegion,
@@ -170,11 +152,15 @@ class ProtectionUser(val uuid: UUID) {
         }
     }
 
-    private fun computeWorldBorderParams(player: Player, region: ProtectionRegion): Pair<Position, Double> {
+    private fun computeWorldBorderParams(
+        player: Player,
+        region: ProtectionRegion
+    ): Pair<Position, Double> {
         val expanding = region.expandingProtection
         return if (expanding != null) {
             val center = expanding.fastCenter().toBlockVector2()
-            val size = config.protection.maxDistanceFromStart + maxDistanceFromCenter(expanding, center)
+            val size =
+                config.protection.maxDistanceFromStart + maxDistanceFromCenter(expanding, center)
             Position.block(center.x(), 0, center.z()) to size
         } else {
             player.location to config.protection.maxDistanceFromStart
