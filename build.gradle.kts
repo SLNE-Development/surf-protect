@@ -26,6 +26,7 @@ dependencies {
         exclude("com.google.code.gson", "gson")
         exclude("it.unimi.dsi", "fastutil")
     }
+    compileOnly("dev.slne.surf.transaction:surf-transaction-api:1.21.11-3.0.1")
     //paperLibrary("pl.allegro.finance:tradukisto:4.1.0")
 }
 

@@ -5,6 +5,7 @@ import io.papermc.paper.math.Position
 import org.bukkit.persistence.PersistentDataAdapterContext
 import org.bukkit.persistence.PersistentDataType
 
+@Suppress("UnstableApiUsage")
 object BlockPositionPersistentDataType : PersistentDataType<IntArray, BlockPosition> {
     override fun getPrimitiveType() = IntArray::class.java
     override fun getComplexType() = BlockPosition::class.java
