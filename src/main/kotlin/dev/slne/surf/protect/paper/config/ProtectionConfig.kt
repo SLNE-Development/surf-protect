@@ -4,8 +4,7 @@ import dev.slne.surf.protect.paper.plugin
 import dev.slne.surf.surfapi.bukkit.api.extensions.server
 import dev.slne.surf.surfapi.core.api.config.createSpongeYmlConfig
 import dev.slne.surf.surfapi.core.api.config.surfConfigApi
-import dev.slne.transaction.api.TransactionApi
-import dev.slne.transaction.api.currency.Currency
+import dev.slne.surf.transaction.api.currency.Currency
 import org.bukkit.block.BlockType
 import org.spongepowered.configurate.objectmapping.ConfigSerializable
 import pl.allegro.finance.tradukisto.ValueConverters
@@ -77,7 +76,6 @@ data class ProtectionConfig(
     data class CurrencyConfig(
         val name: String = "CastCoin"
     ) {
-        val currency: Currency = TransactionApi.getCurrency(name)
-            .orElseThrow { IllegalArgumentException("Currency with name '$name' not found") }
+        val currency: Currency = Currency[name] ?: error("Currency with name '$name' not found")
     }
 }

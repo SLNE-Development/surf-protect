@@ -4,11 +4,7 @@ import com.github.benmanes.caffeine.cache.Caffeine
 import com.sksamuel.aedile.core.expireAfterAccess
 import dev.jorel.commandapi.CommandAPI
 import dev.jorel.commandapi.arguments.ArgumentSuggestions
-import dev.jorel.commandapi.kotlindsl.commandAPICommand
-import dev.jorel.commandapi.kotlindsl.getValue
-import dev.jorel.commandapi.kotlindsl.multiLiteralArgument
-import dev.jorel.commandapi.kotlindsl.playerExecutor
-import dev.jorel.commandapi.kotlindsl.stringArgument
+import dev.jorel.commandapi.kotlindsl.*
 import dev.slne.surf.protect.paper.command.commands.protection.migrateFlagCommand
 import dev.slne.surf.protect.paper.command.commands.protection.protectionCommand
 import dev.slne.surf.protect.paper.command.commands.protectionWhoCommand
@@ -37,7 +33,7 @@ object CommandManager {
         protectionCommand()
         migrateFlagCommand()
 
-        commandAPICommand("protection-visualize") {
+        commandAPICommand("protection-visualize") { // TODO: Remove
             stringArgument("id") {
                 replaceSuggestions(ArgumentSuggestions.stringCollection { context ->
                     server.worlds.mapNotNull { it.getRegionManagerOrNull() }
