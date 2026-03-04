@@ -139,39 +139,14 @@ enum class ProtectionItems(val id: String, template: ItemStack, val cancelEvent:
             return stack.persistentDataContainer.has(key, pdcType)
         }
 
-        fun isProtectionBlock(block: Block): Boolean {
-            return block.pdc().has(key)
-            val pdc =
-                block.chunk.persistentDataContainer.get(itemsKey, itemsPdcType) ?: return false
-            return pdc.containsKey(block.location.toBlock())
-        }
+        fun isProtectionBlock(block: Block): Boolean = block.pdc().has(key)
+        fun getProtectionItem(stack: ItemStack): ProtectionItems? =
+            stack.persistentDataContainer.get(key, pdcType)
 
-        fun getProtectionItem(stack: ItemStack): ProtectionItems? {
-            return stack.persistentDataContainer.get(key, pdcType)
-        }
-
-        fun getProtectionBlock(block: Block): ProtectionItems? {
-//            val pdc = block.chunk.persistentDataContainer.get(itemsKey, itemsPdcType) ?: return null
-//            return pdc[block.location.toBlock()]
-            return block.pdc().get(key, pdcType)
-        }
-
-        fun makeProtectionBlock(item: ProtectionItems, block: Block) {
-//            val pdc = block.chunk.persistentDataContainer.getOrDefault(
-//                itemsKey,
-//                itemsPdcType,
-//                mutableMapOf()
-//            )
-//            pdc[block.location.toBlock()] = item
-//            block.chunk.persistentDataContainer.set(itemsKey, itemsPdcType, pdc)
+        fun getProtectionBlock(block: Block): ProtectionItems? = block.pdc().get(key, pdcType)
+        fun makeProtectionBlock(item: ProtectionItems, block: Block) =
             block.pdc().set(key, pdcType, item)
-        }
 
-        fun removeProtectionBlock(block: Block) {
-//            val pdc = block.chunk.persistentDataContainer.get(itemsKey, itemsPdcType) ?: return
-//            pdc.remove(block.location.toBlock())
-//            block.chunk.persistentDataContainer.set(itemsKey, itemsPdcType, pdc)
-            block.pdc().remove(key)
-        }
+        fun removeProtectionBlock(block: Block) = block.pdc().remove(key)
     }
 }
