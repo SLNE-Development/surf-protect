@@ -2,12 +2,11 @@ import dev.slne.surf.surfapi.gradle.util.registerRequired
 import dev.slne.surf.surfapi.gradle.util.slnePrivate
 
 plugins {
-    id("dev.slne.surf.surfapi.gradle.paper-plugin") version "1.21.7+"
+    id("dev.slne.surf.surfapi.gradle.paper-plugin") version "1.21.11+"
 }
 
-repositories {
-    slnePrivate()
-}
+group = "dev.slne.surf"
+version = findProperty("version") as String
 
 surfPaperPluginApi {
     mainClass("dev.slne.surf.protect.paper.PaperMain")
@@ -27,17 +26,9 @@ dependencies {
         exclude("com.google.code.gson", "gson")
         exclude("it.unimi.dsi", "fastutil")
     }
-
-    compileOnly(libs.dev.slne.surf.transaction.api)
-    paperLibrary("pl.allegro.finance:tradukisto:4.1.0")
-}
-
-tasks.shadowJar {
-    manifest {
-        attributes["paperweight-mappings-namespace"] = "spigot"
-    }
+    //paperLibrary("pl.allegro.finance:tradukisto:4.1.0")
 }
 
 group = "dev.slne.surf.protect"
-version = "1.21.7-2.0.0"
+version = "1.21.11-3.0.0"
 
