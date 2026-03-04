@@ -7,6 +7,7 @@ import dev.slne.surf.protect.paper.plugin
 import io.papermc.paper.math.BlockPosition
 import kotlin.time.Duration.Companion.hours
 
+@Suppress("UnstableApiUsage")
 object MarkerCache {
     private val markers = Caffeine.newBuilder()
         .expireAfterAccess(3.hours)

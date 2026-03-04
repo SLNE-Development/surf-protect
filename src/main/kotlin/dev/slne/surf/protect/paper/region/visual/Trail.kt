@@ -11,6 +11,7 @@ import org.spongepowered.math.vector.Vector3d
 import java.io.Closeable
 import kotlin.time.Duration.Companion.milliseconds
 
+@Suppress("UnstableApiUsage")
 @OptIn(ExperimentalVisualizerApi::class)
 data class Trail(
     private val markerStart: Marker,
