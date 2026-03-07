@@ -13,10 +13,10 @@ object CurrentRegionPlaceholder : PapiPlaceholder("current_region") {
         val player = player.player ?: return null
         val region = player.location.getProtectedRegions(false).firstOrNull()
 
-        if (region == null) {
-            return "Wildness"
+        return if (region == null) {
+            "Wildness"
         } else {
-            return RegionInfo(region).name
+            RegionInfo(region).name
         }
     }
 }
