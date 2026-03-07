@@ -3,7 +3,6 @@ package dev.slne.surf.protect.paper.menu.view.list
 import dev.slne.surf.parkour.paper.menu.util.*
 import dev.slne.surf.parkour.paper.service.playerTextureService
 import dev.slne.surf.parkour.paper.util.formatMillis
-import dev.slne.surf.parkour.paper.util.playerHead
 import dev.slne.surf.parkour.paper.util.playerName
 import dev.slne.surf.protect.paper.menu.util.*
 import dev.slne.surf.protect.paper.menu.view.ProtectionMainView
@@ -23,6 +22,7 @@ import me.devnatan.inventoryframework.context.SlotClickContext
 import me.devnatan.inventoryframework.state.State
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Sound
+import org.bukkit.inventory.ItemType
 
 @Suppress("UnstableApiUsage")
 object ProtectionListView : View() {
@@ -101,9 +101,10 @@ object ProtectionListView : View() {
     }
 }
 
-fun createRegionItem(stats: RegionInfo) = stats.playerUuid.playerHead().apply {
+@Suppress("UnstableApiUsage")
+fun createRegionItem(stats: RegionInfo) = ItemType.DIRT.createItemStack().apply {
     displayName {
-        parkourColored(playerTextureService.getTexture(stats.playerUuid).playerName)
+        protectColored(playerTextureService.getTexture(stats.playerUuid).playerName)
     }
 
     buildLore {
