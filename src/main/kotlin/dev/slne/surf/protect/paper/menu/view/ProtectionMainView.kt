@@ -1,17 +1,26 @@
 package dev.slne.surf.protect.paper.menu.view
 
+import dev.slne.surf.protect.paper.dialogs.sub.ProtectionCreateDialog
 import dev.slne.surf.protect.paper.menu.util.closeItem
 import dev.slne.surf.protect.paper.menu.util.outlineItem
 import dev.slne.surf.protect.paper.menu.util.playGeneralClickSound
 import dev.slne.surf.protect.paper.menu.util.protectColored
+import dev.slne.surf.protect.paper.permission.ProtectPermissionRegistry
+import dev.slne.surf.protect.paper.region.visual.visualizer.ProtectionVisualizerManager
+import dev.slne.surf.protect.paper.settings.ProtectionUserSettings
+import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
 import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
 import dev.slne.surf.surfapi.bukkit.api.builder.displayName
+import dev.slne.surf.surfapi.bukkit.api.dialog.noticeDialogWithBuilder
 import dev.slne.surf.surfapi.bukkit.api.inventory.framework.titleBuilder
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
+import dev.slne.surf.surfapi.core.api.messages.Colors
+import dev.slne.surf.surfapi.core.api.messages.adventure.text
 import me.devnatan.inventoryframework.View
 import me.devnatan.inventoryframework.ViewConfigBuilder
 import me.devnatan.inventoryframework.context.RenderContext
 import net.kyori.adventure.text.format.TextDecoration
+import org.bukkit.Material
 import org.bukkit.inventory.ItemType
 
 @Suppress("UnstableApiUsage")
@@ -23,9 +32,9 @@ object ProtectionMainView : View() {
             }
             .size(5)
             .layout(
-                "OOOO?OOOO",
+                "OOOOOOOOO",
                 "O       O",
-                "O LV CP O",
+                "O LV NP O",
                 "O       O",
                 "OOOOCOOOO"
             )
@@ -33,21 +42,67 @@ object ProtectionMainView : View() {
     }
 
     override fun onFirstRender(render: RenderContext) {
+        render.layoutSlot('O', outlineItem)
+
         render.layoutSlot('C', closeItem).onClick { click ->
             click.playGeneralClickSound()
             click.closeForPlayer()
         }
 
-        render.layoutSlot('O', outlineItem)
-        render.layoutSlot('L', protectListItem)
-        render.layoutSlot('V', visualizeItem)
-        render.layoutSlot('C', createItem)
-        render.layoutSlot('P', plotMessagesItem)
+        if (render.player.hasPermission(ProtectPermissionRegistry.PROTECTION_LIST_PERMISSION)) {
+            render.layoutSlot('L', protectListItem).onClick { click ->
+                click.playGeneralClickSound()
+                click.openForPlayer(ProtectionListView::class.java)
+            }
+        } else {
+            render.layoutSlot('L', outlineItem)
+        }
+
+        if (render.player.hasPermission(ProtectPermissionRegistry.PROTECTION_VISUALIZE_PERMISSION)) {
+            render.layoutSlot('V', visualizeItem).onClick { click ->
+                click.playGeneralClickSound()
+                val state = ProtectionVisualizerManager.switchVisualizing(click.player)
+                click.closeForPlayer()
+                click.player.showDialog(visualizerStateChangedDialog(state))
+            }
+        } else {
+            render.layoutSlot('V', outlineItem)
+        }
+
+        if (render.player.hasPermission(ProtectPermissionRegistry.PROTECTION_CREATE_PERMISSION)) {
+            render.layoutSlot('N', createItem).onClick { click ->
+                click.playGeneralClickSound()
+                click.closeForPlayer()
+                click.player.showDialog(ProtectionCreateDialog.protectionCreateDialog(click.player))
+            }
+        } else {
+            render.layoutSlot('N', outlineItem)
+        }
+
+        render.layoutSlot('P').updateOnClick().renderWith {
+            plotMessagesItem(ProtectionUserSettings.PLOT_MESSAGES.getValue(render.player))
+        }.onClick { click ->
+            click.playGeneralClickSound()
+            ProtectionUserSettings.PLOT_MESSAGES.toggle(click.player)
+        }
     }
 
-    private val protectListItem = ItemType.DIRT.createItemStack().apply {
+    private fun visualizerStateChangedDialog(newState: Boolean) =
+        noticeDialogWithBuilder(
+            text("Protections — Visualizer", Colors.PRIMARY)
+        ) {
+            info("Du hast die Visualisierung der Grundstücke ")
+            if (newState) {
+                success("aktiviert")
+            } else {
+                error("deaktiviert")
+            }
+            info(". Bitte warte einen kleinen Moment, bis die Änderungen wirksam werden.")
+        }
+
+    private val protectListItem = buildItem(Material.GRASS_BLOCK) {
         displayName {
-            primary("Meine Grundstücke")
+            primary("Meine Grundstücke".toSmallCaps(), TextDecoration.BOLD)
         }
 
         buildLore {
@@ -59,9 +114,9 @@ object ProtectionMainView : View() {
         }
     }
 
-    private val visualizeItem = ItemType.ENDER_EYE.createItemStack().apply {
+    private val visualizeItem = buildItem(Material.ENDER_EYE) {
         displayName {
-            primary("Visualizer")
+            primary("Visualizer".toSmallCaps(), TextDecoration.BOLD)
         }
 
         buildLore {
@@ -73,9 +128,9 @@ object ProtectionMainView : View() {
         }
     }
 
-    private val createItem = ItemType.GRASS_BLOCK.createItemStack().apply {
+    private val createItem = buildItem(Material.DIRT) {
         displayName {
-            primary("Grundstück erstellen")
+            primary("Grundstück erstellen".toSmallCaps(), TextDecoration.BOLD)
         }
 
         buildLore {
@@ -87,9 +142,9 @@ object ProtectionMainView : View() {
         }
     }
 
-    private val plotMessagesItem = ItemType.LEATHER_BOOTS.createItemStack().apply {
+    private fun plotMessagesItem(enabled: Boolean) = ItemType.LEATHER_BOOTS.createItemStack().apply {
         displayName {
-            primary("Grundstück Nachrichten")
+            primary("Grundstück Nachrichten".toSmallCaps(), TextDecoration.BOLD)
         }
 
         buildLore {
@@ -99,6 +154,15 @@ object ProtectionMainView : View() {
             }
             line {
                 spacer("beim Betreten/Verlassen eines Grundstücks")
+            }
+            emptyLine()
+            line {
+                spacer("Status: ")
+                if (enabled) {
+                    success("Aktiviert")
+                } else {
+                    error("Deaktiviert")
+                }
             }
             emptyLine()
         }

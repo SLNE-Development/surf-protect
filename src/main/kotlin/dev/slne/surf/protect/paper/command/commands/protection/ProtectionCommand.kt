@@ -1,16 +1,19 @@
 package dev.slne.surf.protect.paper.command.commands.protection
 
+import com.github.shynixn.mccoroutine.folia.entityDispatcher
 import com.github.shynixn.mccoroutine.folia.launch
 import dev.jorel.commandapi.arguments.AsyncPlayerProfileArgument
 import dev.jorel.commandapi.kotlindsl.commandAPICommand
 import dev.jorel.commandapi.kotlindsl.optionalArgument
 import dev.slne.surf.protect.paper.dialogs.ProtectionMainDialog
+import dev.slne.surf.protect.paper.menu.view.ProtectionMainView
 import dev.slne.surf.protect.paper.permission.ProtectPermissionRegistry
 import dev.slne.surf.protect.paper.plugin
 import dev.slne.surf.surfapi.bukkit.api.command.executors.playerExecutorSuspend
 import dev.slne.surf.surfapi.bukkit.api.command.util.awaitAsyncPlayerProfileOptional
 import dev.slne.surf.surfapi.bukkit.api.command.util.idOrThrow
-import kotlinx.coroutines.future.await
+import dev.slne.surf.surfapi.bukkit.api.inventory.framework.viewFrame
+import kotlinx.coroutines.withContext
 import org.bukkit.Bukkit
 
 fun protectionCommand() = commandAPICommand("protect") {
@@ -20,8 +23,10 @@ fun protectionCommand() = commandAPICommand("protect") {
     playerExecutorSuspend { sender, args ->
         val player = args.awaitAsyncPlayerProfileOptional("player")
 
-        if(player == null) {
-            sender.showDialog(ProtectionMainDialog.mainDialog(sender, sender))
+        if (player == null) {
+            withContext(plugin.entityDispatcher(sender)) {
+                viewFrame.open(ProtectionMainView::class.java, sender)
+            }
             return@playerExecutorSuspend
         }
 

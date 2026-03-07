@@ -2,13 +2,17 @@
 
 package dev.slne.surf.protect.paper.dialogs.sub
 
+import com.google.common.collect.ImmutableMap
 import com.sk89q.worldguard.LocalPlayer
+import dev.slne.surf.protect.paper.menu.view.member.ProtectionMemberView
+import dev.slne.surf.protect.paper.plugin
 import dev.slne.surf.protect.paper.region.info.RegionInfo
 import dev.slne.surf.protect.paper.region.visual.visualizer.ProtectionVisualizerManager
 import dev.slne.surf.surfapi.bukkit.api.dialog.base
 import dev.slne.surf.surfapi.bukkit.api.dialog.builder.actionButton
 import dev.slne.surf.surfapi.bukkit.api.dialog.dialog
 import dev.slne.surf.surfapi.bukkit.api.dialog.type
+import dev.slne.surf.surfapi.bukkit.api.inventory.framework.viewFrame
 import dev.slne.surf.surfapi.core.api.messages.Colors
 import io.papermc.paper.dialog.Dialog
 import io.papermc.paper.registry.data.dialog.DialogBase
@@ -44,8 +48,14 @@ object ProtectionRemoveMembersDialog {
     private fun createBackButton(info: RegionInfo, target: OfflinePlayer) = actionButton {
         label { text("Zurück") }
         action {
-            playerCallback {
-                it.showDialog(ProtectionMemberDialog.createProtectionMemberDialog(target, info))
+            playerCallback { player ->
+                plugin.launch {
+                    viewFrame.open(
+                        ProtectionMemberView::class.java,
+                        player,
+                        ImmutableMap.of("region-info", info)
+                    )
+                }
             }
         }
     }
@@ -118,13 +128,14 @@ object ProtectionRemoveMembersDialog {
             notice {
                 label { text("Zurück") }
                 action {
-                    callback {
-                        it.showDialog(
-                            ProtectionMemberDialog.createProtectionMemberDialog(
-                                target,
-                                info
+                    playerCallback { player ->
+                        plugin.launch {
+                            viewFrame.open(
+                                ProtectionMemberView::class.java,
+                                player,
+                                ImmutableMap.of("region-info", info)
                             )
-                        )
+                        }
                     }
                 }
             }

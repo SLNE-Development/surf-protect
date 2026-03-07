@@ -35,9 +35,6 @@ object ProtectionMainDialog {
                 if (viewer.hasPermission(ProtectPermissionRegistry.PROTECTION_CREATE_PERMISSION)) {
                     action(createProtectionButton(target))
                 }
-                if (viewer.hasPermission(ProtectPermissionRegistry.PROTECTION_SETTINGS_PERMISSION)) {
-                    action(protectionsSettingsButton(target))
-                }
             }
         }
     }
@@ -78,14 +75,6 @@ object ProtectionMainDialog {
         tooltip { info("Erstelle ein neues Grundstück") }
         action {
             callback { it.showDialog(ProtectionCreateDialog.protectionCreateDialog(target)) }
-        }
-    }
-
-    private fun protectionsSettingsButton(target: OfflinePlayer) = actionButton {
-        label { text("Einstellungen") }
-        tooltip { info("Ändere die Einstellungen für Protection system") }
-        action {
-            playerCallback { it.showDialog(ProtectionSettingsDialog.settingsDialog(it, target)) }
         }
     }
 }

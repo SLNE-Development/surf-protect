@@ -3,6 +3,8 @@
 package dev.slne.surf.protect.paper.dialogs.sub
 
 import com.github.shynixn.mccoroutine.folia.launch
+import com.google.common.collect.ImmutableMap
+import dev.slne.surf.protect.paper.menu.view.member.ProtectionMemberView
 import dev.slne.surf.protect.paper.plugin
 import dev.slne.surf.protect.paper.region.info.RegionInfo
 import dev.slne.surf.protect.paper.region.visual.visualizer.ProtectionVisualizerManager
@@ -12,6 +14,7 @@ import dev.slne.surf.surfapi.bukkit.api.dialog.builder.actionButton
 import dev.slne.surf.surfapi.bukkit.api.dialog.dialog
 import dev.slne.surf.surfapi.bukkit.api.dialog.type
 import dev.slne.surf.surfapi.bukkit.api.extensions.server
+import dev.slne.surf.surfapi.bukkit.api.inventory.framework.viewFrame
 import dev.slne.surf.surfapi.core.api.service.PlayerLookupService
 import io.papermc.paper.registry.data.dialog.ActionButton
 import io.papermc.paper.registry.data.dialog.DialogBase
@@ -193,8 +196,14 @@ object ProtectionAddMemberDialog {
     private fun backButton(info: RegionInfo, target: OfflinePlayer): ActionButton = actionButton {
         label { text("Zurück") }
         action {
-            callback {
-                it.showDialog(ProtectionMemberDialog.createProtectionMemberDialog(target, info))
+            playerCallback { player ->
+                plugin.launch {
+                    viewFrame.open(
+                        ProtectionMemberView::class.java,
+                        player,
+                        ImmutableMap.of("region-info", info)
+                    )
+                }
             }
         }
     }
