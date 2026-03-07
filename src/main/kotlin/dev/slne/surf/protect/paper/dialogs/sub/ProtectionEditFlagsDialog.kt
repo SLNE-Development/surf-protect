@@ -40,7 +40,7 @@ object ProtectionEditFlagsDialog {
                     singleOption(flag.ordinal.toString()) {
                         label {
                             append(flag.displayName.color(Colors.WHITE))
-//                            hoverEvent(flag.description)
+                            hoverEvent(flag.description)
                         }
                         for (possible in State.entries) {
                             option(
