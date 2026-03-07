@@ -18,11 +18,9 @@ import dev.slne.surf.protect.paper.util.world
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
 import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
 import dev.slne.surf.surfapi.bukkit.api.builder.displayName
-import dev.slne.surf.surfapi.bukkit.api.dialog.noticeDialogWithBuilder
 import dev.slne.surf.surfapi.bukkit.api.inventory.framework.titleBuilder
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
-import dev.slne.surf.surfapi.core.api.messages.Colors
-import dev.slne.surf.surfapi.core.api.messages.adventure.text
+import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import kotlinx.coroutines.future.await
 import me.devnatan.inventoryframework.View
 import me.devnatan.inventoryframework.ViewConfigBuilder
@@ -76,7 +74,10 @@ object ProtectionInfoView : View() {
                         .getHighestBlockYAt(bukkitCenter.blockX and 15, bukkitCenter.blockZ and 15)
                     val tpLocation = bukkitCenter.clone().apply { y = highestY + 1.0 }
                     click.player.teleportAsync(tpLocation).await()
-                    click.player.showDialog(teleportSuccessNotice())
+                    click.player.sendText {
+                        appendSuccessPrefix()
+                        success("Du wurdest erfolgreich zu der Protection teleportiert.")
+                    }
                 }
             }
         } else {
@@ -135,13 +136,6 @@ object ProtectionInfoView : View() {
             render.layoutSlot('S', outlineItem)
         }
     }
-
-    private fun teleportSuccessNotice() =
-        noticeDialogWithBuilder(
-            text("Protection Info — Teleportation", Colors.PRIMARY)
-        ) {
-            success("Du wurdest erfolgreich zu der Protection teleportiert.")
-        }
 
     private fun regionInfoItem(info: RegionInfo, render: RenderContext) = buildItem(Material.GRASS_BLOCK) {
         displayName {

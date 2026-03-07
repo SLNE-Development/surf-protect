@@ -9,7 +9,6 @@ import com.sk89q.worldguard.protection.flags.StateFlag
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion
 import com.sk89q.worldguard.protection.regions.ProtectedRegion
 import dev.slne.surf.protect.paper.config.config
-import dev.slne.surf.protect.paper.dialogs.ProtectionCreationDialogs
 import dev.slne.surf.protect.paper.math.Mth
 import dev.slne.surf.protect.paper.message.Messages
 import dev.slne.surf.protect.paper.plugin
@@ -359,7 +358,7 @@ class ProtectionRegion(
                 tempRegion.protect()
                 removeAllMarkers()
                 protectionUser.resetRegionCreation(false)
-                protectionUser.bukkitPlayer?.showDialog(ProtectionCreationDialogs.protectionCreatedNotice())
+                protectionUser.sendMessage(Messages.Protecting.createdSuccessfully)
 
                 if (expandingProtection != null) {
                     ProtectionVisualizerManager.onRegionCornerChange(tempRegion.region)
@@ -400,7 +399,7 @@ class ProtectionRegion(
     suspend fun cancelProtection() {
         removeAllMarkers()
 
-        protectionUser.bukkitPlayer?.showDialog(ProtectionCreationDialogs.protectionCancelledNotice())
+        protectionUser.sendMessage(Messages.Protecting.creationCancelled)
         protectionUser.resetRegionCreation(true)
     }
 }

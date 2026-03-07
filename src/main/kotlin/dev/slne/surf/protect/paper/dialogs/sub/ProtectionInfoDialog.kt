@@ -15,10 +15,10 @@ import dev.slne.surf.protect.paper.util.world
 import dev.slne.surf.surfapi.bukkit.api.dialog.base
 import dev.slne.surf.surfapi.bukkit.api.dialog.builder.actionButton
 import dev.slne.surf.surfapi.bukkit.api.dialog.dialog
-import dev.slne.surf.surfapi.bukkit.api.dialog.noticeDialogWithBuilder
 import dev.slne.surf.surfapi.bukkit.api.dialog.type
 import dev.slne.surf.surfapi.core.api.messages.Colors
 import dev.slne.surf.surfapi.core.api.messages.adventure.appendNewline
+import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import dev.slne.surf.surfapi.core.api.messages.adventure.text
 import io.papermc.paper.dialog.Dialog
 import io.papermc.paper.registry.data.dialog.DialogBase
@@ -124,16 +124,13 @@ object ProtectionInfoDialog {
                         y = highestY + 1.0
                     }
                     viewer.teleportAsync(tpLocation).await()
-                    viewer.showDialog(teleportSuccessNotice())
+                    viewer.sendText {
+                        appendSuccessPrefix()
+                        success("Du wurdest erfolgreich zu der Protection teleportiert.")
+                    }
                 }
             }
         }
-    }
-
-    private fun teleportSuccessNotice() = noticeDialogWithBuilder(
-        text("Protection Info — Teleportation", Colors.PRIMARY)
-    ) {
-        success("Du wurdest erfolgreich zu der Protection teleportiert.")
     }
 
     private fun expandButton(info: RegionInfo, target: OfflinePlayer) = actionButton {

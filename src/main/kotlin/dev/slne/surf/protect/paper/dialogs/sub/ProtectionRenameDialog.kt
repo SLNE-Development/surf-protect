@@ -16,7 +16,7 @@ import dev.slne.surf.surfapi.bukkit.api.dialog.builder.actionButton
 import dev.slne.surf.surfapi.bukkit.api.dialog.dialog
 import dev.slne.surf.surfapi.bukkit.api.dialog.type
 import dev.slne.surf.surfapi.core.api.messages.Colors
-import dev.slne.transaction.api.TransactionApi
+import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import dev.slne.transaction.api.transaction.result.TransactionAddResult
 import io.papermc.paper.dialog.Dialog
 import io.papermc.paper.registry.data.dialog.DialogBase
@@ -63,12 +63,20 @@ object ProtectionRenameDialog {
             customPlayerClick { response, viewer ->
                 val newName = response.getText("new_name") ?: return@customPlayerClick
                 if (!namePattern.matches(newName)) {
-                    viewer.showDialog(createInvalidNameNotice(info, target))
+                    viewer.sendText {
+                        appendErrorPrefix()
+                        error("Der eingegebene Name ist ungültig. Der Name darf keine Leerzeichen enthalten, muss mindestens 3 Zeichen lang sein und darf nur Buchstaben, Zahlen und Unterstriche enthalten.")
+                    }
+                    viewer.showDialog(createProtectionRenameDialog(info, target))
                     return@customPlayerClick
                 }
                 val region = info.region
                 if (newName == info.name) {
-                    viewer.showDialog(createNameIsSameNotice(info, target))
+                    viewer.sendText {
+                        appendErrorPrefix()
+                        error("Der eingegebene Name ist derselbe wie der aktuelle Name. Bitte gebe einen anderen Namen ein.")
+                    }
+                    viewer.showDialog(createProtectionRenameDialog(info, target))
                     return@customPlayerClick
                 }
 
@@ -79,7 +87,11 @@ object ProtectionRenameDialog {
                 plugin.launch {
                     val hasEnoughMoney = protectionViewer.hasEnoughCurrency(cost, currency)
                     if (!hasEnoughMoney) {
-                        viewer.showDialog(createInsufficientFundsNotice(info, target))
+                        viewer.sendText {
+                            appendErrorPrefix()
+                            error("Du hast nicht genügend Geld um dieses Grundstück umzubenennen.")
+                        }
+                        viewer.showDialog(createProtectionRenameDialog(info, target))
                         return@launch
                     }
                     val previousName = info.name
@@ -88,11 +100,23 @@ object ProtectionRenameDialog {
                         ProtectionRenameData(region, previousName, newName)
                     )
                     if (transactionResult != TransactionAddResult.SUCCESS) {
-                        viewer.showDialog(createInsufficientFundsNotice(info, target))
+                        viewer.sendText {
+                            appendErrorPrefix()
+                            error("Du hast nicht genügend Geld um dieses Grundstück umzubenennen.")
+                        }
+                        viewer.showDialog(createProtectionRenameDialog(info, target))
                         return@launch
                     }
                     info.setProtectionInfoToRegion(ProtectionFlagInfo(newName))
-                    viewer.showDialog(createProtectionRenamedNotice(previousName, newName, info, target))
+                    viewer.sendText {
+                        appendSuccessPrefix()
+                        success("Du hast das Grundstück ")
+                        variableValue(previousName)
+                        success(" erfolgreich in ")
+                        variableValue(newName)
+                        success(" umbenannt.")
+                    }
+                    viewer.showDialog(ProtectionInfoDialog.createProtectionInfoDialog(viewer, info, target))
                 }
             }
         }
@@ -106,99 +130,4 @@ object ProtectionRenameDialog {
             }
         }
     }
-
-    private fun createInvalidNameNotice(info: RegionInfo, target: OfflinePlayer) = dialog {
-        base {
-            title { error("Ungültiger Name") }
-            body {
-                plainMessage {
-                    error("Der eingegebene Name ist ungültig.")
-                    appendSpace()
-                    error("Der Name darf keine Leerzeichen enthalten, muss mindestens 3 Zeichen lang sein und darf nur Buchstaben, Zahlen und Unterstriche enthalten.")
-                }
-            }
-            afterAction(DialogBase.DialogAfterAction.NONE)
-        }
-        type {
-            notice {
-                label { text("Zurück") }
-                action {
-                    callback { viewer ->
-                        viewer.showDialog(createProtectionRenameDialog(info, target))
-                    }
-                }
-            }
-        }
-    }
-
-    private fun createNameIsSameNotice(info: RegionInfo, target: OfflinePlayer) = dialog {
-        base {
-            title { error("Ungültiger Name") }
-            body {
-                plainMessage {
-                    error("Der eingegebene Name ist derselbe wie der aktuelle Name.")
-                    appendSpace()
-                    error("Bitte gebe einen anderen Namen ein.")
-                }
-            }
-            afterAction(DialogBase.DialogAfterAction.NONE)
-        }
-        type {
-            notice {
-                label { text("Zurück") }
-                action {
-                    callback { it.showDialog(createProtectionRenameDialog(info, target)) }
-                }
-            }
-        }
-    }
-
-    private fun createInsufficientFundsNotice(info: RegionInfo, target: OfflinePlayer) = dialog {
-        base {
-            title { error("Zu teuer!") }
-            body {
-                plainMessage {
-                    error("Du hast nicht genügend Geld um dieses Grundstück umzubenennen.")
-                }
-            }
-            afterAction(DialogBase.DialogAfterAction.NONE)
-        }
-        type {
-            notice {
-                label { text("Zurück") }
-                action {
-                    callback { it.showDialog(createProtectionRenameDialog(info, target)) }
-                }
-            }
-        }
-    }
-
-    private fun createProtectionRenamedNotice(oldName: String, newName: String, info: RegionInfo, target: OfflinePlayer) =
-        dialog {
-            base {
-                title { primary("Protection — Grundstück umbenannt") }
-                afterAction(DialogBase.DialogAfterAction.NONE)
-                body {
-                    plainMessage {
-                        success("Du hast das Grundstück ")
-                        variableValue(oldName)
-                        success(" erfolgreich in ")
-                        variableValue(newName)
-                        success(" umbenannt.")
-                    }
-                }
-            }
-            type {
-                notice {
-                    label { text("Zurück") }
-                    action {
-                        playerCallback { viewer ->
-                            viewer.showDialog(
-                                ProtectionInfoDialog.createProtectionInfoDialog(viewer, info, target)
-                            )
-                        }
-                    }
-                }
-            }
-        }
 }

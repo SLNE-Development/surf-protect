@@ -175,6 +175,14 @@ object Messages {
         }
 
         /**
+         * A text message indicating that the creation of a property was cancelled by the player.
+         */
+        val creationCancelled = buildText {
+            appendInfoPrefix()
+            info("Du hast die Erstellung deines Grundstücks abgebrochen.")
+        }
+
+        /**
          * Represents a predefined message indicating that no teleportation point was found
          * for the associated protection region.
          *

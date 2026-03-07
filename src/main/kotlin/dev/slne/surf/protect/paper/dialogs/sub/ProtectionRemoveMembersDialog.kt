@@ -14,6 +14,7 @@ import dev.slne.surf.surfapi.bukkit.api.dialog.dialog
 import dev.slne.surf.surfapi.bukkit.api.dialog.type
 import dev.slne.surf.surfapi.bukkit.api.inventory.framework.viewFrame
 import dev.slne.surf.surfapi.core.api.messages.Colors
+import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import io.papermc.paper.dialog.Dialog
 import io.papermc.paper.registry.data.dialog.DialogBase
 import net.kyori.adventure.text.Component
@@ -69,7 +70,11 @@ object ProtectionRemoveMembersDialog {
                 }
 
                 if (membersToRemove.isEmpty()) {
-                    viewer.showDialog(createNoMembersSelectedNotice(target, info))
+                    viewer.sendText {
+                        appendErrorPrefix()
+                        error("Du hast keine Mitglieder ausgewählt, die entfernt werden sollen.")
+                    }
+                    viewer.showDialog(removeMembersDialog(target, info))
                     return@customClick
                 }
 
@@ -80,63 +85,19 @@ object ProtectionRemoveMembersDialog {
 
                 ProtectionVisualizerManager.onRegionMemberChange(info.region)
 
-                viewer.showDialog(createMembersRemovedNotice(target, info, membersToRemove))
-            }
-        }
-    }
-
-    private fun createNoMembersSelectedNotice(target: OfflinePlayer, info: RegionInfo) = dialog {
-        base {
-            title { text("Protection — Keine Mitglieder ausgewählt") }
-            afterAction(DialogBase.DialogAfterAction.NONE)
-            body {
-                plainMessage(400) {
-                    info("Du hast keine Mitglieder ausgewählt, die entfernt werden sollen.")
-                }
-            }
-        }
-        type {
-            notice {
-                label { text("Zurück") }
-                action {
-                    callback {
-                        it.showDialog(removeMembersDialog(target, info))
-                    }
-                }
-            }
-        }
-    }
-
-    private fun createMembersRemovedNotice(
-        target: OfflinePlayer,
-        info: RegionInfo,
-        membersRemoved: List<LocalPlayer>
-    ) = dialog {
-        base {
-            title { text("Protection — Mitglieder entfernt") }
-            afterAction(DialogBase.DialogAfterAction.NONE)
-            body {
-                plainMessage(400) {
-                    info("Die folgenden Mitglieder wurden entfernt:")
-                    appendCollectionNewLine(membersRemoved, linePrefix = Component.empty()) {
+                viewer.sendText {
+                    appendSuccessPrefix()
+                    success("Die folgenden Mitglieder wurden entfernt: ")
+                    appendCollection(membersToRemove) {
                         Component.text(it.name ?: it.uniqueId.toString(), Colors.VARIABLE_VALUE)
                     }
                 }
-            }
-        }
-        type {
-            notice {
-                label { text("Zurück") }
-                action {
-                    playerCallback { player ->
-                        plugin.launch {
-                            viewFrame.open(
-                                ProtectionMemberView::class.java,
-                                player,
-                                ImmutableMap.of("region-info", info)
-                            )
-                        }
-                    }
+                plugin.launch {
+                    viewFrame.open(
+                        ProtectionMemberView::class.java,
+                        viewer,
+                        ImmutableMap.of("region-info", info)
+                    )
                 }
             }
         }

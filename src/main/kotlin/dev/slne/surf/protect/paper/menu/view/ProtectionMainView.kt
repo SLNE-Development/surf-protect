@@ -11,11 +11,9 @@ import dev.slne.surf.protect.paper.settings.ProtectionUserSettings
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
 import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
 import dev.slne.surf.surfapi.bukkit.api.builder.displayName
-import dev.slne.surf.surfapi.bukkit.api.dialog.noticeDialogWithBuilder
 import dev.slne.surf.surfapi.bukkit.api.inventory.framework.titleBuilder
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
-import dev.slne.surf.surfapi.core.api.messages.Colors
-import dev.slne.surf.surfapi.core.api.messages.adventure.text
+import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import me.devnatan.inventoryframework.View
 import me.devnatan.inventoryframework.ViewConfigBuilder
 import me.devnatan.inventoryframework.context.RenderContext
@@ -62,8 +60,12 @@ object ProtectionMainView : View() {
             render.layoutSlot('V', visualizeItem).onClick { click ->
                 click.playGeneralClickSound()
                 val state = ProtectionVisualizerManager.switchVisualizing(click.player)
-                click.closeForPlayer()
-                click.player.showDialog(visualizerStateChangedDialog(state))
+                click.player.sendText {
+                    appendInfoPrefix()
+                    info("Du hast die Visualisierung der Grundstücke ")
+                    if (state) success("aktiviert") else error("deaktiviert")
+                    info(". Bitte warte einen kleinen Moment, bis die Änderungen wirksam werden.")
+                }
             }
         } else {
             render.layoutSlot('V', outlineItem)
@@ -86,19 +88,6 @@ object ProtectionMainView : View() {
             ProtectionUserSettings.PLOT_MESSAGES.toggle(click.player)
         }
     }
-
-    private fun visualizerStateChangedDialog(newState: Boolean) =
-        noticeDialogWithBuilder(
-            text("Protections — Visualizer", Colors.PRIMARY)
-        ) {
-            info("Du hast die Visualisierung der Grundstücke ")
-            if (newState) {
-                success("aktiviert")
-            } else {
-                error("deaktiviert")
-            }
-            info(". Bitte warte einen kleinen Moment, bis die Änderungen wirksam werden.")
-        }
 
     private val protectListItem = buildItem(Material.GRASS_BLOCK) {
         displayName {

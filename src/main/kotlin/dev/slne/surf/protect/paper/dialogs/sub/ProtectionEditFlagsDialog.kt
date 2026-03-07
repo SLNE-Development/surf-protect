@@ -12,6 +12,7 @@ import dev.slne.surf.surfapi.bukkit.api.dialog.dialog
 import dev.slne.surf.surfapi.bukkit.api.dialog.type
 import dev.slne.surf.surfapi.core.api.messages.Colors
 import dev.slne.surf.surfapi.core.api.messages.adventure.clickOpensUrl
+import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import dev.slne.surf.surfapi.core.api.messages.adventure.text
 import io.papermc.paper.registry.data.dialog.DialogBase
 import org.bukkit.OfflinePlayer
@@ -75,23 +76,12 @@ object ProtectionEditFlagsDialog {
                     }
                     region.setFlag(flag.flag, state)
                 }
-                viewer.showDialog(createFlagsSavedNotice(info, target))
-            }
-        }
-    }
-
-    private fun createFlagsSavedNotice(info: RegionInfo, target: OfflinePlayer) = dialog {
-        base {
-            title { primary("Protection — Flags gespeichert") }
-            afterAction(DialogBase.DialogAfterAction.NONE)
-            body {
-                plainMessage {
+                viewer.sendText {
+                    appendSuccessPrefix()
                     success("Die Flags wurden erfolgreich gespeichert.")
                 }
+                viewer.showDialog(ProtectionInfoDialog.createProtectionInfoDialog(viewer, info, target))
             }
-        }
-        type {
-            notice(createBackButton(info, target))
         }
     }
 

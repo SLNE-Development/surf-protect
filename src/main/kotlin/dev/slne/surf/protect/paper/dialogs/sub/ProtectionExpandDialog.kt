@@ -11,12 +11,14 @@ import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry
 import dev.slne.surf.protect.paper.region.info.RegionInfo
 import dev.slne.surf.protect.paper.user.ProtectionUser
 import dev.slne.surf.protect.paper.util.standsInProtectedRegion
-import dev.slne.surf.surfapi.bukkit.api.dialog.*
 import dev.slne.surf.surfapi.bukkit.api.dialog.builder.actionButton
+import dev.slne.surf.surfapi.bukkit.api.dialog.dialog
+import dev.slne.surf.surfapi.bukkit.api.dialog.type
+import dev.slne.surf.surfapi.bukkit.api.dialog.base
+import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import dev.slne.surf.surfapi.core.api.messages.adventure.text
 import io.papermc.paper.dialog.Dialog
 import io.papermc.paper.registry.data.dialog.DialogBase
-import net.kyori.adventure.text.Component
 import org.bukkit.OfflinePlayer
 
 object ProtectionExpandDialog {
@@ -43,7 +45,10 @@ object ProtectionExpandDialog {
                 val canSellState = region.getFlag(ProtectionFlagsRegistry.SURF_CAN_SELL_FLAG)
                 val canExpandState = canSellState != StateFlag.State.DENY
                 if (!canExpandState) {
-                    viewer.showDialog(createCannotExpandNotice())
+                    viewer.sendText {
+                        appendErrorPrefix()
+                        error("Das Grundstück darf nicht erweitert werden.")
+                    }
                     return@playerCallback
                 }
 
@@ -57,8 +62,8 @@ object ProtectionExpandDialog {
                     )
 
                     if (viewer.standsInProtectedRegion(region)) {
-                        val started = protectionViewer.startRegionCreation(protectionRegion) {
-                            createErrorNoticeDialog(it)
+                        val started = protectionViewer.startRegionCreation(protectionRegion) { message ->
+                            viewer.sendText { appendErrorPrefix(); append(message) }
                         }
                         if (started) {
                             protectionRegion.setCornerMarkers()
@@ -66,19 +71,11 @@ object ProtectionExpandDialog {
                             viewer.clearDialogs()
                         }
                     } else {
-                        viewer.showDialog(createNotOnProtectedRegionNotice())
+                        viewer.sendText {
+                            appendErrorPrefix()
+                            error("Du befindest dich nicht auf dem zu erweiternden Grundstück.")
+                        }
                     }
-                }
-            }
-        }
-    }
-
-    private fun createErrorNoticeDialog(message: Component) = noticeDialog {
-        base {
-            title { error("Protections — Fehler") }
-            body {
-                plainMessage(400) {
-                    error(message)
                 }
             }
         }
@@ -98,14 +95,4 @@ object ProtectionExpandDialog {
             }
         }
     }
-
-    private fun createCannotExpandNotice() =
-        noticeDialogWithBuilder(text("Protection — Erweitern")) {
-            error("Das Grundstück darf nicht erweitert werden.")
-        }
-
-    private fun createNotOnProtectedRegionNotice() =
-        noticeDialogWithBuilder(text("Protection — Erweitern")) {
-            error("Du befindest dich nicht auf dem zu erweiternden Grundstück.")
-        }
 }

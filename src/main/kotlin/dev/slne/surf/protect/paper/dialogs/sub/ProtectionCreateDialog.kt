@@ -10,15 +10,13 @@ import dev.slne.surf.protect.paper.plugin
 import dev.slne.surf.protect.paper.region.ProtectionRegion
 import dev.slne.surf.protect.paper.region.settings.ProtectionSettings
 import dev.slne.surf.protect.paper.user.ProtectionUser
-import dev.slne.surf.surfapi.bukkit.api.dialog.*
 import dev.slne.surf.surfapi.bukkit.api.dialog.builder.actionButton
-import dev.slne.surf.surfapi.core.api.messages.Colors
+import dev.slne.surf.surfapi.bukkit.api.dialog.dialog
 import dev.slne.surf.surfapi.core.api.messages.adventure.appendNewline
-import dev.slne.surf.surfapi.core.api.messages.adventure.clickCopiesToClipboard
 import dev.slne.surf.surfapi.core.api.messages.adventure.clickOpensUrl
+import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import io.papermc.paper.event.player.PlayerCustomClickEvent
 import io.papermc.paper.registry.data.dialog.DialogBase
-import net.kyori.adventure.text.Component
 import org.bukkit.OfflinePlayer
 
 object ProtectionCreateDialog {
@@ -67,22 +65,12 @@ object ProtectionCreateDialog {
                 plugin.launch(plugin.entityDispatcher(player)) {
                     val user = ProtectionUser.getProtectionUser(player)
                     val regionCreation = ProtectionRegion(user, player, player.inventory.contents)
-                    val success =
-                        user.startRegionCreation(regionCreation) { createErrorNoticeDialog(it) }
+                    val success = user.startRegionCreation(regionCreation) { message ->
+                        player.sendText { appendErrorPrefix(); append(message) }
+                    }
                     if (success) {
                         player.clearDialogs()
                     }
-                }
-            }
-        }
-    }
-
-    private fun createErrorNoticeDialog(message: Component) = noticeDialog {
-        base {
-            title { error("Protections — Fehler") }
-            body {
-                plainMessage(400) {
-                    append(message.colorIfAbsent(Colors.ERROR))
                 }
             }
         }

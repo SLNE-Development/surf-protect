@@ -15,9 +15,7 @@ import dev.slne.surf.protect.paper.user.ProtectionUserManager
 import dev.slne.surf.surfapi.bukkit.api.dialog.base
 import dev.slne.surf.surfapi.bukkit.api.dialog.builder.actionButton
 import dev.slne.surf.surfapi.bukkit.api.dialog.dialog
-import dev.slne.surf.surfapi.bukkit.api.dialog.noticeDialogWithBuilder
 import dev.slne.surf.surfapi.bukkit.api.dialog.type
-import dev.slne.surf.surfapi.core.api.messages.Colors
 import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import dev.slne.surf.surfapi.core.api.messages.adventure.text
 import dev.slne.surf.transaction.api.currency.Currency
@@ -58,12 +56,20 @@ object ProtectionSellDialog {
                 val canSell = canSellState == StateFlag.State.ALLOW || canSellState == null
 
                 if (!canSell) {
-                    viewer.showDialog(createCannotSellNotice(info, target))
+                    viewer.sendText {
+                        appendErrorPrefix()
+                        error("Du kannst dieses Grundstück nicht verkaufen, da es nicht zum Verkauf freigegeben ist.")
+                    }
+                    viewer.showDialog(ProtectionInfoDialog.createProtectionInfoDialog(viewer, info, target))
                     return@playerCallback
                 }
 
                 if (isRegionEdited(region)) {
-                    viewer.showDialog(createPlotIsEditedNotice(info, target))
+                    viewer.sendText {
+                        appendErrorPrefix()
+                        error("Das Grundstück wird gerade bearbeitet!")
+                    }
+                    viewer.showDialog(ProtectionInfoDialog.createProtectionInfoDialog(viewer, info, target))
                     return@playerCallback
                 }
 
@@ -71,7 +77,11 @@ object ProtectionSellDialog {
                 val currency = config.currency.currency
                 val regionManager = info.regionManager
                 if (regionManager == null) {
-                    viewer.showDialog(createPlotDoesNotExistNotice())
+                    viewer.sendText {
+                        appendErrorPrefix()
+                        error("Das Grundstück existiert nicht mehr!")
+                    }
+                    viewer.clearDialogs()
                     return@playerCallback
                 }
 
@@ -86,37 +96,17 @@ object ProtectionSellDialog {
 
                 plugin.launch {
                     protectionViewer.transactionUser.deposit(refund, currency)
-                    viewer.showDialog(createPlotSoldNotice(refund, currency))
+                    viewer.sendText {
+                        appendSuccessPrefix()
+                        success("Du hast dein Grundstück für ")
+                        variableValue(DecimalFormat.getNumberInstance().format(refund))
+                        appendSpace()
+                        append(currency.displayName)
+                        success(" verkauft.")
+                    }
+                    viewer.clearDialogs()
                 }
             }
-        }
-    }
-
-    private fun createCannotSellNotice(info: RegionInfo, target: OfflinePlayer) = dialog {
-        base {
-            title { primary("Protection — Grundstück verkaufen") }
-            body {
-                plainMessage {
-                    error("Du kannst dieses Grundstück nicht verkaufen, da es nicht zum Verkauf freigegeben ist.")
-                }
-            }
-        }
-        type {
-            notice(createBackButton(info, target))
-        }
-    }
-
-    private fun createPlotIsEditedNotice(info: RegionInfo, target: OfflinePlayer) = dialog {
-        base {
-            title { primary("Protection — Grundstück verkaufen") }
-            body {
-                plainMessage {
-                    error("Das Grundstück wird gerade bearbeitet!")
-                }
-            }
-        }
-        type {
-            notice(createBackButton(info, target))
         }
     }
 
@@ -134,25 +124,6 @@ object ProtectionSellDialog {
             }
         }
     }
-
-    private fun createPlotDoesNotExistNotice() =
-        noticeDialogWithBuilder(
-            text(
-                "Protection — Grundstück verkaufen",
-                Colors.PRIMARY
-            )
-        ) {
-            error("Das Grundstück existiert nicht mehr!")
-        }
-
-    private fun createPlotSoldNotice(amount: BigDecimal, currency: Currency) =
-        noticeDialogWithBuilder(text("Grundstück verkauft", Colors.Companion.SUCCESS)) {
-            info("Du hast dein Grundstück für ")
-            variableValue(DecimalFormat.getNumberInstance().format(amount))
-            appendSpace()
-            append(currency.displayName)
-            info(" verkauft.")
-        }
 
     private fun isRegionEdited(region: ProtectedRegion): Boolean {
         return ProtectionUserManager.all()

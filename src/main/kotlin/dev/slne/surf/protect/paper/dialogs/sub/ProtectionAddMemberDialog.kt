@@ -15,6 +15,7 @@ import dev.slne.surf.surfapi.bukkit.api.dialog.dialog
 import dev.slne.surf.surfapi.bukkit.api.dialog.type
 import dev.slne.surf.surfapi.bukkit.api.extensions.server
 import dev.slne.surf.surfapi.bukkit.api.inventory.framework.viewFrame
+import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import dev.slne.surf.surfapi.core.api.service.PlayerLookupService
 import io.papermc.paper.registry.data.dialog.ActionButton
 import io.papermc.paper.registry.data.dialog.DialogBase
@@ -55,13 +56,25 @@ object ProtectionAddMemberDialog {
                 customClick { response, viewer ->
                     val memberName = response.getText("member_name") ?: return@customClick
                     if (!namePattern.matches(memberName)) {
-                        viewer.showDialog(createInvalidMemberNameNotice(target, info, memberName))
+                        viewer.sendText {
+                            appendErrorPrefix()
+                            error("Der Name '")
+                            variableValue(memberName)
+                            error("' ist ungültig. Er muss zwischen 2 und 16 Zeichen lang sein und darf nur Buchstaben, Zahlen und Unterstriche enthalten.")
+                        }
+                        viewer.showDialog(addMemberDialog(target, info, memberName.trim()))
                         return@customClick
                     }
                     plugin.launch {
                         val validatedUuid = PlayerLookupService.getUuid(memberName)
                         if (validatedUuid == null) {
-                            viewer.showDialog(createNoPlayerFoundNotice(target, info, memberName))
+                            viewer.sendText {
+                                appendErrorPrefix()
+                                error("Der Spieler '")
+                                variableValue(memberName)
+                                error("' wurde nicht gefunden. Bitte überprüfe, dass der Name korrekt ist und versuche es erneut.")
+                            }
+                            viewer.showDialog(addMemberDialog(target, info, memberName.trim()))
                             return@launch
                         }
                         val offlinePlayer = server.getOfflinePlayer(validatedUuid)
@@ -70,13 +83,13 @@ object ProtectionAddMemberDialog {
                         }
 
                         if (!offlinePlayer.hasPlayedBefore()) {
-                            viewer.showDialog(
-                                createPlayerNotPlayedBeforeNotice(
-                                    target,
-                                    info,
-                                    memberName
-                                )
-                            )
+                            viewer.sendText {
+                                appendErrorPrefix()
+                                error("Der Spieler '")
+                                variableValue(memberName)
+                                error("' hat noch nie auf diesem Server gespielt. Bitte füge den Spieler hinzu, nachdem er mindestens einmal online war.")
+                            }
+                            viewer.showDialog(addMemberDialog(target, info, memberName.trim()))
                             return@launch
                         }
 
@@ -84,114 +97,23 @@ object ProtectionAddMemberDialog {
                         info.region.members.addPlayer(memberPlayer)
                         ProtectionVisualizerManager.onRegionMemberChange(info.region)
 
-                        viewer.showDialog(
-                            createMemberAddedNotice(target, info, memberName)
-                        )
+                        viewer.sendText {
+                            appendSuccessPrefix()
+                            success("Das Mitglied '")
+                            variableValue(memberName)
+                            success("' wurde erfolgreich zur Protection hinzugefügt.")
+                        }
+                        plugin.launch {
+                            viewFrame.open(
+                                ProtectionMemberView::class.java,
+                                viewer,
+                                ImmutableMap.of("region-info", info)
+                            )
+                        }
                     }
                 }
             }
         }
-
-    private fun createInvalidMemberNameNotice(
-        target: OfflinePlayer,
-        info: RegionInfo,
-        input: String
-    ) = dialog {
-        base {
-            title { text("Protection — Ungültiger Name") }
-            body {
-                plainMessage {
-                    error("Der Name '")
-                    variableValue(input)
-                    error("' ist ungültig. Er muss zwischen 2 und 16 Zeichen lang sein und darf nur Buchstaben, Zahlen und Unterstriche enthalten.")
-                }
-            }
-        }
-        type {
-            notice {
-                label { text("Zurück") }
-                action {
-                    callback {
-                        it.showDialog(addMemberDialog(target, info, input.trim()))
-                    }
-                }
-            }
-        }
-    }
-
-    private fun createNoPlayerFoundNotice(
-        target: OfflinePlayer,
-        info: RegionInfo,
-        input: String
-    ) = dialog {
-        base {
-            title { text("Protection — Spieler nicht gefunden") }
-            body {
-                plainMessage {
-                    error("Der Spieler '")
-                    variableValue(input)
-                    error("' wurde nicht gefunden. Bitte überprüfe, dass der Name korrekt ist und versuche es erneut.")
-                }
-            }
-        }
-        type {
-            notice {
-                label { text("Zurück") }
-                action {
-                    callback {
-                        it.showDialog(addMemberDialog(target, info, input.trim()))
-                    }
-                }
-            }
-        }
-    }
-
-    private fun createPlayerNotPlayedBeforeNotice(
-        target: OfflinePlayer,
-        info: RegionInfo,
-        input: String
-    ) = dialog {
-        base {
-            title { text("Protection — Spieler hat noch nicht gespielt") }
-            body {
-                plainMessage {
-                    error("Der Spieler '")
-                    variableValue(input)
-                    error("' hat noch nie auf diesem Server gespielt. Bitte füge den Spieler hinzu, nachdem er mindestens einmal online war.")
-                }
-            }
-        }
-        type {
-            notice {
-                label { text("Zurück") }
-                action {
-                    callback {
-                        it.showDialog(addMemberDialog(target, info, input.trim()))
-                    }
-                }
-            }
-        }
-    }
-
-    private fun createMemberAddedNotice(
-        target: OfflinePlayer,
-        info: RegionInfo,
-        memberName: String
-    ) = dialog {
-        base {
-            title { text("Protection — Mitglied hinzugefügt") }
-            body {
-                plainMessage {
-                    success("Das Mitglied '")
-                    variableValue(memberName)
-                    success("' wurde erfolgreich zur Protection hinzugefügt.")
-                }
-            }
-        }
-        type {
-            notice(backButton(info, target))
-        }
-    }
 
     private fun backButton(info: RegionInfo, target: OfflinePlayer): ActionButton = actionButton {
         label { text("Zurück") }
