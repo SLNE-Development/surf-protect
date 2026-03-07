@@ -4,7 +4,6 @@ package dev.slne.surf.protect.paper.dialogs
 
 import dev.slne.surf.protect.paper.dialogs.sub.ProtectionCreateDialog
 import dev.slne.surf.protect.paper.dialogs.sub.ProtectionListDialog
-import dev.slne.surf.protect.paper.dialogs.sub.ProtectionSettingsDialog
 import dev.slne.surf.protect.paper.permission.ProtectPermissionRegistry
 import dev.slne.surf.protect.paper.region.visual.visualizer.ProtectionVisualizerManager
 import dev.slne.surf.surfapi.bukkit.api.dialog.base
