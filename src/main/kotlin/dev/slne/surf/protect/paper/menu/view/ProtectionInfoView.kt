@@ -62,7 +62,10 @@ object ProtectionInfoView : View() {
         render.layoutSlot('I', createRegionItem(protectionState.get(render)))
         render.layoutSlot('S', sellItem).onClick { click ->
             click.playGeneralClickSound()
-            click.openForPlayer(ProtectionSellConfirmView::class.java)
+            click.openForPlayer(
+                ProtectionSellConfirmView::class.java,
+                mapOf("protection" to protectionState.get(render))
+            )
         }
         render.layoutSlot('R', renameItem).onClick { click ->
             click.playGeneralClickSound()
