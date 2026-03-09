@@ -58,5 +58,5 @@ private fun handleAdd(player: Player, playerName: String, protection: RegionInfo
     }
 
     player.closeDialog()
-    viewFrame.open(ProtectionMemberListView::class.java, player)
+    viewFrame.open(ProtectionMemberListView::class.java, player, mapOf("protection" to protection))
 }
