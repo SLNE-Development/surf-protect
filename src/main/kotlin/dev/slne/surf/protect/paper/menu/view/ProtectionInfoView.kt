@@ -196,7 +196,7 @@ object ProtectionInfoView : View() {
             line {
                 appendBlob()
                 appendSpace()
-                protectColored("Besitzer: ".toSmallCaps())
+                white("Besitzer: ".toSmallCaps())
                 variableValue(protection.owners.joinToString(", ") { it.displayName })
             }
             line {

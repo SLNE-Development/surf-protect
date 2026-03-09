@@ -113,7 +113,7 @@ fun createRegionItem(protection: RegionInfo) = ItemType.DIRT.createItemStack().a
         line {
             appendBlob()
             appendSpace()
-            protectColored("Besitzer: ".toSmallCaps())
+            white("Besitzer: ".toSmallCaps())
             variableValue(protection.owners.joinToString(", ") { it.displayName })
         }
         line {
