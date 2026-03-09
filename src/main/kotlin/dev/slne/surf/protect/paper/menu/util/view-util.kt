@@ -1,6 +1,7 @@
 package dev.slne.surf.protect.paper.menu.util
 
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
+import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
 import dev.slne.surf.surfapi.bukkit.api.builder.displayName
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
 import dev.slne.surf.surfapi.core.api.messages.adventure.playSound
@@ -46,13 +47,23 @@ fun Context.playYesSound() {
 
 val previousItem = MenuHeads.ARROW_LEFT.clone().apply {
     displayName {
-        protectColored("Vorherige Seite")
+        protectColored("Vorherige Seite".toSmallCaps(), TextDecoration.BOLD)
+    }
+    buildLore {
+        line {
+            spacer("Eine Seite zurück")
+        }
     }
 }
 
 val nextItem = MenuHeads.ARROW_RIGHT.clone().apply {
     displayName {
-        protectColored("Nächste Seite")
+        protectColored("Nächste Seite".toSmallCaps(), TextDecoration.BOLD)
+    }
+    buildLore {
+        line {
+            spacer("Eine Seite weiter".toSmallCaps())
+        }
     }
 }
 
@@ -60,13 +71,29 @@ val backItem = MenuHeads.CROSS.apply {
     displayName {
         primary("Zurück".toSmallCaps(), TextDecoration.BOLD)
     }
+
+    buildLore {
+        line {
+            spacer("Zum vorherigen Menü zurückkehren".toSmallCaps())
+        }
+    }
 }
 
 val closeItem = MenuHeads.CROSS.apply {
     displayName {
         primary("Schließen".toSmallCaps(), TextDecoration.BOLD)
     }
+
+    buildLore {
+        line {
+            spacer("Das Menü schließen".toSmallCaps())
+        }
+    }
 }
 
+fun SurfComponentBuilder.appendBlob() = darkSpacer("▪")
+
+val protectionColor = TextColor.color(224, 89, 11)
+
 fun SurfComponentBuilder.protectColored(text: Any, vararg decoration: TextDecoration) =
-    coloredComponent(text.toString(), TextColor.color(224, 89, 11), *decoration)
+    coloredComponent(text.toString(), protectionColor, *decoration)

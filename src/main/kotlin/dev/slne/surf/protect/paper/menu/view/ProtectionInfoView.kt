@@ -25,6 +25,7 @@ import me.devnatan.inventoryframework.context.RenderContext
 import me.devnatan.inventoryframework.state.State
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.inventory.ItemType
+import kotlin.math.roundToInt
 
 @Suppress("UnstableApiUsage")
 object ProtectionInfoView : View() {
@@ -123,37 +124,68 @@ object ProtectionInfoView : View() {
 
     private val membersItem = ItemType.PLAYER_HEAD.createItemStack().apply {
         displayName {
-            protectColored("Mitglieder")
+            protectColored("Mitglieder".toSmallCaps(), TextDecoration.BOLD)
+        }
+
+        buildLore {
+            line {
+                protectColored("Klicke, um die Mitglieder zu verwalten".toSmallCaps())
+            }
         }
     }
 
     private val sellItem = ItemType.EMERALD.createItemStack().apply {
         displayName {
-            protectColored("Verkaufen")
+            protectColored("Verkaufen".toSmallCaps(), TextDecoration.BOLD)
+        }
+
+        buildLore {
+            line {
+                protectColored("Klicke, um das Grundstück zu verkaufen".toSmallCaps())
+            }
         }
     }
 
     private val renameItem = ItemType.NAME_TAG.createItemStack().apply {
         displayName {
-            protectColored("Umbenennen")
+            protectColored("Umbenennen".toSmallCaps(), TextDecoration.BOLD)
+        }
+
+        buildLore {
+            line {
+                protectColored("Klicke, um das Grundstück umzubenennen".toSmallCaps())
+            }
         }
     }
 
     private val expandItem = ItemType.OAK_SIGN.createItemStack().apply {
         displayName {
-            protectColored("Erweitern")
+            protectColored("Erweitern".toSmallCaps(), TextDecoration.BOLD)
+        }
+
+        buildLore {
+            line {
+                protectColored("Klicke, um das Grundstück zu erweitern".toSmallCaps())
+            }
         }
     }
 
     private val editFlags = ItemType.REDSTONE_TORCH.createItemStack().apply {
         displayName {
-            protectColored("Flags bearbeiten")
+            protectColored("Flags bearbeiten".toSmallCaps(), TextDecoration.BOLD)
+        }
+
+        buildLore {
+            line {
+                protectColored("Klicke, um die Flags zu bearbeiten".toSmallCaps())
+            }
         }
     }
 
+
     fun createRegionItem(protection: RegionInfo) = ItemType.DIRT.createItemStack().apply {
         displayName {
-            protectColored(protection.name)
+            variableValue(protection.name)
         }
 
         buildLore {
@@ -162,40 +194,44 @@ object ProtectionInfoView : View() {
                 protectColored("Grundstücksinformation".toSmallCaps(), TextDecoration.BOLD)
             }
             line {
-                spacer("-")
+                appendBlob()
                 appendSpace()
-                protectColored("Besitzer: ")
+                protectColored("Besitzer: ".toSmallCaps())
                 variableValue(protection.owners.joinToString(", ") { it.displayName })
             }
             line {
-                spacer("-")
+                appendBlob()
                 appendSpace()
-                protectColored("Id: ")
-                variableValue(protection.region.id)
+                white("Id: ".toSmallCaps())
+                variableValue(protection.region.id.toSmallCaps())
             }
             line {
-                spacer("-")
+                appendBlob()
                 appendSpace()
-                protectColored("Fläche: ")
-                variableValue("${protection.volume} Blöcke")
+                white("Fläche: ".toSmallCaps())
+                variableValue("${protection.volume} Blöcke".toSmallCaps())
             }
             line {
-                spacer("-")
+                appendBlob()
                 appendSpace()
-                protectColored("Mitglieder: ")
+                white("Mitglieder: ".toSmallCaps())
                 variableValue(protection.members.size)
             }
             line {
-                spacer("-")
+                appendBlob()
                 appendSpace()
-                protectColored("Bezahlter Preis: ")
-                variableValue("${protection.price}CC")
+                white("Bezahlter Preis: ".toSmallCaps())
+                variableValue("${protection.price.roundToInt()}CC".toSmallCaps())
             }
             line {
-                spacer("-")
+                appendBlob()
                 appendSpace()
-                protectColored("Verkaufspreis: ")
-                variableValue("${protection.retailPrice}CC")
+                white("Verkaufspreis: ".toSmallCaps())
+                variableValue("${protection.retailPrice.roundToInt()}CC".toSmallCaps())
+            }
+            emptyLine()
+            line {
+                spacer("Klicke für mehr Informationen".toSmallCaps())
             }
         }
     }

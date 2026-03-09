@@ -60,7 +60,7 @@ object ProtectionMemberRemoveConfirmView : View() {
 
     private fun createMemberItem(member: LocalPlayer) = buildItem(Material.PLAYER_HEAD) {
         displayName {
-            protectColored(member.displayName)
+            protectColored(member.displayName.toSmallCaps(), TextDecoration.BOLD)
         }
 
         editMeta(SkullMeta::class.java) {
@@ -71,18 +71,33 @@ object ProtectionMemberRemoveConfirmView : View() {
             line {
                 darkSpacer(member.uniqueId.toString())
             }
+            emptyLine()
+            line {
+                darkSpacer("Klicke, um das Mitglied zu entfernen")
+            }
         }
     }
 
     private val cancelItem = buildItem(Material.RED_STAINED_GLASS_PANE) {
         displayName {
-            error("Abbrechen")
+            error("Abbrechen".toSmallCaps(), TextDecoration.BOLD)
+        }
+
+        buildLore {
+            line {
+                darkSpacer("Klicke, um den Vorgang abzubrechen")
+            }
         }
     }
 
     private val confirmItem = buildItem(Material.GREEN_STAINED_GLASS_PANE) {
         displayName {
-            success("Bestätigen")
+            success("Bestätigen".toSmallCaps(), TextDecoration.BOLD)
+        }
+        buildLore {
+            line {
+                darkSpacer("Klicke, um das Mitglied zu entfernen")
+            }
         }
     }
 }

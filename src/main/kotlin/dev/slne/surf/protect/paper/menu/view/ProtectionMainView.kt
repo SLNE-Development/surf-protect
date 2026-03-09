@@ -113,13 +113,13 @@ object ProtectionMainView : View() {
 
     private val protectListItem = ItemType.DIRT.createItemStack().apply {
         displayName {
-            primary("Meine Grundstücke")
+            protectColored("Meine Grundstücke".toSmallCaps(), TextDecoration.BOLD)
         }
 
         buildLore {
             emptyLine()
             line {
-                spacer("Eine Liste mit allen deinen Grundstücken")
+                spacer("Eine Liste mit allen deinen Grundstücken".toSmallCaps())
             }
             emptyLine()
         }
@@ -127,13 +127,13 @@ object ProtectionMainView : View() {
 
     private val visualizeItem = ItemType.ENDER_EYE.createItemStack().apply {
         displayName {
-            primary("Visualizer")
+            protectColored("Visualizer".toSmallCaps(), TextDecoration.BOLD)
         }
 
         buildLore {
             emptyLine()
             line {
-                spacer("Aktiviert/Deaktiviert den Visualizer")
+                spacer("Aktiviert/Deaktiviert den Visualizer".toSmallCaps())
             }
             emptyLine()
         }
@@ -141,13 +141,13 @@ object ProtectionMainView : View() {
 
     private val createItem = ItemType.GRASS_BLOCK.createItemStack().apply {
         displayName {
-            primary("Grundstück erstellen")
+            protectColored("Grundstück erstellen".toSmallCaps(), TextDecoration.BOLD)
         }
 
         buildLore {
             emptyLine()
             line {
-                spacer("Erstelle ein neues Grundstück")
+                spacer("Erstelle ein neues Grundstück".toSmallCaps())
             }
             emptyLine()
         }
@@ -155,16 +155,16 @@ object ProtectionMainView : View() {
 
     private val plotMessagesItem = ItemType.LEATHER_BOOTS.createItemStack().apply {
         displayName {
-            primary("Grundstück Nachrichten")
+            protectColored("Grundstück Nachrichten".toSmallCaps(), TextDecoration.BOLD)
         }
 
         buildLore {
             emptyLine()
             line {
-                spacer("Aktiviert/Deaktiviert die Nachrichten")
+                spacer("Aktiviert/Deaktiviert die Nachrichten".toSmallCaps())
             }
             line {
-                spacer("beim Betreten/Verlassen eines Grundstücks")
+                spacer("beim Betreten/Verlassen eines Grundstücks".toSmallCaps())
             }
             emptyLine()
         }

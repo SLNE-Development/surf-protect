@@ -3,6 +3,7 @@ package dev.slne.surf.protect.paper.menu.view.sell
 import com.github.shynixn.mccoroutine.folia.entityDispatcher
 import com.github.shynixn.mccoroutine.folia.launch
 import com.sk89q.worldguard.protection.flags.StateFlag
+import dev.slne.surf.protect.paper.menu.util.appendBlob
 import dev.slne.surf.protect.paper.menu.util.outlineItem
 import dev.slne.surf.protect.paper.menu.util.playGeneralClickSound
 import dev.slne.surf.protect.paper.menu.util.protectColored
@@ -27,6 +28,7 @@ import me.devnatan.inventoryframework.state.State
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
 import org.bukkit.inventory.ItemType
+import kotlin.math.roundToInt
 
 @Suppress("UnstableApiUsage")
 object ProtectionSellConfirmView : View() {
@@ -101,6 +103,7 @@ object ProtectionSellConfirmView : View() {
         }
     }
 
+    @Suppress("UnstableApiUsage")
     fun createRegionItem(protection: RegionInfo) = ItemType.DIRT.createItemStack().apply {
         displayName {
             variableValue(protection.name)
@@ -112,53 +115,69 @@ object ProtectionSellConfirmView : View() {
                 protectColored("Grundstücksinformation".toSmallCaps(), TextDecoration.BOLD)
             }
             line {
-                spacer("-")
+                appendBlob()
                 appendSpace()
-                protectColored("Besitzer: ")
+                protectColored("Besitzer: ".toSmallCaps())
                 variableValue(protection.owners.joinToString(", ") { it.displayName })
             }
             line {
-                spacer("-")
+                appendBlob()
                 appendSpace()
-                protectColored("Id: ")
-                variableValue(protection.region.id)
+                white("Id: ".toSmallCaps())
+                variableValue(protection.region.id.toSmallCaps())
             }
             line {
-                spacer("-")
+                appendBlob()
                 appendSpace()
-                protectColored("Fläche: ")
-                variableValue("${protection.volume} Blöcke")
+                white("Fläche: ".toSmallCaps())
+                variableValue("${protection.volume} Blöcke".toSmallCaps())
             }
             line {
-                spacer("-")
+                appendBlob()
                 appendSpace()
-                protectColored("Mitglieder: ")
+                white("Mitglieder: ".toSmallCaps())
                 variableValue(protection.members.size)
             }
             line {
-                spacer("-")
+                appendBlob()
                 appendSpace()
-                protectColored("Bezahlter Preis: ")
-                variableValue("${protection.price}CC")
+                white("Bezahlter Preis: ".toSmallCaps())
+                variableValue("${protection.price.roundToInt()}CC".toSmallCaps())
             }
             line {
-                spacer("-")
+                appendBlob()
                 appendSpace()
-                protectColored("Verkaufspreis: ")
-                variableValue("${protection.retailPrice}CC")
+                white("Verkaufspreis: ".toSmallCaps())
+                variableValue("${protection.retailPrice.roundToInt()}CC".toSmallCaps())
+            }
+            emptyLine()
+            line {
+                spacer("Klicke für mehr Informationen".toSmallCaps())
             }
         }
     }
 
     private val cancelItem = buildItem(Material.RED_STAINED_GLASS_PANE) {
         displayName {
-            error("Abbrechen")
+            error("Abbrechen".toSmallCaps(), TextDecoration.BOLD)
+        }
+
+        buildLore {
+            line {
+                darkSpacer("Klicke, um den Verkauf abzubrechen".toSmallCaps())
+            }
         }
     }
 
     private val confirmItem = buildItem(Material.GREEN_STAINED_GLASS_PANE) {
         displayName {
-            success("Bestätigen")
+            success("Bestätigen".toSmallCaps(), TextDecoration.BOLD)
+        }
+
+        buildLore {
+            line {
+                darkSpacer("Klicke, um das Grundstück zu verkaufen".toSmallCaps())
+            }
         }
     }
 }

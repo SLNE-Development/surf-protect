@@ -59,7 +59,7 @@ object ProtectionEditFlagsView : View() {
                 context.player.sendText {
                     appendSuccessPrefix()
                     success("Du hast die Flag ")
-                    append(flag.displayName)
+                    protectColored(flag.displayName.toSmallCaps(), TextDecoration.BOLD)
                     success(" auf ")
                     variableValue(
                         when (newState) {
@@ -142,26 +142,29 @@ object ProtectionEditFlagsView : View() {
     private fun createFlagItem(flag: EditableProtectionFlags, state: StateFlag.State) =
         buildItem(flag.icon) {
             displayName {
-                append(flag.displayName)
+                protectColored(flag.displayName.toSmallCaps(), TextDecoration.BOLD)
             }
 
             buildLore {
+                line {
+                    darkSpacer("Flag: ${flag.flag.name}".toSmallCaps())
+                }
                 emptyLine()
                 line {
-                    darkSpacer("▪")
+                    appendBlob()
                     appendSpace()
+                    white("Status: ".toSmallCaps())
                     if (state == StateFlag.State.ALLOW) {
-                        success("Erlaubt")
+                        success("Erlaubt".toSmallCaps())
                     } else {
-                        error("Verboten")
+                        error("Verboten".toSmallCaps())
                     }
                 }
+                emptyLine()
+                line {
+                    appendSpace()
+                    variableValue("Klicke, um die Flag zu ändern.".toSmallCaps())
+                }
             }
-        }
-
-    private val StateFlag.State.other
-        get() = when (this) {
-            StateFlag.State.ALLOW -> StateFlag.State.DENY
-            StateFlag.State.DENY -> StateFlag.State.ALLOW
         }
 }

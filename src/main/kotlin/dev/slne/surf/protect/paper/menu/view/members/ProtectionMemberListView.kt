@@ -5,6 +5,7 @@ import dev.slne.surf.protect.paper.menu.util.*
 import dev.slne.surf.protect.paper.menu.view.ProtectionInfoView
 import dev.slne.surf.protect.paper.region.info.RegionInfo
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
+import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
 import dev.slne.surf.surfapi.bukkit.api.builder.displayName
 import dev.slne.surf.surfapi.bukkit.api.inventory.framework.titleBuilder
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
@@ -30,7 +31,7 @@ object ProtectionMemberListView : View() {
         }.elementFactory { _, builder, _, player ->
             builder.withItem(buildItem(Material.PLAYER_HEAD) {
                 displayName {
-                    protectColored(player.name ?: "#Unbekannt")
+                    protectColored(player.name ?: "#Unbekannt".toSmallCaps())
                 }
 
                 editMeta(SkullMeta::class.java) {
@@ -121,7 +122,14 @@ object ProtectionMemberListView : View() {
 
     val addMemberItem = ItemType.PLAYER_HEAD.createItemStack().apply {
         displayName {
-            protectColored("Mitglied hinzufügen")
+            protectColored("Mitglied hinzufügen".toSmallCaps(), TextDecoration.BOLD)
+        }
+
+        buildLore {
+            emptyLine()
+            line {
+                spacer("Klicke hier, um ein neues Mitglied hinzuzufügen.")
+            }
         }
     }
 }
