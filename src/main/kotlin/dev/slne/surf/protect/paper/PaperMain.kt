@@ -27,6 +27,14 @@ class PaperMain : SuspendingJavaPlugin() {
     override suspend fun onLoadAsync() {
         metrics = Metrics(this, 26498)
         ProtectionFlagsRegistry.registerFlags()
+
+        viewFrame.with(ProtectionEditFlagsView)
+        viewFrame.with(ProtectionListView)
+        viewFrame.with(ProtectionMemberListView)
+        viewFrame.with(ProtectionMemberRemoveConfirmView)
+        viewFrame.with(ProtectionSellConfirmView)
+        viewFrame.with(ProtectionInfoView)
+        viewFrame.with(ProtectionMainView)
     }
 
     override suspend fun onEnableAsync() {
@@ -35,15 +43,6 @@ class PaperMain : SuspendingJavaPlugin() {
         CommandManager.registerCommands()
 
         papiHook.register(PapiExpansion)
-
-        viewFrame.with(ProtectionEditFlagsView)
-        viewFrame.with(ProtectionListView)
-        viewFrame.with(ProtectionMemberListView)
-        viewFrame.with(ProtectionMemberRemoveConfirmView)
-        viewFrame.with(ProtectionSellConfirmView)
-        viewFrame.with(ProtectionSellConfirmView)
-        viewFrame.with(ProtectionInfoView)
-        viewFrame.with(ProtectionMainView)
 
         metrics.addCustomChart(Metrics.SingleLineChart("protected_regions") {
             server.worlds.sumOf { world ->
