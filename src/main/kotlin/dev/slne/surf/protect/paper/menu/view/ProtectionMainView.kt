@@ -35,7 +35,7 @@ object ProtectionMainView : View() {
             .layout(
                 "OOOOOOOOO",
                 "O       O",
-                "O LV CP O",
+                "O LC VP O",
                 "O       O",
                 "OOOOCOOOO"
             )
