@@ -5,7 +5,7 @@ import dev.slne.surf.protect.paper.util.getProtectedRegions
 import dev.slne.surf.surfapi.bukkit.api.hook.papi.expansion.PapiPlaceholder
 import org.bukkit.OfflinePlayer
 
-object CurrentRegionPlaceholder : PapiPlaceholder("current_region") {
+object CurrentRegionPlaceholder : PapiPlaceholder("current-region") {
     override fun parse(
         player: OfflinePlayer,
         args: List<String>
