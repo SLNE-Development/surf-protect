@@ -9,6 +9,7 @@ import dev.slne.surf.protect.paper.menu.util.protectColored
 import dev.slne.surf.protect.paper.menu.view.list.ProtectionListView
 import dev.slne.surf.protect.paper.plugin
 import dev.slne.surf.protect.paper.region.ProtectionRegion
+import dev.slne.surf.protect.paper.region.visual.visualizer.ProtectionVisualizerManager
 import dev.slne.surf.protect.paper.user.ProtectionUser
 import dev.slne.surf.protect.paper.util.hasBorderCrossingMessagesEnabled
 import dev.slne.surf.protect.paper.util.setBorderCrossingMessagesEnabled
@@ -53,20 +54,21 @@ object ProtectionMainView : View() {
             click.openForPlayer(ProtectionListView::class.java)
         }
         render.layoutSlot('V', visualizeItem).onClick { click ->
-            click.playGeneralClickSound()
-
             val player = click.player
-            val oldState = player.hasBorderCrossingMessagesEnabled()
-            val newState = !oldState
 
-            player.setBorderCrossingMessagesEnabled(newState)
-            player.sendText {
-                appendSuccessPrefix()
-                success("Du hast die Grundstücks Nachrichten ")
-                variableValue(if (newState) "aktiviert" else "deaktiviert")
-                success(".")
+            if (ProtectionVisualizerManager.isVisualizing(player)) {
+                ProtectionVisualizerManager.stop(player)
+                player.sendText {
+                    appendSuccessPrefix()
+                    success("Du hast den Visualizer deaktiviert.")
+                }
+            } else {
+                ProtectionVisualizerManager.startVisualizer(player)
+                player.sendText {
+                    appendSuccessPrefix()
+                    success("Du hast den Visualizer aktiviert.")
+                }
             }
-
         }
         render.layoutSlot('C', createItem).onClick { click ->
             val player = click.player
@@ -93,7 +95,22 @@ object ProtectionMainView : View() {
                 click.openForPlayer(ProtectionMainView::class.java)
             }
         }
-        render.layoutSlot('P', plotMessagesItem)
+        render.layoutSlot('P', plotMessagesItem).onClick { click ->
+            click.playGeneralClickSound()
+
+            val player = click.player
+            val oldState = player.hasBorderCrossingMessagesEnabled()
+            val newState = !oldState
+
+            player.setBorderCrossingMessagesEnabled(newState)
+            player.sendText {
+                appendSuccessPrefix()
+                success("Du hast die Grundstücks Nachrichten ")
+                variableValue(if (newState) "aktiviert" else "deaktiviert")
+                success(".")
+            }
+
+        }
     }
 
     private val protectListItem = ItemType.DIRT.createItemStack().apply {
