@@ -35,7 +35,7 @@ object ProtectionMainView : View() {
             .layout(
                 "OOOOOOOOO",
                 "O       O",
-                "O LC VP O",
+                "O LA VP O",
                 "O       O",
                 "OOOOCOOOO"
             )
@@ -70,7 +70,7 @@ object ProtectionMainView : View() {
                 }
             }
         }
-        render.layoutSlot('C', createItem).onClick { click ->
+        render.layoutSlot('A', createItem).onClick { click ->
             val player = click.player
 
             click.closeForPlayer()

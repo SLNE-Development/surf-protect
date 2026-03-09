@@ -93,7 +93,5 @@ val closeItem = MenuHeads.CROSS.apply {
 
 fun SurfComponentBuilder.appendBlob() = darkSpacer("▪")
 
-val protectionColor = TextColor.color(224, 89, 11)
-
 fun SurfComponentBuilder.protectColored(text: Any, vararg decoration: TextDecoration) =
-    coloredComponent(text.toString(), protectionColor, *decoration)
+    coloredComponent(text.toString(), TextColor.color(224, 89, 11), *decoration)
