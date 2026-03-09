@@ -103,7 +103,7 @@ object ProtectionSellConfirmView : View() {
 
     fun createRegionItem(protection: RegionInfo) = ItemType.DIRT.createItemStack().apply {
         displayName {
-            protectColored(protection.name)
+            variableValue(protection.name)
         }
 
         buildLore {
