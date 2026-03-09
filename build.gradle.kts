@@ -15,7 +15,7 @@ surfPaperPluginApi {
     authors.addAll("Ammo", "twisti", "red")
 
     serverDependencies {
-        registerRequired("surf-transaction-bukkit")
+        registerRequired("surf-transaction-paper")
         registerRequired("WorldGuard")
     }
 }
