@@ -10,6 +10,8 @@ import dev.slne.surf.protect.paper.menu.view.list.ProtectionListView
 import dev.slne.surf.protect.paper.plugin
 import dev.slne.surf.protect.paper.region.ProtectionRegion
 import dev.slne.surf.protect.paper.user.ProtectionUser
+import dev.slne.surf.protect.paper.util.hasBorderCrossingMessagesEnabled
+import dev.slne.surf.protect.paper.util.setBorderCrossingMessagesEnabled
 import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
 import dev.slne.surf.surfapi.bukkit.api.builder.displayName
 import dev.slne.surf.surfapi.bukkit.api.inventory.framework.titleBuilder
@@ -50,7 +52,22 @@ object ProtectionMainView : View() {
             click.playGeneralClickSound()
             click.openForPlayer(ProtectionListView::class.java)
         }
-        render.layoutSlot('V', visualizeItem)
+        render.layoutSlot('V', visualizeItem).onClick { click ->
+            click.playGeneralClickSound()
+
+            val player = click.player
+            val oldState = player.hasBorderCrossingMessagesEnabled()
+            val newState = !oldState
+
+            player.setBorderCrossingMessagesEnabled(newState)
+            player.sendText {
+                appendSuccessPrefix()
+                success("Du hast die Grundstücks Nachrichten ")
+                variableValue(if (newState) "aktiviert" else "deaktiviert")
+                success(".")
+            }
+
+        }
         render.layoutSlot('C', createItem).onClick { click ->
             val player = click.player
 
