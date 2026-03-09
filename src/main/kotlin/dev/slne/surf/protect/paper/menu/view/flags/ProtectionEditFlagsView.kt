@@ -38,15 +38,13 @@ object ProtectionEditFlagsView : View() {
             }.onClick { context ->
                 val protection = protectionState.get(context)
                 val region = protection.region
-                val oldState = region.getFlag(flag.flag) ?: flag.initialState
+                val oldState =
+                    region.getFlag(flag.flag) ?: flag.initialState ?: StateFlag.State.ALLOW
 
-                val newState = when (oldState) {
-                    null -> flag.initialState ?: StateFlag.State.ALLOW
-                    else -> if (oldState == flag.initialState) {
-                        flag.initialState.other
-                    } else {
-                        flag.initialState ?: StateFlag.State.ALLOW
-                    }
+                val newState = if (oldState == StateFlag.State.ALLOW) {
+                    StateFlag.State.DENY
+                } else {
+                    StateFlag.State.ALLOW
                 }
 
                 region.setFlag(flag.flag, newState)
