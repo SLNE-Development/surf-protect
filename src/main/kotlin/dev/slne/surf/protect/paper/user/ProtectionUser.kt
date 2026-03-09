@@ -17,9 +17,8 @@ import dev.slne.surf.protect.paper.util.fastCenter
 import dev.slne.surf.protect.paper.util.isInProtectionRegion
 import dev.slne.surf.protect.paper.util.toLocalPlayer
 import dev.slne.surf.surfapi.bukkit.api.extensions.server
-import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
+import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import dev.slne.surf.transaction.api.user.TransactionUser
-import io.papermc.paper.dialog.Dialog
 import io.papermc.paper.math.Position
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.withContext
@@ -51,29 +50,35 @@ class ProtectionUser(val uuid: UUID) {
     val transactionUser get() = TransactionUser[uuid]
 
     suspend fun startRegionCreation(
-        newRegion: ProtectionRegion,
-        errorBuilder: (Component) -> Dialog
+        newRegion: ProtectionRegion
     ): Boolean {
         val player = this.bukkitPlayer ?: return false
 
         when {
             isCreatingRegion -> {
-                player.showDialog(errorBuilder(buildText { error("Du befindest dich bereits im ProtectionMode.") }))
+                player.sendText {
+                    appendErrorPrefix()
+                    error("Du befindest dich bereits im ProtectionMode.")
+                }
                 return false
             }
 
             !player.location.isInProtectionRegion() -> {
-                player.showDialog(errorBuilder(buildText { error("Du kannst hier keinen ProtectionMode starten.") }))
+                player.sendText {
+                    appendErrorPrefix()
+                    error("Du kannst hier keinen ProtectionMode starten.")
+                }
                 return false
             }
 
             protectionModeCooldown.onCooldown -> {
                 val left = protectionModeCooldown.timeLeft.milliseconds
-                player.showDialog(errorBuilder(buildText {
+                player.sendText {
+                    appendErrorPrefix()
                     error("Du kannst den ProtectionMode erst wieder in ")
                     variableValue(left.toString(DurationUnit.SECONDS))
                     error(" verwenden.")
-                }))
+                }
                 return false
             }
         }

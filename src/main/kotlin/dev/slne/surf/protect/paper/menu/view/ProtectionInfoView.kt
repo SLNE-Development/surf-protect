@@ -1,18 +1,21 @@
 package dev.slne.surf.protect.paper.menu.view
 
+import com.github.shynixn.mccoroutine.folia.launch
 import dev.slne.surf.protect.paper.menu.dialog.protectionRenameDialog
-import dev.slne.surf.protect.paper.menu.util.backItem
-import dev.slne.surf.protect.paper.menu.util.outlineItem
-import dev.slne.surf.protect.paper.menu.util.playGeneralClickSound
-import dev.slne.surf.protect.paper.menu.util.protectColored
+import dev.slne.surf.protect.paper.menu.util.*
 import dev.slne.surf.protect.paper.menu.view.list.ProtectionListView
 import dev.slne.surf.protect.paper.menu.view.members.ProtectionMemberListView
 import dev.slne.surf.protect.paper.menu.view.sell.ProtectionSellConfirmView
+import dev.slne.surf.protect.paper.plugin
+import dev.slne.surf.protect.paper.region.ProtectionRegion
 import dev.slne.surf.protect.paper.region.info.RegionInfo
+import dev.slne.surf.protect.paper.user.protectionUser
+import dev.slne.surf.protect.paper.util.standsInProtectedRegion
 import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
 import dev.slne.surf.surfapi.bukkit.api.builder.displayName
 import dev.slne.surf.surfapi.bukkit.api.inventory.framework.titleBuilder
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
+import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import me.devnatan.inventoryframework.View
 import me.devnatan.inventoryframework.ViewConfigBuilder
 import me.devnatan.inventoryframework.context.RenderContext
@@ -34,7 +37,7 @@ object ProtectionInfoView : View() {
                 "OOOOOOOOO",
                 "O       O",
                 "ORM I SFO",
-                "O       O",
+                "O   E   O",
                 "OOOOBOOOO"
             )
             .cancelInteractions()
@@ -64,6 +67,40 @@ object ProtectionInfoView : View() {
             click.player.showDialog(protectionRenameDialog(protectionState.get(click)))
         }
         render.layoutSlot('F', editFlags)
+        render.layoutSlot('E', expandItem).onClick { click ->
+            click.playGeneralClickSound()
+
+            val protectionUser = click.player.protectionUser()
+            val protection = protectionState.get(render)
+
+            val protectionRegion = ProtectionRegion(
+                protectionUser,
+                click.player,
+                click.player.inventory.contents,
+                protection.region
+            )
+
+            plugin.launch {
+                if (click.player.standsInProtectedRegion(protection.region)) {
+                    val started =
+                        click.player.protectionUser().startRegionCreation(protectionRegion)
+
+                    if (started) {
+                        click.closeForPlayer()
+                        protectionRegion.setCornerMarkers()
+                        protectionUser.updateMarkerItems()
+                    } else {
+                        click.playNoSound()
+                    }
+                } else {
+                    click.playNoSound()
+                    click.player.sendText {
+                        appendErrorPrefix()
+                        error("Du musst dich auf deinem Grundstück befinden, um es erweitern zu können.")
+                    }
+                }
+            }
+        }
     }
 
     private val membersItem = ItemType.PLAYER_HEAD.createItemStack().apply {
@@ -81,6 +118,12 @@ object ProtectionInfoView : View() {
     private val renameItem = ItemType.NAME_TAG.createItemStack().apply {
         displayName {
             protectColored("Umbenennen")
+        }
+    }
+
+    private val expandItem = ItemType.OAK_SIGN.createItemStack().apply {
+        displayName {
+            protectColored("Erweitern")
         }
     }
 

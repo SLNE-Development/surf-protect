@@ -32,6 +32,18 @@ fun Context.playNewPageSound() {
     }
 }
 
+fun Context.playNoSound() {
+    player.playSound(true) {
+        type(Sound.ENTITY_VILLAGER_NO)
+    }
+}
+
+fun Context.playYesSound() {
+    player.playSound(true) {
+        type(Sound.ENTITY_VILLAGER_YES)
+    }
+}
+
 val previousItem = MenuHeads.ARROW_LEFT.clone().apply {
     displayName {
         protectColored("Vorherige Seite")
