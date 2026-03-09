@@ -127,7 +127,7 @@ object ProtectionEditFlagsView : View() {
 
     private fun createFlagItem(flag: EditableProtectionFlags) = buildItem(flag.icon) {
         displayName {
-            protectColored(flag.displayName)
+            append(flag.displayName)
         }
     }
 

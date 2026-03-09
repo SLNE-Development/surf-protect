@@ -1,5 +1,6 @@
 package dev.slne.surf.protect.paper.menu.view.sell
 
+import com.github.shynixn.mccoroutine.folia.entityDispatcher
 import com.github.shynixn.mccoroutine.folia.launch
 import com.sk89q.worldguard.protection.flags.StateFlag
 import dev.slne.surf.protect.paper.menu.util.outlineItem
@@ -18,6 +19,7 @@ import dev.slne.surf.surfapi.bukkit.api.inventory.framework.titleBuilder
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
 import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import dev.slne.surf.transaction.api.currency.Currency
+import kotlinx.coroutines.withContext
 import me.devnatan.inventoryframework.View
 import me.devnatan.inventoryframework.ViewConfigBuilder
 import me.devnatan.inventoryframework.context.RenderContext
@@ -89,10 +91,12 @@ object ProtectionSellConfirmView : View() {
                 regionManager.removeRegion(region.id)
                 ProtectionVisualizerManager.onRegionDeletion(region)
 
-                click.openForPlayer(
-                    ProtectionInfoView::class.java,
-                    mapOf("protection" to protection)
-                )
+                withContext(plugin.entityDispatcher(click.player)) {
+                    click.openForPlayer(
+                        ProtectionInfoView::class.java,
+                        mapOf("protection" to protection)
+                    )
+                }
             }
         }
     }
