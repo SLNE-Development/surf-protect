@@ -69,7 +69,7 @@ val nextItem = MenuHeads.ARROW_RIGHT.clone().apply {
 
 val backItem = MenuHeads.CROSS.apply {
     displayName {
-        primary("Zurück".toSmallCaps(), TextDecoration.BOLD)
+        protectColored("Zurück".toSmallCaps(), TextDecoration.BOLD)
     }
 
     buildLore {
@@ -81,7 +81,7 @@ val backItem = MenuHeads.CROSS.apply {
 
 val closeItem = MenuHeads.CROSS.apply {
     displayName {
-        primary("Schließen".toSmallCaps(), TextDecoration.BOLD)
+        protectColored("Schließen".toSmallCaps(), TextDecoration.BOLD)
     }
 
     buildLore {
