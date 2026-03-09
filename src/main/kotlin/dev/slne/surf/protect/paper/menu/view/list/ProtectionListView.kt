@@ -61,40 +61,36 @@ object ProtectionListView : View() {
 
         render
             .layoutSlot('P')
-            .updateOnStateChange(paginationState)
-            .displayIf { _ ->
-                pagination.canBack()
-            }
-            .onRender { slotRender ->
+            .watch(paginationState)
+            .renderWith {
                 if (pagination.canBack()) {
-                    slotRender.item = previousItem
+                    backItem
                 } else {
-                    slotRender.item = outlineItem
+                    outlineItem
                 }
             }
             .onClick { context ->
-                pagination.back()
-                pagination.update()
-                context.playNewPageSound()
+                if (pagination.canBack()) {
+                    pagination.back()
+                    context.playNewPageSound()
+                }
             }
 
         render
             .layoutSlot('N')
-            .updateOnStateChange(paginationState)
-            .displayIf { _ ->
-                pagination.canAdvance()
-            }
-            .onRender { slotRender ->
+            .watch(paginationState)
+            .renderWith {
                 if (pagination.canAdvance()) {
-                    slotRender.item = nextItem
+                    nextItem
                 } else {
-                    slotRender.item = outlineItem
+                    outlineItem
                 }
             }
             .onClick { context ->
-                pagination.advance()
-                pagination.update()
-                context.playNewPageSound()
+                if (pagination.canAdvance()) {
+                    pagination.advance()
+                    context.playNewPageSound()
+                }
             }
     }
 }
