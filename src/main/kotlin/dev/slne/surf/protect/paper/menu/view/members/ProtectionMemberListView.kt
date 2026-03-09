@@ -1,11 +1,11 @@
 package dev.slne.surf.protect.paper.menu.view.members
 
 import com.sk89q.worldedit.bukkit.BukkitAdapter
+import dev.slne.surf.protect.paper.menu.dialog.protectionAddMemberDialog
 import dev.slne.surf.protect.paper.menu.util.*
 import dev.slne.surf.protect.paper.menu.view.ProtectionInfoView
 import dev.slne.surf.protect.paper.region.info.RegionInfo
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
-import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
 import dev.slne.surf.surfapi.bukkit.api.builder.displayName
 import dev.slne.surf.surfapi.bukkit.api.inventory.framework.titleBuilder
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
@@ -51,7 +51,7 @@ object ProtectionMemberListView : View() {
             }
             .size(5)
             .layout(
-                "OOOO?OOOO",
+                "OOOOAOOOO",
                 "ORRRRRRRO",
                 "ORRRRRRRO",
                 "ORRRRRRRO",
@@ -71,6 +71,11 @@ object ProtectionMemberListView : View() {
         }
 
         render.layoutSlot('O', outlineItem)
+        render.layoutSlot('A', addMemberItem).onClick { context ->
+            context.playGeneralClickSound()
+            context.closeForPlayer()
+            context.player.showDialog(protectionAddMemberDialog(protectionState.get(context)))
+        }
 
         render
             .layoutSlot('P')
@@ -110,54 +115,10 @@ object ProtectionMemberListView : View() {
                 context.playNewPageSound()
             }
     }
-}
 
-@Suppress("UnstableApiUsage")
-fun createRegionItem(protection: RegionInfo) = ItemType.DIRT.createItemStack().apply {
-    displayName {
-        protectColored(protection.name)
-    }
-
-    buildLore {
-        emptyLine()
-        line {
-            protectColored("Grundstücksinformation".toSmallCaps(), TextDecoration.BOLD)
-        }
-        line {
-            spacer("-")
-            appendSpace()
-            protectColored("Besitzer: ")
-            variableValue(protection.owners.joinToString(", ") { it.displayName })
-        }
-        line {
-            spacer("-")
-            appendSpace()
-            protectColored("Id: ")
-            variableValue(protection.region.id)
-        }
-        line {
-            spacer("-")
-            appendSpace()
-            protectColored("Fläche: ")
-            variableValue("${protection.volume} Blöcke")
-        }
-        line {
-            spacer("-")
-            appendSpace()
-            protectColored("Mitglieder: ")
-            variableValue(protection.members.size)
-        }
-        line {
-            spacer("-")
-            appendSpace()
-            protectColored("Bezahlter Preis: ")
-            variableValue("${protection.price}CC")
-        }
-        line {
-            spacer("-")
-            appendSpace()
-            protectColored("Verkaufspreis: ")
-            variableValue("${protection.retailPrice}CC")
+    val addMemberItem = ItemType.PLAYER_HEAD.createItemStack().apply {
+        displayName {
+            protectColored("Mitglied hinzufügen")
         }
     }
 }
