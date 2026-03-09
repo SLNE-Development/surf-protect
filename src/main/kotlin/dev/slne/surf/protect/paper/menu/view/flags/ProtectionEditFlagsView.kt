@@ -2,7 +2,7 @@ package dev.slne.surf.protect.paper.menu.view.flags
 
 import com.sk89q.worldguard.protection.flags.StateFlag
 import dev.slne.surf.protect.paper.menu.util.*
-import dev.slne.surf.protect.paper.menu.view.ProtectionMainView
+import dev.slne.surf.protect.paper.menu.view.ProtectionInfoView
 import dev.slne.surf.protect.paper.region.flags.EditableProtectionFlags
 import dev.slne.surf.protect.paper.region.info.RegionInfo
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
@@ -64,7 +64,7 @@ object ProtectionEditFlagsView : View() {
     override fun onInit(config: ViewConfigBuilder) {
         config
             .titleBuilder {
-                protectColored("Grundstück - Flags bearbeiten".toSmallCaps(), TextDecoration.BOLD)
+                protectColored("Grundstück - Flags".toSmallCaps(), TextDecoration.BOLD)
             }
             .size(5)
             .layout(
@@ -81,7 +81,10 @@ object ProtectionEditFlagsView : View() {
         val pagination = paginationState.get(render)
 
         render.layoutSlot('B', backItem).onClick { context ->
-            context.openForPlayer(ProtectionMainView::class.java)
+            context.openForPlayer(
+                ProtectionInfoView::class.java,
+                mapOf("protection" to protectionState.get(render))
+            )
         }
 
         render.layoutSlot('O', outlineItem)

@@ -1,6 +1,5 @@
 package dev.slne.surf.protect.paper.menu.view.members
 
-import com.sk89q.worldedit.bukkit.BukkitAdapter
 import dev.slne.surf.protect.paper.menu.dialog.protectionAddMemberDialog
 import dev.slne.surf.protect.paper.menu.util.*
 import dev.slne.surf.protect.paper.menu.view.ProtectionInfoView
@@ -15,6 +14,7 @@ import me.devnatan.inventoryframework.component.Pagination
 import me.devnatan.inventoryframework.context.RenderContext
 import me.devnatan.inventoryframework.state.State
 import net.kyori.adventure.text.format.TextDecoration
+import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.inventory.ItemType
 import org.bukkit.inventory.meta.SkullMeta
@@ -25,15 +25,16 @@ object ProtectionMemberListView : View() {
 
     private val paginationState: State<Pagination> =
         buildLazyPaginationState { context ->
-            protectionState.get(context).members
+            protectionState.get(context).members.map { Bukkit.getOfflinePlayer(it.uniqueId) }
+                .toMutableList()
         }.elementFactory { _, builder, _, player ->
             builder.withItem(buildItem(Material.PLAYER_HEAD) {
                 displayName {
-                    protectColored(player.displayName)
+                    protectColored(player.name ?: "#Unbekannt")
                 }
 
                 editMeta(SkullMeta::class.java) {
-                    it.owningPlayer = BukkitAdapter.adapt(player)
+                    it.owningPlayer = player
                 }
             }).onClick { context ->
                 context.playGeneralClickSound()

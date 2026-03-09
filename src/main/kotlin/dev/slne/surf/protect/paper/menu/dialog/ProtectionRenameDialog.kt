@@ -1,5 +1,6 @@
 package dev.slne.surf.protect.paper.menu.dialog
 
+import com.github.shynixn.mccoroutine.folia.entityDispatcher
 import com.github.shynixn.mccoroutine.folia.launch
 import dev.slne.surf.protect.paper.config.config
 import dev.slne.surf.protect.paper.menu.util.protectColored
@@ -13,6 +14,7 @@ import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import dev.slne.surf.transaction.api.currency.Currency
 import dev.slne.surf.transaction.api.transaction.TransactionResult
 import dev.slne.surf.transaction.api.user.transactionUser
+import kotlinx.coroutines.withContext
 import org.bukkit.entity.Player
 
 @Suppress("UnstableApiUsage")
@@ -108,6 +110,12 @@ private fun handleRename(player: Player, newName: String, protection: RegionInfo
         }
 
         player.closeDialog()
-        viewFrame.open(ProtectionInfoView::class.java, player, mapOf("protection" to protection))
+        withContext(plugin.entityDispatcher(player)) {
+            viewFrame.open(
+                ProtectionInfoView::class.java,
+                player,
+                mapOf("protection" to protection)
+            )
+        }
     }
 }
