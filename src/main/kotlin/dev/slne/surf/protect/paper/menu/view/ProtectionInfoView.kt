@@ -1,5 +1,6 @@
 package dev.slne.surf.protect.paper.menu.view
 
+import com.github.shynixn.mccoroutine.folia.entityDispatcher
 import com.github.shynixn.mccoroutine.folia.launch
 import dev.slne.surf.protect.paper.menu.dialog.protectionRenameDialog
 import dev.slne.surf.protect.paper.menu.util.*
@@ -17,6 +18,7 @@ import dev.slne.surf.surfapi.bukkit.api.builder.displayName
 import dev.slne.surf.surfapi.bukkit.api.inventory.framework.titleBuilder
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
 import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
+import kotlinx.coroutines.withContext
 import me.devnatan.inventoryframework.View
 import me.devnatan.inventoryframework.ViewConfigBuilder
 import me.devnatan.inventoryframework.context.RenderContext
@@ -93,7 +95,10 @@ object ProtectionInfoView : View() {
                         click.player.protectionUser().startRegionCreation(protectionRegion)
 
                     if (started) {
-                        click.closeForPlayer()
+                        withContext(plugin.entityDispatcher(click.player)) {
+                            click.closeForPlayer()
+                        }
+
                         protectionRegion.setCornerMarkers()
                         protectionUser.updateMarkerItems()
                     } else {
@@ -104,6 +109,9 @@ object ProtectionInfoView : View() {
                     click.player.sendText {
                         appendErrorPrefix()
                         error("Du musst dich auf deinem Grundstück befinden, um es erweitern zu können.")
+                    }
+                    withContext(plugin.entityDispatcher(click.player)) {
+                        click.closeForPlayer()
                     }
                 }
             }
