@@ -3,9 +3,9 @@ package dev.slne.surf.protect.paper.menu.view
 import dev.slne.surf.protect.paper.menu.dialog.protectionRenameDialog
 import dev.slne.surf.protect.paper.menu.util.backItem
 import dev.slne.surf.protect.paper.menu.util.outlineItem
+import dev.slne.surf.protect.paper.menu.util.playGeneralClickSound
 import dev.slne.surf.protect.paper.menu.util.protectColored
 import dev.slne.surf.protect.paper.menu.view.list.ProtectionListView
-import dev.slne.surf.protect.paper.menu.view.list.playGeneralClickSound
 import dev.slne.surf.protect.paper.menu.view.members.ProtectionMemberListView
 import dev.slne.surf.protect.paper.region.info.RegionInfo
 import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
@@ -32,8 +32,8 @@ object ProtectionInfoView : View() {
             .layout(
                 "OOOOOOOOO",
                 "O       O",
-                "O M I S O",
-                "O   R   O",
+                "ORM I SFO",
+                "O       O",
                 "OOOOBOOOO"
             )
             .cancelInteractions()
@@ -59,6 +59,7 @@ object ProtectionInfoView : View() {
             click.closeForPlayer()
             click.player.showDialog(protectionRenameDialog(protectionState.get(click)))
         }
+        render.layoutSlot('F', editFlags)
     }
 
     private val membersItem = ItemType.PLAYER_HEAD.createItemStack().apply {
@@ -76,6 +77,12 @@ object ProtectionInfoView : View() {
     private val renameItem = ItemType.NAME_TAG.createItemStack().apply {
         displayName {
             protectColored("Umbenennen")
+        }
+    }
+
+    private val editFlags = ItemType.REDSTONE_TORCH.createItemStack().apply {
+        displayName {
+            protectColored("Flags bearbeiten")
         }
     }
 

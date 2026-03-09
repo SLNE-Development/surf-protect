@@ -3,6 +3,7 @@ package dev.slne.surf.protect.paper.menu.view.members
 import com.sk89q.worldedit.bukkit.BukkitAdapter
 import com.sk89q.worldguard.LocalPlayer
 import dev.slne.surf.protect.paper.menu.util.outlineItem
+import dev.slne.surf.protect.paper.menu.util.playGeneralClickSound
 import dev.slne.surf.protect.paper.menu.util.protectColored
 import dev.slne.surf.protect.paper.menu.view.ProtectionInfoView
 import dev.slne.surf.protect.paper.region.info.RegionInfo
