@@ -91,8 +91,6 @@ object ProtectionMainView : View() {
                         error("Es ist ein Fehler aufgetreten. Versuche es später erneut. ")
                     }
                 }
-
-                click.openForPlayer(ProtectionMainView::class.java)
             }
         }
         render.layoutSlot('P', plotMessagesItem).onClick { click ->

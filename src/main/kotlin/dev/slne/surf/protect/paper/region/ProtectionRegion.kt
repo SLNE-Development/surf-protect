@@ -10,7 +10,6 @@ import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion
 import com.sk89q.worldguard.protection.regions.ProtectedRegion
 import dev.slne.surf.protect.paper.config.config
 import dev.slne.surf.protect.paper.math.Mth
-import dev.slne.surf.protect.paper.menu.view.ProtectionMainView
 import dev.slne.surf.protect.paper.message.Messages
 import dev.slne.surf.protect.paper.plugin
 import dev.slne.surf.protect.paper.region.flags.EditableProtectionFlags
@@ -24,7 +23,6 @@ import dev.slne.surf.protect.paper.region.visual.Trail
 import dev.slne.surf.protect.paper.region.visual.visualizer.ProtectionVisualizerManager
 import dev.slne.surf.protect.paper.user.ProtectionUser
 import dev.slne.surf.protect.paper.util.*
-import dev.slne.surf.surfapi.bukkit.api.inventory.framework.viewFrame
 import dev.slne.surf.surfapi.bukkit.api.util.getHighestBlockYAtBlockCoordinates
 import dev.slne.surf.surfapi.bukkit.api.util.getXFromChunkKey
 import dev.slne.surf.surfapi.bukkit.api.util.getZFromChunkKey
@@ -364,10 +362,6 @@ class ProtectionRegion(
                 protectionUser.bukkitPlayer?.sendText {
                     appendSuccessPrefix()
                     success("Das Grundstück wurde erstellt.")
-                }
-
-                protectionUser.bukkitPlayer?.let {
-                    viewFrame.open(ProtectionMainView::class.java, it)
                 }
 
                 if (expandingProtection != null) {
