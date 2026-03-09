@@ -15,11 +15,14 @@ import me.devnatan.inventoryframework.View
 import me.devnatan.inventoryframework.ViewConfigBuilder
 import me.devnatan.inventoryframework.component.Pagination
 import me.devnatan.inventoryframework.context.RenderContext
+import me.devnatan.inventoryframework.state.MutableState
 import me.devnatan.inventoryframework.state.State
 import net.kyori.adventure.text.format.TextDecoration
 
 object ProtectionEditFlagsView : View() {
     val protectionState: State<RegionInfo> = initialState("protection")
+    val nullRegionInfo: RegionInfo? = null
+    val localProtectionState: MutableState<RegionInfo?> = mutableState(nullRegionInfo)
 
     private val paginationState: State<Pagination> =
         buildLazyPaginationState { _ ->
@@ -47,11 +50,12 @@ object ProtectionEditFlagsView : View() {
                 }
 
                 region.setFlag(flag.flag, newState)
+                localProtectionState.set(protection, context)
                 context.playGeneralClickSound()
 
                 context.openForPlayer(
                     ProtectionEditFlagsView::class.java,
-                    mapOf("protection" to protection)
+                    mapOf("protection" to localProtectionState.get(context))
                 ) // TODO: only update inventory instead of reopening, currently not working by api
 
                 context.player.sendText {
@@ -87,6 +91,8 @@ object ProtectionEditFlagsView : View() {
     }
 
     override fun onFirstRender(render: RenderContext) {
+        localProtectionState.set(protectionState.get(render), render)
+
         val pagination = paginationState.get(render)
 
         render.layoutSlot('B', backItem).onClick { context ->
