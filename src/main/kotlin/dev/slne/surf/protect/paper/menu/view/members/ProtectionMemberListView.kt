@@ -9,16 +9,13 @@ import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
 import dev.slne.surf.surfapi.bukkit.api.builder.displayName
 import dev.slne.surf.surfapi.bukkit.api.inventory.framework.titleBuilder
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
-import dev.slne.surf.surfapi.core.api.messages.adventure.playSound
 import me.devnatan.inventoryframework.View
 import me.devnatan.inventoryframework.ViewConfigBuilder
 import me.devnatan.inventoryframework.component.Pagination
 import me.devnatan.inventoryframework.context.RenderContext
-import me.devnatan.inventoryframework.context.SlotClickContext
 import me.devnatan.inventoryframework.state.State
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
-import org.bukkit.Sound
 import org.bukkit.inventory.ItemType
 import org.bukkit.inventory.meta.SkullMeta
 
@@ -120,17 +117,5 @@ object ProtectionMemberListView : View() {
         displayName {
             protectColored("Mitglied hinzufügen")
         }
-    }
-}
-
-fun SlotClickContext.playGeneralClickSound() {
-    player.playSound(true) {
-        type(Sound.UI_BUTTON_CLICK)
-    }
-}
-
-fun SlotClickContext.playNewPageSound() {
-    player.playSound(true) {
-        type(Sound.ENTITY_CHICKEN_EGG)
     }
 }

@@ -1,5 +1,6 @@
 package dev.slne.surf.protect.paper.menu.view
 
+import dev.slne.surf.protect.paper.menu.dialog.protectionRenameDialog
 import dev.slne.surf.protect.paper.menu.util.backItem
 import dev.slne.surf.protect.paper.menu.util.outlineItem
 import dev.slne.surf.protect.paper.menu.util.protectColored
@@ -53,7 +54,11 @@ object ProtectionInfoView : View() {
         }
         render.layoutSlot('I', createRegionItem(protectionState.get(render)))
         render.layoutSlot('S', sellItem)
-        render.layoutSlot('R', renameItem)
+        render.layoutSlot('R', renameItem).onClick { click ->
+            click.playGeneralClickSound()
+            click.closeForPlayer()
+            click.player.showDialog(protectionRenameDialog(protectionState.get(click)))
+        }
     }
 
     private val membersItem = ItemType.PLAYER_HEAD.createItemStack().apply {
