@@ -69,4 +69,4 @@ val closeItem = MenuHeads.CROSS.apply {
 }
 
 fun SurfComponentBuilder.protectColored(text: Any, vararg decoration: TextDecoration) =
-    coloredComponent(text.toString(), TextColor.color(3, 252, 173), *decoration)
+    coloredComponent(text.toString(), TextColor.color(50, 121, 168), *decoration)

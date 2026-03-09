@@ -32,7 +32,7 @@ object ProtectionMainView : View() {
             }
             .size(5)
             .layout(
-                "OOOO?OOOO",
+                "OOOOOOOOO",
                 "O       O",
                 "O LV CP O",
                 "O       O",
