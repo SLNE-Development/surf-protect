@@ -1,5 +1,6 @@
 package dev.slne.surf.protect.paper.menu.view.flags
 
+import com.sk89q.worldguard.protection.flags.StateFlag
 import dev.slne.surf.protect.paper.menu.util.*
 import dev.slne.surf.protect.paper.menu.view.ProtectionMainView
 import dev.slne.surf.protect.paper.region.flags.EditableProtectionFlags
@@ -8,6 +9,7 @@ import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
 import dev.slne.surf.surfapi.bukkit.api.builder.displayName
 import dev.slne.surf.surfapi.bukkit.api.inventory.framework.titleBuilder
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
+import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import me.devnatan.inventoryframework.View
 import me.devnatan.inventoryframework.ViewConfigBuilder
 import me.devnatan.inventoryframework.component.Pagination
@@ -23,7 +25,37 @@ object ProtectionEditFlagsView : View() {
             EditableProtectionFlags.entries.toMutableList()
         }.elementFactory { _, builder, _, flag ->
             builder.withItem(createFlagItem(flag)).onClick { context ->
+                val protection = protectionState.get(context)
+                val region = protection.region
+
+                val oldState = region.getFlag(flag.flag) ?: flag.initialState
+
+                val newState = when (oldState) {
+                    null -> flag.initialState ?: StateFlag.State.ALLOW
+                    else -> if (oldState == flag.initialState) {
+                        flag.initialState.other
+                    } else {
+                        flag.initialState ?: StateFlag.State.ALLOW
+                    }
+                }
+
+                region.setFlag(flag.flag, newState)
                 context.playGeneralClickSound()
+                context.update()
+
+                context.player.sendText {
+                    appendSuccessPrefix()
+                    success("Du hast die Flag ")
+                    append(flag.displayName)
+                    success(" auf ")
+                    variableValue(
+                        when (newState) {
+                            StateFlag.State.ALLOW -> "Erlaubt"
+                            StateFlag.State.DENY -> "Verboten"
+                        }
+                    )
+                    success(" gesetzt.")
+                }
             }
         }.layoutTarget('R').build()
 
@@ -96,4 +128,10 @@ object ProtectionEditFlagsView : View() {
             protectColored(flag.displayName)
         }
     }
+
+    private val StateFlag.State.other
+        get() = when (this) {
+            StateFlag.State.ALLOW -> StateFlag.State.DENY
+            StateFlag.State.DENY -> StateFlag.State.ALLOW
+        }
 }
