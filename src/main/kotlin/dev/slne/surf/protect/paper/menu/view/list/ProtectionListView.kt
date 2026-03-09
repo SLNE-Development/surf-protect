@@ -25,13 +25,16 @@ object ProtectionListView : View() {
             context.player.protectionUser().localPlayer.allRegions()
                 .map { RegionInfo(it) }.toMutableList()
         }.elementFactory { _, builder, _, protection ->
-            builder.withItem(createRegionItem(protection)).onClick { context ->
-                context.playGeneralClickSound()
-                context.openForPlayer(
-                    ProtectionInfoView::class.java,
-                    mapOf("protection" to protection)
-                )
+            builder.renderWith {
+                createRegionItem(protection)
             }
+                .onClick { context ->
+                    context.playGeneralClickSound()
+                    context.openForPlayer(
+                        ProtectionInfoView::class.java,
+                        mapOf("protection" to protection)
+                    )
+                }
         }.layoutTarget('R').build()
 
     override fun onInit(config: ViewConfigBuilder) {
