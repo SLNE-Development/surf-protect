@@ -3,10 +3,7 @@ package dev.slne.surf.protect.paper.menu.view.sell
 import com.github.shynixn.mccoroutine.folia.entityDispatcher
 import com.github.shynixn.mccoroutine.folia.launch
 import com.sk89q.worldguard.protection.flags.StateFlag
-import dev.slne.surf.protect.paper.menu.util.appendBlob
-import dev.slne.surf.protect.paper.menu.util.outlineItem
-import dev.slne.surf.protect.paper.menu.util.playGeneralClickSound
-import dev.slne.surf.protect.paper.menu.util.protectColored
+import dev.slne.surf.protect.paper.menu.util.*
 import dev.slne.surf.protect.paper.menu.view.ProtectionInfoView
 import dev.slne.surf.protect.paper.plugin
 import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry
@@ -95,6 +92,7 @@ object ProtectionSellConfirmView : View() {
 
                 withContext(plugin.entityDispatcher(click.player)) {
                     click.closeForPlayer()
+                    click.playYesSound()
                 }
             }
         }
