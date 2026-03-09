@@ -1,14 +1,20 @@
 package dev.slne.surf.protect.paper.menu.view
 
+import com.github.shynixn.mccoroutine.folia.entityDispatcher
+import com.github.shynixn.mccoroutine.folia.launch
 import dev.slne.surf.protect.paper.menu.util.closeItem
 import dev.slne.surf.protect.paper.menu.util.outlineItem
 import dev.slne.surf.protect.paper.menu.util.playGeneralClickSound
 import dev.slne.surf.protect.paper.menu.util.protectColored
 import dev.slne.surf.protect.paper.menu.view.list.ProtectionListView
+import dev.slne.surf.protect.paper.plugin
+import dev.slne.surf.protect.paper.region.ProtectionRegion
+import dev.slne.surf.protect.paper.user.ProtectionUser
 import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
 import dev.slne.surf.surfapi.bukkit.api.builder.displayName
 import dev.slne.surf.surfapi.bukkit.api.inventory.framework.titleBuilder
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
+import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import me.devnatan.inventoryframework.View
 import me.devnatan.inventoryframework.ViewConfigBuilder
 import me.devnatan.inventoryframework.context.RenderContext
@@ -45,7 +51,31 @@ object ProtectionMainView : View() {
             click.openForPlayer(ProtectionListView::class.java)
         }
         render.layoutSlot('V', visualizeItem)
-        render.layoutSlot('C', createItem)
+        render.layoutSlot('C', createItem).onClick { click ->
+            val player = click.player
+
+            click.closeForPlayer()
+
+            plugin.launch(plugin.entityDispatcher(player)) {
+                val user = ProtectionUser.getProtectionUser(player)
+                val regionCreation = ProtectionRegion(user, player, player.inventory.contents)
+                val success = user.startRegionCreation(regionCreation)
+
+                if (success) {
+                    player.sendText {
+                        appendSuccessPrefix()
+                        success("Du befindest dich nun im Protection-Mode. ")
+                    }
+                } else {
+                    player.sendText {
+                        appendErrorPrefix()
+                        error("Es ist ein Fehler aufgetreten. Versuche es später erneut. ")
+                    }
+                }
+
+                click.openForPlayer(ProtectionMainView::class.java)
+            }
+        }
         render.layoutSlot('P', plotMessagesItem)
     }
 

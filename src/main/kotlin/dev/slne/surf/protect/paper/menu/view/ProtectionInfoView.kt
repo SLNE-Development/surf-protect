@@ -3,6 +3,7 @@ package dev.slne.surf.protect.paper.menu.view
 import com.github.shynixn.mccoroutine.folia.launch
 import dev.slne.surf.protect.paper.menu.dialog.protectionRenameDialog
 import dev.slne.surf.protect.paper.menu.util.*
+import dev.slne.surf.protect.paper.menu.view.flags.ProtectionEditFlagsView
 import dev.slne.surf.protect.paper.menu.view.list.ProtectionListView
 import dev.slne.surf.protect.paper.menu.view.members.ProtectionMemberListView
 import dev.slne.surf.protect.paper.menu.view.sell.ProtectionSellConfirmView
@@ -66,7 +67,13 @@ object ProtectionInfoView : View() {
             click.closeForPlayer()
             click.player.showDialog(protectionRenameDialog(protectionState.get(click)))
         }
-        render.layoutSlot('F', editFlags)
+        render.layoutSlot('F', editFlags).onClick { onClick ->
+            onClick.playGeneralClickSound()
+            onClick.openForPlayer(
+                ProtectionEditFlagsView::class.java,
+                mapOf("protection" to protectionState.get(render))
+            )
+        }
         render.layoutSlot('E', expandItem).onClick { click ->
             click.playGeneralClickSound()
 
