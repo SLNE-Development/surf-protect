@@ -12,6 +12,8 @@ surfPaperPluginApi {
     foliaSupported(true)
     generateLibraryLoader(true)
 
+    authors.addAll("Ammo", "twisti", "red")
+
     serverDependencies {
         registerRequired("surf-transaction-bukkit")
         registerRequired("WorldGuard")
