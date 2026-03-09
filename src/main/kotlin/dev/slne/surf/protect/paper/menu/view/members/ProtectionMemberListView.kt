@@ -1,11 +1,10 @@
-package dev.slne.surf.protect.paper.menu.view.list
+package dev.slne.surf.protect.paper.menu.view.members
 
+import com.sk89q.worldedit.bukkit.BukkitAdapter
 import dev.slne.surf.protect.paper.menu.util.*
 import dev.slne.surf.protect.paper.menu.view.ProtectionInfoView
-import dev.slne.surf.protect.paper.menu.view.ProtectionMainView
 import dev.slne.surf.protect.paper.region.info.RegionInfo
-import dev.slne.surf.protect.paper.user.protectionUser
-import dev.slne.surf.protect.paper.util.allRegions
+import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
 import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
 import dev.slne.surf.surfapi.bukkit.api.builder.displayName
 import dev.slne.surf.surfapi.bukkit.api.inventory.framework.titleBuilder
@@ -18,34 +17,45 @@ import me.devnatan.inventoryframework.context.RenderContext
 import me.devnatan.inventoryframework.context.SlotClickContext
 import me.devnatan.inventoryframework.state.State
 import net.kyori.adventure.text.format.TextDecoration
+import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.inventory.ItemType
+import org.bukkit.inventory.meta.SkullMeta
 
 @Suppress("UnstableApiUsage")
-object ProtectionListView : View() {
+object ProtectionMemberListView : View() {
+    val protectionState: State<RegionInfo> = initialState("protection")
+
     private val paginationState: State<Pagination> =
         buildLazyPaginationState { context ->
-            context.player.protectionUser().localPlayer.allRegions()
-                .map { RegionInfo(it) }.toMutableList()
-        }.elementFactory { _, builder, _, stats ->
-            builder.withItem(createRegionItem(stats)).onClick { context ->
+            protectionState.get(context).members
+        }.elementFactory { _, builder, _, player ->
+            builder.withItem(buildItem(Material.PLAYER_HEAD) {
+                displayName {
+                    protectColored(player.displayName)
+                }
+
+                editMeta(SkullMeta::class.java) {
+                    it.owningPlayer = BukkitAdapter.adapt(player)
+                }
+            }).onClick { context ->
                 context.playGeneralClickSound()
-                context.openForPlayer(ProtectionInfoView::class.java)
+                context.openForPlayer(RemoveMemberConfigView::class.java)
             }
         }.layoutTarget('R').build()
 
     override fun onInit(config: ViewConfigBuilder) {
         config
             .titleBuilder {
-                protectColored("Deine Grundstücke".toSmallCaps(), TextDecoration.BOLD)
+                protectColored("Grundstück - Mitglieder".toSmallCaps(), TextDecoration.BOLD)
             }
             .size(5)
             .layout(
-                "OOOOOOOOO",
+                "OOOO?OOOO",
                 "ORRRRRRRO",
                 "ORRRRRRRO",
                 "ORRRRRRRO",
-                "OAOPBNOOS"
+                "OOPOBONOO"
             )
             .cancelInteractions()
     }
@@ -54,7 +64,10 @@ object ProtectionListView : View() {
         val pagination = paginationState.get(render)
 
         render.layoutSlot('B', backItem).onClick { context ->
-            context.openForPlayer(ProtectionMainView::class.java)
+            context.openForPlayer(
+                ProtectionInfoView::class.java,
+                mapOf("protection" to protectionState.get(context))
+            )
         }
 
         render.layoutSlot('O', outlineItem)
