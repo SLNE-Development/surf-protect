@@ -44,6 +44,7 @@ import org.bukkit.inventory.ItemStack
 import java.lang.ref.WeakReference
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.min
+import kotlin.math.roundToInt
 
 class ProtectionRegion(
     val protectionUser: ProtectionUser,
@@ -338,7 +339,7 @@ class ProtectionRegion(
         }
 
         val (pricePerBlock) = centerLoc.getProtectionPricePerBlock()
-        val cost = tempRegion.effectiveVolume * pricePerBlock
+        val cost = (tempRegion.effectiveVolume * pricePerBlock).roundToInt()
         val costBD = (-cost).toBigDecimal()
         val currency = config.currency.currency
 

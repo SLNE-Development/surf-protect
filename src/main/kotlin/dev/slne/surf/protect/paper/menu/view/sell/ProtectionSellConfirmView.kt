@@ -86,7 +86,7 @@ object ProtectionSellConfirmView : View() {
 
             plugin.launch {
                 click.player.protectionUser().transactionUser.deposit(
-                    protection.retailPrice.toBigDecimal(),
+                    protection.retailPrice.roundToInt().toBigDecimal(),
                     Currency.default()
                 )
 
