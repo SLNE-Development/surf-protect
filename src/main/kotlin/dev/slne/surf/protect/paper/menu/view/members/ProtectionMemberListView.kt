@@ -37,7 +37,7 @@ object ProtectionMemberListView : View() {
                 }
             }).onClick { context ->
                 context.playGeneralClickSound()
-                context.openForPlayer(RemoveMemberConfigView::class.java)
+                context.openForPlayer(RemoveMemberConfirmView::class.java)
             }
         }.layoutTarget('R').build()
 

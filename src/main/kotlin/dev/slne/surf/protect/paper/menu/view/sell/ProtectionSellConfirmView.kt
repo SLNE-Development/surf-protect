@@ -1,92 +1,99 @@
-package dev.slne.surf.protect.paper.menu.view
+package dev.slne.surf.protect.paper.menu.view.sell
 
-import dev.slne.surf.protect.paper.menu.dialog.protectionRenameDialog
-import dev.slne.surf.protect.paper.menu.util.backItem
+import com.github.shynixn.mccoroutine.folia.launch
+import com.sk89q.worldguard.protection.flags.StateFlag
 import dev.slne.surf.protect.paper.menu.util.outlineItem
 import dev.slne.surf.protect.paper.menu.util.playGeneralClickSound
 import dev.slne.surf.protect.paper.menu.util.protectColored
-import dev.slne.surf.protect.paper.menu.view.list.ProtectionListView
-import dev.slne.surf.protect.paper.menu.view.members.ProtectionMemberListView
-import dev.slne.surf.protect.paper.menu.view.sell.ProtectionSellConfirmView
+import dev.slne.surf.protect.paper.menu.view.ProtectionInfoView
+import dev.slne.surf.protect.paper.plugin
+import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry
 import dev.slne.surf.protect.paper.region.info.RegionInfo
+import dev.slne.surf.protect.paper.region.visual.visualizer.ProtectionVisualizerManager
+import dev.slne.surf.protect.paper.user.protectionUser
+import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
 import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
 import dev.slne.surf.surfapi.bukkit.api.builder.displayName
 import dev.slne.surf.surfapi.bukkit.api.inventory.framework.titleBuilder
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
+import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
+import dev.slne.surf.transaction.api.currency.Currency
 import me.devnatan.inventoryframework.View
 import me.devnatan.inventoryframework.ViewConfigBuilder
 import me.devnatan.inventoryframework.context.RenderContext
 import me.devnatan.inventoryframework.state.State
 import net.kyori.adventure.text.format.TextDecoration
+import org.bukkit.Material
 import org.bukkit.inventory.ItemType
 
 @Suppress("UnstableApiUsage")
-object ProtectionInfoView : View() {
+object ProtectionSellConfirmView : View() {
     val protectionState: State<RegionInfo> = initialState("protection")
 
     override fun onInit(config: ViewConfigBuilder) {
         config
             .titleBuilder {
-                protectColored("Deine Gründstücke - Info".toSmallCaps(), TextDecoration.BOLD)
+                protectColored("Grundstück - Verkaufen".toSmallCaps(), TextDecoration.BOLD)
             }
-            .size(5)
+            .size(3)
             .layout(
                 "OOOOOOOOO",
-                "O       O",
-                "ORM I SFO",
-                "O       O",
-                "OOOOBOOOO"
+                "ORCRIRYRO",
+                "OOOOOOOOO"
             )
             .cancelInteractions()
     }
 
     override fun onFirstRender(render: RenderContext) {
         render.layoutSlot('O', outlineItem)
-        render.layoutSlot('B', backItem).onClick { click ->
-            click.playGeneralClickSound()
-            click.openForPlayer(ProtectionListView::class.java)
-        }
-        render.layoutSlot('M', membersItem).onClick { click ->
+        render.layoutSlot('I', createRegionItem(protectionState.get(render)))
+        render.layoutSlot('C', cancelItem).onClick { click ->
             click.playGeneralClickSound()
             click.openForPlayer(
-                ProtectionMemberListView::class.java,
+                ProtectionInfoView::class.java,
                 mapOf("protection" to protectionState.get(render))
             )
         }
-        render.layoutSlot('I', createRegionItem(protectionState.get(render)))
-        render.layoutSlot('S', sellItem).onClick { click ->
+        render.layoutSlot('Y', confirmItem).onClick { click ->
             click.playGeneralClickSound()
-            click.openForPlayer(ProtectionSellConfirmView::class.java)
-        }
-        render.layoutSlot('R', renameItem).onClick { click ->
-            click.playGeneralClickSound()
-            click.closeForPlayer()
-            click.player.showDialog(protectionRenameDialog(protectionState.get(click)))
-        }
-        render.layoutSlot('F', editFlags)
-    }
+            val protection = protectionState.get(click)
 
-    private val membersItem = ItemType.PLAYER_HEAD.createItemStack().apply {
-        displayName {
-            protectColored("Mitglieder")
-        }
-    }
+            val region = protection.region
+            val canSellState = region.getFlag(ProtectionFlagsRegistry.SURF_CAN_SELL_FLAG)
+            val canSell = canSellState == StateFlag.State.ALLOW || canSellState == null
 
-    private val sellItem = ItemType.EMERALD.createItemStack().apply {
-        displayName {
-            protectColored("Verkaufen")
-        }
-    }
+            if (!canSell) {
+                click.player.sendText {
+                    appendErrorPrefix()
+                    error("Dieses Grundstück kann nicht verkauft werden!")
+                }
+                return@onClick
+            }
 
-    private val renameItem = ItemType.NAME_TAG.createItemStack().apply {
-        displayName {
-            protectColored("Umbenennen")
-        }
-    }
+            val regionManager = protection.regionManager
 
-    private val editFlags = ItemType.REDSTONE_TORCH.createItemStack().apply {
-        displayName {
-            protectColored("Flags bearbeiten")
+            if (regionManager == null) {
+                click.player.sendText {
+                    appendErrorPrefix()
+                    error("Dieses Grundstück existiert nicht mehr!")
+                }
+                return@onClick
+            }
+
+            plugin.launch {
+                click.player.protectionUser().transactionUser.deposit(
+                    protection.retailPrice.toBigDecimal(),
+                    Currency.default()
+                )
+
+                regionManager.removeRegion(region.id)
+                ProtectionVisualizerManager.onRegionDeletion(region)
+
+                click.openForPlayer(
+                    ProtectionInfoView::class.java,
+                    mapOf("protection" to protection)
+                )
+            }
         }
     }
 
@@ -138,5 +145,16 @@ object ProtectionInfoView : View() {
             }
         }
     }
-}
 
+    private val cancelItem = buildItem(Material.RED_STAINED_GLASS_PANE) {
+        displayName {
+            error("Abbrechen")
+        }
+    }
+
+    private val confirmItem = buildItem(Material.GREEN_STAINED_GLASS_PANE) {
+        displayName {
+            success("Bestätigen")
+        }
+    }
+}

@@ -20,7 +20,7 @@ import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
 import org.bukkit.inventory.meta.SkullMeta
 
-object RemoveMemberConfigView : View() {
+object RemoveMemberConfirmView : View() {
     val protectionState: State<RegionInfo> = initialState("protection")
     val memberState: State<LocalPlayer> = initialState("member")
 
