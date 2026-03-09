@@ -1,24 +1,24 @@
 package dev.slne.surf.protect.paper.region
 
-import com.sk89q.worldedit.math.BlockVector3
 import com.sk89q.worldedit.util.Location
 import dev.slne.surf.protect.paper.config.config
 import dev.slne.surf.protect.paper.math.Mth
-
-private val spawns = listOf(
-    BlockVector3(0, 0, 0),
-    BlockVector3(0, 0, -25000),
-    BlockVector3(25000, 0, -25000),
-    BlockVector3(-25000, 0, -25000),
-    BlockVector3(0, 0, 25000),
-    BlockVector3(25000, 0, 25000),
-    BlockVector3(-25000, 0, 25000),
-    BlockVector3(25000, 0, 0),
-    BlockVector3(-25000, 0, 0)
-)
+import org.bukkit.util.Vector
 
 fun Location.getProtectionPricePerBlock(): PricePerBlockResult {
-    val pos = toVector().toBlockPoint().withY(0)
+    val spawns = listOf(
+        Vector(0, 0, 0),
+        Vector(0, 0, -25000),
+        Vector(25000, 0, -25000),
+        Vector(-25000, 0, -25000),
+        Vector(0, 0, 25000),
+        Vector(25000, 0, 25000),
+        Vector(-25000, 0, 25000),
+        Vector(25000, 0, 0),
+        Vector(-25000, 0, 0)
+    )
+
+    val pos = Vector(blockX.toDouble(), 0.0, blockZ.toDouble())
 
     val nearestSpawn = spawns.minBy {
         pos.distance(it)
