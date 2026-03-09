@@ -94,10 +94,7 @@ object ProtectionSellConfirmView : View() {
                 ProtectionVisualizerManager.onRegionDeletion(region)
 
                 withContext(plugin.entityDispatcher(click.player)) {
-                    click.openForPlayer(
-                        ProtectionInfoView::class.java,
-                        mapOf("protection" to protection)
-                    )
+                    click.closeForPlayer()
                 }
             }
         }
