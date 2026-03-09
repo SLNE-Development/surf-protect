@@ -6,6 +6,7 @@ import dev.slne.surf.protect.paper.menu.view.ProtectionInfoView
 import dev.slne.surf.protect.paper.region.flags.EditableProtectionFlags
 import dev.slne.surf.protect.paper.region.info.RegionInfo
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
+import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
 import dev.slne.surf.surfapi.bukkit.api.builder.displayName
 import dev.slne.surf.surfapi.bukkit.api.inventory.framework.titleBuilder
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
@@ -23,13 +24,17 @@ object ProtectionEditFlagsView : View() {
     private val paginationState: State<Pagination> =
         buildLazyPaginationState { _ ->
             EditableProtectionFlags.entries.toMutableList()
-        }.elementFactory { _, builder, _, flag ->
+        }.elementFactory { context, builder, _, flag ->
             builder.renderWith {
-                createFlagItem(flag)
+                val protection = protectionState.get(context)
+                val region = protection.region
+                val currentState =
+                    region.getFlag(flag.flag) ?: flag.initialState ?: StateFlag.State.ALLOW
+
+                createFlagItem(flag, currentState)
             }.onClick { context ->
                 val protection = protectionState.get(context)
                 val region = protection.region
-
                 val oldState = region.getFlag(flag.flag) ?: flag.initialState
 
                 val newState = when (oldState) {
@@ -43,7 +48,11 @@ object ProtectionEditFlagsView : View() {
 
                 region.setFlag(flag.flag, newState)
                 context.playGeneralClickSound()
-                context.update()
+
+                context.openForPlayer(
+                    ProtectionEditFlagsView::class.java,
+                    mapOf("protection" to protection)
+                ) // TODO: only update inventory instead of reopening, currently not working by api
 
                 context.player.sendText {
                     appendSuccessPrefix()
@@ -104,7 +113,6 @@ object ProtectionEditFlagsView : View() {
             }
             .onClick { context ->
                 pagination.back()
-                pagination.update()
                 context.playNewPageSound()
             }
 
@@ -123,16 +131,29 @@ object ProtectionEditFlagsView : View() {
             }
             .onClick { context ->
                 pagination.advance()
-                pagination.update()
                 context.playNewPageSound()
             }
     }
 
-    private fun createFlagItem(flag: EditableProtectionFlags) = buildItem(flag.icon) {
-        displayName {
-            append(flag.displayName)
+    private fun createFlagItem(flag: EditableProtectionFlags, state: StateFlag.State) =
+        buildItem(flag.icon) {
+            displayName {
+                append(flag.displayName)
+            }
+
+            buildLore {
+                emptyLine()
+                line {
+                    darkSpacer("▪")
+                    appendSpace()
+                    if (state == StateFlag.State.ALLOW) {
+                        success("Erlaubt")
+                    } else {
+                        error("Verboten")
+                    }
+                }
+            }
         }
-    }
 
     private val StateFlag.State.other
         get() = when (this) {
