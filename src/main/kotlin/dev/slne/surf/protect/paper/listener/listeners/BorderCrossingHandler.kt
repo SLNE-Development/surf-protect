@@ -11,7 +11,7 @@ import com.sk89q.worldguard.session.Session
 import com.sk89q.worldguard.session.handler.Handler
 import dev.slne.surf.protect.paper.message.Messages
 import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry
-import dev.slne.surf.protect.paper.settings.ProtectionUserSettings
+import dev.slne.surf.protect.paper.util.hasBorderCrossingMessagesEnabled
 
 class BorderCrossingHandler(session: Session) : Handler(session) {
     override fun onCrossBoundary(
@@ -44,7 +44,8 @@ class BorderCrossingHandler(session: Session) : Handler(session) {
         if (protectionFlag == StateFlag.State.DENY) return
 
         val player = BukkitAdapter.adapt(localPlayer)
-        if (!ProtectionUserSettings.PLOT_MESSAGES.getValue(player)) {
+
+        if (!player.hasBorderCrossingMessagesEnabled()) {
             return
         }
 

@@ -10,6 +10,7 @@ import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion
 import com.sk89q.worldguard.protection.regions.ProtectedRegion
 import dev.slne.surf.protect.paper.config.config
 import dev.slne.surf.protect.paper.math.Mth
+import dev.slne.surf.protect.paper.menu.view.ProtectionMainView
 import dev.slne.surf.protect.paper.message.Messages
 import dev.slne.surf.protect.paper.plugin
 import dev.slne.surf.protect.paper.region.flags.EditableProtectionFlags
@@ -23,9 +24,11 @@ import dev.slne.surf.protect.paper.region.visual.Trail
 import dev.slne.surf.protect.paper.region.visual.visualizer.ProtectionVisualizerManager
 import dev.slne.surf.protect.paper.user.ProtectionUser
 import dev.slne.surf.protect.paper.util.*
+import dev.slne.surf.surfapi.bukkit.api.inventory.framework.viewFrame
 import dev.slne.surf.surfapi.bukkit.api.util.getHighestBlockYAtBlockCoordinates
 import dev.slne.surf.surfapi.bukkit.api.util.getXFromChunkKey
 import dev.slne.surf.surfapi.bukkit.api.util.getZFromChunkKey
+import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import dev.slne.surf.surfapi.core.api.util.*
 import io.papermc.paper.math.BlockPosition
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet
@@ -358,7 +361,14 @@ class ProtectionRegion(
                 tempRegion.protect()
                 removeAllMarkers()
                 protectionUser.resetRegionCreation(false)
-                protectionUser.bukkitPlayer?.showDialog(ProtectionCreationDialogs.protectionCreatedNotice())
+                protectionUser.bukkitPlayer?.sendText {
+                    appendSuccessPrefix()
+                    success("Das Grundstück wurde erstellt.")
+                }
+
+                protectionUser.bukkitPlayer?.let {
+                    viewFrame.open(ProtectionMainView::class.java, it)
+                }
 
                 if (expandingProtection != null) {
                     ProtectionVisualizerManager.onRegionCornerChange(tempRegion.region)
@@ -399,7 +409,10 @@ class ProtectionRegion(
     suspend fun cancelProtection() {
         removeAllMarkers()
 
-        protectionUser.bukkitPlayer?.showDialog(ProtectionCreationDialogs.protectionCancelledNotice())
+        protectionUser.bukkitPlayer?.sendText {
+            appendInfoPrefix()
+            info("Der Grundstückserstellungsprozess wurde abgebrochen.")
+        }
         protectionUser.resetRegionCreation(true)
     }
 }
