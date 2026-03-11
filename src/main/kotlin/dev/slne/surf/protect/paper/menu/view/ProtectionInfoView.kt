@@ -25,7 +25,6 @@ import me.devnatan.inventoryframework.context.RenderContext
 import me.devnatan.inventoryframework.state.State
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.inventory.ItemType
-import kotlin.math.roundToInt
 
 @Suppress("UnstableApiUsage")
 object ProtectionInfoView : View() {
@@ -129,7 +128,7 @@ object ProtectionInfoView : View() {
 
         buildLore {
             line {
-                protectColored("Klicke, um die Mitglieder zu verwalten".toSmallCaps())
+                spacer("Klicke, um die Mitglieder zu verwalten".toSmallCaps())
             }
         }
     }
@@ -141,7 +140,7 @@ object ProtectionInfoView : View() {
 
         buildLore {
             line {
-                protectColored("Klicke, um das Grundstück zu verkaufen".toSmallCaps())
+                spacer("Klicke, um das Grundstück zu verkaufen".toSmallCaps())
             }
         }
     }
@@ -153,7 +152,7 @@ object ProtectionInfoView : View() {
 
         buildLore {
             line {
-                protectColored("Klicke, um das Grundstück umzubenennen".toSmallCaps())
+                spacer("Klicke, um das Grundstück umzubenennen".toSmallCaps())
             }
         }
     }
@@ -165,7 +164,7 @@ object ProtectionInfoView : View() {
 
         buildLore {
             line {
-                protectColored("Klicke, um das Grundstück zu erweitern".toSmallCaps())
+                spacer("Klicke, um das Grundstück zu erweitern".toSmallCaps())
             }
         }
     }
@@ -177,61 +176,7 @@ object ProtectionInfoView : View() {
 
         buildLore {
             line {
-                protectColored("Klicke, um die Flags zu bearbeiten".toSmallCaps())
-            }
-        }
-    }
-
-
-    fun createRegionItem(protection: RegionInfo) = ItemType.DIRT.createItemStack().apply {
-        displayName {
-            variableValue(protection.name)
-        }
-
-        buildLore {
-            emptyLine()
-            line {
-                protectColored("Grundstücksinformation".toSmallCaps(), TextDecoration.BOLD)
-            }
-            line {
-                appendBlob()
-                appendSpace()
-                white("Besitzer: ".toSmallCaps())
-                variableValue(protection.owners.joinToString(", ") { it.displayName })
-            }
-            line {
-                appendBlob()
-                appendSpace()
-                white("Id: ".toSmallCaps())
-                variableValue(protection.region.id.toSmallCaps())
-            }
-            line {
-                appendBlob()
-                appendSpace()
-                white("Fläche: ".toSmallCaps())
-                variableValue("${protection.volume} Blöcke".toSmallCaps())
-            }
-            line {
-                appendBlob()
-                appendSpace()
-                white("Mitglieder: ".toSmallCaps())
-                variableValue(protection.members.size)
-            }
-            line {
-                appendBlob()
-                appendSpace()
-                white("Bezahlter Preis: ".toSmallCaps())
-                variableValue("${protection.price.roundToInt()}CC".toSmallCaps())
-            }
-            line {
-                appendBlob()
-                appendSpace()
-                white("Verkaufspreis: ".toSmallCaps())
-                variableValue("${protection.retailPrice.roundToInt()}CC".toSmallCaps())
-            }
-            emptyLine()
-            line {
-                spacer("Klicke für mehr Informationen".toSmallCaps())
+                spacer("Klicke, um die Flags zu bearbeiten".toSmallCaps())
             }
         }
     }
