@@ -8,17 +8,20 @@ import dev.jorel.commandapi.arguments.Argument
 import dev.jorel.commandapi.arguments.ArgumentSuggestions
 import dev.jorel.commandapi.arguments.CustomArgument
 import dev.jorel.commandapi.arguments.StringArgument
+import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry
 import dev.slne.surf.surfapi.core.api.util.toObjectList
 
 class ProtectionArgument(nodeName: String) :
     CustomArgument<ProtectedRegion, String>(StringArgument(nodeName), { info ->
         WorldGuard.getInstance().platform.regionContainer.loaded.flatMap { it.regions.values }
+            .filter { it.getFlag(ProtectionFlagsRegistry.SURF_PROTECTION) != null }
             .firstOrNull { it.id == info.input }
     }) {
     init {
         this.replaceSuggestions(
             ArgumentSuggestions.stringCollection {
                 WorldGuard.getInstance().platform.regionContainer.loaded.flatMap { it.regions.values }
+                    .filter { it.getFlag(ProtectionFlagsRegistry.SURF_PROTECTION) != null }
                     .toObjectList().map { it.id }
             }
         )
