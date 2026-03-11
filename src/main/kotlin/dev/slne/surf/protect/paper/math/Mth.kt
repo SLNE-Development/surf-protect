@@ -38,7 +38,7 @@ object Mth {
         val rawCost = calculateProtectionPrice(temporaryRegion, pricePerBlock)
 
         return EffectiveCostResult(
-            (rawCost * 100.0).roundToInt() / 100.0,
+            rawCost.roundToInt().toDouble(),
             pricePerBlock,
             spawnDistance
         )
