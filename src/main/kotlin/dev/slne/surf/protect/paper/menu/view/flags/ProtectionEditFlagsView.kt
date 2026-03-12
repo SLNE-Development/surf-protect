@@ -153,6 +153,12 @@ object ProtectionEditFlagsView : View() {
                 line {
                     appendBlob()
                     appendSpace()
+                    spacer(flag.description)
+                }
+                emptyLine()
+                line {
+                    appendBlob()
+                    appendSpace()
                     white("Status: ".toSmallCaps())
                     if (state == StateFlag.State.ALLOW) {
                         success("Erlaubt".toSmallCaps())
