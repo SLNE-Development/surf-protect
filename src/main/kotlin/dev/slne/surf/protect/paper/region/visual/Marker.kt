@@ -5,7 +5,6 @@ package dev.slne.surf.protect.paper.region.visual
 import com.github.shynixn.mccoroutine.folia.regionDispatcher
 import com.sk89q.worldedit.math.BlockVector2
 import dev.slne.surf.protect.paper.config.ProtectionConfig
-import dev.slne.surf.protect.paper.config.asString
 import dev.slne.surf.protect.paper.configManager
 import dev.slne.surf.protect.paper.items.ProtectionItems
 import dev.slne.surf.protect.paper.plugin
@@ -65,10 +64,7 @@ data class Marker(
         if (shutdown) {
             configManager.edit {
                 dirtyMarkers.add(
-                    ProtectionConfig.DirtyMarker(
-                        pos.toLocation(world).asString(),
-                        previousData.asString
-                    )
+                    ProtectionConfig.DirtyMarker.create(pos.toLocation(world), previousData)
                 )
             }
         } else {
