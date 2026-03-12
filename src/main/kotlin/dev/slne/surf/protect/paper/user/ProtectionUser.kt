@@ -11,8 +11,6 @@ import com.sk89q.worldguard.LocalPlayer
 import com.sk89q.worldguard.protection.regions.ProtectedRegion
 import dev.slne.surf.protect.paper.config
 import dev.slne.surf.protect.paper.config.ProtectionConfig
-import dev.slne.surf.protect.paper.config.asString
-import dev.slne.surf.protect.paper.config.serializeItemsToBytes
 import dev.slne.surf.protect.paper.configManager
 import dev.slne.surf.protect.paper.items.ProtectionItems
 import dev.slne.surf.protect.paper.plugin
@@ -134,11 +132,10 @@ class ProtectionUser(val uuid: UUID) {
         if (shutdown) {
             configManager.edit {
                 awaitingProtectionModes.add(
-                    ProtectionConfig.AwaitingProtectionModeConfig(
-                        playerUuidString = uuid.toString(),
-                        inventoryBytes = creation.startingInventoryContent.filterNotNull()
-                            .serializeItemsToBytes(),
-                        startLocationString = creation.startLocation.asString()
+                    ProtectionConfig.AwaitingProtectionModeConfig.create(
+                        playerUuid = uuid,
+                        inventory = creation.startingInventoryContent,
+                        location = creation.startLocation
                     )
                 )
             }
