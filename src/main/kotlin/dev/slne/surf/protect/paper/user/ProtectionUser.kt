@@ -177,6 +177,10 @@ class ProtectionUser(val uuid: UUID) {
         return sqrt(maxSq.toDouble())
     }
 
+    fun recordProtectionAbort() {
+        protectionModeCooldown.recordAbort()
+    }
+
     fun sendMessage(message: Component) {
         this.bukkitPlayer?.sendMessage(message)
     }

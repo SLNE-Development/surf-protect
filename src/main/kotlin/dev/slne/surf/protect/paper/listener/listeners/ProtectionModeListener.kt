@@ -1,13 +1,24 @@
 package dev.slne.surf.protect.paper.listener.listeners
 
 import com.destroystokyo.paper.MaterialSetTag
+import com.github.shynixn.mccoroutine.folia.entityDispatcher
 import com.github.shynixn.mccoroutine.folia.launch
+import com.github.shynixn.mccoroutine.folia.regionDispatcher
 import dev.slne.surf.protect.paper.items.ProtectionItems
 import dev.slne.surf.protect.paper.plugin
+import dev.slne.surf.protect.paper.user.PendingProtectResetManager
 import dev.slne.surf.protect.paper.user.protectionUser
 import dev.slne.surf.surfapi.bukkit.api.util.key
 import io.papermc.paper.event.player.PlayerItemFrameChangeEvent
 import io.papermc.paper.event.player.PrePlayerAttackEntityEvent
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.future.await
+import kotlinx.coroutines.withContext
+import org.bukkit.Bukkit
+import org.bukkit.GameMode
+import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
@@ -25,8 +36,73 @@ object ProtectionModeListener : Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     fun onQuit(event: PlayerQuitEvent) {
+        // During server shutdown the pending reset data is saved in onDisableAsync().
+        // Skip the immediate reset here so that regionCreation remains intact for serialization.
+        if (plugin.server.isStopping) return
         val player = event.player
         player.protectionUser().handleQuit(player)
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    fun onJoin(event: PlayerJoinEvent) {
+        val player = event.player
+        val pendingReset = PendingProtectResetManager.remove(player.uniqueId) ?: return
+
+        plugin.launch {
+            withContext(plugin.entityDispatcher(player)) {
+                with(player) {
+                    fallDistance = 0f
+                    allowFlight = gameMode == GameMode.CREATIVE
+                    isFlying = gameMode == GameMode.CREATIVE
+                    flySpeed = 0.2f
+                    isCollidable = true
+                    worldBorder = null
+                    // Restore inventory slot-by-slot to handle any size mismatch defensively
+                    val savedContents = pendingReset.inventoryContent
+                    val invSize = inventory.size
+                    for (i in 0 until invSize) {
+                        inventory.setItem(i, if (i < savedContents.size) savedContents[i] else null)
+                    }
+                }
+            }
+
+            player.protectionUser().recordProtectionAbort()
+
+            coroutineScope {
+                pendingReset.markers.map { markerData ->
+                    async {
+                        val world = Bukkit.getWorld(markerData.world) ?: return@async
+                        val blockData = runCatching {
+                            Bukkit.createBlockData(markerData.blockData)
+                        }.getOrNull() ?: return@async
+                        val targetChunkX = markerData.x shr 4
+                        val targetChunkZ = markerData.z shr 4
+                        val chunk = world.getChunkAtAsync(targetChunkX, targetChunkZ).await()
+                        withContext(plugin.regionDispatcher(world, chunk.x, chunk.z)) {
+                            chunk.getBlock(
+                                markerData.x and 15,
+                                markerData.y,
+                                markerData.z and 15
+                            ).blockData = blockData
+                        }
+                    }
+                }.awaitAll()
+            }
+
+            val startWorld = Bukkit.getWorld(pendingReset.worldName)
+            if (startWorld != null) {
+                player.teleportAsync(
+                    Location(
+                        startWorld,
+                        pendingReset.startX,
+                        pendingReset.startY,
+                        pendingReset.startZ,
+                        pendingReset.startYaw,
+                        pendingReset.startPitch,
+                    )
+                ).await()
+            }
+        }
     }
 
     @EventHandler(priority = EventPriority.LOWEST)

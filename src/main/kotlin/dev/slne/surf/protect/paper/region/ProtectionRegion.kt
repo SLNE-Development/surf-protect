@@ -21,6 +21,7 @@ import dev.slne.surf.protect.paper.region.visual.Marker
 import dev.slne.surf.protect.paper.region.visual.QuickHull
 import dev.slne.surf.protect.paper.region.visual.Trail
 import dev.slne.surf.protect.paper.region.visual.visualizer.ProtectionVisualizerManager
+import dev.slne.surf.protect.paper.user.PendingMarkerData
 import dev.slne.surf.protect.paper.user.ProtectionUser
 import dev.slne.surf.protect.paper.util.*
 import dev.slne.surf.surfapi.bukkit.api.util.getHighestBlockYAtBlockCoordinates
@@ -396,6 +397,24 @@ class ProtectionRegion(
         markers.clear()
         restoreHull()
         handleTrails()
+    }
+
+    /**
+     * Returns a snapshot of all current marker positions and their original block data
+     * so that they can be persisted and restored after a server restart.
+     */
+    fun getMarkersSnapshot(): List<PendingMarkerData> {
+        return markers.mapNotNull { marker ->
+            val worldName = marker.world.get()?.name ?: return@mapNotNull null
+            val prevData = marker.previousData ?: return@mapNotNull null
+            PendingMarkerData(
+                world = worldName,
+                x = marker.blockX,
+                y = marker.blockY,
+                z = marker.blockZ,
+                blockData = prevData.asString,
+            )
+        }
     }
 
     /**

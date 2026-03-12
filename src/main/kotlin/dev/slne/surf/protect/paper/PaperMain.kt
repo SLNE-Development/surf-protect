@@ -13,6 +13,8 @@ import dev.slne.surf.protect.paper.menu.view.members.ProtectionMemberRemoveConfi
 import dev.slne.surf.protect.paper.menu.view.sell.ProtectionSellConfirmView
 import dev.slne.surf.protect.paper.papi.PapiExpansion
 import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry
+import dev.slne.surf.protect.paper.user.PendingProtectResetManager
+import dev.slne.surf.protect.paper.user.PendingResetEntry
 import dev.slne.surf.protect.paper.user.ProtectionUserManager
 import dev.slne.surf.protect.paper.util.getRegionManagerOrNull
 import dev.slne.surf.surfapi.bukkit.api.hook.papi.papiHook
@@ -39,6 +41,7 @@ class PaperMain : SuspendingJavaPlugin() {
 
     override suspend fun onEnableAsync() {
         dev.slne.surf.protect.paper.config.config // Load the configuration
+        PendingProtectResetManager.load(dataPath.toFile())
         ListenerManager.registerListeners()
         CommandManager.registerCommands()
 
@@ -55,8 +58,23 @@ class PaperMain : SuspendingJavaPlugin() {
 
     override suspend fun onDisableAsync() {
         ProtectionUserManager.all().forEach { user ->
-            user.regionCreation?.cancelProtection()
+            val creation = user.regionCreation ?: return@forEach
+            val worldName = creation.startLocation.world?.name ?: return@forEach
+            PendingProtectResetManager.add(
+                user.uuid,
+                PendingResetEntry(
+                    worldName = worldName,
+                    startX = creation.startLocation.x,
+                    startY = creation.startLocation.y,
+                    startZ = creation.startLocation.z,
+                    startYaw = creation.startLocation.yaw,
+                    startPitch = creation.startLocation.pitch,
+                    inventoryContent = creation.startingInventoryContent,
+                    markers = creation.getMarkersSnapshot(),
+                )
+            )
         }
+        PendingProtectResetManager.save(dataPath.toFile())
 
         ListenerManager.unregisterListeners()
 
