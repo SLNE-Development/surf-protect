@@ -206,5 +206,6 @@ enum class EditableProtectionFlags(
         initialState = null
     );
 
-    val component = SurfComponentBuilder { primary(displayName) }
+    val displayNameComponent = SurfComponentBuilder { primary(displayName) }
+    val descriptionComponent = SurfComponentBuilder { info(description) }
 }
