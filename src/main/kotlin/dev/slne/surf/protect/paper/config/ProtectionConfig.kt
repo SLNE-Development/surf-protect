@@ -19,7 +19,7 @@ data class ProtectionConfig(
     val markers: MarkerSettings = MarkerSettings(),
     val pricing: PricingSettings = PricingSettings(),
     val currency: CurrencyConfig = CurrencyConfig(),
-    val awaitingProtectionModes: List<AwaitingProtectionModeConfig> = emptyList()
+    val awaitingProtectionModes: MutableList<AwaitingProtectionModeConfig> = mutableListOf()
 ) {
 
     @ConfigSerializable
