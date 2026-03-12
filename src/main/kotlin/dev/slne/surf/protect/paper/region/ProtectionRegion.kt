@@ -8,7 +8,7 @@ import com.sk89q.worldguard.protection.flags.Flags
 import com.sk89q.worldguard.protection.flags.StateFlag
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion
 import com.sk89q.worldguard.protection.regions.ProtectedRegion
-import dev.slne.surf.protect.paper.config.config
+import dev.slne.surf.protect.paper.config
 import dev.slne.surf.protect.paper.math.Mth
 import dev.slne.surf.protect.paper.message.Messages
 import dev.slne.surf.protect.paper.plugin
@@ -385,11 +385,11 @@ class ProtectionRegion(
     /**
      * Removes all markers
      */
-    suspend fun removeAllMarkers() {
+    suspend fun removeAllMarkers(shutdown: Boolean = false) {
         coroutineScope {
             markers.toObjectList().map { marker ->
                 async {
-                    marker.restorePreviousData()
+                    marker.restorePreviousData(shutdown)
                 }
             }.awaitAll()
         }
@@ -401,13 +401,14 @@ class ProtectionRegion(
     /**
      * Cancel the protection
      */
-    suspend fun cancelProtection() {
-        removeAllMarkers()
+    suspend fun cancelProtection(shutdown: Boolean = false) {
+        removeAllMarkers(shutdown)
 
         protectionUser.bukkitPlayer?.sendText {
             appendInfoPrefix()
             info("Der Grundstückserstellungsprozess wurde abgebrochen.")
         }
-        protectionUser.resetRegionCreation(true)
+
+        protectionUser.resetRegionCreation(true, shutdown)
     }
 }

@@ -1,6 +1,6 @@
 package dev.slne.surf.protect.paper.message
 
-import dev.slne.surf.protect.paper.config.config
+import dev.slne.surf.protect.paper.config
 import dev.slne.surf.protect.paper.region.info.RegionInfo
 import dev.slne.surf.surfapi.core.api.messages.Colors
 import dev.slne.surf.surfapi.core.api.messages.adventure.buildText

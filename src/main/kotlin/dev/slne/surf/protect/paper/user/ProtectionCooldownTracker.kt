@@ -1,6 +1,6 @@
 package dev.slne.surf.protect.paper.user
 
-import dev.slne.surf.protect.paper.config.config
+import dev.slne.surf.protect.paper.config
 import kotlin.math.pow
 import kotlin.math.roundToLong
 

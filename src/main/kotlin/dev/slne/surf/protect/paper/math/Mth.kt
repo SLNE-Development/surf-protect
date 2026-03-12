@@ -3,7 +3,7 @@ package dev.slne.surf.protect.paper.math
 import com.sk89q.worldedit.util.Location
 import com.sk89q.worldguard.protection.flags.Flags
 import com.sk89q.worldguard.protection.regions.ProtectedRegion
-import dev.slne.surf.protect.paper.config.config
+import dev.slne.surf.protect.paper.config
 import dev.slne.surf.protect.paper.region.TempProtectionRegion
 import dev.slne.surf.protect.paper.region.getProtectionPricePerBlock
 import dev.slne.surf.protect.paper.util.fixedVolume

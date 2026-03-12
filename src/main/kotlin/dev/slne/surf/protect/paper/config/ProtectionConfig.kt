@@ -19,6 +19,7 @@ data class ProtectionConfig(
     val markers: MarkerSettings = MarkerSettings(),
     val pricing: PricingSettings = PricingSettings(),
     val currency: CurrencyConfig = CurrencyConfig(),
+    val dirtyMarkers: MutableList<DirtyMarker> = mutableListOf(),
     val awaitingProtectionModes: MutableList<AwaitingProtectionModeConfig> = mutableListOf()
 ) {
 
@@ -80,34 +81,22 @@ data class ProtectionConfig(
 
     @ConfigSerializable
     class AwaitingProtectionModeConfig(
-        val playerUuidString: String,
-        val inventoryBytes: ByteArray,
-        val startLocationString: String
+        val playerUuidString: String = "",
+        val inventoryBytes: ByteArray = byteArrayOf(),
+        val startLocationString: String = ""
     ) {
-        val playerUuid: UUID = UUID.fromString(playerUuidString)
-        val inventory = ItemStack.deserializeItemsFromBytes(inventoryBytes)
-        val startLocation: Location = startLocationString.toLocation()
+        val playerUuid: UUID get() = UUID.fromString(playerUuidString)
+        val inventory: Array<ItemStack> get() = ItemStack.deserializeItemsFromBytes(inventoryBytes)
+        val startLocation: Location get() = startLocationString.toLocation()
+    }
 
-        fun String.toLocation(): Location {
-            val parts = this.split(",")
-            require(parts.size == 5) { "Invalid location string: $this" }
-            val worldName = parts[0]
-            val x =
-                parts[1].toDoubleOrNull() ?: error("Invalid X coordinate in location string: $this")
-            val y =
-                parts[2].toDoubleOrNull() ?: error("Invalid Y coordinate in location string: $this")
-            val z =
-                parts[3].toDoubleOrNull() ?: error("Invalid Z coordinate in location string: $this")
-            val yaw = parts[4].toFloatOrNull() ?: error("Invalid yaw in location string: $this")
-            return Location(
-                server.getWorld(worldName) ?: error("World '$worldName' not found"),
-                x,
-                y,
-                z,
-                yaw,
-                0f
-            )
-        }
+    @ConfigSerializable
+    class DirtyMarker(
+        val locationString: String = "",
+        val blockDataString: String = ""
+    ) {
+        val location get() = locationString.toLocation()
+        val blockData get() = server.createBlockData(blockDataString)
     }
 }
 
@@ -131,3 +120,24 @@ fun List<ItemStack>.serializeItemsToBytes(): ByteArray =
         }
         arrayOut.toByteArray()
     }
+
+fun String.toLocation(): Location {
+    val parts = this.split(",")
+    require(parts.size == 5) { "Invalid location string: $this" }
+    val worldName = parts[0]
+    val x =
+        parts[1].toDoubleOrNull() ?: error("Invalid X coordinate in location string: $this")
+    val y =
+        parts[2].toDoubleOrNull() ?: error("Invalid Y coordinate in location string: $this")
+    val z =
+        parts[3].toDoubleOrNull() ?: error("Invalid Z coordinate in location string: $this")
+    val yaw = parts[4].toFloatOrNull() ?: error("Invalid yaw in location string: $this")
+    return Location(
+        server.getWorld(worldName) ?: error("World '$worldName' not found"),
+        x,
+        y,
+        z,
+        yaw,
+        0f
+    )
+}

@@ -1,9 +1,9 @@
 package dev.slne.surf.protect.paper.listener.listeners
 
 import com.destroystokyo.paper.MaterialSetTag
-import com.github.shynixn.mccoroutine.folia.launch
+import dev.slne.surf.protect.paper.config
+import dev.slne.surf.protect.paper.configManager
 import dev.slne.surf.protect.paper.items.ProtectionItems
-import dev.slne.surf.protect.paper.plugin
 import dev.slne.surf.protect.paper.user.protectionUser
 import dev.slne.surf.surfapi.bukkit.api.util.key
 import io.papermc.paper.event.player.PlayerItemFrameChangeEvent
@@ -27,6 +27,25 @@ object ProtectionModeListener : Listener {
     fun onQuit(event: PlayerQuitEvent) {
         val player = event.player
         player.protectionUser().handleQuit(player)
+    }
+
+    @EventHandler
+    fun onJoin(event: PlayerJoinEvent) {
+        val player = event.player
+
+        val awaitingProtectionMode =
+            config.awaitingProtectionModes.firstOrNull { it.playerUuid == player.uniqueId }
+                ?: return
+
+        val protectionUser = player.protectionUser()
+
+        protectionUser.restorePlayerProperties(player, awaitingProtectionMode.inventory)
+
+        configManager.edit {
+            awaitingProtectionModes.remove(awaitingProtectionMode)
+        }
+
+        player.teleportAsync(awaitingProtectionMode.startLocation)
     }
 
     @EventHandler(priority = EventPriority.LOWEST)

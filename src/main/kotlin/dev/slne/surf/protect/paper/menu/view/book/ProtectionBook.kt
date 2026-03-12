@@ -1,6 +1,6 @@
 package dev.slne.surf.protect.paper.menu.view.book
 
-import dev.slne.surf.protect.paper.config.config
+import dev.slne.surf.protect.paper.config
 import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
 import net.kyori.adventure.inventory.Book
 
