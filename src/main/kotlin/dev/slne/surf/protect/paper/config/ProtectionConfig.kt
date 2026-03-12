@@ -111,7 +111,14 @@ data class ProtectionConfig(
                 val y = din.readDouble()
                 val z = din.readDouble()
                 val yaw = din.readFloat()
-                Location(server.getWorld(worldName) ?: error("World '$worldName' not found"), x, y, z, yaw, 0f)
+                Location(
+                    server.getWorld(worldName) ?: error("World '$worldName' not found"),
+                    x,
+                    y,
+                    z,
+                    yaw,
+                    0f
+                )
             }
 
         private fun <T> decodeStream(block: (DataInputStream) -> T): T {
@@ -137,7 +144,7 @@ data class ProtectionConfig(
                 location: Location
             ): AwaitingProtectionModeConfig {
                 val invItems = Array(inventory.size) { i -> inventory[i] ?: ItemStack.empty() }
-                val invBytes = ItemStack.serializeItemsAsBytes(*invItems)
+                val invBytes = ItemStack.serializeItemsAsBytes(invItems)
                 val bytes = ByteArrayOutputStream().use { bout ->
                     DataOutputStream(bout).use { dout ->
                         dout.writeByte(VERSION.toInt())
@@ -166,7 +173,12 @@ data class ProtectionConfig(
                 val x = din.readInt()
                 val y = din.readInt()
                 val z = din.readInt()
-                Location(server.getWorld(worldName) ?: error("World '$worldName' not found"), x.toDouble(), y.toDouble(), z.toDouble())
+                Location(
+                    server.getWorld(worldName) ?: error("World '$worldName' not found"),
+                    x.toDouble(),
+                    y.toDouble(),
+                    z.toDouble()
+                )
             }
 
         val blockData: BlockData
