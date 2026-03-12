@@ -1,17 +1,15 @@
 package dev.slne.surf.protect.paper.config
 
-import dev.slne.surf.protect.paper.plugin
 import dev.slne.surf.surfapi.bukkit.api.extensions.server
-import dev.slne.surf.surfapi.core.api.config.createSpongeYmlConfig
-import dev.slne.surf.surfapi.core.api.config.surfConfigApi
 import dev.slne.surf.transaction.api.currency.Currency
+import org.bukkit.Location
 import org.bukkit.block.BlockType
+import org.bukkit.inventory.ItemStack
 import org.spongepowered.configurate.objectmapping.ConfigSerializable
 import pl.allegro.finance.tradukisto.ValueConverters
-
-val config by lazy {
-    surfConfigApi.createSpongeYmlConfig<ProtectionConfig>(plugin.dataPath, "config.yml")
-}
+import java.io.ByteArrayOutputStream
+import java.io.DataOutputStream
+import java.util.*
 
 @ConfigSerializable
 data class ProtectionConfig(
@@ -21,6 +19,7 @@ data class ProtectionConfig(
     val markers: MarkerSettings = MarkerSettings(),
     val pricing: PricingSettings = PricingSettings(),
     val currency: CurrencyConfig = CurrencyConfig(),
+    val awaitingProtectionModes: List<AwaitingProtectionModeConfig> = emptyList()
 ) {
 
     @ConfigSerializable
@@ -78,4 +77,57 @@ data class ProtectionConfig(
     ) {
         val currency: Currency = Currency[name] ?: error("Currency with name '$name' not found")
     }
+
+    @ConfigSerializable
+    class AwaitingProtectionModeConfig(
+        val playerUuidString: String,
+        val inventoryBytes: ByteArray,
+        val startLocationString: String
+    ) {
+        val playerUuid: UUID = UUID.fromString(playerUuidString)
+        val inventory = ItemStack.deserializeItemsFromBytes(inventoryBytes)
+        val startLocation: Location = startLocationString.toLocation()
+
+        fun String.toLocation(): Location {
+            val parts = this.split(",")
+            require(parts.size == 5) { "Invalid location string: $this" }
+            val worldName = parts[0]
+            val x =
+                parts[1].toDoubleOrNull() ?: error("Invalid X coordinate in location string: $this")
+            val y =
+                parts[2].toDoubleOrNull() ?: error("Invalid Y coordinate in location string: $this")
+            val z =
+                parts[3].toDoubleOrNull() ?: error("Invalid Z coordinate in location string: $this")
+            val yaw = parts[4].toFloatOrNull() ?: error("Invalid yaw in location string: $this")
+            return Location(
+                server.getWorld(worldName) ?: error("World '$worldName' not found"),
+                x,
+                y,
+                z,
+                yaw,
+                0f
+            )
+        }
+    }
 }
+
+fun Location.asString(): String = "${world.name},$x,$y,$z,$yaw"
+
+fun List<ItemStack>.serializeItemsToBytes(): ByteArray =
+    ByteArrayOutputStream().use { arrayOut ->
+        DataOutputStream(arrayOut).use { dataOut ->
+            dataOut.writeByte(1)
+            dataOut.writeInt(this.size)
+
+            for (item in this) {
+                if (item.isEmpty) {
+                    dataOut.writeInt(0)
+                } else {
+                    val itemBytes = item.serializeAsBytes()
+                    dataOut.writeInt(itemBytes.size)
+                    dataOut.write(itemBytes)
+                }
+            }
+        }
+        arrayOut.toByteArray()
+    }

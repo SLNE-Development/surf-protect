@@ -5,6 +5,7 @@ import com.sk89q.worldguard.protection.flags.Flags
 import com.sk89q.worldguard.protection.regions.ProtectedRegion
 import dev.jorel.commandapi.kotlindsl.*
 import dev.slne.surf.protect.paper.command.commands.protection.argument.protectionArgument
+import dev.slne.surf.protect.paper.configManager
 import dev.slne.surf.protect.paper.permission.ProtectPermissionRegistry
 import dev.slne.surf.protect.paper.util.getRegionManagerOrNull
 import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
@@ -57,6 +58,18 @@ fun protectionAdminCommand() = commandTree("protectionadmin") {
                             success("Du wurdest zum Grundstück teleportiert.")
                         }
                     }
+            }
+        }
+    }
+
+    literalArgument("reload") {
+        withPermission(ProtectPermissionRegistry.PROTECTION_ADMIN_RELOAD)
+        anyExecutor { executor, _ ->
+            configManager.reload()
+
+            executor.sendText {
+                appendSuccessPrefix()
+                success("Die Konfiguration wurde erfolgreich neu geladen.")
             }
         }
     }

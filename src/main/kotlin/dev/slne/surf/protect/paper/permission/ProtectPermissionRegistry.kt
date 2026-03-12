@@ -21,5 +21,6 @@ object ProtectPermissionRegistry : PermissionRegistry() {
     val PROTECTION_ADMIN_COMMAND = create("$COMMAND_PREFIX.admin")
     val PROTECTION_ADMIN_TELEPORT = create("$COMMAND_PREFIX.admin.teleport")
     val PROTECTION_ADMIN_DELETE = create("$COMMAND_PREFIX.admin.delete")
+    val PROTECTION_ADMIN_RELOAD = create("$COMMAND_PREFIX.admin.reload")
     val MIGRATE_FLAGS_COMMAND = create("$COMMAND_PREFIX.migrateflags")
 }
