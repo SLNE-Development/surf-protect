@@ -2,7 +2,7 @@ package dev.slne.surf.protect.paper.menu.dialog
 
 import com.github.shynixn.mccoroutine.folia.entityDispatcher
 import com.github.shynixn.mccoroutine.folia.launch
-import dev.slne.surf.protect.paper.config.config
+import dev.slne.surf.protect.paper.config
 import dev.slne.surf.protect.paper.menu.util.protectColored
 import dev.slne.surf.protect.paper.menu.view.ProtectionInfoView
 import dev.slne.surf.protect.paper.plugin

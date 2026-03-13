@@ -266,3 +266,6 @@ fun ChunkSnapshot.getBlockDataAt(
 ): BlockData {
     return getBlockData(blockX and 15, blockY, blockZ and 15)
 }
+
+fun WorldEditLocation?.formatString() =
+    if (this == null) "/" else "(${x.toInt()}, ${y.toInt()}, ${z.toInt()})"

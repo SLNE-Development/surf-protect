@@ -1,7 +1,7 @@
 package dev.slne.surf.protect.paper.region
 
 import com.sk89q.worldedit.util.Location
-import dev.slne.surf.protect.paper.config.config
+import dev.slne.surf.protect.paper.config
 import dev.slne.surf.protect.paper.math.Mth
 import org.bukkit.util.Vector
 

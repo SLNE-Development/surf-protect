@@ -1,17 +1,18 @@
 package dev.slne.surf.protect.paper.config
 
-import dev.slne.surf.protect.paper.plugin
 import dev.slne.surf.surfapi.bukkit.api.extensions.server
-import dev.slne.surf.surfapi.core.api.config.createSpongeYmlConfig
-import dev.slne.surf.surfapi.core.api.config.surfConfigApi
 import dev.slne.surf.transaction.api.currency.Currency
+import org.bukkit.Location
 import org.bukkit.block.BlockType
+import org.bukkit.block.data.BlockData
+import org.bukkit.inventory.ItemStack
 import org.spongepowered.configurate.objectmapping.ConfigSerializable
 import pl.allegro.finance.tradukisto.ValueConverters
-
-val config by lazy {
-    surfConfigApi.createSpongeYmlConfig<ProtectionConfig>(plugin.dataPath, "config.yml")
-}
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.DataInputStream
+import java.io.DataOutputStream
+import java.util.*
 
 @ConfigSerializable
 data class ProtectionConfig(
@@ -21,6 +22,8 @@ data class ProtectionConfig(
     val markers: MarkerSettings = MarkerSettings(),
     val pricing: PricingSettings = PricingSettings(),
     val currency: CurrencyConfig = CurrencyConfig(),
+    val dirtyMarkers: MutableList<DirtyMarker> = mutableListOf(),
+    val awaitingProtectionModes: MutableList<AwaitingProtectionModeConfig> = mutableListOf()
 ) {
 
     @ConfigSerializable
@@ -77,5 +80,142 @@ data class ProtectionConfig(
         val name: String = "CastCoin"
     ) {
         val currency: Currency = Currency[name] ?: error("Currency with name '$name' not found")
+    }
+
+    @ConfigSerializable
+    class AwaitingProtectionModeConfig(val data: String = "") {
+        val playerUuid: UUID
+            get() = decodeStream { din ->
+                UUID(din.readLong(), din.readLong())
+            }
+
+        val inventory: Array<ItemStack>
+            get() = decodeStream { din ->
+                skipUUID(din)
+                din.readUTF() // world name
+                din.readDouble() // x
+                din.readDouble() // y
+                din.readDouble() // z
+                din.readFloat() // yaw
+                val invLen = din.readInt()
+                val invBytes = ByteArray(invLen)
+                din.readFully(invBytes)
+                ItemStack.deserializeItemsFromBytes(invBytes)
+            }
+
+        val startLocation: Location
+            get() = decodeStream { din ->
+                skipUUID(din)
+                val worldName = din.readUTF()
+                val x = din.readDouble()
+                val y = din.readDouble()
+                val z = din.readDouble()
+                val yaw = din.readFloat()
+                Location(
+                    server.getWorld(worldName) ?: error("World '$worldName' not found"),
+                    x,
+                    y,
+                    z,
+                    yaw,
+                    0f
+                )
+            }
+
+        private fun <T> decodeStream(block: (DataInputStream) -> T): T {
+            val bytes = Base64.getDecoder().decode(data)
+            return DataInputStream(ByteArrayInputStream(bytes)).use { din ->
+                val version = din.readByte()
+                require(version == VERSION) { "Unknown AwaitingProtectionModeConfig version: $version" }
+                block(din)
+            }
+        }
+
+        companion object {
+            private const val VERSION: Byte = 1
+
+            private fun skipUUID(din: DataInputStream) {
+                din.readLong() // most significant bits
+                din.readLong() // least significant bits
+            }
+
+            fun create(
+                playerUuid: UUID,
+                inventory: Array<ItemStack?>,
+                location: Location
+            ): AwaitingProtectionModeConfig {
+                val invItems = Array(inventory.size) { i -> inventory[i] ?: ItemStack.empty() }
+                val invBytes = ItemStack.serializeItemsAsBytes(invItems)
+                val bytes = ByteArrayOutputStream().use { bout ->
+                    DataOutputStream(bout).use { dout ->
+                        dout.writeByte(VERSION.toInt())
+                        dout.writeLong(playerUuid.mostSignificantBits)
+                        dout.writeLong(playerUuid.leastSignificantBits)
+                        dout.writeUTF(location.world.name)
+                        dout.writeDouble(location.x)
+                        dout.writeDouble(location.y)
+                        dout.writeDouble(location.z)
+                        dout.writeFloat(location.yaw)
+                        dout.writeInt(invBytes.size)
+                        dout.write(invBytes)
+                    }
+                    bout.toByteArray()
+                }
+                return AwaitingProtectionModeConfig(Base64.getEncoder().encodeToString(bytes))
+            }
+        }
+    }
+
+    @ConfigSerializable
+    class DirtyMarker(val data: String = "") {
+        val location: Location
+            get() = decodeStream { din ->
+                val worldName = din.readUTF()
+                val x = din.readInt()
+                val y = din.readInt()
+                val z = din.readInt()
+                Location(
+                    server.getWorld(worldName) ?: error("World '$worldName' not found"),
+                    x.toDouble(),
+                    y.toDouble(),
+                    z.toDouble()
+                )
+            }
+
+        val blockData: BlockData
+            get() = decodeStream { din ->
+                din.readUTF() // world name (skip)
+                din.readInt() // x (skip)
+                din.readInt() // y (skip)
+                din.readInt() // z (skip)
+                server.createBlockData(din.readUTF())
+            }
+
+        private fun <T> decodeStream(block: (DataInputStream) -> T): T {
+            val bytes = Base64.getDecoder().decode(data)
+            return DataInputStream(ByteArrayInputStream(bytes)).use { din ->
+                val version = din.readByte()
+                require(version == VERSION) { "Unknown DirtyMarker version: $version" }
+                block(din)
+            }
+        }
+
+        companion object {
+            private const val VERSION: Byte = 1
+
+            fun create(location: Location, blockData: BlockData): DirtyMarker {
+                val bytes = ByteArrayOutputStream().use { bout ->
+                    DataOutputStream(bout).use { dout ->
+                        dout.writeByte(VERSION.toInt())
+                        dout.writeUTF(location.world.name)
+                        dout.writeInt(location.blockX)
+                        dout.writeInt(location.blockY)
+                        dout.writeInt(location.blockZ)
+                        dout.writeUTF(blockData.asString)
+                    }
+                    bout.toByteArray()
+                }
+                return DirtyMarker(Base64.getEncoder().encodeToString(bytes))
+            }
+        }
     }
 }

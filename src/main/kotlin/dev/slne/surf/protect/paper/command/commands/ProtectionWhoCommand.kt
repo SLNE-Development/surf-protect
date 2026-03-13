@@ -1,6 +1,5 @@
 package dev.slne.surf.protect.paper.command.commands
 
-import dev.jorel.commandapi.CommandAPI
 import dev.jorel.commandapi.kotlindsl.commandAPICommand
 import dev.jorel.commandapi.kotlindsl.playerExecutor
 import dev.slne.surf.protect.paper.message.Messages
@@ -17,10 +16,14 @@ fun protectionWhoCommand() = commandAPICommand("pwho") {
         val regions = loc.getProtectedRegions()
 
         if (regions.isEmpty()) {
-            throw CommandAPI.failWithString(Messages.Command.PWho.NO_PLAYER_DEFINED_REGION)
+            player.sendText {
+                appendErrorPrefix()
+                error("Du stehst in keiner von einem Spieler gesicherten Region.")
+            }
         }
 
         player.sendText {
+            appendInfoPrefix()
             appendCollectionNewLine(regions, Component.empty()) { region ->
                 Messages.Command.PWho.renderInfo(RegionInfo(region))
             }

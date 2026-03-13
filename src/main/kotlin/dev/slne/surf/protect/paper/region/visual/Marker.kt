@@ -4,6 +4,8 @@ package dev.slne.surf.protect.paper.region.visual
 
 import com.github.shynixn.mccoroutine.folia.regionDispatcher
 import com.sk89q.worldedit.math.BlockVector2
+import dev.slne.surf.protect.paper.config.ProtectionConfig
+import dev.slne.surf.protect.paper.configManager
 import dev.slne.surf.protect.paper.items.ProtectionItems
 import dev.slne.surf.protect.paper.plugin
 import dev.slne.surf.protect.paper.region.ProtectionRegion
@@ -52,16 +54,24 @@ data class Marker(
         }
     }
 
-    suspend fun restorePreviousData() {
+    suspend fun restorePreviousData(shutdown: Boolean = false) {
         if (restored || previousData == null) return
         val world = this.world.get() ?: return
 
         restored = true
         MarkerCache.invalidate(this)
 
-        val chunk = world.getChunkAtAsync(chunkX, chunkZ).await()
-        withContext(plugin.regionDispatcher(world, chunk.x, chunk.z)) {
-            chunk.getBlock(chunkBlockX, blockY, chunkBlockZ).blockData = previousData
+        if (shutdown) {
+            configManager.edit {
+                dirtyMarkers.add(
+                    ProtectionConfig.DirtyMarker.create(pos.toLocation(world), previousData)
+                )
+            }
+        } else {
+            val chunk = world.getChunkAtAsync(chunkX, chunkZ).await()
+            withContext(plugin.regionDispatcher(world, chunk.x, chunk.z)) {
+                chunk.getBlock(chunkBlockX, blockY, chunkBlockZ).blockData = previousData
+            }
         }
     }
 

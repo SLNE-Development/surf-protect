@@ -1,6 +1,6 @@
 package dev.slne.surf.protect.paper.region.visual
 
-import dev.slne.surf.protect.paper.config.config
+import dev.slne.surf.protect.paper.config
 import dev.slne.surf.protect.paper.region.ProtectionRegion
 import dev.slne.surf.surfapi.bukkit.api.nms.bridges.packets.entity.BlockDisplaySettings
 import dev.slne.surf.surfapi.bukkit.api.util.forEachPlayer

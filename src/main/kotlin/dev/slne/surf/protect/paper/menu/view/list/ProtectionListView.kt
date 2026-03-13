@@ -6,8 +6,6 @@ import dev.slne.surf.protect.paper.menu.view.ProtectionMainView
 import dev.slne.surf.protect.paper.region.info.RegionInfo
 import dev.slne.surf.protect.paper.user.protectionUser
 import dev.slne.surf.protect.paper.util.allRegions
-import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
-import dev.slne.surf.surfapi.bukkit.api.builder.displayName
 import dev.slne.surf.surfapi.bukkit.api.inventory.framework.titleBuilder
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
 import me.devnatan.inventoryframework.View
@@ -16,8 +14,6 @@ import me.devnatan.inventoryframework.component.Pagination
 import me.devnatan.inventoryframework.context.RenderContext
 import me.devnatan.inventoryframework.state.State
 import net.kyori.adventure.text.format.TextDecoration
-import org.bukkit.inventory.ItemType
-import kotlin.math.roundToInt
 
 @Suppress("UnstableApiUsage")
 object ProtectionListView : View() {
@@ -96,59 +92,5 @@ object ProtectionListView : View() {
                     context.playNewPageSound()
                 }
             }
-    }
-}
-
-@Suppress("UnstableApiUsage")
-fun createRegionItem(protection: RegionInfo) = ItemType.DIRT.createItemStack().apply {
-    displayName {
-        variableValue(protection.name)
-    }
-
-    buildLore {
-        emptyLine()
-        line {
-            protectColored("Grundstücksinformation".toSmallCaps(), TextDecoration.BOLD)
-        }
-        line {
-            appendBlob()
-            appendSpace()
-            white("Besitzer: ".toSmallCaps())
-            variableValue(protection.owners.joinToString(", ") { it.displayName })
-        }
-        line {
-            appendBlob()
-            appendSpace()
-            white("Id: ".toSmallCaps())
-            variableValue(protection.region.id.toSmallCaps())
-        }
-        line {
-            appendBlob()
-            appendSpace()
-            white("Fläche: ".toSmallCaps())
-            variableValue("${protection.volume} Blöcke".toSmallCaps())
-        }
-        line {
-            appendBlob()
-            appendSpace()
-            white("Mitglieder: ".toSmallCaps())
-            variableValue(protection.members.size)
-        }
-        line {
-            appendBlob()
-            appendSpace()
-            white("Bezahlter Preis: ".toSmallCaps())
-            variableValue("${protection.price.roundToInt()}CC".toSmallCaps())
-        }
-        line {
-            appendBlob()
-            appendSpace()
-            white("Verkaufspreis: ".toSmallCaps())
-            variableValue("${protection.retailPrice.roundToInt()}CC".toSmallCaps())
-        }
-        emptyLine()
-        line {
-            spacer("Klicke für mehr Informationen".toSmallCaps())
-        }
     }
 }

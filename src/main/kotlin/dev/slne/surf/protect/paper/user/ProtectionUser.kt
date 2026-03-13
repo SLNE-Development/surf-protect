@@ -9,7 +9,9 @@ import com.github.shynixn.mccoroutine.folia.launch
 import com.sk89q.worldedit.math.BlockVector2
 import com.sk89q.worldguard.LocalPlayer
 import com.sk89q.worldguard.protection.regions.ProtectedRegion
-import dev.slne.surf.protect.paper.config.config
+import dev.slne.surf.protect.paper.config
+import dev.slne.surf.protect.paper.config.ProtectionConfig
+import dev.slne.surf.protect.paper.configManager
 import dev.slne.surf.protect.paper.items.ProtectionItems
 import dev.slne.surf.protect.paper.plugin
 import dev.slne.surf.protect.paper.region.ProtectionRegion
@@ -20,13 +22,13 @@ import dev.slne.surf.surfapi.bukkit.api.extensions.server
 import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import dev.slne.surf.transaction.api.user.TransactionUser
 import io.papermc.paper.math.Position
-import kotlinx.coroutines.future.await
 import kotlinx.coroutines.withContext
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.OfflinePlayer
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
 import java.util.*
 import kotlin.math.sqrt
 import kotlin.time.Duration.Companion.milliseconds
@@ -117,7 +119,7 @@ class ProtectionUser(val uuid: UUID) {
         return true
     }
 
-    suspend fun resetRegionCreation(aborted: Boolean) {
+    suspend fun resetRegionCreation(aborted: Boolean, shutdown: Boolean = false) {
         val creation = regionCreation ?: return
         this.regionCreation = null
 
@@ -127,18 +129,33 @@ class ProtectionUser(val uuid: UUID) {
             protectionModeCooldown.reset()
         }
 
-        val player = this.bukkitPlayer ?: return
-        plugin.launch(plugin.entityDispatcher(player)) {
-            restorePlayerProperties(player, creation)
-        }
+        if (shutdown) {
+            configManager.edit {
+                awaitingProtectionModes.add(
+                    ProtectionConfig.AwaitingProtectionModeConfig.create(
+                        playerUuid = uuid,
+                        inventory = creation.startingInventoryContent,
+                        location = creation.startLocation
+                    )
+                )
+            }
+        } else {
+            val player = this.bukkitPlayer ?: return
+            withContext(plugin.entityDispatcher(player)) {
+                restorePlayerProperties(
+                    player,
+                    creation.startingInventoryContent.map { it ?: ItemStack.empty() }.toTypedArray()
+                )
+            }
 
-        player.teleportAsync(creation.startLocation).await()
+            player.teleportAsync(creation.startLocation)
+        }
     }
 
-    fun restorePlayerProperties(player: Player, creation: ProtectionRegion) {
+    fun restorePlayerProperties(player: Player, inventory: Array<ItemStack>) {
         with(player) {
             fallDistance = 0f
-            inventory.contents = creation.startingInventoryContent
+            player.inventory.contents = inventory
             allowFlight = gameMode == GameMode.CREATIVE
             isFlying = gameMode == GameMode.CREATIVE
             flySpeed = 0.2f
@@ -183,8 +200,12 @@ class ProtectionUser(val uuid: UUID) {
 
     fun handleQuit(player: Player) {
         val regionCreation = regionCreation
-        if (regionCreation != null) { // TODO: 09.07.2025 23:46 - does this actually work?
-            restorePlayerProperties(player, regionCreation)
+        if (regionCreation != null) {
+            restorePlayerProperties(
+                player,
+                regionCreation.startingInventoryContent.map { it ?: ItemStack.empty() }
+                    .toTypedArray()
+            )
             plugin.launch { regionCreation.cancelProtection() }
         }
     }
