@@ -9,6 +9,7 @@ import dev.jorel.commandapi.arguments.ArgumentSuggestions
 import dev.jorel.commandapi.arguments.CustomArgument
 import dev.jorel.commandapi.arguments.StringArgument
 import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry
+import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
 import dev.slne.surf.surfapi.core.api.util.toObjectList
 
 class ProtectionArgument(nodeName: String) :
@@ -16,6 +17,11 @@ class ProtectionArgument(nodeName: String) :
         WorldGuard.getInstance().platform.regionContainer.loaded.flatMap { it.regions.values }
             .filter { it.getFlag(ProtectionFlagsRegistry.SURF_PROTECTION) != null }
             .firstOrNull { it.id == info.input }
+            ?: throw CustomArgumentException.fromAdventureComponent(
+                buildText {
+                    appendErrorPrefix()
+                    error("Das Grundstück wurde nicht gefunden.")
+                })
     }) {
     init {
         this.replaceSuggestions(
