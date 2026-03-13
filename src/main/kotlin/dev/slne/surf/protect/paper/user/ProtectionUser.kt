@@ -119,7 +119,7 @@ class ProtectionUser(val uuid: UUID) {
         return true
     }
 
-    fun resetRegionCreation(aborted: Boolean, shutdown: Boolean = false) {
+    suspend fun resetRegionCreation(aborted: Boolean, shutdown: Boolean = false) {
         val creation = regionCreation ?: return
         this.regionCreation = null
 
@@ -141,10 +141,12 @@ class ProtectionUser(val uuid: UUID) {
             }
         } else {
             val player = this.bukkitPlayer ?: return
-            restorePlayerProperties(
-                player,
-                creation.startingInventoryContent.map { it ?: ItemStack.empty() }.toTypedArray()
-            )
+            withContext(plugin.entityDispatcher(player)) {
+                restorePlayerProperties(
+                    player,
+                    creation.startingInventoryContent.map { it ?: ItemStack.empty() }.toTypedArray()
+                )
+            }
 
             player.teleportAsync(creation.startLocation)
         }
