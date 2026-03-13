@@ -28,15 +28,6 @@ object Messages {
          * detailed information about a region, such as its name, owners, members, and other metadata.
          */
         object PWho {
-            /**
-             * Message string indicating that the player is currently not standing in any protected region
-             * defined by other players.
-             *
-             * This message is typically used when a command or action requires a player to be located in a
-             * defined protected region, but there are no such regions at the player's current location.
-             */
-            const val NO_PLAYER_DEFINED_REGION =
-                "Du stehst in keiner von einem Spieler gesicherten Region."
 
             /**
              * Renders detailed information about a given region and its associated metadata.
