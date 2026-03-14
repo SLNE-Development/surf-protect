@@ -28,7 +28,7 @@ inline fun Double.fastFloorToInt(): Int {
     return if (floor.toDouble() == this) floor else floor - (toRawBits() ushr 63).toInt()
 }
 
-val castCoinFormat = DecimalFormat("#,##0.##", DecimalFormatSymbols(Locale.GERMANY).apply {
+val castCoinFormat = DecimalFormat("#,##0.## ¤", DecimalFormatSymbols(Locale.GERMANY).apply {
     decimalSeparator = ','
     groupingSeparator = '.'
     currencySymbol = "CC"
