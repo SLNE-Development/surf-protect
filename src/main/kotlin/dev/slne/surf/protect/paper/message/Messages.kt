@@ -248,8 +248,6 @@ object Messages {
             appendNewInfoPrefixedLine()
             variableKey("Preis pro Block: ")
             variableValue(castCoinFormat.format(pricePerBlock))
-            appendSpace()
-            append(currency.displayName.colorIfAbsent(Colors.VARIABLE_VALUE))
             appendNewInfoPrefixedLine()
             variableKey("Distanz zum Spawn: ")
             variableValue(distanceToSpawnFormatted)
@@ -258,8 +256,6 @@ object Messages {
             appendNewInfoPrefixedLine()
             variableKey("Gesamtkosten: ")
             variableValue(castCoinFormat.format(effectiveCost))
-            appendSpace()
-            append(currency.displayName.colorIfAbsent(Colors.VARIABLE_VALUE))
 
             appendNewInfoPrefixedLine()
             appendNewInfoPrefixedLine()
