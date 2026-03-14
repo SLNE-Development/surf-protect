@@ -12,171 +12,200 @@ import org.bukkit.inventory.ItemType
 enum class EditableProtectionFlags(
     val icon: ItemType,
     val displayName: String,
+    val description: String,
     val flag: StateFlag,
     val initialState: StateFlag.State?
 ) {
     CHEST_ACCESS(
         icon = ItemType.CHEST,
-        displayName = "Chest Access",
+        displayName = "Kistenzugriff",
+        description = "Legt fest, ob fremde Spieler Inventare wie Kisten, Fässer oder Shulkerboxen öffnen dürfen.",
         flag = Flags.CHEST_ACCESS,
         initialState = null
     ),
     USE(
         icon = ItemType.LEVER,
-        displayName = "Use",
+        displayName = "Blockbenutzung",
+        description = "Legt fest, ob fremde Spieler interaktive Blöcke wie Türen, Hebel oder Knöpfe nutzen dürfen.",
         flag = Flags.USE,
         initialState = null
     ),
     DAMAGE_ANIMALS(
         icon = ItemType.COOKED_BEEF,
-        displayName = "Damage Animals",
+        displayName = "Tiere verletzen",
+        description = "Legt fest, ob fremde Spieler Tiere verletzen dürfen.",
         flag = Flags.DAMAGE_ANIMALS,
         initialState = null
     ),
     SLEEP(
         icon = ItemType.RED_BED,
-        displayName = "Sleep",
+        displayName = "Schlafen",
+        description = "Legt fest, ob fremde Spieler in Betten schlafen dürfen.",
         flag = Flags.SLEEP,
         initialState = null
     ),
     VEHICLE_PLACE(
         icon = ItemType.MINECART,
-        displayName = "Vehicle Place",
+        displayName = "Fahrzeuge platzieren",
+        description = "Legt fest, ob fremde Spieler Fahrzeuge wie bspw. Boote oder Loren platzieren dürfen.",
         flag = Flags.PLACE_VEHICLE,
         initialState = null
     ),
     VEHICLE_DESTROY(
         icon = ItemType.TNT_MINECART,
-        displayName = "Vehicle Destroy",
+        displayName = "Fahrzeuge zerstören",
+        description = "Legt fest, ob Fahrzeuge zerstören dürfen.",
         flag = Flags.DESTROY_VEHICLE,
         initialState = null
     ),
     RIDE(
         icon = ItemType.SADDLE,
-        displayName = "Ride",
+        displayName = "Reiten",
+        description = "Legt fest, ob fremde Spieler auf Tieren oder in Fahrzeugen reiten dürfen.",
         flag = Flags.RIDE,
         initialState = null
     ),
     ITEM_FRAME_ROTATION(
         icon = ItemType.ITEM_FRAME,
-        displayName = "ItemFrames Rotation",
+        displayName = "Gegenstandsrahmen drehen",
+        description = "Legt fest, ob fremde Spieler Gegenstände in Rahmen drehen dürfen.",
         flag = Flags.ITEM_FRAME_ROTATE,
         initialState = null
     ),
     USE_ANVIL(
         icon = ItemType.ANVIL,
-        displayName = "Anvil Usage",
+        displayName = "Amboss benutzen",
+        description = "Legt fest, ob fremde Spieler einen Amboss benutzen dürfen.",
         flag = Flags.USE_ANVIL,
         initialState = null
     ),
     USE_DRIPLEAF(
         icon = ItemType.BIG_DRIPLEAF,
-        displayName = "Dripleaf Usage",
+        displayName = "Tropfblatt Nutzung",
+        description = "Legt fest, ob fremde Spieler große Tropfblätter auslösen dürfen.",
         flag = Flags.USE_DRIPLEAF,
         initialState = null
     ),
     OTHER_EXPLOSION(
         icon = ItemType.TNT,
-        displayName = "Explosion Damage",
+        displayName = "Explosionsschaden",
+        description = "Legt fest, ob Explosionen auf dem Grundstück Schaden verursachen dürfen.",
         flag = Flags.OTHER_EXPLOSION,
         initialState = null
     ),
     ENDERMAN_GRIEF(
         icon = ItemType.ENDERMAN_SPAWN_EGG,
-        displayName = "Enderman Griefing",
+        displayName = "Enderman‑Griefing",
+        description = "Legt fest, ob Endermänner Blöcke aufnehmen oder platzieren dürfen.",
         flag = Flags.ENDER_BUILD,
         initialState = null
     ),
     FIRE_SPREAD(
         icon = ItemType.FLINT_AND_STEEL,
-        displayName = "Fire Spread",
+        displayName = "Feuerausbreitung",
+        description = "Legt fest, ob sich Feuer auf dem Grundstück natürlich ausbreiten darf.",
         flag = Flags.FIRE_SPREAD,
         initialState = StateFlag.State.DENY
     ),
     LEAF_DECAY(
         icon = ItemType.OAK_LEAVES,
-        displayName = "Leaf Decay",
+        displayName = "Blattverfall",
+        description = "Legt fest, ob Blätter auf dem Grundstück natürlich verfallen dürfen.",
         flag = Flags.LEAF_DECAY,
         initialState = null
     ),
     GRASS_GROWTH(
         icon = ItemType.GRASS_BLOCK,
-        displayName = "Grass Growth",
+        displayName = "Graswachstum",
+        description = "Legt fest, ob sich Gras natürlich auf Erde ausbreiten darf.",
         flag = Flags.GRASS_SPREAD,
         initialState = null
     ),
     MYCELIUM_SPREAD(
         icon = ItemType.MYCELIUM,
-        displayName = "Mycelium Spread",
+        displayName = "Myzelwachstum",
+        description = "Legt fest, ob sich Myzel natürlich auf Erde ausbreiten darf.",
         flag = Flags.MYCELIUM_SPREAD,
         initialState = null
     ),
     MUSHROOM_GROWTH(
         icon = ItemType.RED_MUSHROOM,
-        displayName = "Mushroom Growth",
+        displayName = "Pilzwachstum",
+        description = "Legt fest, ob Pilze auf dem Grundstück wachsen oder sich ausbreiten dürfen.",
         flag = Flags.MUSHROOMS,
         initialState = null
     ),
     VINE_GROWTH(
         icon = ItemType.VINE,
-        displayName = "Vine Growth",
+        displayName = "Rankenwachstum",
+        description = "Legt fest, ob Ranken und Seetang wachsen oder sich ausbreiten dürfen.",
         flag = Flags.VINE_GROWTH,
         initialState = null
     ),
     ROCK_GROWTH(
         icon = ItemType.DRIPSTONE_BLOCK,
-        displayName = "Rock Growth",
+        displayName = "Tropfsteinwachstum",
+        description = "Legt fest, ob Tropfstein natürlich wachsen oder sich verlängern darf.",
         flag = Flags.ROCK_GROWTH,
         initialState = null
     ),
     SCULK_GROWTH(
         icon = ItemType.SCULK_SENSOR,
-        displayName = "Sculk Growth",
+        displayName = "Sculk-Ausbreitung",
+        description = "Legt fest, ob sich Sculk auf dem Grundstück ausbreiten oder wachsen darf.",
         flag = Flags.SCULK_GROWTH,
         initialState = null
     ),
     CROP_GROWTH(
         icon = ItemType.WHEAT,
-        displayName = "Crop Growth",
+        displayName = "Pflanzenwachstum",
+        description = "Legt fest, ob Nutzpflanzen auf dem Grundstück wachsen dürfen.",
         flag = Flags.CROP_GROWTH,
         initialState = null
     ),
     CORAL_FADE(
         icon = ItemType.BRAIN_CORAL,
-        displayName = "Coral Fade",
+        displayName = "Korallenverblassen",
+        description = "Legt fest, ob Korallen ohne Wasser ausbleichen dürfen.",
         flag = Flags.CORAL_FADE,
         initialState = null
     ),
     SNOWMAN_TRAILS(
         icon = ItemType.CARVED_PUMPKIN,
-        displayName = "Snowman Trails",
+        displayName = "Schneegolem-Spuren",
+        description = "Legt fest, ob Schneegolems Schneespuren auf dem Boden hinterlassen dürfen.",
         flag = Flags.SNOWMAN_TRAILS,
         initialState = null
     ),
     SNOW_FALL(
         icon = ItemType.SNOW,
-        displayName = "Snow Fall",
+        displayName = "Schneefall",
+        description = "Legt fest, ob fallender Schnee Blöcke auf dem Grundstück bedecken darf.",
         flag = Flags.SNOW_FALL,
         initialState = null
     ),
     SNOW_MELT(
         icon = ItemType.SNOW,
-        displayName = "Snow Melt",
+        displayName = "Schneeschmelze",
+        description = "Legt fest, ob Schnee durch Licht oder Wärme schmelzen darf.",
         flag = Flags.SNOW_MELT,
         initialState = null
     ),
     ICE_FORM(
         icon = ItemType.ICE,
-        displayName = "Ice Form",
+        displayName = "Eisbildung",
+        description = "Legt fest, ob Wasser auf dem Grundstück zu Eis gefrieren darf.",
         flag = Flags.ICE_FORM,
         initialState = null
     ),
     ICE_MELT(
         icon = ItemType.ICE,
-        displayName = "Ice Melt",
+        displayName = "Eisschmelze",
+        description = "Legt fest, ob Eis durch Licht oder Wärme auf dem Grundstück schmelzen darf.",
         flag = Flags.ICE_MELT,
         initialState = null
     );
 
-    val component = SurfComponentBuilder { primary(displayName) }
+    val displayNameComponent = SurfComponentBuilder { primary(displayName) }
+    val descriptionComponent = SurfComponentBuilder { info(description) }
 }
