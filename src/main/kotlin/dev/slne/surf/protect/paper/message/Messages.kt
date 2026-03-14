@@ -9,6 +9,7 @@ import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
 import dev.slne.surf.transaction.api.currency.Currency
 import net.kyori.adventure.text.Component
 import kotlin.math.roundToInt
+import java.util.Locale
 
 /**
  * The Messages object serves as a container for various predefined message and text utilities.
@@ -232,6 +233,7 @@ object Messages {
             distanceToSpawn: Double
         ) = buildText {
             val distanceToSpawn = (distanceToSpawn * 100).roundToInt() / 100.0
+            val distanceToSpawnFormatted = String.format(Locale.GERMANY, "%,.2f", distanceToSpawn)
 
             appendInfoPrefix()
             appendNewInfoPrefixedLine()
@@ -250,7 +252,7 @@ object Messages {
             append(currency.displayName.colorIfAbsent(Colors.VARIABLE_VALUE))
             appendNewInfoPrefixedLine()
             variableKey("Distanz zum Spawn: ")
-            variableValue(blockFormat.format(distanceToSpawn))
+            variableValue(distanceToSpawnFormatted)
             variableValue(" Blöcke")
 
             appendNewInfoPrefixedLine()
