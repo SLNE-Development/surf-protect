@@ -8,6 +8,7 @@ import dev.slne.surf.protect.paper.menu.view.ProtectionInfoView
 import dev.slne.surf.protect.paper.plugin
 import dev.slne.surf.protect.paper.region.info.ProtectionFlagInfo
 import dev.slne.surf.protect.paper.region.info.RegionInfo
+import dev.slne.surf.protect.paper.util.castCoinFormat
 import dev.slne.surf.surfapi.bukkit.api.dialog.search.searchDialog
 import dev.slne.surf.surfapi.bukkit.api.inventory.framework.viewFrame
 import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
@@ -30,11 +31,11 @@ fun protectionRenameDialog(protection: RegionInfo) = searchDialog(
             protectColored("Gib den neuen Namen für dein Grundstück ein.")
             appendNewline()
             appendWarningPrefix()
-            error("Dieser Vorgang kostet dich ${config.protection.renamePrice}CC!")
+            error("Dieser Vorgang kostet dich ${castCoinFormat.format(config.protection.renamePrice)}!")
 
             appendNewline()
             appendWarningPrefix()
-            error("Der Name darf nur 16 Zeichen lang sein!")
+            error("Der Name darf maximal 22 Zeichen lang sein!")
         }
     },
     onSearch = { player, query ->
@@ -45,11 +46,13 @@ fun protectionRenameDialog(protection: RegionInfo) = searchDialog(
     }
 )
 
+private val chars = ('a'..'z') + ('A'..'Z') + ('0'..'9') + listOf(' ', '_', '-')
+
 private fun handleRename(player: Player, newName: String, protection: RegionInfo) {
-    if (newName.length > 16) {
+    if (newName.length > 22) {
         player.sendText {
             appendErrorPrefix()
-            error("Der Name darf nur 16 Zeichen lang sein!")
+            error("Der Name darf maximal 22 Zeichen lang sein!")
         }
         return
     }
@@ -58,6 +61,14 @@ private fun handleRename(player: Player, newName: String, protection: RegionInfo
         player.sendText {
             appendErrorPrefix()
             error("Der neue Name ist identisch mit dem alten Name!")
+        }
+        return
+    }
+
+    if (newName.any { it !in chars }) {
+        player.sendText {
+            appendErrorPrefix()
+            error("Der Name darf nur aus Buchstaben, Zahlen, Leerzeichen, Unterstrichen und Bindestrichen bestehen!")
         }
         return
     }

@@ -2,12 +2,14 @@ package dev.slne.surf.protect.paper.message
 
 import dev.slne.surf.protect.paper.config
 import dev.slne.surf.protect.paper.region.info.RegionInfo
+import dev.slne.surf.protect.paper.util.blockFormat
+import dev.slne.surf.protect.paper.util.castCoinFormat
 import dev.slne.surf.surfapi.core.api.messages.Colors
 import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
 import dev.slne.surf.transaction.api.currency.Currency
 import net.kyori.adventure.text.Component
-import java.text.NumberFormat
 import kotlin.math.roundToInt
+import java.util.Locale
 
 /**
  * The Messages object serves as a container for various predefined message and text utilities.
@@ -231,7 +233,7 @@ object Messages {
             distanceToSpawn: Double
         ) = buildText {
             val distanceToSpawn = (distanceToSpawn * 100).roundToInt() / 100.0
-            val format = NumberFormat.getNumberInstance()
+            val distanceToSpawnFormatted = String.format(Locale.GERMANY, "%,.2f", distanceToSpawn)
 
             appendInfoPrefix()
             appendNewInfoPrefixedLine()
@@ -240,24 +242,20 @@ object Messages {
             appendNewInfoPrefixedLine()
             appendNewInfoPrefixedLine()
             variableKey("Fläche: ")
-            variableValue(format.format(area))
+            variableValue(blockFormat.format(area))
             variableValue(" Blöcke²")
 
             appendNewInfoPrefixedLine()
             variableKey("Preis pro Block: ")
-            variableValue(format.format(pricePerBlock))
-            appendSpace()
-            append(currency.displayName.colorIfAbsent(Colors.VARIABLE_VALUE))
+            variableValue(castCoinFormat.format(pricePerBlock))
             appendNewInfoPrefixedLine()
             variableKey("Distanz zum Spawn: ")
-            variableValue(format.format(distanceToSpawn))
+            variableValue(distanceToSpawnFormatted)
             variableValue(" Blöcke")
 
             appendNewInfoPrefixedLine()
             variableKey("Gesamtkosten: ")
-            variableValue(format.format(effectiveCost))
-            appendSpace()
-            append(currency.displayName.colorIfAbsent(Colors.VARIABLE_VALUE))
+            variableValue(castCoinFormat.format(effectiveCost))
 
             appendNewInfoPrefixedLine()
             appendNewInfoPrefixedLine()
