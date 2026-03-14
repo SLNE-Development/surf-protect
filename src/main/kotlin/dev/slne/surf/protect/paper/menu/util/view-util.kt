@@ -1,6 +1,8 @@
 package dev.slne.surf.protect.paper.menu.util
 
 import dev.slne.surf.protect.paper.region.info.RegionInfo
+import dev.slne.surf.protect.paper.util.blockFormat
+import dev.slne.surf.protect.paper.util.castCoinFormat
 import dev.slne.surf.protect.paper.util.formatString
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
 import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
@@ -16,7 +18,6 @@ import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.ItemType
-import kotlin.math.roundToInt
 
 val View.outlineItem: ItemStack
     get() = buildItem(Material.GRAY_STAINED_GLASS_PANE) {
@@ -122,7 +123,7 @@ fun createRegionItem(protection: RegionInfo) = ItemType.DIRT.createItemStack().a
             appendBlob()
             appendSpace()
             white("Fläche: ".toSmallCaps())
-            variableValue("${protection.volume} Blöcke".toSmallCaps())
+            variableValue("${blockFormat.format(protection.volume)} Blöcke".toSmallCaps())
         }
 
         line {
@@ -141,13 +142,13 @@ fun createRegionItem(protection: RegionInfo) = ItemType.DIRT.createItemStack().a
             appendBlob()
             appendSpace()
             white("Bezahlter Preis: ".toSmallCaps())
-            variableValue("${protection.price.roundToInt()}CC".toSmallCaps())
+            variableValue(castCoinFormat.format(protection.price))
         }
         line {
             appendBlob()
             appendSpace()
             white("Verkaufspreis: ".toSmallCaps())
-            variableValue("${protection.retailPrice.roundToInt()}CC".toSmallCaps())
+            variableValue(castCoinFormat.format(protection.retailPrice))
         }
         emptyLine()
         line {

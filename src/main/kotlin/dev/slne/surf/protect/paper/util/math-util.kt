@@ -2,6 +2,10 @@
 
 package dev.slne.surf.protect.paper.util
 
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
+import java.util.*
+
 /**
  * Returns the mathematical floor of this [Double] as an [Int], using a branchless approach.
  *
@@ -23,3 +27,14 @@ inline fun Double.fastFloorToInt(): Int {
     val floor = toInt()
     return if (floor.toDouble() == this) floor else floor - (toRawBits() ushr 63).toInt()
 }
+
+val castCoinFormat = DecimalFormat("#,##0.##", DecimalFormatSymbols(Locale.GERMANY).apply {
+    decimalSeparator = ','
+    groupingSeparator = '.'
+    currencySymbol = "CC"
+})
+
+val blockFormat = DecimalFormat("#,##0", DecimalFormatSymbols(Locale.GERMANY).apply {
+    decimalSeparator = ','
+    groupingSeparator = '.'
+})
