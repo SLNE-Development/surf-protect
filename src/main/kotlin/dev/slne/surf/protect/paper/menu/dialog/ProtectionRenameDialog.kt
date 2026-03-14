@@ -49,10 +49,10 @@ fun protectionRenameDialog(protection: RegionInfo) = searchDialog(
 private val chars = ('a'..'z') + ('A'..'Z') + ('0'..'9') + listOf(' ', '_', '-')
 
 private fun handleRename(player: Player, newName: String, protection: RegionInfo) {
-    if (newName.length > 2) {
+    if (newName.length > 22) {
         player.sendText {
             appendErrorPrefix()
-            error("Der Name darf nur 22 Zeichen lang sein!")
+            error("Der Name darf maximal 22 Zeichen lang sein!")
         }
         return
     }
