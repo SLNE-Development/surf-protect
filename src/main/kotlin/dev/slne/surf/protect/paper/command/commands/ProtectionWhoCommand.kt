@@ -22,11 +22,8 @@ fun protectionWhoCommand() = commandAPICommand("pwho") {
             }
         }
 
-        player.sendText {
-            appendInfoPrefix()
-            appendCollectionNewLine(regions, Component.empty()) { region ->
-                Messages.Command.PWho.renderInfo(RegionInfo(region))
-            }
+        regions.forEach { region ->
+            player.sendMessage(Messages.Command.PWho.renderInfo(RegionInfo(region)))
         }
     }
 }
