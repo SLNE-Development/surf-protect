@@ -34,7 +34,7 @@ fun protectionRenameDialog(protection: RegionInfo) = searchDialog(
 
             appendNewline()
             appendWarningPrefix()
-            error("Der Name darf nur 16 Zeichen lang sein!")
+            error("Der Name darf maximal 22 Zeichen lang sein!")
         }
     },
     onSearch = { player, query ->
@@ -45,11 +45,13 @@ fun protectionRenameDialog(protection: RegionInfo) = searchDialog(
     }
 )
 
+private val chars = ('a'..'z') + ('A'..'Z') + ('0'..'9') + listOf(' ', '_', '-')
+
 private fun handleRename(player: Player, newName: String, protection: RegionInfo) {
-    if (newName.length > 16) {
+    if (newName.length > 2) {
         player.sendText {
             appendErrorPrefix()
-            error("Der Name darf nur 16 Zeichen lang sein!")
+            error("Der Name darf nur 22 Zeichen lang sein!")
         }
         return
     }
@@ -58,6 +60,14 @@ private fun handleRename(player: Player, newName: String, protection: RegionInfo
         player.sendText {
             appendErrorPrefix()
             error("Der neue Name ist identisch mit dem alten Name!")
+        }
+        return
+    }
+
+    if (newName.any { it !in chars }) {
+        player.sendText {
+            appendErrorPrefix()
+            error("Der Name darf nur aus Buchstaben, Zahlen, Leerzeichen, Unterstrichen und Bindestrichen bestehen!")
         }
         return
     }
