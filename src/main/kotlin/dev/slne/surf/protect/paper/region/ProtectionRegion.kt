@@ -2,6 +2,7 @@
 
 package dev.slne.surf.protect.paper.region
 
+import com.github.shynixn.mccoroutine.folia.globalRegionDispatcher
 import com.github.shynixn.mccoroutine.folia.launch
 import com.sk89q.worldedit.math.BlockVector2
 import com.sk89q.worldguard.protection.flags.Flags
@@ -9,6 +10,7 @@ import com.sk89q.worldguard.protection.flags.StateFlag
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion
 import com.sk89q.worldguard.protection.regions.ProtectedRegion
 import dev.slne.surf.protect.paper.config
+import dev.slne.surf.protect.paper.event.ProtectionCreateEvent
 import dev.slne.surf.protect.paper.math.Mth
 import dev.slne.surf.protect.paper.message.Messages
 import dev.slne.surf.protect.paper.plugin
@@ -35,6 +37,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.future.await
+import kotlinx.coroutines.withContext
 import org.apache.commons.lang3.RandomStringUtils
 import org.bukkit.Chunk
 import org.bukkit.ChunkSnapshot
@@ -372,6 +375,12 @@ class ProtectionRegion(
                         startLocation.world,
                         tempRegion.region
                     )
+                }
+
+                withContext(plugin.globalRegionDispatcher) {
+                    protectionUser.bukkitPlayer?.let {
+                        ProtectionCreateEvent(it)
+                    }
                 }
             } else {
                 protectionUser.sendMessage(Messages.Protecting.tooExpensiveToBuy)
