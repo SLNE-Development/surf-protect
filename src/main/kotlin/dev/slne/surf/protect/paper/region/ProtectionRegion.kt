@@ -379,7 +379,7 @@ class ProtectionRegion(
 
                 withContext(plugin.globalRegionDispatcher) {
                     protectionUser.bukkitPlayer?.let {
-                        ProtectionCreateEvent(it)
+                        ProtectionCreateEvent(it).callEvent()
                     }
                 }
             } else {
