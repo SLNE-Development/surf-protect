@@ -56,17 +56,14 @@ object ProtectionMainView : View() {
         render.layoutSlot('V', visualizeItem).onClick { click ->
             val player = click.player
 
-            if (ProtectionVisualizerManager.isVisualizing(player)) {
-                ProtectionVisualizerManager.stop(player)
-                player.sendText {
-                    appendSuccessPrefix()
-                    success("Du hast den Visualizer deaktiviert.")
-                }
-            } else {
-                ProtectionVisualizerManager.startVisualizer(player)
-                player.sendText {
-                    appendSuccessPrefix()
+            val isVisualizing = ProtectionVisualizerManager.switchVisualizing(player)
+            player.sendText {
+                appendSuccessPrefix()
+                if (isVisualizing) {
                     success("Du hast den Visualizer aktiviert.")
+
+                } else {
+                    success("Du hast den Visualizer deaktiviert.")
                 }
             }
         }
