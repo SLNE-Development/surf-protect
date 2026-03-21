@@ -1,7 +1,9 @@
 package dev.slne.surf.protect.paper.menu.view
 
+import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.shynixn.mccoroutine.folia.entityDispatcher
 import com.github.shynixn.mccoroutine.folia.launch
+import com.sksamuel.aedile.core.expireAfterWrite
 import dev.slne.surf.protect.paper.menu.util.closeItem
 import dev.slne.surf.protect.paper.menu.util.outlineItem
 import dev.slne.surf.protect.paper.menu.util.playGeneralClickSound
@@ -23,9 +25,15 @@ import me.devnatan.inventoryframework.ViewConfigBuilder
 import me.devnatan.inventoryframework.context.RenderContext
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.inventory.ItemType
+import java.util.UUID
+import kotlin.time.Duration.Companion.seconds
 
 @Suppress("UnstableApiUsage")
 object ProtectionMainView : View() {
+    private val visualizerCooldown = Caffeine.newBuilder()
+        .expireAfterWrite(1.seconds)
+        .build<UUID, Boolean>()
+
     override fun onInit(config: ViewConfigBuilder) {
         config
             .titleBuilder {
@@ -56,6 +64,16 @@ object ProtectionMainView : View() {
         render.layoutSlot('V', visualizeItem).onClick { click ->
             val player = click.player
 
+            val onCooldown = visualizerCooldown.getIfPresent(player.uniqueId) ?: false
+            if (onCooldown) {
+                player.sendText {
+                    appendErrorPrefix()
+                    error("Bitte warte einen Augenblick.")
+                }
+                return@onClick
+            }
+            visualizerCooldown.put(player.uniqueId, true)
+
             val isVisualizing = ProtectionVisualizerManager.switchVisualizing(player)
             player.sendText {
                 appendSuccessPrefix()
@@ -66,6 +84,8 @@ object ProtectionMainView : View() {
                     success("Du hast den Visualizer deaktiviert.")
                 }
             }
+
+            click.closeForPlayer()
         }
         render.layoutSlot('A', createItem).onClick { click ->
             val player = click.player
