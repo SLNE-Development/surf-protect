@@ -4,6 +4,8 @@ package dev.slne.surf.protect.paper.region.info
  * Represents the state of a region creation
  */
 enum class RegionCreationState {
+    TOO_NEAR_FROM_SPAWN,
+
     /**
      * More markers are needed to complete the region creation
      */

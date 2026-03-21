@@ -28,6 +28,7 @@ import dev.slne.surf.protect.paper.util.*
 import dev.slne.surf.surfapi.bukkit.api.util.getHighestBlockYAtBlockCoordinates
 import dev.slne.surf.surfapi.bukkit.api.util.getXFromChunkKey
 import dev.slne.surf.surfapi.bukkit.api.util.getZFromChunkKey
+import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
 import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import dev.slne.surf.surfapi.core.api.util.*
 import io.papermc.paper.math.BlockPosition
@@ -254,6 +255,14 @@ class ProtectionRegion(
                     protectionUser.sendMessage(Messages.Protecting.areaTooSmall)
                     RegionCreationState.TOO_SMALL
                 } else {
+                    if (spawnDistance < config.pricing.spawnProtectionPerBlock) {
+                        protectionUser.sendMessage(buildText {
+                            appendErrorPrefix()
+                            error("Das Grundstück liegt zu nah am Spawn.")
+                        })
+                        return RegionCreationState.TOO_NEAR_FROM_SPAWN
+                    }
+
                     protectionUser.sendMessage(
                         Messages.Protecting.offer(
                             tmpVolume,
@@ -345,6 +354,14 @@ class ProtectionRegion(
         val cost = (tempRegion.effectiveVolume * pricePerBlock).roundToInt()
         val costBD = (-cost).toBigDecimal()
         val currency = config.currency.currency
+
+        if (pricePerBlock == Double.MAX_VALUE) {
+            protectionUser.sendMessage(buildText {
+                appendErrorPrefix()
+                error("Das Grundstück liegt zu nah am Spawn.")
+            })
+            return
+        }
 
         if (!isProcessingTransaction.compareAndSet(false, true)) {
             protectionUser.sendMessage(Messages.Protecting.alreadyProcessingTransaction)
