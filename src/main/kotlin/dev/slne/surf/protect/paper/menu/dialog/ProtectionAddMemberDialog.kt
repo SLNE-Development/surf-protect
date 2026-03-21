@@ -3,6 +3,7 @@ package dev.slne.surf.protect.paper.menu.dialog
 import dev.slne.surf.protect.paper.menu.util.protectColored
 import dev.slne.surf.protect.paper.menu.view.members.ProtectionMemberListView
 import dev.slne.surf.protect.paper.region.info.RegionInfo
+import dev.slne.surf.protect.paper.region.visual.visualizer.ProtectionVisualizerManager
 import dev.slne.surf.surfapi.bukkit.api.dialog.search.searchDialog
 import dev.slne.surf.surfapi.bukkit.api.inventory.framework.viewFrame
 import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
@@ -60,6 +61,7 @@ private fun handleAdd(player: Player, playerName: String, protection: RegionInfo
     }
 
     protection.region.members.addPlayer(target.uniqueId)
+    ProtectionVisualizerManager.onRegionMemberChange(protection.region)
 
     player.sendText {
         appendSuccessPrefix()

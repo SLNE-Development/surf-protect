@@ -4,9 +4,6 @@ plugins {
     id("dev.slne.surf.surfapi.gradle.paper-plugin") version "1.21.11+"
 }
 
-group = "dev.slne.surf.protect.paper"
-version = findProperty("version") as String
-
 surfPaperPluginApi {
     mainClass("dev.slne.surf.protect.paper.PaperMain")
     foliaSupported(true)
@@ -33,4 +30,3 @@ dependencies {
 
 group = "dev.slne.surf.protect"
 version = findProperty("version") as String
-

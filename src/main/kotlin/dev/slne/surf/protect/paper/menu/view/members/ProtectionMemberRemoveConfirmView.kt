@@ -5,6 +5,7 @@ import dev.slne.surf.protect.paper.menu.util.playGeneralClickSound
 import dev.slne.surf.protect.paper.menu.util.protectColored
 import dev.slne.surf.protect.paper.menu.view.ProtectionInfoView
 import dev.slne.surf.protect.paper.region.info.RegionInfo
+import dev.slne.surf.protect.paper.region.visual.visualizer.ProtectionVisualizerManager
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
 import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
 import dev.slne.surf.surfapi.bukkit.api.builder.displayName
@@ -53,6 +54,7 @@ object ProtectionMemberRemoveConfirmView : View() {
             val member = memberState.get(click)
 
             protection.region.members.removePlayer(member.uniqueId)
+            ProtectionVisualizerManager.onRegionMemberChange(protection.region)
             click.openForPlayer(ProtectionInfoView::class.java, mapOf("protection" to protection))
         }
     }
