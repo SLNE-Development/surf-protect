@@ -34,6 +34,15 @@ fun protectionAddMemberDialog(protection: RegionInfo) = searchDialog(
 )
 
 private fun handleAdd(player: Player, playerName: String, protection: RegionInfo) {
+    if (playerName.isEmpty() || playerName.isBlank() || playerName.length > 16) {
+        player.sendText {
+            appendErrorPrefix()
+            error("Der Spielername ist ungültig.")
+        }
+        return
+    }
+
+
     val target = Bukkit.getOfflinePlayer(playerName)
 
     if (!target.hasPlayedBefore()) {

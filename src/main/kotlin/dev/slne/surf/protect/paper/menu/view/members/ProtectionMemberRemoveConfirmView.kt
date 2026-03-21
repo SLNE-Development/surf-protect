@@ -1,7 +1,5 @@
 package dev.slne.surf.protect.paper.menu.view.members
 
-import com.sk89q.worldedit.bukkit.BukkitAdapter
-import com.sk89q.worldguard.LocalPlayer
 import dev.slne.surf.protect.paper.menu.util.outlineItem
 import dev.slne.surf.protect.paper.menu.util.playGeneralClickSound
 import dev.slne.surf.protect.paper.menu.util.protectColored
@@ -18,11 +16,12 @@ import me.devnatan.inventoryframework.context.RenderContext
 import me.devnatan.inventoryframework.state.State
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
+import org.bukkit.OfflinePlayer
 import org.bukkit.inventory.meta.SkullMeta
 
 object ProtectionMemberRemoveConfirmView : View() {
     val protectionState: State<RegionInfo> = initialState("protection")
-    val memberState: State<LocalPlayer> = initialState("member")
+    val memberState: State<OfflinePlayer> = initialState("member")
 
     override fun onInit(config: ViewConfigBuilder) {
         config
@@ -58,13 +57,13 @@ object ProtectionMemberRemoveConfirmView : View() {
         }
     }
 
-    private fun createMemberItem(member: LocalPlayer) = buildItem(Material.PLAYER_HEAD) {
+    private fun createMemberItem(member: OfflinePlayer) = buildItem(Material.PLAYER_HEAD) {
         displayName {
-            protectColored(member.displayName.toSmallCaps(), TextDecoration.BOLD)
+            protectColored(member.name?.toSmallCaps() ?: "#Unknown", TextDecoration.BOLD)
         }
 
         editMeta(SkullMeta::class.java) {
-            it.owningPlayer = BukkitAdapter.adapt(member)
+            it.owningPlayer = member
         }
 
         buildLore {
