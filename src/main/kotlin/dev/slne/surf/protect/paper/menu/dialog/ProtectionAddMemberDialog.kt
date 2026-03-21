@@ -51,6 +51,7 @@ private fun handleAdd(player: Player, playerName: String, protection: RegionInfo
             appendErrorPrefix()
             error("Der Spieler wurde nicht gefunden.")
         }
+        return
     }
 
     if (protection.members.map { it.uniqueId }.contains(target.uniqueId)) {
@@ -58,6 +59,7 @@ private fun handleAdd(player: Player, playerName: String, protection: RegionInfo
             appendErrorPrefix()
             error("Der Spieler ist bereits Mitglied dieses Grundstücks.")
         }
+        return
     }
 
     protection.region.members.addPlayer(target.uniqueId)
