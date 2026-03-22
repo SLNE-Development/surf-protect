@@ -1,5 +1,6 @@
 package dev.slne.surf.protect.paper.menu.view.flags
 
+import com.sk89q.worldguard.protection.flags.RegionGroup
 import com.sk89q.worldguard.protection.flags.StateFlag
 import dev.slne.surf.protect.paper.menu.util.*
 import dev.slne.surf.protect.paper.menu.view.ProtectionInfoView
@@ -47,7 +48,19 @@ object ProtectionEditFlagsView : View() {
                     StateFlag.State.ALLOW
                 }
 
-                region.setFlag(flag.flag, newState)
+                if (flag == EditableProtectionFlags.CHEST_ACCESS) {
+                    if (newState == StateFlag.State.ALLOW) {
+                        region.setFlag(flag.flag, StateFlag.State.ALLOW)
+                        region.setFlag(flag.flag.regionGroupFlag, RegionGroup.MEMBERS)
+                    } else {
+                        region.setFlag(flag.flag, StateFlag.State.ALLOW)
+                        region.setFlag(flag.flag.regionGroupFlag, null)
+                    }
+                } else {
+                    region.setFlag(flag.flag, newState)
+                }
+
+
                 localProtectionState.set(protection, context)
                 context.playGeneralClickSound()
 
@@ -77,9 +90,10 @@ object ProtectionEditFlagsView : View() {
             .titleBuilder {
                 protectColored("Grundstück - Flags".toSmallCaps(), TextDecoration.BOLD)
             }
-            .size(5)
+            .size(6)
             .layout(
                 "OOOOOOOOO",
+                "ORRRRRRRO",
                 "ORRRRRRRO",
                 "ORRRRRRRO",
                 "ORRRRRRRO",
@@ -105,9 +119,6 @@ object ProtectionEditFlagsView : View() {
         render
             .layoutSlot('P')
             .updateOnStateChange(paginationState)
-            .displayIf { _ ->
-                pagination.canBack()
-            }
             .onRender { slotRender ->
                 if (pagination.canBack()) {
                     slotRender.item = previousItem
@@ -123,9 +134,6 @@ object ProtectionEditFlagsView : View() {
         render
             .layoutSlot('N')
             .updateOnStateChange(paginationState)
-            .displayIf { _ ->
-                pagination.canAdvance()
-            }
             .onRender { slotRender ->
                 if (pagination.canAdvance()) {
                     slotRender.item = nextItem
