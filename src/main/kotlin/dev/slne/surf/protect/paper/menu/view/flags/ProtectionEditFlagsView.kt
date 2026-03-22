@@ -32,34 +32,50 @@ object ProtectionEditFlagsView : View() {
             builder.renderWith {
                 val protection = protectionState.get(context)
                 val region = protection.region
+
                 val currentState =
-                    region.getFlag(flag.flag) ?: flag.initialState ?: StateFlag.State.ALLOW
+                    if (flag.isPlayerRelated) {
+                        val group = region.getFlag(flag.flag.regionGroupFlag)
+                        if (group == RegionGroup.MEMBERS || (region.getFlag(flag.flag) == StateFlag.State.DENY)) {
+                            StateFlag.State.DENY
+                        } else {
+                            StateFlag.State.ALLOW
+                        }
+                    } else {
+                        region.getFlag(flag.flag) ?: flag.initialState ?: StateFlag.State.ALLOW
+                    }
 
                 createFlagItem(flag, currentState)
             }.onClick { context ->
                 val protection = protectionState.get(context)
                 val region = protection.region
+
                 val oldState =
-                    region.getFlag(flag.flag) ?: flag.initialState ?: StateFlag.State.ALLOW
-
-                val newState = if (oldState == StateFlag.State.ALLOW) {
-                    StateFlag.State.DENY
-                } else {
-                    StateFlag.State.ALLOW
-                }
-
-                if (flag == EditableProtectionFlags.CHEST_ACCESS) {
-                    if (newState == StateFlag.State.ALLOW) {
-                        region.setFlag(flag.flag, StateFlag.State.ALLOW)
-                        region.setFlag(flag.flag.regionGroupFlag, RegionGroup.MEMBERS)
+                    if (flag.isPlayerRelated) {
+                        val group = region.getFlag(flag.flag.regionGroupFlag)
+                        if (group == RegionGroup.MEMBERS) StateFlag.State.DENY else StateFlag.State.ALLOW
                     } else {
-                        region.setFlag(flag.flag, StateFlag.State.ALLOW)
+                        region.getFlag(flag.flag) ?: flag.initialState ?: StateFlag.State.ALLOW
+                    }
+
+                val newState =
+                    if (flag.isPlayerRelated) {
+                        val group = region.getFlag(flag.flag.regionGroupFlag)
+                        if (group == RegionGroup.MEMBERS) StateFlag.State.ALLOW else StateFlag.State.DENY
+                    } else {
+                        if (oldState == StateFlag.State.ALLOW) StateFlag.State.DENY else StateFlag.State.ALLOW
+                    }
+
+                if (flag.isPlayerRelated) {
+                    region.setFlag(flag.flag, StateFlag.State.ALLOW)
+                    if (newState == StateFlag.State.ALLOW) {
                         region.setFlag(flag.flag.regionGroupFlag, null)
+                    } else {
+                        region.setFlag(flag.flag.regionGroupFlag, RegionGroup.MEMBERS)
                     }
                 } else {
                     region.setFlag(flag.flag, newState)
                 }
-
 
                 localProtectionState.set(protection, context)
                 context.playGeneralClickSound()
@@ -67,7 +83,7 @@ object ProtectionEditFlagsView : View() {
                 context.openForPlayer(
                     ProtectionEditFlagsView::class.java,
                     mapOf("protection" to localProtectionState.get(context))
-                ) // TODO: only update inventory instead of reopening, currently not working by api
+                )
 
                 context.player.sendText {
                     appendSuccessPrefix()
@@ -75,9 +91,16 @@ object ProtectionEditFlagsView : View() {
                     protectColored(flag.displayName.toSmallCaps(), TextDecoration.BOLD)
                     success(" auf ")
                     variableValue(
-                        when (newState) {
-                            StateFlag.State.ALLOW -> "Erlaubt"
-                            StateFlag.State.DENY -> "Verboten"
+                        if (flag.isPlayerRelated) {
+                            when (newState) {
+                                StateFlag.State.ALLOW -> "Für alle erlaubt"
+                                StateFlag.State.DENY -> "Nur für Mitglieder"
+                            }
+                        } else {
+                            when (newState) {
+                                StateFlag.State.ALLOW -> "Erlaubt"
+                                StateFlag.State.DENY -> "Verboten"
+                            }
                         }
                     )
                     success(" gesetzt.")
@@ -120,11 +143,7 @@ object ProtectionEditFlagsView : View() {
             .layoutSlot('P')
             .updateOnStateChange(paginationState)
             .onRender { slotRender ->
-                if (pagination.canBack()) {
-                    slotRender.item = previousItem
-                } else {
-                    slotRender.item = outlineItem
-                }
+                if (pagination.canBack()) previousItem else outlineItem
             }
             .onClick { context ->
                 pagination.back()
@@ -135,11 +154,7 @@ object ProtectionEditFlagsView : View() {
             .layoutSlot('N')
             .updateOnStateChange(paginationState)
             .onRender { slotRender ->
-                if (pagination.canAdvance()) {
-                    slotRender.item = nextItem
-                } else {
-                    slotRender.item = outlineItem
-                }
+                if (pagination.canAdvance()) nextItem else outlineItem
             }
             .onClick { context ->
                 pagination.advance()
@@ -168,10 +183,18 @@ object ProtectionEditFlagsView : View() {
                     appendBlob()
                     appendSpace()
                     white("Status: ".toSmallCaps())
-                    if (state == StateFlag.State.ALLOW) {
-                        success("Erlaubt".toSmallCaps())
+                    if (flag.isPlayerRelated) {
+                        if (state == StateFlag.State.ALLOW) {
+                            success("Alle".toSmallCaps())
+                        } else {
+                            variableValue("Mitglieder".toSmallCaps())
+                        }
                     } else {
-                        error("Verboten".toSmallCaps())
+                        if (state == StateFlag.State.ALLOW) {
+                            success("Erlaubt".toSmallCaps())
+                        } else {
+                            error("Verboten".toSmallCaps())
+                        }
                     }
                 }
                 emptyLine()
