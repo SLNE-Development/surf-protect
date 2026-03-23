@@ -24,7 +24,7 @@ fun protectionRenameDialog(protection: RegionInfo) = searchDialog(
         protectColored("Grundstück umbenennen...")
     },
     searchInput = {
-        protection.name
+        initialValue = protection.name
     },
     body = {
         plainMessage {
@@ -42,7 +42,16 @@ fun protectionRenameDialog(protection: RegionInfo) = searchDialog(
         handleRename(player, query, protection)
     },
     onClose = { player, query ->
-        handleRename(player, query, protection)
+        viewFrame.open(
+            ProtectionInfoView::class.java,
+            player,
+            mapOf("protection" to protection)
+        )
+
+        player.sendText {
+            appendInfoPrefix()
+            info("Du hast den Umbenennen-Vorgang abgebrochen.")
+        }
     }
 )
 
@@ -54,6 +63,11 @@ private fun handleRename(player: Player, newName: String, protection: RegionInfo
             appendErrorPrefix()
             error("Der Name darf maximal 22 Zeichen lang sein!")
         }
+        viewFrame.open(
+            ProtectionInfoView::class.java,
+            player,
+            mapOf("protection" to protection)
+        )
         return
     }
 
@@ -62,6 +76,11 @@ private fun handleRename(player: Player, newName: String, protection: RegionInfo
             appendErrorPrefix()
             error("Der neue Name ist identisch mit dem alten Name!")
         }
+        viewFrame.open(
+            ProtectionInfoView::class.java,
+            player,
+            mapOf("protection" to protection)
+        )
         return
     }
 
@@ -70,6 +89,11 @@ private fun handleRename(player: Player, newName: String, protection: RegionInfo
             appendErrorPrefix()
             error("Der Name darf nur aus Buchstaben, Zahlen, Leerzeichen, Unterstrichen und Bindestrichen bestehen!")
         }
+        viewFrame.open(
+            ProtectionInfoView::class.java,
+            player,
+            mapOf("protection" to protection)
+        )
         return
     }
 
