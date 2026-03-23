@@ -6,6 +6,7 @@ import com.github.shynixn.mccoroutine.folia.globalRegionDispatcher
 import com.github.shynixn.mccoroutine.folia.launch
 import com.sk89q.worldedit.math.BlockVector2
 import com.sk89q.worldguard.protection.flags.Flags
+import com.sk89q.worldguard.protection.flags.RegionGroup
 import com.sk89q.worldguard.protection.flags.StateFlag
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion
 import com.sk89q.worldguard.protection.regions.ProtectedRegion
@@ -392,6 +393,8 @@ class ProtectionRegion(
                         startLocation.world,
                         tempRegion.region
                     )
+
+                    applyDefaultFlags(tempRegion.region)
                 }
 
                 withContext(plugin.globalRegionDispatcher) {
@@ -405,6 +408,25 @@ class ProtectionRegion(
 
         } finally {
             isProcessingTransaction.set(false)
+        }
+    }
+
+    private fun applyDefaultFlags(region: ProtectedRegion) {
+        for (flag in EditableProtectionFlags.entries) {
+
+            val state = flag.initialState ?: StateFlag.State.ALLOW
+
+            if (flag.isPlayerRelated) {
+                region.setFlag(flag.flag.regionGroupFlag, RegionGroup.NON_MEMBERS)
+                region.setFlag(flag.flag, state)
+
+                region.setFlag(flag.flag.regionGroupFlag, RegionGroup.MEMBERS)
+                region.setFlag(flag.flag, StateFlag.State.ALLOW)
+
+                continue
+            }
+
+            region.setFlag(flag.flag, state)
         }
     }
 

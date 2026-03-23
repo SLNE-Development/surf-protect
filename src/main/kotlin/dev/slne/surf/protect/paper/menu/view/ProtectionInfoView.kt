@@ -37,10 +37,10 @@ object ProtectionInfoView : View() {
             }
             .size(5)
             .layout(
-                "OOOOOOOOO",
+                "OOOOIOOOO",
                 "O       O",
-                "ORM I SFO",
-                "O   E   O",
+                "ORM F SEO",
+                "O       O",
                 "OOOOBOOOO"
             )
             .cancelInteractions()
@@ -59,7 +59,7 @@ object ProtectionInfoView : View() {
                 mapOf("protection" to protectionState.get(render))
             )
         }
-        render.layoutSlot('I', createRegionItem(protectionState.get(render)))
+        render.layoutSlot('I', createRegionItem(protectionState.get(render), false))
         render.layoutSlot('S', sellItem).onClick { click ->
             click.playGeneralClickSound()
             click.openForPlayer(

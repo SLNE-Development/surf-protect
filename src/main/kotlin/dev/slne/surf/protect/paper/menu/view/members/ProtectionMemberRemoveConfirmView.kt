@@ -3,7 +3,6 @@ package dev.slne.surf.protect.paper.menu.view.members
 import dev.slne.surf.protect.paper.menu.util.outlineItem
 import dev.slne.surf.protect.paper.menu.util.playGeneralClickSound
 import dev.slne.surf.protect.paper.menu.util.protectColored
-import dev.slne.surf.protect.paper.menu.view.ProtectionInfoView
 import dev.slne.surf.protect.paper.region.info.RegionInfo
 import dev.slne.surf.protect.paper.region.visual.visualizer.ProtectionVisualizerManager
 import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
@@ -11,6 +10,7 @@ import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
 import dev.slne.surf.surfapi.bukkit.api.builder.displayName
 import dev.slne.surf.surfapi.bukkit.api.inventory.framework.titleBuilder
 import dev.slne.surf.surfapi.core.api.font.toSmallCaps
+import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import me.devnatan.inventoryframework.View
 import me.devnatan.inventoryframework.ViewConfigBuilder
 import me.devnatan.inventoryframework.context.RenderContext
@@ -44,7 +44,7 @@ object ProtectionMemberRemoveConfirmView : View() {
         render.layoutSlot('C', cancelItem).onClick { click ->
             click.playGeneralClickSound()
             click.openForPlayer(
-                ProtectionInfoView::class.java,
+                ProtectionMemberListView::class.java,
                 mapOf("protection" to protectionState.get(render))
             )
         }
@@ -55,7 +55,17 @@ object ProtectionMemberRemoveConfirmView : View() {
 
             protection.region.members.removePlayer(member.uniqueId)
             ProtectionVisualizerManager.onRegionMemberChange(protection.region)
-            click.openForPlayer(ProtectionInfoView::class.java, mapOf("protection" to protection))
+            click.openForPlayer(
+                ProtectionMemberListView::class.java,
+                mapOf("protection" to protection)
+            )
+
+            click.player.sendText {
+                appendSuccessPrefix()
+                success("Du hast das Mitglied ")
+                variableValue(member?.name ?: "#Unbekannt")
+                success(" entfernt.")
+            }
         }
     }
 

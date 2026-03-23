@@ -40,6 +40,12 @@ private fun handleAdd(player: Player, playerName: String, protection: RegionInfo
             appendErrorPrefix()
             error("Der Spielername ist ungültig.")
         }
+        player.closeDialog()
+        viewFrame.open(
+            ProtectionMemberListView::class.java,
+            player,
+            mapOf("protection" to protection)
+        )
         return
     }
 
@@ -51,6 +57,12 @@ private fun handleAdd(player: Player, playerName: String, protection: RegionInfo
             appendErrorPrefix()
             error("Der Spieler wurde nicht gefunden.")
         }
+        player.closeDialog()
+        viewFrame.open(
+            ProtectionMemberListView::class.java,
+            player,
+            mapOf("protection" to protection)
+        )
         return
     }
 
@@ -59,6 +71,12 @@ private fun handleAdd(player: Player, playerName: String, protection: RegionInfo
             appendErrorPrefix()
             error("Der Spieler ist bereits Mitglied dieses Grundstücks.")
         }
+        player.closeDialog()
+        viewFrame.open(
+            ProtectionMemberListView::class.java,
+            player,
+            mapOf("protection" to protection)
+        )
         return
     }
 

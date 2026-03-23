@@ -100,14 +100,14 @@ enum class EditableProtectionFlags(
         displayName = "Explosionsschaden",
         description = "Legt fest, ob Explosionen auf dem Grundstück Schaden verursachen dürfen.",
         flag = Flags.OTHER_EXPLOSION,
-        initialState = null
+        initialState = StateFlag.State.DENY
     ),
     ENDERMAN_GRIEF(
         icon = ItemType.ENDERMAN_SPAWN_EGG,
         displayName = "Enderman-Griefing",
         description = "Legt fest, ob Endermänner Blöcke aufnehmen oder platzieren dürfen.",
         flag = Flags.ENDER_BUILD,
-        initialState = null
+        initialState = StateFlag.State.DENY
     ),
     FIRE_SPREAD(
         icon = ItemType.FLINT_AND_STEEL,
