@@ -22,7 +22,6 @@ fun protectionAddMemberDialog(protection: RegionInfo) = searchDialog(
         plainMessage {
             protectColored("Gib den Namen des Spielers ein, den du hinzufügen möchtest.")
             appendNewline()
-            appendWarningPrefix()
             error("Der Spieler muss bereits einmal auf diesem Server gespielt haben, damit er hinzugefügt werden kann.")
         }
     },
