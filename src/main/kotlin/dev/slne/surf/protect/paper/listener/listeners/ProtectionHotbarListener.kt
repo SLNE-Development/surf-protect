@@ -85,13 +85,17 @@ object ProtectionHotbarListener : Listener {
         event.blockList().removeIf { ProtectionItems.isProtectionBlock(it) }
     }
 
-    @EventHandler(priority = EventPriority.LOW)
+    @EventHandler(priority = EventPriority.HIGH)
     fun onMarkerPlace(event: BlockPlaceEvent) {
         val block = event.getBlock()
         val location = block.getLocation()
         val player = event.getPlayer()
         val protectionUser = player.protectionUser()
         val protectionItem = ProtectionItems.getProtectionItem(event.itemInHand) ?: return
+
+        if (event.isCancelled) {
+            return
+        }
 
         if (protectionItem.cancelEvent) {
             event.isCancelled = true

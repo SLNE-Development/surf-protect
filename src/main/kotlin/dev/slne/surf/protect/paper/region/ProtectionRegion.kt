@@ -2,13 +2,16 @@
 
 package dev.slne.surf.protect.paper.region
 
+import com.github.shynixn.mccoroutine.folia.globalRegionDispatcher
 import com.github.shynixn.mccoroutine.folia.launch
 import com.sk89q.worldedit.math.BlockVector2
 import com.sk89q.worldguard.protection.flags.Flags
+import com.sk89q.worldguard.protection.flags.RegionGroup
 import com.sk89q.worldguard.protection.flags.StateFlag
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion
 import com.sk89q.worldguard.protection.regions.ProtectedRegion
 import dev.slne.surf.protect.paper.config
+import dev.slne.surf.protect.paper.event.ProtectionCreateEvent
 import dev.slne.surf.protect.paper.math.Mth
 import dev.slne.surf.protect.paper.message.Messages
 import dev.slne.surf.protect.paper.plugin
@@ -26,6 +29,7 @@ import dev.slne.surf.protect.paper.util.*
 import dev.slne.surf.surfapi.bukkit.api.util.getHighestBlockYAtBlockCoordinates
 import dev.slne.surf.surfapi.bukkit.api.util.getXFromChunkKey
 import dev.slne.surf.surfapi.bukkit.api.util.getZFromChunkKey
+import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
 import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import dev.slne.surf.surfapi.core.api.util.*
 import io.papermc.paper.math.BlockPosition
@@ -35,6 +39,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.future.await
+import kotlinx.coroutines.withContext
 import org.apache.commons.lang3.RandomStringUtils
 import org.bukkit.Chunk
 import org.bukkit.ChunkSnapshot
@@ -251,6 +256,14 @@ class ProtectionRegion(
                     protectionUser.sendMessage(Messages.Protecting.areaTooSmall)
                     RegionCreationState.TOO_SMALL
                 } else {
+                    if (spawnDistance < config.pricing.spawnProtectionPerBlock) {
+                        protectionUser.sendMessage(buildText {
+                            appendErrorPrefix()
+                            error("Das Grundstück liegt zu nah am Spawn.")
+                        })
+                        return RegionCreationState.TOO_NEAR_FROM_SPAWN
+                    }
+
                     protectionUser.sendMessage(
                         Messages.Protecting.offer(
                             tmpVolume,
@@ -343,6 +356,14 @@ class ProtectionRegion(
         val costBD = (-cost).toBigDecimal()
         val currency = config.currency.currency
 
+        if (pricePerBlock == Double.MAX_VALUE) {
+            protectionUser.sendMessage(buildText {
+                appendErrorPrefix()
+                error("Das Grundstück liegt zu nah am Spawn.")
+            })
+            return
+        }
+
         if (!isProcessingTransaction.compareAndSet(false, true)) {
             protectionUser.sendMessage(Messages.Protecting.alreadyProcessingTransaction)
             return
@@ -372,6 +393,14 @@ class ProtectionRegion(
                         startLocation.world,
                         tempRegion.region
                     )
+
+                    applyDefaultFlags(tempRegion.region)
+                }
+
+                withContext(plugin.globalRegionDispatcher) {
+                    protectionUser.bukkitPlayer?.let {
+                        ProtectionCreateEvent(it).callEvent()
+                    }
                 }
             } else {
                 protectionUser.sendMessage(Messages.Protecting.tooExpensiveToBuy)
@@ -379,6 +408,25 @@ class ProtectionRegion(
 
         } finally {
             isProcessingTransaction.set(false)
+        }
+    }
+
+    private fun applyDefaultFlags(region: ProtectedRegion) {
+        for (flag in EditableProtectionFlags.entries) {
+
+            val state = flag.initialState ?: StateFlag.State.ALLOW
+
+            if (flag.isPlayerRelated) {
+                region.setFlag(flag.flag.regionGroupFlag, RegionGroup.NON_MEMBERS)
+                region.setFlag(flag.flag, state)
+
+                region.setFlag(flag.flag.regionGroupFlag, RegionGroup.MEMBERS)
+                region.setFlag(flag.flag, StateFlag.State.ALLOW)
+
+                continue
+            }
+
+            region.setFlag(flag.flag, state)
         }
     }
 

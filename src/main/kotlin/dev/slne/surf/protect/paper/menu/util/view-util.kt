@@ -97,65 +97,69 @@ val closeItem = MenuHeads.CROSS.apply {
 }
 
 @Suppress("UnstableApiUsage")
-fun createRegionItem(protection: RegionInfo) = ItemType.DIRT.createItemStack().apply {
-    displayName {
-        variableValue(protection.name)
-    }
-
-    buildLore {
-        emptyLine()
-        line {
-            protectColored("Grundstücksinformation".toSmallCaps(), TextDecoration.BOLD)
-        }
-        line {
-            appendBlob()
-            appendSpace()
-            white("Besitzer: ".toSmallCaps())
-            variableValue(protection.owners.joinToString(", ") { it.displayName })
-        }
-        line {
-            appendBlob()
-            appendSpace()
-            white("Id: ".toSmallCaps())
-            variableValue(protection.region.id.toSmallCaps())
-        }
-        line {
-            appendBlob()
-            appendSpace()
-            white("Fläche: ".toSmallCaps())
-            variableValue("${blockFormat.format(protection.volume)} Blöcke".toSmallCaps())
+fun createRegionItem(protection: RegionInfo, showMoreInfo: Boolean = true) =
+    ItemType.DIRT.createItemStack().apply {
+        displayName {
+            variableValue(protection.name)
         }
 
-        line {
-            appendBlob()
-            appendSpace()
-            white("Mittelpunkt: ".toSmallCaps())
-            variableValue(protection.centerLocation.formatString())
-        }
-        line {
-            appendBlob()
-            appendSpace()
-            white("Mitglieder: ".toSmallCaps())
-            variableValue(protection.members.size)
-        }
-        line {
-            appendBlob()
-            appendSpace()
-            white("Bezahlter Preis: ".toSmallCaps())
-            variableValue(castCoinFormat.format(protection.price))
-        }
-        line {
-            appendBlob()
-            appendSpace()
-            white("Verkaufspreis: ".toSmallCaps())
-            variableValue(castCoinFormat.format(protection.retailPrice))
-        }
-        emptyLine()
-        line {
-            spacer("Klicke für mehr Informationen".toSmallCaps())
+        buildLore {
+            emptyLine()
+            line {
+                protectColored("Grundstücksinformation".toSmallCaps(), TextDecoration.BOLD)
+            }
+            line {
+                appendBlob()
+                appendSpace()
+                white("Besitzer: ".toSmallCaps())
+                variableValue(protection.owners.joinToString(", ") { it.displayName })
+            }
+            line {
+                appendBlob()
+                appendSpace()
+                white("Id: ".toSmallCaps())
+                variableValue(protection.region.id.toSmallCaps())
+            }
+            line {
+                appendBlob()
+                appendSpace()
+                white("Fläche: ".toSmallCaps())
+                variableValue("${blockFormat.format(protection.volume)} Blöcke".toSmallCaps())
+            }
+
+            line {
+                appendBlob()
+                appendSpace()
+                white("Mittelpunkt: ".toSmallCaps())
+                variableValue(protection.centerLocation.formatString())
+            }
+            line {
+                appendBlob()
+                appendSpace()
+                white("Mitglieder: ".toSmallCaps())
+                variableValue(protection.members.size)
+            }
+            line {
+                appendBlob()
+                appendSpace()
+                white("Bezahlter Preis: ".toSmallCaps())
+                variableValue(castCoinFormat.format(protection.price))
+            }
+            line {
+                appendBlob()
+                appendSpace()
+                white("Verkaufspreis: ".toSmallCaps())
+                variableValue(castCoinFormat.format(protection.retailPrice))
+            }
+
+            if (showMoreInfo) {
+                emptyLine()
+                line {
+                    spacer("Klicke für mehr Informationen".toSmallCaps())
+                }
+            }
         }
     }
-}
 
 fun SurfComponentBuilder.appendBlob() = darkSpacer("▪")
 

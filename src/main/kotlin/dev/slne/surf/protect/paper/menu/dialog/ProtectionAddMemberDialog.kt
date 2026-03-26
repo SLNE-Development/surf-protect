@@ -34,6 +34,21 @@ fun protectionAddMemberDialog(protection: RegionInfo) = searchDialog(
 )
 
 private fun handleAdd(player: Player, playerName: String, protection: RegionInfo) {
+    if (playerName.isEmpty() || playerName.isBlank() || playerName.length > 16) {
+        player.sendText {
+            appendErrorPrefix()
+            error("Der Spielername ist ungültig.")
+        }
+        player.closeDialog()
+        viewFrame.open(
+            ProtectionMemberListView::class.java,
+            player,
+            mapOf("protection" to protection)
+        )
+        return
+    }
+
+
     val target = Bukkit.getOfflinePlayer(playerName)
 
     if (!target.hasPlayedBefore()) {
@@ -41,6 +56,13 @@ private fun handleAdd(player: Player, playerName: String, protection: RegionInfo
             appendErrorPrefix()
             error("Der Spieler wurde nicht gefunden.")
         }
+        player.closeDialog()
+        viewFrame.open(
+            ProtectionMemberListView::class.java,
+            player,
+            mapOf("protection" to protection)
+        )
+        return
     }
 
     if (protection.members.map { it.uniqueId }.contains(target.uniqueId)) {
@@ -48,6 +70,13 @@ private fun handleAdd(player: Player, playerName: String, protection: RegionInfo
             appendErrorPrefix()
             error("Der Spieler ist bereits Mitglied dieses Grundstücks.")
         }
+        player.closeDialog()
+        viewFrame.open(
+            ProtectionMemberListView::class.java,
+            player,
+            mapOf("protection" to protection)
+        )
+        return
     }
 
     protection.region.members.addPlayer(target.uniqueId)

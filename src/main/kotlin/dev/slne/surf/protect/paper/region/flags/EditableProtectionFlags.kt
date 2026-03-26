@@ -5,100 +5,109 @@ import com.sk89q.worldguard.protection.flags.StateFlag
 import dev.slne.surf.surfapi.core.api.messages.builder.SurfComponentBuilder
 import org.bukkit.inventory.ItemType
 
-/**
- * @see <a href="https://github.com/SLNE-Development/surf-protect/blob/18c4108a688c2e048d406203365ede81b801e0c1/src/main/java/dev/slne/protect/bukkit/gui/protection/flags/ProtectionFlagsMap.java">ProtectionFlagsMap</a>
- */
 @Suppress("UnstableApiUsage")
 enum class EditableProtectionFlags(
     val icon: ItemType,
     val displayName: String,
     val description: String,
     val flag: StateFlag,
-    val initialState: StateFlag.State?
+    val initialState: StateFlag.State?,
+    val isPlayerRelated: Boolean = false
 ) {
     CHEST_ACCESS(
         icon = ItemType.CHEST,
         displayName = "Kistenzugriff",
         description = "Legt fest, ob fremde Spieler Inventare wie Kisten, Fässer oder Shulkerboxen öffnen dürfen.",
         flag = Flags.CHEST_ACCESS,
-        initialState = null
+        initialState = StateFlag.State.DENY,
+        isPlayerRelated = true
     ),
     USE(
         icon = ItemType.LEVER,
         displayName = "Blockbenutzung",
         description = "Legt fest, ob fremde Spieler interaktive Blöcke wie Türen, Hebel oder Knöpfe nutzen dürfen.",
         flag = Flags.USE,
-        initialState = null
+        initialState = StateFlag.State.DENY,
+        isPlayerRelated = true
     ),
     DAMAGE_ANIMALS(
         icon = ItemType.COOKED_BEEF,
         displayName = "Tiere verletzen",
         description = "Legt fest, ob fremde Spieler Tiere verletzen dürfen.",
         flag = Flags.DAMAGE_ANIMALS,
-        initialState = null
+        initialState = StateFlag.State.DENY,
+        isPlayerRelated = true
     ),
     SLEEP(
         icon = ItemType.RED_BED,
         displayName = "Schlafen",
         description = "Legt fest, ob fremde Spieler in Betten schlafen dürfen.",
         flag = Flags.SLEEP,
-        initialState = null
+        initialState = StateFlag.State.DENY,
+        isPlayerRelated = true
     ),
     VEHICLE_PLACE(
         icon = ItemType.MINECART,
         displayName = "Fahrzeuge platzieren",
         description = "Legt fest, ob fremde Spieler Fahrzeuge wie bspw. Boote oder Loren platzieren dürfen.",
         flag = Flags.PLACE_VEHICLE,
-        initialState = null
+        initialState = StateFlag.State.DENY,
+        isPlayerRelated = true
     ),
     VEHICLE_DESTROY(
         icon = ItemType.TNT_MINECART,
         displayName = "Fahrzeuge zerstören",
         description = "Legt fest, ob Fahrzeuge zerstören dürfen.",
         flag = Flags.DESTROY_VEHICLE,
-        initialState = null
+        initialState = StateFlag.State.DENY,
+        isPlayerRelated = true
     ),
     RIDE(
         icon = ItemType.SADDLE,
         displayName = "Reiten",
         description = "Legt fest, ob fremde Spieler auf Tieren oder in Fahrzeugen reiten dürfen.",
         flag = Flags.RIDE,
-        initialState = null
+        initialState = StateFlag.State.DENY,
+        isPlayerRelated = true
     ),
     ITEM_FRAME_ROTATION(
         icon = ItemType.ITEM_FRAME,
         displayName = "Gegenstandsrahmen drehen",
         description = "Legt fest, ob fremde Spieler Gegenstände in Rahmen drehen dürfen.",
         flag = Flags.ITEM_FRAME_ROTATE,
-        initialState = null
+        initialState = StateFlag.State.DENY,
+        isPlayerRelated = true
     ),
     USE_ANVIL(
         icon = ItemType.ANVIL,
         displayName = "Amboss benutzen",
         description = "Legt fest, ob fremde Spieler einen Amboss benutzen dürfen.",
         flag = Flags.USE_ANVIL,
-        initialState = null
+        initialState = StateFlag.State.DENY,
+        isPlayerRelated = true
     ),
     USE_DRIPLEAF(
         icon = ItemType.BIG_DRIPLEAF,
         displayName = "Tropfblatt Nutzung",
         description = "Legt fest, ob fremde Spieler große Tropfblätter auslösen dürfen.",
         flag = Flags.USE_DRIPLEAF,
-        initialState = null
+        initialState = StateFlag.State.DENY,
+        isPlayerRelated = true
     ),
+
     OTHER_EXPLOSION(
         icon = ItemType.TNT,
         displayName = "Explosionsschaden",
         description = "Legt fest, ob Explosionen auf dem Grundstück Schaden verursachen dürfen.",
         flag = Flags.OTHER_EXPLOSION,
-        initialState = null
+        initialState = StateFlag.State.DENY
     ),
     ENDERMAN_GRIEF(
         icon = ItemType.ENDERMAN_SPAWN_EGG,
-        displayName = "Enderman‑Griefing",
+        displayName = "Enderman-Griefing",
         description = "Legt fest, ob Endermänner Blöcke aufnehmen oder platzieren dürfen.",
         flag = Flags.ENDER_BUILD,
-        initialState = null
+        initialState = StateFlag.State.DENY
     ),
     FIRE_SPREAD(
         icon = ItemType.FLINT_AND_STEEL,

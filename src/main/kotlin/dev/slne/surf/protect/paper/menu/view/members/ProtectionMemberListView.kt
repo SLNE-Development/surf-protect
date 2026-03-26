@@ -17,7 +17,6 @@ import me.devnatan.inventoryframework.state.State
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Bukkit
 import org.bukkit.Material
-import org.bukkit.inventory.ItemType
 import org.bukkit.inventory.meta.SkullMeta
 
 @Suppress("UnstableApiUsage")
@@ -32,6 +31,16 @@ object ProtectionMemberListView : View() {
             builder.withItem(buildItem(Material.PLAYER_HEAD) {
                 displayName {
                     protectColored(player.name ?: "#Unbekannt".toSmallCaps())
+                }
+
+                buildLore {
+                    line {
+                        darkSpacer(player.uniqueId.toString())
+                    }
+                    emptyLine()
+                    line {
+                        darkSpacer("Klicke, um das Mitglied zu entfernen")
+                    }
                 }
 
                 editMeta(SkullMeta::class.java) {
@@ -84,9 +93,6 @@ object ProtectionMemberListView : View() {
         render
             .layoutSlot('P')
             .updateOnStateChange(paginationState)
-            .displayIf { _ ->
-                pagination.canBack()
-            }
             .onRender { slotRender ->
                 if (pagination.canBack()) {
                     slotRender.item = previousItem
@@ -103,9 +109,6 @@ object ProtectionMemberListView : View() {
         render
             .layoutSlot('N')
             .updateOnStateChange(paginationState)
-            .displayIf { _ ->
-                pagination.canAdvance()
-            }
             .onRender { slotRender ->
                 if (pagination.canAdvance()) {
                     slotRender.item = nextItem
@@ -120,7 +123,7 @@ object ProtectionMemberListView : View() {
             }
     }
 
-    val addMemberItem = ItemType.PLAYER_HEAD.createItemStack().apply {
+    val addMemberItem = MenuHeads.PLUS.clone().apply {
         displayName {
             protectColored("Mitglied hinzufügen".toSmallCaps(), TextDecoration.BOLD)
         }

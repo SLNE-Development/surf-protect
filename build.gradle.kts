@@ -29,5 +29,4 @@ dependencies {
 }
 
 group = "dev.slne.surf.protect"
-version = "1.21.11-3.0.2"
-
+version = findProperty("version") as String

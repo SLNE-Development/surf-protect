@@ -1,6 +1,8 @@
 package dev.slne.surf.protect.paper.menu.view.flags
 
+import com.sk89q.worldguard.protection.flags.RegionGroup
 import com.sk89q.worldguard.protection.flags.StateFlag
+import com.sk89q.worldguard.protection.regions.ProtectedRegion
 import dev.slne.surf.protect.paper.menu.util.*
 import dev.slne.surf.protect.paper.menu.view.ProtectionInfoView
 import dev.slne.surf.protect.paper.region.flags.EditableProtectionFlags
@@ -15,71 +17,59 @@ import me.devnatan.inventoryframework.View
 import me.devnatan.inventoryframework.ViewConfigBuilder
 import me.devnatan.inventoryframework.component.Pagination
 import me.devnatan.inventoryframework.context.RenderContext
-import me.devnatan.inventoryframework.state.MutableState
 import me.devnatan.inventoryframework.state.State
 import net.kyori.adventure.text.format.TextDecoration
 
 object ProtectionEditFlagsView : View() {
-    val protectionState: State<RegionInfo> = initialState("protection")
-    val nullRegionInfo: RegionInfo? = null
-    val localProtectionState: MutableState<RegionInfo?> = mutableState(nullRegionInfo)
+
+    private val protectionState: State<RegionInfo> = initialState("protection")
 
     private val paginationState: State<Pagination> =
-        buildLazyPaginationState { _ ->
-            EditableProtectionFlags.entries.toMutableList()
-        }.elementFactory { context, builder, _, flag ->
-            builder.renderWith {
-                val protection = protectionState.get(context)
-                val region = protection.region
-                val currentState =
-                    region.getFlag(flag.flag) ?: flag.initialState ?: StateFlag.State.ALLOW
+        buildLazyPaginationState { _ -> EditableProtectionFlags.entries.toMutableList() }
+            .elementFactory { context, builder, _, flag ->
 
-                createFlagItem(flag, currentState)
-            }.onClick { context ->
-                val protection = protectionState.get(context)
-                val region = protection.region
-                val oldState =
-                    region.getFlag(flag.flag) ?: flag.initialState ?: StateFlag.State.ALLOW
-
-                val newState = if (oldState == StateFlag.State.ALLOW) {
-                    StateFlag.State.DENY
-                } else {
-                    StateFlag.State.ALLOW
+                builder.renderWith {
+                    val region = protectionState.get(context).region
+                    val state = getCurrentState(region, flag)
+                    createFlagItem(flag, state)
                 }
 
-                region.setFlag(flag.flag, newState)
-                localProtectionState.set(protection, context)
-                context.playGeneralClickSound()
+                builder.onClick { context ->
+                    val protection = protectionState.get(context)
+                    val region = protection.region
 
-                context.openForPlayer(
-                    ProtectionEditFlagsView::class.java,
-                    mapOf("protection" to localProtectionState.get(context))
-                ) // TODO: only update inventory instead of reopening, currently not working by api
+                    val newState = toggleState(region, flag)
+                    applyState(region, flag, newState)
 
-                context.player.sendText {
-                    appendSuccessPrefix()
-                    success("Du hast die Flag ")
-                    protectColored(flag.displayName.toSmallCaps(), TextDecoration.BOLD)
-                    success(" auf ")
-                    variableValue(
-                        when (newState) {
-                            StateFlag.State.ALLOW -> "Erlaubt"
-                            StateFlag.State.DENY -> "Verboten"
-                        }
+                    context.playGeneralClickSound()
+
+                    context.openForPlayer(
+                        ProtectionEditFlagsView::class.java,
+                        mapOf("protection" to protection)
                     )
-                    success(" gesetzt.")
+
+                    context.player.sendText {
+                        appendSuccessPrefix()
+                        success("Du hast die Flag ")
+                        protectColored(flag.displayName.toSmallCaps(), TextDecoration.BOLD)
+                        success(" auf ")
+                        variableValue(formatState(flag, newState))
+                        success(" gesetzt.")
+                    }
                 }
             }
-        }.layoutTarget('R').build()
+            .layoutTarget('R')
+            .build()
 
     override fun onInit(config: ViewConfigBuilder) {
         config
             .titleBuilder {
                 protectColored("Grundstück - Flags".toSmallCaps(), TextDecoration.BOLD)
             }
-            .size(5)
+            .size(6)
             .layout(
                 "OOOOOOOOO",
+                "ORRRRRRRO",
                 "ORRRRRRRO",
                 "ORRRRRRRO",
                 "ORRRRRRRO",
@@ -89,12 +79,10 @@ object ProtectionEditFlagsView : View() {
     }
 
     override fun onFirstRender(render: RenderContext) {
-        localProtectionState.set(protectionState.get(render), render)
-
         val pagination = paginationState.get(render)
 
-        render.layoutSlot('B', backItem).onClick { context ->
-            context.openForPlayer(
+        render.layoutSlot('B', backItem).onClick { click ->
+            click.openForPlayer(
                 ProtectionInfoView::class.java,
                 mapOf("protection" to protectionState.get(render))
             )
@@ -102,41 +90,70 @@ object ProtectionEditFlagsView : View() {
 
         render.layoutSlot('O', outlineItem)
 
-        render
-            .layoutSlot('P')
+        render.layoutSlot('P')
             .updateOnStateChange(paginationState)
-            .displayIf { _ ->
-                pagination.canBack()
+            .onRender {
+                if (pagination.canBack()) previousItem else outlineItem
             }
-            .onRender { slotRender ->
-                if (pagination.canBack()) {
-                    slotRender.item = previousItem
-                } else {
-                    slotRender.item = outlineItem
-                }
-            }
-            .onClick { context ->
+            .onClick { click ->
                 pagination.back()
-                context.playNewPageSound()
+                click.playNewPageSound()
             }
 
-        render
-            .layoutSlot('N')
+        render.layoutSlot('N')
             .updateOnStateChange(paginationState)
-            .displayIf { _ ->
-                pagination.canAdvance()
+            .onRender {
+                if (pagination.canAdvance()) nextItem else outlineItem
             }
-            .onRender { slotRender ->
-                if (pagination.canAdvance()) {
-                    slotRender.item = nextItem
-                } else {
-                    slotRender.item = outlineItem
-                }
-            }
-            .onClick { context ->
+            .onClick { click ->
                 pagination.advance()
-                context.playNewPageSound()
+                click.playNewPageSound()
             }
+    }
+
+    private fun getCurrentState(
+        region: ProtectedRegion,
+        flag: EditableProtectionFlags
+    ): StateFlag.State {
+        return if (flag.isPlayerRelated) {
+            val group = region.getFlag(flag.flag.regionGroupFlag)
+            if (group == RegionGroup.MEMBERS) StateFlag.State.DENY else StateFlag.State.ALLOW
+        } else {
+            region.getFlag(flag.flag) ?: flag.initialState ?: StateFlag.State.ALLOW
+        }
+    }
+
+    private fun toggleState(
+        region: ProtectedRegion,
+        flag: EditableProtectionFlags
+    ): StateFlag.State {
+        val current = getCurrentState(region, flag)
+        return if (current == StateFlag.State.ALLOW) StateFlag.State.DENY else StateFlag.State.ALLOW
+    }
+
+    private fun applyState(
+        region: ProtectedRegion,
+        flag: EditableProtectionFlags,
+        state: StateFlag.State
+    ) {
+        if (flag.isPlayerRelated) {
+            region.setFlag(flag.flag, StateFlag.State.ALLOW)
+            if (state == StateFlag.State.ALLOW) {
+                region.setFlag(flag.flag.regionGroupFlag, null)
+            } else {
+                region.setFlag(flag.flag.regionGroupFlag, RegionGroup.MEMBERS)
+            }
+        } else {
+            region.setFlag(flag.flag, state)
+        }
+    }
+
+    private fun formatState(flag: EditableProtectionFlags, state: StateFlag.State): String {
+        return if (flag.isPlayerRelated) {
+            if (state == StateFlag.State.ALLOW) "Für alle erlaubt" else "Nur für Mitglieder"
+        } else {
+            if (state == StateFlag.State.ALLOW) "Erlaubt" else "Verboten"
+        }
     }
 
     private fun createFlagItem(flag: EditableProtectionFlags, state: StateFlag.State) =
@@ -146,9 +163,7 @@ object ProtectionEditFlagsView : View() {
             }
 
             buildLore {
-                line {
-                    darkSpacer("Flag: ${flag.flag.name}".toSmallCaps())
-                }
+                line { darkSpacer("Flag: ${flag.flag.name}".toSmallCaps()) }
                 emptyLine()
                 line {
                     appendBlob()
@@ -160,16 +175,25 @@ object ProtectionEditFlagsView : View() {
                     appendBlob()
                     appendSpace()
                     white("Status: ".toSmallCaps())
-                    if (state == StateFlag.State.ALLOW) {
-                        success("Erlaubt".toSmallCaps())
+
+                    if (flag.isPlayerRelated) {
+                        if (state == StateFlag.State.ALLOW) {
+                            success("Alle".toSmallCaps())
+                        } else {
+                            variableValue("Mitglieder".toSmallCaps())
+                        }
                     } else {
-                        error("Verboten".toSmallCaps())
+                        if (state == StateFlag.State.ALLOW) {
+                            success("Erlaubt".toSmallCaps())
+                        } else {
+                            error("Verboten".toSmallCaps())
+                        }
                     }
                 }
                 emptyLine()
                 line {
                     appendSpace()
-                    variableValue("Klicke, um die Flag zu ändern.".toSmallCaps())
+                    variableValue("Klicke zum Umschalten".toSmallCaps())
                 }
             }
         }

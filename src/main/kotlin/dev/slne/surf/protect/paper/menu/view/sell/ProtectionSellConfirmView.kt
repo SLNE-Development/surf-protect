@@ -46,7 +46,7 @@ object ProtectionSellConfirmView : View() {
 
     override fun onFirstRender(render: RenderContext) {
         render.layoutSlot('O', outlineItem)
-        render.layoutSlot('I', createRegionItem(protectionState.get(render)))
+        render.layoutSlot('I', createRegionItem(protectionState.get(render), false))
         render.layoutSlot('C', cancelItem).onClick { click ->
             click.playGeneralClickSound()
             click.openForPlayer(
