@@ -73,14 +73,12 @@ object ProtectionEditFlagsView : View() {
                 "ORRRRRRRO",
                 "ORRRRRRRO",
                 "ORRRRRRRO",
-                "OOPOBONOO"
+                "OOOOBOOOO"
             )
             .cancelInteractions()
     }
 
     override fun onFirstRender(render: RenderContext) {
-        val pagination = paginationState.get(render)
-
         render.layoutSlot('B', backItem).onClick { click ->
             click.openForPlayer(
                 ProtectionInfoView::class.java,
@@ -89,26 +87,6 @@ object ProtectionEditFlagsView : View() {
         }
 
         render.layoutSlot('O', outlineItem)
-
-        render.layoutSlot('P')
-            .updateOnStateChange(paginationState)
-            .onRender {
-                if (pagination.canBack()) previousItem else outlineItem
-            }
-            .onClick { click ->
-                pagination.back()
-                click.playNewPageSound()
-            }
-
-        render.layoutSlot('N')
-            .updateOnStateChange(paginationState)
-            .onRender {
-                if (pagination.canAdvance()) nextItem else outlineItem
-            }
-            .onClick { click ->
-                pagination.advance()
-                click.playNewPageSound()
-            }
     }
 
     private fun getCurrentState(
