@@ -96,7 +96,7 @@ enum class EditableProtectionFlags(
     ),
 
     OTHER_EXPLOSION(
-        icon = ItemType.TNT,
+        icon = ItemType.END_CRYSTAL,
         displayName = "Explosionsschaden",
         description = "Legt fest, ob Explosionen auf dem Grundstück Schaden verursachen dürfen.",
         flag = Flags.OTHER_EXPLOSION,
@@ -114,6 +114,13 @@ enum class EditableProtectionFlags(
         displayName = "Feuerausbreitung",
         description = "Legt fest, ob sich Feuer auf dem Grundstück natürlich ausbreiten darf.",
         flag = Flags.FIRE_SPREAD,
+        initialState = StateFlag.State.DENY
+    ),
+    TNT(
+        icon = ItemType.TNT,
+        displayName = "TNT-Schaden",
+        description = "Legt fest, ob TNT auf dem Grundstück Schaden verursachen darf.",
+        flag = Flags.TNT,
         initialState = StateFlag.State.DENY
     ),
     LEAF_DECAY(
