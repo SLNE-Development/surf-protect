@@ -4,6 +4,7 @@ import dev.slne.surf.protect.paper.menu.util.protectColored
 import dev.slne.surf.protect.paper.menu.view.members.ProtectionMemberListView
 import dev.slne.surf.protect.paper.region.info.RegionInfo
 import dev.slne.surf.protect.paper.region.visual.visualizer.ProtectionVisualizerManager
+import dev.slne.surf.protect.paper.util.appendWarnPrefix
 import dev.slne.surf.surfapi.bukkit.api.dialog.search.searchDialog
 import dev.slne.surf.surfapi.bukkit.api.inventory.framework.viewFrame
 import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
@@ -22,7 +23,7 @@ fun protectionAddMemberDialog(protection: RegionInfo) = searchDialog(
         plainMessage {
             protectColored("Gib den Namen des Spielers ein, den du hinzufügen möchtest.")
             appendNewline()
-            appendWarningPrefix()
+            appendWarnPrefix()
             error("Der Spieler muss bereits einmal auf diesem Server gespielt haben, damit er hinzugefügt werden kann.")
         }
     },

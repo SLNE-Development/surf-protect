@@ -8,6 +8,7 @@ import dev.slne.surf.protect.paper.menu.view.ProtectionInfoView
 import dev.slne.surf.protect.paper.plugin
 import dev.slne.surf.protect.paper.region.info.ProtectionFlagInfo
 import dev.slne.surf.protect.paper.region.info.RegionInfo
+import dev.slne.surf.protect.paper.util.appendWarnPrefix
 import dev.slne.surf.protect.paper.util.castCoinFormat
 import dev.slne.surf.surfapi.bukkit.api.dialog.search.searchDialog
 import dev.slne.surf.surfapi.bukkit.api.inventory.framework.viewFrame
@@ -30,11 +31,11 @@ fun protectionRenameDialog(protection: RegionInfo) = searchDialog(
         plainMessage {
             protectColored("Gib den neuen Namen für dein Grundstück ein.")
             appendNewline()
-            appendWarningPrefix()
+            appendWarnPrefix()
             error("Dieser Vorgang kostet dich ${castCoinFormat.format(config.protection.renamePrice)}!")
 
             appendNewline()
-            appendWarningPrefix()
+            appendWarnPrefix()
             error("Der Name darf maximal 22 Zeichen lang sein!")
         }
     },

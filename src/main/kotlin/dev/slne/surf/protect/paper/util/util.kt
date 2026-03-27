@@ -12,6 +12,7 @@ import com.sk89q.worldguard.protection.managers.RegionManager
 import com.sk89q.worldguard.protection.regions.ProtectedRegion
 import com.sk89q.worldguard.protection.regions.RegionContainer
 import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry
+import dev.slne.surf.surfapi.core.api.messages.builder.SurfComponentBuilder
 import dev.slne.surf.surfapi.core.api.util.mutableObjectSetOf
 import dev.slne.surf.surfapi.core.api.util.toObjectList
 import io.papermc.paper.math.Position
@@ -265,6 +266,12 @@ fun ChunkSnapshot.getBlockDataAt(
     blockZ: Int
 ): BlockData {
     return getBlockData(blockX and 15, blockY, blockZ and 15)
+}
+
+fun SurfComponentBuilder.appendWarnPrefix() = append {
+    darkSpacer("[")
+    warning("⚠")
+    darkSpacer("] ")
 }
 
 fun WorldEditLocation?.formatString() =
