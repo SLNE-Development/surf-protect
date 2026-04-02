@@ -15,7 +15,6 @@ import dev.slne.surf.protect.paper.configManager
 import dev.slne.surf.protect.paper.items.ProtectionItems
 import dev.slne.surf.protect.paper.plugin
 import dev.slne.surf.protect.paper.region.ProtectionRegion
-import dev.slne.surf.protect.paper.util.fastCenter
 import dev.slne.surf.protect.paper.util.isInProtectionRegion
 import dev.slne.surf.protect.paper.util.toLocalPlayer
 import dev.slne.surf.surfapi.bukkit.api.extensions.server
@@ -178,15 +177,17 @@ class ProtectionUser(val uuid: UUID) {
         player: Player,
         region: ProtectionRegion
     ): Pair<Position, Double> {
-        val expanding = region.expandingProtection
-        return if (expanding != null) {
-            val center = expanding.fastCenter().toBlockVector2()
-            val size =
-                config.protection.maxDistanceFromStart + maxDistanceFromCenter(expanding, center)
-            Position.block(center.x(), 0, center.z()) to size
-        } else {
-            player.location to config.protection.maxDistanceFromStart
-        }
+        return player.location to config.protection.maxDistanceFromStart
+
+//        val expanding = region.expandingProtection
+//        return if (expanding != null) {
+//            val center = expanding.fastCenter().toBlockVector2()
+//            val size =
+//                config.protection.maxDistanceFromStart + maxDistanceFromCenter(expanding, center)
+//            Position.block(center.x(), 0, center.z()) to size
+//        } else {
+//            player.location to config.protection.maxDistanceFromStart
+//        }
     }
 
     private fun maxDistanceFromCenter(region: ProtectedRegion, center: BlockVector2): Double {
