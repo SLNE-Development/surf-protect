@@ -30,7 +30,7 @@ import org.bukkit.OfflinePlayer
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import java.util.*
-import kotlin.math.sqrt
+import kotlin.math.abs
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.DurationUnit
 
@@ -190,8 +190,12 @@ class ProtectionUser(val uuid: UUID) {
     }
 
     private fun maxDistanceFromCenter(region: ProtectedRegion, center: BlockVector2): Double {
-        val maxSq = region.points.maxOf { it.distanceSq(center) }
-        return sqrt(maxSq.toDouble())
+        return region.points.maxOf { point ->
+            maxOf(
+                abs(point.x() - center.x()),
+                abs(point.z() - center.z())
+            ).toDouble()
+        }
     }
 
     fun sendMessage(message: Component) {
