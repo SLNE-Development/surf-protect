@@ -30,7 +30,7 @@ import org.bukkit.OfflinePlayer
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import java.util.*
-import kotlin.math.sqrt
+import kotlin.math.abs
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.DurationUnit
 
@@ -112,7 +112,7 @@ class ProtectionUser(val uuid: UUID) {
 
         PacketEvents.getAPI().playerManager.sendPacketSilently( // TODO: 08.07.2025 23:56 - replace with surf api
             player,
-            WrapperPlayWorldBorderLerpSize(size, size - 0.001, Long.MAX_VALUE)
+            WrapperPlayWorldBorderLerpSize(size * 2, size * 2 - BORDER_LERP_OFFSET, Long.MAX_VALUE)
         )
 
         this.regionCreation = newRegion
@@ -190,8 +190,12 @@ class ProtectionUser(val uuid: UUID) {
     }
 
     private fun maxDistanceFromCenter(region: ProtectedRegion, center: BlockVector2): Double {
-        val maxSq = region.points.maxOf { it.distanceSq(center) }
-        return sqrt(maxSq.toDouble())
+        return region.points.maxOf { point ->
+            maxOf(
+                abs(point.x() - center.x()),
+                abs(point.z() - center.z())
+            ).toDouble()
+        }
     }
 
     fun sendMessage(message: Component) {
@@ -211,6 +215,9 @@ class ProtectionUser(val uuid: UUID) {
     }
 
     companion object {
+        /** Small offset used in the world border lerp packet to produce a near-static border animation. */
+        private const val BORDER_LERP_OFFSET = 0.001
+
         @JvmStatic
         fun getProtectionUser(player: OfflinePlayer): ProtectionUser {
             return getProtectionUser(player.uniqueId)
