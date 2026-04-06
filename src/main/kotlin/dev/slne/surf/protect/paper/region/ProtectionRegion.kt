@@ -14,6 +14,7 @@ import dev.slne.surf.protect.paper.config
 import dev.slne.surf.protect.paper.event.ProtectionCreateEvent
 import dev.slne.surf.protect.paper.math.Mth
 import dev.slne.surf.protect.paper.message.Messages
+import dev.slne.surf.protect.paper.permission.ProtectPermissionRegistry
 import dev.slne.surf.protect.paper.plugin
 import dev.slne.surf.protect.paper.region.flags.EditableProtectionFlags
 import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry
@@ -158,6 +159,14 @@ class ProtectionRegion(
      *
      * @return the [RegionCreationState]
      */
+    private fun getDiscountFactor(): Double {
+        return if (player.hasPermission(ProtectPermissionRegistry.PROTECTION_DISCOUNT)) {
+            config.pricing.discountModifier
+        } else {
+            1.0
+        }
+    }
+
     private fun offerAccepting(): RegionCreationState {
         if (hull.size < config.markers.minAmount) {
             protectionUser.sendMessage(Messages.Protecting.moreMarkers(hull.size))
@@ -247,9 +256,11 @@ class ProtectionRegion(
 
             else -> {
                 val currency = config.currency
+                val discountFactor = getDiscountFactor()
                 val (effectiveCost, pricePerBlock, spawnDistance) = Mth.calculateEffectiveCost(
                     centerLoc,
-                    tmpRegion
+                    tmpRegion,
+                    discountFactor
                 )
 
                 if (effectiveCost <= 0) {
@@ -270,7 +281,8 @@ class ProtectionRegion(
                             effectiveCost,
                             currency.currency,
                             pricePerBlock,
-                            spawnDistance
+                            spawnDistance,
+                            discountFactor
                         )
                     )
                     RegionCreationState.SUCCESS
@@ -351,12 +363,13 @@ class ProtectionRegion(
             protectionUser.sendMessage(Messages.Protecting.noTpPointFound)
         }
 
-        val (pricePerBlock) = centerLoc.getProtectionPricePerBlock()
-        val cost = (tempRegion.effectiveVolume * pricePerBlock).roundToInt()
+        val discountFactor = getDiscountFactor()
+        val costResult = Mth.calculateEffectiveCost(centerLoc, tempRegion, discountFactor)
+        val cost = costResult.effectiveCost.roundToInt()
         val costBD = (-cost).toBigDecimal()
         val currency = config.currency.currency
 
-        if (pricePerBlock == Double.MAX_VALUE) {
+        if (costResult.pricePerBlock == Double.MAX_VALUE) {
             protectionUser.sendMessage(buildText {
                 appendErrorPrefix()
                 error("Das Grundstück liegt zu nah am Spawn.")

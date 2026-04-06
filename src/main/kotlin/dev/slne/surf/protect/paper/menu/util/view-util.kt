@@ -142,7 +142,7 @@ fun createRegionItem(protection: RegionInfo, showMoreInfo: Boolean = true) =
             line {
                 appendBlob()
                 appendSpace()
-                white("Bezahlter Preis: ".toSmallCaps())
+                white("Grundstückswert: ".toSmallCaps())
                 variableValue(castCoinFormat.format(protection.price))
             }
             line {
