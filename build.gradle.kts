@@ -1,7 +1,7 @@
-import dev.slne.surf.surfapi.gradle.util.registerRequired
+import dev.slne.surf.api.gradle.util.registerRequired
 
 plugins {
-    id("dev.slne.surf.surfapi.gradle.paper-plugin") version "1.21.11+"
+    id("dev.slne.surf.api.gradle.paper-plugin") version "+"
 }
 
 surfPaperPluginApi {
@@ -24,7 +24,7 @@ dependencies {
         exclude("com.google.code.gson", "gson")
         exclude("it.unimi.dsi", "fastutil")
     }
-    compileOnly("dev.slne.surf.transaction:surf-transaction-api:1.21.11-3.0.1")
+    compileOnly("dev.slne.surf.transaction:surf-transaction-api:+")
     paperLibrary("pl.allegro.finance:tradukisto:4.1.0")
 }
 

@@ -4,11 +4,11 @@ import com.sk89q.worldedit.bukkit.BukkitAdapter
 import com.sk89q.worldguard.protection.flags.Flags
 import com.sk89q.worldguard.protection.regions.ProtectedRegion
 import dev.jorel.commandapi.kotlindsl.*
+import dev.slne.surf.api.core.messages.adventure.sendText
 import dev.slne.surf.protect.paper.command.commands.protection.argument.protectionArgument
 import dev.slne.surf.protect.paper.configManager
 import dev.slne.surf.protect.paper.permission.ProtectPermissionRegistry
 import dev.slne.surf.protect.paper.util.getRegionManagerOrNull
-import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 
 fun protectionAdminCommand() = commandTree("protectionadmin") {
     withPermission(ProtectPermissionRegistry.PROTECTION_ADMIN_COMMAND)

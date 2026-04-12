@@ -2,6 +2,9 @@ package dev.slne.surf.protect.paper.menu.dialog
 
 import com.github.shynixn.mccoroutine.folia.entityDispatcher
 import com.github.shynixn.mccoroutine.folia.launch
+import dev.slne.surf.api.core.messages.adventure.sendText
+import dev.slne.surf.api.paper.dialog.search.searchDialog
+import dev.slne.surf.api.paper.inventory.framework.viewFrame
 import dev.slne.surf.protect.paper.config
 import dev.slne.surf.protect.paper.menu.util.protectColored
 import dev.slne.surf.protect.paper.menu.view.ProtectionInfoView
@@ -9,9 +12,6 @@ import dev.slne.surf.protect.paper.plugin
 import dev.slne.surf.protect.paper.region.info.ProtectionFlagInfo
 import dev.slne.surf.protect.paper.region.info.RegionInfo
 import dev.slne.surf.protect.paper.util.castCoinFormat
-import dev.slne.surf.surfapi.bukkit.api.dialog.search.searchDialog
-import dev.slne.surf.surfapi.bukkit.api.inventory.framework.viewFrame
-import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import dev.slne.surf.transaction.api.currency.Currency
 import dev.slne.surf.transaction.api.transaction.TransactionResult
 import dev.slne.surf.transaction.api.user.transactionUser

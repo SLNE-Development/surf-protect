@@ -1,8 +1,8 @@
 package dev.slne.surf.protect.paper.papi.placeholder
 
+import dev.slne.surf.api.paper.hook.papi.expansion.PapiPlaceholder
 import dev.slne.surf.protect.paper.region.info.RegionInfo
 import dev.slne.surf.protect.paper.util.getProtectedRegions
-import dev.slne.surf.surfapi.bukkit.api.hook.papi.expansion.PapiPlaceholder
 import org.bukkit.OfflinePlayer
 
 object CurrentRegionPlaceholder : PapiPlaceholder("current-region") {

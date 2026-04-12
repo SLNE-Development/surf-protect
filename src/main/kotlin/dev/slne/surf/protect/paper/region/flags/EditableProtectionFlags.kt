@@ -2,7 +2,7 @@ package dev.slne.surf.protect.paper.region.flags
 
 import com.sk89q.worldguard.protection.flags.Flags
 import com.sk89q.worldguard.protection.flags.StateFlag
-import dev.slne.surf.surfapi.core.api.messages.builder.SurfComponentBuilder
+import dev.slne.surf.api.core.messages.builder.SurfComponentBuilder
 import org.bukkit.inventory.ItemType
 
 @Suppress("UnstableApiUsage")

@@ -1,13 +1,13 @@
 package dev.slne.surf.protect.paper.menu.view.list
 
+import dev.slne.surf.api.core.font.toSmallCaps
+import dev.slne.surf.api.paper.inventory.framework.titleBuilder
 import dev.slne.surf.protect.paper.menu.util.*
 import dev.slne.surf.protect.paper.menu.view.ProtectionInfoView
 import dev.slne.surf.protect.paper.menu.view.ProtectionMainView
 import dev.slne.surf.protect.paper.region.info.RegionInfo
 import dev.slne.surf.protect.paper.user.protectionUser
 import dev.slne.surf.protect.paper.util.allRegions
-import dev.slne.surf.surfapi.bukkit.api.inventory.framework.titleBuilder
-import dev.slne.surf.surfapi.core.api.font.toSmallCaps
 import me.devnatan.inventoryframework.View
 import me.devnatan.inventoryframework.ViewConfigBuilder
 import me.devnatan.inventoryframework.component.Pagination

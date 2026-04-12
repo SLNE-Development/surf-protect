@@ -2,8 +2,8 @@ package dev.slne.surf.protect.paper.region.flags
 
 import com.sk89q.worldguard.protection.flags.Flag
 import com.sk89q.worldguard.protection.flags.FlagContext
+import dev.slne.surf.api.core.util.object2ObjectMapOf
 import dev.slne.surf.protect.paper.region.info.ProtectionFlagInfo
-import dev.slne.surf.surfapi.core.api.util.object2ObjectMapOf
 
 class ProtectionFlag(name: String) : Flag<ProtectionFlagInfo>(name) {
     override fun parseInput(context: FlagContext): ProtectionFlagInfo {

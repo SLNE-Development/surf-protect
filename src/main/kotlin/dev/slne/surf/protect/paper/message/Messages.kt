@@ -1,15 +1,15 @@
 package dev.slne.surf.protect.paper.message
 
+import dev.slne.surf.api.core.messages.Colors
+import dev.slne.surf.api.core.messages.adventure.buildText
 import dev.slne.surf.protect.paper.config
 import dev.slne.surf.protect.paper.region.info.RegionInfo
 import dev.slne.surf.protect.paper.util.blockFormat
 import dev.slne.surf.protect.paper.util.castCoinFormat
-import dev.slne.surf.surfapi.core.api.messages.Colors
-import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
 import dev.slne.surf.transaction.api.currency.Currency
 import net.kyori.adventure.text.Component
+import java.util.*
 import kotlin.math.roundToInt
-import java.util.Locale
 
 /**
  * The Messages object serves as a container for various predefined message and text utilities.

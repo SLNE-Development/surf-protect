@@ -1,7 +1,7 @@
 package dev.slne.surf.protect.paper.region.visual
 
-import dev.slne.surf.surfapi.core.api.util.mutableObjectListOf
-import dev.slne.surf.surfapi.core.api.util.objectListOf
+import dev.slne.surf.api.core.util.mutableObjectListOf
+import dev.slne.surf.api.core.util.objectListOf
 import it.unimi.dsi.fastutil.objects.ObjectArrayList
 import it.unimi.dsi.fastutil.objects.ObjectList
 import kotlin.math.abs

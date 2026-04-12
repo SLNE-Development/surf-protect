@@ -11,9 +11,9 @@ import com.sk89q.worldguard.bukkit.WorldGuardPlugin
 import com.sk89q.worldguard.protection.managers.RegionManager
 import com.sk89q.worldguard.protection.regions.ProtectedRegion
 import com.sk89q.worldguard.protection.regions.RegionContainer
+import dev.slne.surf.api.core.util.mutableObjectSetOf
+import dev.slne.surf.api.core.util.toObjectList
 import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry
-import dev.slne.surf.surfapi.core.api.util.mutableObjectSetOf
-import dev.slne.surf.surfapi.core.api.util.toObjectList
 import io.papermc.paper.math.Position
 import org.bukkit.Bukkit
 import org.bukkit.ChunkSnapshot

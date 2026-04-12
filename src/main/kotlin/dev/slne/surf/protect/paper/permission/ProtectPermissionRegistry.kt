@@ -1,6 +1,6 @@
 package dev.slne.surf.protect.paper.permission
 
-import dev.slne.surf.surfapi.bukkit.api.permission.PermissionRegistry
+import dev.slne.surf.api.paper.permission.PermissionRegistry
 
 object ProtectPermissionRegistry : PermissionRegistry() {
     val PROTECTION_LIST_PERMISSION = create("surf.protect.list")

@@ -9,6 +9,8 @@ import com.github.shynixn.mccoroutine.folia.launch
 import com.sk89q.worldedit.math.BlockVector2
 import com.sk89q.worldguard.LocalPlayer
 import com.sk89q.worldguard.protection.regions.ProtectedRegion
+import dev.slne.surf.api.core.messages.adventure.sendText
+import dev.slne.surf.api.paper.extensions.server
 import dev.slne.surf.protect.paper.config
 import dev.slne.surf.protect.paper.config.ProtectionConfig
 import dev.slne.surf.protect.paper.configManager
@@ -18,8 +20,6 @@ import dev.slne.surf.protect.paper.region.ProtectionRegion
 import dev.slne.surf.protect.paper.util.fastCenter
 import dev.slne.surf.protect.paper.util.isInProtectionRegion
 import dev.slne.surf.protect.paper.util.toLocalPlayer
-import dev.slne.surf.surfapi.bukkit.api.extensions.server
-import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import dev.slne.surf.transaction.api.user.TransactionUser
 import io.papermc.paper.math.Position
 import kotlinx.coroutines.withContext
