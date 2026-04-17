@@ -200,10 +200,16 @@ class ProtectionRegion(
             region.owners.addPlayer(protectionUser.localPlayer)
 
             for (flagsMap in EditableProtectionFlags.entries) {
-                region.setFlag(
-                    flagsMap.flag,
-                    flagsMap.initialState
-                )
+                if (flagsMap.isPlayerRelated) {
+                    region.setFlag(flagsMap.flag, StateFlag.State.ALLOW)
+                    if ((flagsMap.initialState ?: StateFlag.State.ALLOW) == StateFlag.State.DENY) {
+                        region.setFlag(flagsMap.flag.regionGroupFlag, RegionGroup.MEMBERS)
+                    } else {
+                        region.setFlag(flagsMap.flag.regionGroupFlag, null)
+                    }
+                } else {
+                    region.setFlag(flagsMap.flag, flagsMap.initialState)
+                }
             }
 
             region.setFlag(
@@ -421,12 +427,12 @@ class ProtectionRegion(
             val state = flag.initialState ?: StateFlag.State.ALLOW
 
             if (flag.isPlayerRelated) {
-                region.setFlag(flag.flag.regionGroupFlag, RegionGroup.NON_MEMBERS)
-                region.setFlag(flag.flag, state)
-
-                region.setFlag(flag.flag.regionGroupFlag, RegionGroup.MEMBERS)
                 region.setFlag(flag.flag, StateFlag.State.ALLOW)
-
+                if (state == StateFlag.State.DENY) {
+                    region.setFlag(flag.flag.regionGroupFlag, RegionGroup.MEMBERS)
+                } else {
+                    region.setFlag(flag.flag.regionGroupFlag, null)
+                }
                 continue
             }
 
