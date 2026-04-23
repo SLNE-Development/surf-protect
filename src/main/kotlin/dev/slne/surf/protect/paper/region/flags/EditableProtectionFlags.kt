@@ -189,7 +189,7 @@ enum class EditableProtectionFlags(
     CONCRETE_FORM(
         icon = ItemType.WHITE_CONCRETE_POWDER,
         displayName = "Beton-Verfestigung",
-        description = "Legt fest, ob sich Beton auf deinem grundstück durch Wasser verfestigt.",
+        description = "Legt fest, ob sich Beton auf deinem Grundstück durch Wasser verfestigt.",
         flag = ProtectionFlagsRegistry.CONCRETE_FORM,
         initialState = StateFlag.State.DENY
     ),
