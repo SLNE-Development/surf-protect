@@ -186,6 +186,13 @@ enum class EditableProtectionFlags(
         flag = Flags.CORAL_FADE,
         initialState = null
     ),
+    CONCRETE_FORM(
+        icon = ItemType.WHITE_CONCRETE_POWDER,
+        displayName = "Beton-Verfestigung",
+        description = "Legt fest, ob sich Beton auf deinem Grundstück durch Wasser verfestigt.",
+        flag = ProtectionFlagsRegistry.CONCRETE_FORM,
+        initialState = StateFlag.State.ALLOW
+    ),
     SNOWMAN_TRAILS(
         icon = ItemType.CARVED_PUMPKIN,
         displayName = "Schneegolem-Spuren",

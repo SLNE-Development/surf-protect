@@ -1,19 +1,19 @@
 package dev.slne.surf.protect.paper.config
 
-import dev.slne.surf.api.core.config.SurfConfigApi
 import dev.slne.surf.api.core.config.manager.SpongeConfigManager
+import dev.slne.surf.api.core.config.surfConfigApi
 import dev.slne.surf.protect.paper.plugin
 
 class ProtectionConfigManager {
     private val configManager: SpongeConfigManager<ProtectionConfig>
 
     init {
-        SurfConfigApi.createSpongeYmlConfig(
+        surfConfigApi.createSpongeYmlConfig(
             ProtectionConfig::class.java,
             plugin.dataPath,
             "config.yml"
         )
-        configManager = SurfConfigApi.getSpongeConfigManagerForConfig(
+        configManager = surfConfigApi.getSpongeConfigManagerForConfig(
             ProtectionConfig::class.java
         )
         reload()

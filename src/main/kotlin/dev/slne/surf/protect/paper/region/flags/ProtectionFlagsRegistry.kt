@@ -40,6 +40,12 @@ object ProtectionFlagsRegistry {
     @JvmField
     val SURF_PROTECTION = StateFlag("surf-protection", false)
 
+    /**
+     * Determines whether concrete powder solidifies into concrete when in contact with water
+     */
+    @JvmField
+    val CONCRETE_FORM = StateFlag("concrete-form", false)
+
     fun registerFlags() = with(WorldGuard.getInstance().flagRegistry) {
         register(SURF_PROTECT)
         register(SURF_PROTECT_FLAG)
@@ -47,5 +53,6 @@ object ProtectionFlagsRegistry {
         register(SURF_BIG_PROTECTION_FLAG)
         register(SURF_PROTECT_VISUALIZE)
         register(SURF_PROTECTION)
+        register(CONCRETE_FORM)
     }
 }

@@ -2,18 +2,22 @@ package dev.slne.surf.protect.paper.listener.listeners
 
 import com.sk89q.worldguard.protection.flags.Flags
 import com.sk89q.worldguard.protection.flags.StateFlag
+import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry
 import dev.slne.surf.protect.paper.util.getProtectedRegions
 import dev.slne.surf.protect.paper.util.isGlobalRegion
+import org.bukkit.Tag
 import org.bukkit.block.Block
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockExplodeEvent
+import org.bukkit.event.block.BlockFormEvent
 import org.bukkit.event.block.BlockIgniteEvent
 import org.bukkit.event.block.BlockIgniteEvent.IgniteCause
 import org.bukkit.event.entity.EntityExplodeEvent
 
 object RegionListener : Listener {
+
     @EventHandler(priority = EventPriority.LOWEST)
     fun onIgnite(event: BlockIgniteEvent) {
         val cause = event.cause
@@ -36,6 +40,25 @@ object RegionListener : Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     fun onBlockExplode(event: BlockExplodeEvent) {
         performBlockRemove(event.blockList())
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    fun onBlockForm(event: BlockFormEvent) {
+        val block = event.block
+        if (!Tag.CONCRETE_POWDER.isTagged(block.type)) return
+
+        if (block.location.isGlobalRegion()) {
+            return  // Allow
+        }
+
+        val regions = block.location.getProtectedRegions()
+        for (region in regions) {
+            val flagState = region.getFlag(ProtectionFlagsRegistry.CONCRETE_FORM) ?: StateFlag.State.ALLOW
+            if (flagState == StateFlag.State.DENY) {
+                event.isCancelled = true
+                return
+            }
+        }
     }
 
     private fun performBlockRemove(blocks: MutableList<Block>) {
