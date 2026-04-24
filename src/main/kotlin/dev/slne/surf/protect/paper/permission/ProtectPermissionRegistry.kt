@@ -14,6 +14,7 @@ object ProtectPermissionRegistry : PermissionRegistry() {
     val PROTECTION_EDIT_FLAGS = create("surf.protect.flags.edit")
     val PROTECTION_SELL = create("surf.protect.view.sell")
     val PROTECTION_MEMBER = create("surf.protect.view.members")
+    val PROTECTION_DISCOUNT = create("surf.protect.discount")
 
     private const val COMMAND_PREFIX = "surf.protect.command"
     val PROTECTION_WHO_COMMAND = create("$COMMAND_PREFIX.pwho")

@@ -32,15 +32,18 @@ object Mth {
     @JvmStatic
     fun calculateEffectiveCost(
         center: Location,
-        temporaryRegion: TempProtectionRegion
+        temporaryRegion: TempProtectionRegion,
+        discountFactor: Double = 1.0
     ): EffectiveCostResult {
         val (pricePerBlock, spawnDistance) = center.getProtectionPricePerBlock()
         val rawCost = calculateProtectionPrice(temporaryRegion, pricePerBlock)
+        val discountedCost = rawCost * discountFactor
 
         return EffectiveCostResult(
-            rawCost.roundToInt().toDouble(),
+            discountedCost.roundToInt().toDouble(),
             pricePerBlock,
-            spawnDistance
+            spawnDistance,
+            discountFactor
         )
     }
 
@@ -102,6 +105,9 @@ object Mth {
     data class EffectiveCostResult(
         val effectiveCost: Double,
         val pricePerBlock: Double,
-        val spawnDistance: Double
-    )
+        val spawnDistance: Double,
+        val discountFactor: Double = 1.0
+    ) {
+        val hasDiscount: Boolean get() = discountFactor < 1.0
+    }
 }

@@ -8,8 +8,9 @@ import dev.slne.surf.protect.paper.util.blockFormat
 import dev.slne.surf.protect.paper.util.castCoinFormat
 import dev.slne.surf.transaction.api.currency.Currency
 import net.kyori.adventure.text.Component
-import java.util.*
+import net.kyori.adventure.text.format.TextDecoration
 import kotlin.math.roundToInt
+import java.util.Locale
 
 /**
  * The Messages object serves as a container for various predefined message and text utilities.
@@ -230,7 +231,8 @@ object Messages {
             effectiveCost: Double,
             currency: Currency,
             pricePerBlock: Double,
-            distanceToSpawn: Double
+            distanceToSpawn: Double,
+            discountFactor: Double = 1.0
         ) = buildText {
             val distanceToSpawn = (distanceToSpawn * 100).roundToInt() / 100.0
             val distanceToSpawnFormatted = String.format(Locale.GERMANY, "%,.2f", distanceToSpawn)
@@ -255,7 +257,20 @@ object Messages {
 
             appendNewInfoPrefixedLine()
             variableKey("Gesamtkosten: ")
-            variableValue(castCoinFormat.format(effectiveCost))
+            if (discountFactor < 1.0) {
+                val originalCost = effectiveCost / discountFactor
+                val discountPercent = ((1.0 - discountFactor) * 100).roundToInt()
+                append(
+                    Component.text(castCoinFormat.format(originalCost), Colors.VARIABLE_VALUE)
+                        .decoration(TextDecoration.STRIKETHROUGH, true)
+                )
+                appendSpace()
+                success(castCoinFormat.format(effectiveCost))
+                appendSpace()
+                success("(-${discountPercent}%)")
+            } else {
+                variableValue(castCoinFormat.format(effectiveCost))
+            }
 
             appendNewInfoPrefixedLine()
             appendNewInfoPrefixedLine()

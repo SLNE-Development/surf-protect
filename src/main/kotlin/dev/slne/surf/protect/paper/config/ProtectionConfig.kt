@@ -72,8 +72,16 @@ data class ProtectionConfig(
     @ConfigSerializable
     data class PricingSettings(
         val minPerBlock: Double = 4.0,
-        val spawnProtectionPerBlock: Double = 200.0
-    )
+        val spawnProtectionPerBlock: Double = 200.0,
+        val discountPercent: Int = 20
+    ) {
+        val discountModifier: Double
+            get() = 1.0 - (discountPercent / 100.0)
+
+        init {
+            require(discountPercent in 0..100) { "Discount percent must be between 0 and 100" }
+        }
+    }
 
     @ConfigSerializable
     data class CurrencyConfig(
