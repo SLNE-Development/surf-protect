@@ -1,12 +1,12 @@
 package dev.slne.surf.protect.paper.region.visual
 
+import dev.slne.surf.api.core.util.objectListOf
+import dev.slne.surf.api.paper.nms.bridges.packets.entity.BlockDisplaySettings
+import dev.slne.surf.api.paper.util.forEachPlayer
+import dev.slne.surf.api.paper.visualizer.SurfPaperVisualizerApi
+import dev.slne.surf.api.paper.visualizer.visualizer.ExperimentalVisualizerApi
 import dev.slne.surf.protect.paper.config
 import dev.slne.surf.protect.paper.region.ProtectionRegion
-import dev.slne.surf.surfapi.bukkit.api.nms.bridges.packets.entity.BlockDisplaySettings
-import dev.slne.surf.surfapi.bukkit.api.util.forEachPlayer
-import dev.slne.surf.surfapi.bukkit.api.visualizer.surfVisualizerApi
-import dev.slne.surf.surfapi.bukkit.api.visualizer.visualizer.ExperimentalVisualizerApi
-import dev.slne.surf.surfapi.core.api.util.objectListOf
 import org.spongepowered.math.vector.Vector3d
 import java.io.Closeable
 import kotlin.time.Duration.Companion.milliseconds
@@ -31,7 +31,7 @@ data class Trail(
         }
     }
 
-    private val visualizer = surfVisualizerApi.createAreaVisualizer(
+    private val visualizer = SurfPaperVisualizerApi.createAreaVisualizer(
         protectionRegion.player.world,
         if (isProtecting) protectingSettings else expandingSettings,
         objectListOf(

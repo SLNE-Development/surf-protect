@@ -4,17 +4,17 @@ package dev.slne.surf.protect.paper.items
 
 import com.github.shynixn.mccoroutine.folia.launch
 import com.jeff_media.morepersistentdatatypes.DataType
+import dev.slne.surf.api.paper.builder.buildItem
+import dev.slne.surf.api.paper.builder.buildLore
+import dev.slne.surf.api.paper.builder.displayName
+import dev.slne.surf.api.paper.pdc.block.pdc
+import dev.slne.surf.api.paper.util.namespacedKey
 import dev.slne.surf.protect.paper.pdc.BlockPositionPersistentDataType
 import dev.slne.surf.protect.paper.plugin
 import dev.slne.surf.protect.paper.region.ProtectionRegion
 import dev.slne.surf.protect.paper.region.visual.MarkerCache
 import dev.slne.surf.protect.paper.user.ProtectionUser
 import dev.slne.surf.protect.paper.util.isInProtectionRegion
-import dev.slne.surf.surfapi.bukkit.api.builder.buildItem
-import dev.slne.surf.surfapi.bukkit.api.builder.buildLore
-import dev.slne.surf.surfapi.bukkit.api.builder.displayName
-import dev.slne.surf.surfapi.bukkit.api.pdc.block.pdc
-import dev.slne.surf.surfapi.bukkit.api.util.key
 import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.event.block.BlockBreakEvent
@@ -111,7 +111,7 @@ enum class ProtectionItems(val id: String, template: ItemStack, val cancelEvent:
     val item: ItemStack by lazy {
         template.apply {
             editPersistentDataContainer { pdc ->
-                pdc.set(key, pdcType, this@ProtectionItems)
+                pdc.set(namespacedKey, pdcType, this@ProtectionItems)
             }
         }
     }
@@ -130,23 +130,25 @@ enum class ProtectionItems(val id: String, template: ItemStack, val cancelEvent:
     }
 
     companion object {
-        private val key = key("protection-item")
+        private val namespacedKey = namespacedKey("protection-item")
         private val pdcType = DataType.asEnum(ProtectionItems::class.java)
-        private val itemsKey = key("protection-items")
+        private val itemsnamespacedKey = namespacedKey("protection-items")
         private val itemsPdcType = DataType.asMap(BlockPositionPersistentDataType, pdcType)
 
         fun isProtectionItem(stack: ItemStack): Boolean {
-            return stack.persistentDataContainer.has(key, pdcType)
+            return stack.persistentDataContainer.has(namespacedKey, pdcType)
         }
 
-        fun isProtectionBlock(block: Block): Boolean = block.pdc().has(key)
+        fun isProtectionBlock(block: Block): Boolean = block.pdc().has(namespacedKey)
         fun getProtectionItem(stack: ItemStack): ProtectionItems? =
-            stack.persistentDataContainer.get(key, pdcType)
+            stack.persistentDataContainer.get(namespacedKey, pdcType)
 
-        fun getProtectionBlock(block: Block): ProtectionItems? = block.pdc().get(key, pdcType)
+        fun getProtectionBlock(block: Block): ProtectionItems? =
+            block.pdc().get(namespacedKey, pdcType)
+
         fun makeProtectionBlock(item: ProtectionItems, block: Block) =
-            block.pdc().set(key, pdcType, item)
+            block.pdc().set(namespacedKey, pdcType, item)
 
-        fun removeProtectionBlock(block: Block) = block.pdc().remove(key)
+        fun removeProtectionBlock(block: Block) = block.pdc().remove(namespacedKey)
     }
 }

@@ -3,6 +3,10 @@ package dev.slne.surf.protect.paper
 import com.github.shynixn.mccoroutine.folia.SuspendingJavaPlugin
 import com.github.shynixn.mccoroutine.folia.launch
 import com.github.shynixn.mccoroutine.folia.regionDispatcher
+import dev.slne.surf.api.paper.hook.papi.SurfPaperPAPIHook
+import dev.slne.surf.api.paper.inventory.framework.viewFrame
+import dev.slne.surf.api.paper.util.chunkX
+import dev.slne.surf.api.paper.util.chunkZ
 import dev.slne.surf.protect.paper.command.CommandManager
 import dev.slne.surf.protect.paper.config.ProtectionConfigManager
 import dev.slne.surf.protect.paper.listener.ListenerManager
@@ -16,10 +20,6 @@ import dev.slne.surf.protect.paper.menu.view.sell.ProtectionSellConfirmView
 import dev.slne.surf.protect.paper.papi.PapiExpansion
 import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry
 import dev.slne.surf.protect.paper.user.ProtectionUserManager
-import dev.slne.surf.surfapi.bukkit.api.hook.papi.papiHook
-import dev.slne.surf.surfapi.bukkit.api.inventory.framework.viewFrame
-import dev.slne.surf.surfapi.bukkit.api.util.chunkX
-import dev.slne.surf.surfapi.bukkit.api.util.chunkZ
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.withContext
 import org.bukkit.plugin.java.JavaPlugin
@@ -46,7 +46,7 @@ class PaperMain : SuspendingJavaPlugin() {
             restoreMarkers()
         }
 
-        papiHook.register(PapiExpansion)
+        SurfPaperPAPIHook.register(PapiExpansion)
     }
 
     override suspend fun onDisableAsync() {

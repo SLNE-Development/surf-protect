@@ -3,16 +3,16 @@ package dev.slne.surf.protect.paper.region.visual.visualizer.visualizers
 import com.sk89q.worldguard.protection.flags.StateFlag
 import com.sk89q.worldguard.protection.regions.ProtectedRegion
 import com.sk89q.worldguard.protection.regions.RegionType
+import dev.slne.surf.api.core.util.logger
+import dev.slne.surf.api.core.util.mutableObject2ObjectMapOf
+import dev.slne.surf.api.paper.extensions.server
+import dev.slne.surf.api.paper.nms.bridges.packets.entity.BlockDisplaySettings
+import dev.slne.surf.api.paper.visualizer.SurfPaperVisualizerApi
+import dev.slne.surf.api.paper.visualizer.visualizer.ExperimentalVisualizerApi
+import dev.slne.surf.api.paper.visualizer.visualizer.SurfVisualizerArea
 import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry
 import dev.slne.surf.protect.paper.region.visual.visualizer.color.VisualizerColor
 import dev.slne.surf.protect.paper.util.getRegionManagerOrNull
-import dev.slne.surf.surfapi.bukkit.api.extensions.server
-import dev.slne.surf.surfapi.bukkit.api.nms.bridges.packets.entity.BlockDisplaySettings
-import dev.slne.surf.surfapi.bukkit.api.visualizer.surfVisualizerApi
-import dev.slne.surf.surfapi.bukkit.api.visualizer.visualizer.ExperimentalVisualizerApi
-import dev.slne.surf.surfapi.bukkit.api.visualizer.visualizer.SurfVisualizerArea
-import dev.slne.surf.surfapi.core.api.util.logger
-import dev.slne.surf.surfapi.core.api.util.mutableObject2ObjectMapOf
 import org.bukkit.World
 import org.bukkit.entity.Player
 import org.spongepowered.math.vector.Vector3d
@@ -65,7 +65,7 @@ class ProtectionPlayerVisualizerManager(val uuid: UUID) {
         world: World,
         player: Player
     ) {
-        val visualizer = surfVisualizerApi.createAreaVisualizer(
+        val visualizer = SurfPaperVisualizerApi.createAreaVisualizer(
             world = world,
             initialSettings = BlockDisplaySettings {
                 scale = Vector3f(1f, 5f, 1f)

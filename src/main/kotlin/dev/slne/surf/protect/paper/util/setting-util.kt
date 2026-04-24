@@ -1,10 +1,10 @@
 package dev.slne.surf.protect.paper.util
 
-import dev.slne.surf.surfapi.bukkit.api.util.key
+import dev.slne.surf.api.paper.util.namespacedKey
 import org.bukkit.entity.Player
 import org.bukkit.persistence.PersistentDataType
 
-private val borderCrossingKey = key("border_crossing_messages")
+private val borderCrossingKey = namespacedKey("border_crossing_messages")
 
 fun Player.hasBorderCrossingMessagesEnabled(): Boolean {
     return persistentDataContainer.get(borderCrossingKey, PersistentDataType.BOOLEAN) ?: true

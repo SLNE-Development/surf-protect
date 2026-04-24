@@ -1,11 +1,11 @@
 package dev.slne.surf.protect.paper.listener.listeners
 
 import com.destroystokyo.paper.MaterialSetTag
+import dev.slne.surf.api.paper.util.namespacedKey
 import dev.slne.surf.protect.paper.config
 import dev.slne.surf.protect.paper.configManager
 import dev.slne.surf.protect.paper.items.ProtectionItems
 import dev.slne.surf.protect.paper.user.protectionUser
-import dev.slne.surf.surfapi.bukkit.api.util.key
 import io.papermc.paper.event.player.PlayerItemFrameChangeEvent
 import io.papermc.paper.event.player.PrePlayerAttackEntityEvent
 import org.bukkit.Material
@@ -175,7 +175,7 @@ object ProtectionModeListener : Listener {
         }
     }
 
-    private val INTERACTABLE = MaterialSetTag(key("interactable"))
+    private val INTERACTABLE = MaterialSetTag(namespacedKey("interactable"))
         .contains("BUTTON")
         .contains("DOOR")
         .contains("LEVER")

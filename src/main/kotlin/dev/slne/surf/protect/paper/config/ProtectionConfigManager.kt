@@ -1,8 +1,8 @@
 package dev.slne.surf.protect.paper.config
 
+import dev.slne.surf.api.core.config.manager.SpongeConfigManager
+import dev.slne.surf.api.core.config.surfConfigApi
 import dev.slne.surf.protect.paper.plugin
-import dev.slne.surf.surfapi.core.api.config.manager.SpongeConfigManager
-import dev.slne.surf.surfapi.core.api.config.surfConfigApi
 
 class ProtectionConfigManager {
     private val configManager: SpongeConfigManager<ProtectionConfig>

@@ -1,6 +1,6 @@
 package dev.slne.surf.protect.paper.config
 
-import dev.slne.surf.surfapi.bukkit.api.extensions.server
+import dev.slne.surf.api.paper.extensions.server
 import dev.slne.surf.transaction.api.currency.Currency
 import org.bukkit.Location
 import org.bukkit.block.BlockType

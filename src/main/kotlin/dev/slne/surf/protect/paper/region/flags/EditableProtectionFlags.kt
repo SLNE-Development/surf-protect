@@ -2,7 +2,7 @@ package dev.slne.surf.protect.paper.region.flags
 
 import com.sk89q.worldguard.protection.flags.Flags
 import com.sk89q.worldguard.protection.flags.StateFlag
-import dev.slne.surf.surfapi.core.api.messages.builder.SurfComponentBuilder
+import dev.slne.surf.api.core.messages.builder.SurfComponentBuilder
 import org.bukkit.inventory.ItemType
 
 @Suppress("UnstableApiUsage")
@@ -185,6 +185,13 @@ enum class EditableProtectionFlags(
         description = "Legt fest, ob Korallen ohne Wasser ausbleichen dürfen.",
         flag = Flags.CORAL_FADE,
         initialState = null
+    ),
+    CONCRETE_FORM(
+        icon = ItemType.WHITE_CONCRETE_POWDER,
+        displayName = "Beton-Verfestigung",
+        description = "Legt fest, ob sich Beton auf deinem Grundstück durch Wasser verfestigt.",
+        flag = ProtectionFlagsRegistry.CONCRETE_FORM,
+        initialState = StateFlag.State.ALLOW
     ),
     SNOWMAN_TRAILS(
         icon = ItemType.CARVED_PUMPKIN,

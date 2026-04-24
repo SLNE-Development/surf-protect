@@ -2,9 +2,9 @@ package dev.slne.surf.protect.paper.region.visual.visualizer
 
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.sk89q.worldguard.protection.regions.ProtectedRegion
+import dev.slne.surf.api.paper.event.listen
+import dev.slne.surf.api.paper.visualizer.visualizer.ExperimentalVisualizerApi
 import dev.slne.surf.protect.paper.region.visual.visualizer.visualizers.ProtectionPlayerVisualizerManager
-import dev.slne.surf.surfapi.bukkit.api.event.listen
-import dev.slne.surf.surfapi.bukkit.api.visualizer.visualizer.ExperimentalVisualizerApi
 import org.bukkit.World
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerQuitEvent

@@ -2,12 +2,12 @@ package dev.slne.surf.protect.paper.region.info
 
 import com.sk89q.worldguard.protection.flags.Flags
 import com.sk89q.worldguard.protection.regions.ProtectedRegion
+import dev.slne.surf.api.core.util.mutableObjectListOf
 import dev.slne.surf.protect.paper.math.Mth
 import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry
 import dev.slne.surf.protect.paper.util.fixedVolume
 import dev.slne.surf.protect.paper.util.getRegionManagerOrNull
 import dev.slne.surf.protect.paper.util.toLocalPlayer
-import dev.slne.surf.surfapi.core.api.util.mutableObjectListOf
 
 
 data class RegionInfo(val region: ProtectedRegion) {

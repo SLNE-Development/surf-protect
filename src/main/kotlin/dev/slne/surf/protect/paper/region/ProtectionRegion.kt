@@ -10,6 +10,12 @@ import com.sk89q.worldguard.protection.flags.RegionGroup
 import com.sk89q.worldguard.protection.flags.StateFlag
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion
 import com.sk89q.worldguard.protection.regions.ProtectedRegion
+import dev.slne.surf.api.core.messages.adventure.buildText
+import dev.slne.surf.api.core.messages.adventure.sendText
+import dev.slne.surf.api.core.util.*
+import dev.slne.surf.api.paper.util.getHighestBlockYAtBlockCoordinates
+import dev.slne.surf.api.paper.util.getXFromChunkKey
+import dev.slne.surf.api.paper.util.getZFromChunkKey
 import dev.slne.surf.protect.paper.config
 import dev.slne.surf.protect.paper.event.ProtectionCreateEvent
 import dev.slne.surf.protect.paper.math.Mth
@@ -27,12 +33,6 @@ import dev.slne.surf.protect.paper.region.visual.Trail
 import dev.slne.surf.protect.paper.region.visual.visualizer.ProtectionVisualizerManager
 import dev.slne.surf.protect.paper.user.ProtectionUser
 import dev.slne.surf.protect.paper.util.*
-import dev.slne.surf.surfapi.bukkit.api.util.getHighestBlockYAtBlockCoordinates
-import dev.slne.surf.surfapi.bukkit.api.util.getXFromChunkKey
-import dev.slne.surf.surfapi.bukkit.api.util.getZFromChunkKey
-import dev.slne.surf.surfapi.core.api.messages.adventure.buildText
-import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
-import dev.slne.surf.surfapi.core.api.util.*
 import io.papermc.paper.math.BlockPosition
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet
 import it.unimi.dsi.fastutil.objects.ObjectList
@@ -83,14 +83,17 @@ class ProtectionRegion(
 
         val byChunk = mutableLong2ObjectMapOf<ObjectList<BlockVector2>>(points.size / 4 + 1)
         for (point in points) {
-            val key = Chunk.getChunkKey(point.x() shr 4, point.z() shr 4)
-            val list = byChunk.computeIfAbsent(key) { mutableObjectListOf() }
+            val namespacedKey = Chunk.getChunkKey(point.x() shr 4, point.z() shr 4)
+            val list = byChunk.computeIfAbsent(namespacedKey) { mutableObjectListOf() }
             list.add(point)
         }
 
         val snapshots = coroutineScope {
-            byChunk.keys.mapAsync { key ->
-                key to world.getChunkAtAsync(getXFromChunkKey(key), getZFromChunkKey(key))
+            byChunk.keys.mapAsync { namespacedKey ->
+                namespacedKey to world.getChunkAtAsync(
+                    getXFromChunkKey(namespacedKey),
+                    getZFromChunkKey(namespacedKey)
+                )
                     .await()
                     .getChunkSnapshot(true, false, false, false)
             }.toMap(mutableLong2ObjectMapOf<ChunkSnapshot>(byChunk.size))
@@ -99,9 +102,10 @@ class ProtectionRegion(
         val it = byChunk.long2ObjectEntrySet().fastIterator()
         while (it.hasNext()) {
             val entry = it.next()
-            val key = entry.longKey
+            val namespacedKey = entry.longKey
             val pointsInChunk = entry.value
-            val snapshot = snapshots[key] ?: error("ChunkSnapshot for key $key not found")
+            val snapshot = snapshots[namespacedKey]
+                ?: error("ChunkSnapshot for namespacedKey $namespacedKey not found")
             for (point in pointsInChunk) {
                 val x = point.x()
                 val z = point.z()
@@ -205,10 +209,16 @@ class ProtectionRegion(
             region.owners.addPlayer(protectionUser.localPlayer)
 
             for (flagsMap in EditableProtectionFlags.entries) {
-                region.setFlag(
-                    flagsMap.flag,
-                    flagsMap.initialState
-                )
+                if (flagsMap.isPlayerRelated) {
+                    region.setFlag(flagsMap.flag, StateFlag.State.ALLOW)
+                    if ((flagsMap.initialState ?: StateFlag.State.ALLOW) == StateFlag.State.DENY) {
+                        region.setFlag(flagsMap.flag.regionGroupFlag, RegionGroup.MEMBERS)
+                    } else {
+                        region.setFlag(flagsMap.flag.regionGroupFlag, null)
+                    }
+                } else {
+                    region.setFlag(flagsMap.flag, flagsMap.initialState)
+                }
             }
 
             region.setFlag(
@@ -242,7 +252,7 @@ class ProtectionRegion(
         }
 
         return when {
-            tmpRegion.overlaps(expandingProtection) -> RegionCreationState.OVERLAPPING.also {
+            tmpRegion.overlapsUnownedRegion(protectionUser.localPlayer) -> RegionCreationState.OVERLAPPING.also {
                 protectionUser.sendMessage(Messages.Protecting.overlappingRegions)
             }
 
@@ -430,12 +440,12 @@ class ProtectionRegion(
             val state = flag.initialState ?: StateFlag.State.ALLOW
 
             if (flag.isPlayerRelated) {
-                region.setFlag(flag.flag.regionGroupFlag, RegionGroup.NON_MEMBERS)
-                region.setFlag(flag.flag, state)
-
-                region.setFlag(flag.flag.regionGroupFlag, RegionGroup.MEMBERS)
                 region.setFlag(flag.flag, StateFlag.State.ALLOW)
-
+                if (state == StateFlag.State.DENY) {
+                    region.setFlag(flag.flag.regionGroupFlag, RegionGroup.MEMBERS)
+                } else {
+                    region.setFlag(flag.flag.regionGroupFlag, null)
+                }
                 continue
             }
 

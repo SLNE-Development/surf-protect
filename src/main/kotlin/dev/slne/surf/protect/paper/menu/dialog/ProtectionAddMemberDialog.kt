@@ -1,12 +1,12 @@
 package dev.slne.surf.protect.paper.menu.dialog
 
+import dev.slne.surf.api.core.messages.adventure.sendText
+import dev.slne.surf.api.paper.dialog.search.searchDialog
+import dev.slne.surf.api.paper.inventory.framework.viewFrame
 import dev.slne.surf.protect.paper.menu.util.protectColored
 import dev.slne.surf.protect.paper.menu.view.members.ProtectionMemberListView
 import dev.slne.surf.protect.paper.region.info.RegionInfo
 import dev.slne.surf.protect.paper.region.visual.visualizer.ProtectionVisualizerManager
-import dev.slne.surf.surfapi.bukkit.api.dialog.search.searchDialog
-import dev.slne.surf.surfapi.bukkit.api.inventory.framework.viewFrame
-import dev.slne.surf.surfapi.core.api.messages.adventure.sendText
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 
