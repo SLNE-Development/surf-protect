@@ -53,7 +53,7 @@ object RegionListener : Listener {
 
         val regions = block.location.getProtectedRegions()
         for (region in regions) {
-            val flagState = region.getFlag(ProtectionFlagsRegistry.CONCRETE_FORM) ?: StateFlag.State.DENY
+            val flagState = region.getFlag(ProtectionFlagsRegistry.CONCRETE_FORM) ?: StateFlag.State.ALLOW
             if (flagState == StateFlag.State.DENY) {
                 event.isCancelled = true
                 return
