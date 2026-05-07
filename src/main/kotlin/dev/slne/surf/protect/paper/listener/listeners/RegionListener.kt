@@ -72,7 +72,7 @@ object RegionListener : Listener {
         }
 
         val blockBelow = event.block.getRelative(0, -1, 0)
-        if (!blockBelow.type.isAir) {
+        if (!blockBelow.isPassable) {
             return
         }
 
