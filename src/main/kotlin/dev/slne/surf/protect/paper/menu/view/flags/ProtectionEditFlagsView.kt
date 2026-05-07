@@ -42,11 +42,7 @@ object ProtectionEditFlagsView : View() {
                     applyState(region, flag, newState)
 
                     context.playGeneralClickSound()
-
-                    context.openForPlayer(
-                        ProtectionEditFlagsView::class.java,
-                        mapOf("protection" to protection)
-                    )
+                    paginationState.get(context).update()
 
                     context.player.sendText {
                         appendSuccessPrefix()
@@ -73,12 +69,14 @@ object ProtectionEditFlagsView : View() {
                 "ORRRRRRRO",
                 "ORRRRRRRO",
                 "ORRRRRRRO",
-                "OOOOBOOOO"
+                "OOPOBONOO"
             )
             .cancelInteractions()
     }
 
     override fun onFirstRender(render: RenderContext) {
+        val pagination = paginationState.get(render)
+
         render.layoutSlot('B', backItem).onClick { click ->
             click.openForPlayer(
                 ProtectionInfoView::class.java,
@@ -87,6 +85,42 @@ object ProtectionEditFlagsView : View() {
         }
 
         render.layoutSlot('O', outlineItem)
+
+        render
+            .layoutSlot('P')
+            .watch(paginationState)
+            .renderWith {
+                if (pagination.canBack()) {
+                    previousItem
+                } else {
+                    outlineItem
+                }
+            }
+            .onClick { context ->
+                if (pagination.canBack()) {
+                    pagination.back()
+                    pagination.update()
+                    context.playNewPageSound()
+                }
+            }
+
+        render
+            .layoutSlot('N')
+            .watch(paginationState)
+            .renderWith {
+                if (pagination.canAdvance()) {
+                    nextItem
+                } else {
+                    outlineItem
+                }
+            }
+            .onClick { context ->
+                if (pagination.canAdvance()) {
+                    pagination.advance()
+                    pagination.update()
+                    context.playNewPageSound()
+                }
+            }
     }
 
     private fun getCurrentState(
