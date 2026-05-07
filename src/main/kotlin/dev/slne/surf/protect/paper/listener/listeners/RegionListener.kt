@@ -7,6 +7,7 @@ import dev.slne.surf.protect.paper.util.getProtectedRegions
 import dev.slne.surf.protect.paper.util.isGlobalRegion
 import org.bukkit.Tag
 import org.bukkit.block.Block
+import org.bukkit.entity.FallingBlock
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -14,7 +15,10 @@ import org.bukkit.event.block.BlockExplodeEvent
 import org.bukkit.event.block.BlockFormEvent
 import org.bukkit.event.block.BlockIgniteEvent
 import org.bukkit.event.block.BlockIgniteEvent.IgniteCause
+import org.bukkit.event.entity.EntityChangeBlockEvent
 import org.bukkit.event.entity.EntityExplodeEvent
+import org.bukkit.event.entity.EntitySpawnEvent
+
 
 object RegionListener : Listener {
 
@@ -58,6 +62,29 @@ object RegionListener : Listener {
                 event.isCancelled = true
                 return
             }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    fun handleFallingBlockChange(event: EntityChangeBlockEvent) {
+        if (event.entity !is FallingBlock) {
+            return
+        }
+
+        val blockBelow = event.block.getRelative(0, -1, 0)
+        if (!blockBelow.type.isAir) {
+            return
+        }
+
+        val gravityDenied = gravityDeniedAt(event.block.location)
+        if (gravityDenied) {
+            event.isCancelled = true
+        }
+    }
+
+    private fun gravityDeniedAt(location: org.bukkit.Location): Boolean {
+        return location.getProtectedRegions().any {
+            (it.getFlag(ProtectionFlagsRegistry.SURF_BLOCK_GRAVITY) ?: StateFlag.State.ALLOW) == StateFlag.State.DENY
         }
     }
 
