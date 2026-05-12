@@ -11,6 +11,7 @@ import org.bukkit.entity.FallingBlock
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
+import org.bukkit.Location
 import org.bukkit.event.block.BlockExplodeEvent
 import org.bukkit.event.block.BlockFormEvent
 import org.bukkit.event.block.BlockIgniteEvent
@@ -82,7 +83,7 @@ object RegionListener : Listener {
         }
     }
 
-    private fun gravityDeniedAt(location: org.bukkit.Location): Boolean {
+    private fun gravityDeniedAt(location: Location): Boolean {
         return location.getProtectedRegions().any {
             (it.getFlag(ProtectionFlagsRegistry.SURF_BLOCK_GRAVITY) ?: StateFlag.State.ALLOW) == StateFlag.State.DENY
         }
