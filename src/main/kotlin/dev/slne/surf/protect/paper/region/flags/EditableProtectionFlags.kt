@@ -233,7 +233,7 @@ enum class EditableProtectionFlags(
         displayName = "Blockgravitation",
         description = "Legt fest, ob Blöcke auf dem Grundstück durch Gravitation fallen dürfen.",
         flag = ProtectionFlagsRegistry.SURF_BLOCK_GRAVITY,
-        initialState = true
+        initialState = StateFlag.State.ALLOW
     );
 
     val displayNameComponent = SurfComponentBuilder { primary(displayName) }
