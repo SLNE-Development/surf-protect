@@ -25,7 +25,7 @@ object ProtectionEditFlagsViewA : View() {
     private val protectionState: State<RegionInfo> = initialState("protection")
 
     private val paginationState: State<Pagination> =
-        buildLazyPaginationState { _ -> EditableProtectionFlags.entries.chunked(36)[0].toMutableList() }
+        buildLazyPaginationState { _ -> EditableProtectionFlags.entries.chunked(27)[0].toMutableList() }
             .elementFactory { context, builder, _, flag ->
 
                 builder.renderWith {
@@ -66,14 +66,13 @@ object ProtectionEditFlagsViewA : View() {
             .titleBuilder {
                 protectColored("Grundstück - Flags".toSmallCaps(), TextDecoration.BOLD)
             }
-            .size(6)
+            .size(5)
             .layout(
-                "RRRRRRRRR",
-                "RRRRRRRRR",
-                "RRRRRRRRR",
-                "RRRRRRRRR",
                 "OOOOOOOOO",
-                "    B N  "
+                "ORRRRRRRO",
+                "ORRRRRRRO",
+                "ORRRRRRRO",
+                "OOOOBONOO",
             )
             .cancelInteractions()
     }
