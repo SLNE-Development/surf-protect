@@ -20,12 +20,12 @@ import me.devnatan.inventoryframework.context.RenderContext
 import me.devnatan.inventoryframework.state.State
 import net.kyori.adventure.text.format.TextDecoration
 
-object ProtectionEditFlagsView : View() {
+object ProtectionEditFlagsViewA : View() {
 
     private val protectionState: State<RegionInfo> = initialState("protection")
 
     private val paginationState: State<Pagination> =
-        buildLazyPaginationState { _ -> EditableProtectionFlags.entries.toMutableList() }
+        buildLazyPaginationState { _ -> EditableProtectionFlags.entries.chunked(36)[0].toMutableList() }
             .elementFactory { context, builder, _, flag ->
 
                 builder.renderWith {
@@ -44,7 +44,7 @@ object ProtectionEditFlagsView : View() {
                     context.playGeneralClickSound()
 
                     context.openForPlayer(
-                        ProtectionEditFlagsView::class.java,
+                        ProtectionEditFlagsViewA::class.java,
                         mapOf("protection" to protection)
                     )
 
@@ -68,12 +68,12 @@ object ProtectionEditFlagsView : View() {
             }
             .size(6)
             .layout(
+                "RRRRRRRRR",
+                "RRRRRRRRR",
+                "RRRRRRRRR",
+                "RRRRRRRRR",
                 "OOOOOOOOO",
-                "ORRRRRRRO",
-                "ORRRRRRRO",
-                "ORRRRRRRO",
-                "ORRRRRRRO",
-                "OOOOBOOOO"
+                "    B N  "
             )
             .cancelInteractions()
     }
@@ -87,6 +87,13 @@ object ProtectionEditFlagsView : View() {
         }
 
         render.layoutSlot('O', outlineItem)
+        render.layoutSlot('N', nextItem).onClick { click ->
+            click.playGeneralClickSound()
+            click.openForPlayer(
+                ProtectionEditFlagsViewB::class.java,
+                mapOf("protection" to protectionState.get(render))
+            )
+        }
     }
 
     private fun getCurrentState(

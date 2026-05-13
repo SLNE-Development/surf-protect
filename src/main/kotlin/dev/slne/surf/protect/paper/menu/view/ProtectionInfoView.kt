@@ -9,7 +9,7 @@ import dev.slne.surf.api.paper.builder.displayName
 import dev.slne.surf.api.paper.inventory.framework.titleBuilder
 import dev.slne.surf.protect.paper.menu.dialog.protectionRenameDialog
 import dev.slne.surf.protect.paper.menu.util.*
-import dev.slne.surf.protect.paper.menu.view.flags.ProtectionEditFlagsView
+import dev.slne.surf.protect.paper.menu.view.flags.ProtectionEditFlagsViewA
 import dev.slne.surf.protect.paper.menu.view.list.ProtectionListView
 import dev.slne.surf.protect.paper.menu.view.members.ProtectionMemberListView
 import dev.slne.surf.protect.paper.menu.view.sell.ProtectionSellConfirmView
@@ -75,7 +75,7 @@ object ProtectionInfoView : View() {
         render.layoutSlot('F', editFlags).onClick { onClick ->
             onClick.playGeneralClickSound()
             onClick.openForPlayer(
-                ProtectionEditFlagsView::class.java,
+                ProtectionEditFlagsViewA::class.java,
                 mapOf("protection" to protectionState.get(render))
             )
         }

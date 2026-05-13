@@ -12,7 +12,8 @@ import dev.slne.surf.protect.paper.config.ProtectionConfigManager
 import dev.slne.surf.protect.paper.listener.ListenerManager
 import dev.slne.surf.protect.paper.menu.view.ProtectionInfoView
 import dev.slne.surf.protect.paper.menu.view.ProtectionMainView
-import dev.slne.surf.protect.paper.menu.view.flags.ProtectionEditFlagsView
+import dev.slne.surf.protect.paper.menu.view.flags.ProtectionEditFlagsViewA
+import dev.slne.surf.protect.paper.menu.view.flags.ProtectionEditFlagsViewB
 import dev.slne.surf.protect.paper.menu.view.list.ProtectionListView
 import dev.slne.surf.protect.paper.menu.view.members.ProtectionMemberListView
 import dev.slne.surf.protect.paper.menu.view.members.ProtectionMemberRemoveConfirmView
@@ -29,7 +30,8 @@ class PaperMain : SuspendingJavaPlugin() {
     override suspend fun onLoadAsync() {
         ProtectionFlagsRegistry.registerFlags()
 
-        viewFrame.with(ProtectionEditFlagsView)
+        viewFrame.with(ProtectionEditFlagsViewA)
+        viewFrame.with(ProtectionEditFlagsViewB)
         viewFrame.with(ProtectionListView)
         viewFrame.with(ProtectionMemberListView)
         viewFrame.with(ProtectionMemberRemoveConfirmView)
