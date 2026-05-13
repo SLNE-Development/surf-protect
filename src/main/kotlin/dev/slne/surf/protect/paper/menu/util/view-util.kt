@@ -86,7 +86,7 @@ val backItem = MenuHeads.CROSS.apply {
 
 val closeItem = MenuHeads.CROSS.apply {
     displayName {
-        protectColored("Schließen".toSmallCaps(), TextDecoration.BOLD)
+        protectColored("Schließen", TextDecoration.BOLD)
     }
 
     buildLore {
