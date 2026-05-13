@@ -227,6 +227,13 @@ enum class EditableProtectionFlags(
         description = "Legt fest, ob Eis durch Licht oder Wärme auf dem Grundstück schmelzen darf.",
         flag = Flags.ICE_MELT,
         initialState = null
+    ),
+    BLOCK_GRAVITY(
+        icon = ItemType.GRAVEL,
+        displayName = "Blockgravitation",
+        description = "Legt fest, ob Blöcke auf dem Grundstück durch Gravitation fallen dürfen.",
+        flag = ProtectionFlagsRegistry.SURF_BLOCK_GRAVITY,
+        initialState = StateFlag.State.ALLOW
     );
 
     val displayNameComponent = SurfComponentBuilder { primary(displayName) }

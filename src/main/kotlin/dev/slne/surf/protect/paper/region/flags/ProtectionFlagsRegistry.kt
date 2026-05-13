@@ -46,6 +46,12 @@ object ProtectionFlagsRegistry {
     @JvmField
     val CONCRETE_FORM = StateFlag("concrete-form", false)
 
+    /**
+     * Controls whether gravity-affected blocks may fall in this region.
+     */
+    @JvmField
+    val SURF_BLOCK_GRAVITY = StateFlag("apply-gravity", true)
+
     fun registerFlags() = with(WorldGuard.getInstance().flagRegistry) {
         register(SURF_PROTECT)
         register(SURF_PROTECT_FLAG)
@@ -54,5 +60,6 @@ object ProtectionFlagsRegistry {
         register(SURF_PROTECT_VISUALIZE)
         register(SURF_PROTECTION)
         register(CONCRETE_FORM)
+        register(SURF_BLOCK_GRAVITY)
     }
 }
