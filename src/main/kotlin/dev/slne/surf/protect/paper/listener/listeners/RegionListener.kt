@@ -5,20 +5,19 @@ import com.sk89q.worldguard.protection.flags.StateFlag
 import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry
 import dev.slne.surf.protect.paper.util.getProtectedRegions
 import dev.slne.surf.protect.paper.util.isGlobalRegion
+import org.bukkit.Location
 import org.bukkit.Tag
 import org.bukkit.block.Block
 import org.bukkit.entity.FallingBlock
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
-import org.bukkit.Location
 import org.bukkit.event.block.BlockExplodeEvent
 import org.bukkit.event.block.BlockFormEvent
 import org.bukkit.event.block.BlockIgniteEvent
 import org.bukkit.event.block.BlockIgniteEvent.IgniteCause
 import org.bukkit.event.entity.EntityChangeBlockEvent
 import org.bukkit.event.entity.EntityExplodeEvent
-import org.bukkit.event.entity.EntitySpawnEvent
 
 
 object RegionListener : Listener {
@@ -27,11 +26,11 @@ object RegionListener : Listener {
     fun onIgnite(event: BlockIgniteEvent) {
         val cause = event.cause
         if (cause == IgniteCause.FLINT_AND_STEEL || cause == IgniteCause.FIREBALL) {
-            return  // Allow
+            return
         }
 
         if (event.block.location.isGlobalRegion()) {
-            return  // Allow
+            return
         }
 
         event.isCancelled = true
@@ -58,7 +57,8 @@ object RegionListener : Listener {
 
         val regions = block.location.getProtectedRegions()
         for (region in regions) {
-            val flagState = region.getFlag(ProtectionFlagsRegistry.CONCRETE_FORM) ?: StateFlag.State.ALLOW
+            val flagState =
+                region.getFlag(ProtectionFlagsRegistry.CONCRETE_FORM) ?: StateFlag.State.ALLOW
             if (flagState == StateFlag.State.DENY) {
                 event.isCancelled = true
                 return
@@ -77,16 +77,14 @@ object RegionListener : Listener {
             return
         }
 
-        val gravityDenied = gravityDeniedAt(event.block.location)
-        if (gravityDenied) {
+        if (gravityDeniedAt(event.block.location)) {
             event.isCancelled = true
         }
     }
 
-    private fun gravityDeniedAt(location: Location): Boolean {
-        return location.getProtectedRegions().any {
-            (it.getFlag(ProtectionFlagsRegistry.SURF_BLOCK_GRAVITY) ?: StateFlag.State.ALLOW) == StateFlag.State.DENY
-        }
+    private fun gravityDeniedAt(location: Location) = location.getProtectedRegions().any {
+        (it.getFlag(ProtectionFlagsRegistry.SURF_BLOCK_GRAVITY)
+            ?: StateFlag.State.ALLOW) == StateFlag.State.DENY
     }
 
     private fun performBlockRemove(blocks: MutableList<Block>) {
