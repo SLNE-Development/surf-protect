@@ -24,7 +24,7 @@ object ProtectionEditFlagsViewB : View() {
     private val protectionState: State<RegionInfo> = initialState("protection")
 
     private val paginationState: State<Pagination> =
-        buildLazyPaginationState { _ -> EditableProtectionFlags.entries.chunked(27)[1].toMutableList() }
+        buildLazyPaginationState { _ -> EditableProtectionFlags.entries.chunked(21)[1].toMutableList() }
             .elementFactory { context, builder, _, flag ->
 
                 builder.renderWith {
