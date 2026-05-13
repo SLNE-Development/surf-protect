@@ -112,7 +112,7 @@ fun createRegionItem(protection: RegionInfo, showMoreInfo: Boolean = true) =
                 appendBlob()
                 appendSpace()
                 white("Besitzer: ".toSmallCaps())
-                variableValue(protection.owners.joinToString(", ") { it.displayName })
+                variableValue(protection.owners.joinToString(", ") { it.name })
             }
             line {
                 appendBlob()
