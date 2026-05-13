@@ -74,7 +74,7 @@ val nextItem = MenuHeads.ARROW_RIGHT.clone().apply {
 
 val backItem = MenuHeads.CROSS.apply {
     displayName {
-        protectColored("Zurück".toSmallCaps(), TextDecoration.BOLD)
+        protectColored("Zurück", TextDecoration.BOLD)
     }
 
     buildLore {
