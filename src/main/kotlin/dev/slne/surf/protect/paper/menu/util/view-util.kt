@@ -52,18 +52,18 @@ fun Context.playYesSound() {
 
 val previousItem = MenuHeads.ARROW_LEFT.clone().apply {
     displayName {
-        protectColored("Vorherige Seite".toSmallCaps(), TextDecoration.BOLD)
+        protectColored("Vorherige Seite", TextDecoration.BOLD)
     }
     buildLore {
         line {
-            spacer("Eine Seite zurück")
+            spacer("Eine Seite zurück".toSmallCaps())
         }
     }
 }
 
 val nextItem = MenuHeads.ARROW_RIGHT.clone().apply {
     displayName {
-        protectColored("Nächste Seite".toSmallCaps(), TextDecoration.BOLD)
+        protectColored("Nächste Seite", TextDecoration.BOLD)
     }
     buildLore {
         line {
@@ -74,7 +74,7 @@ val nextItem = MenuHeads.ARROW_RIGHT.clone().apply {
 
 val backItem = MenuHeads.CROSS.apply {
     displayName {
-        protectColored("Zurück".toSmallCaps(), TextDecoration.BOLD)
+        protectColored("Zurück", TextDecoration.BOLD)
     }
 
     buildLore {
@@ -86,7 +86,7 @@ val backItem = MenuHeads.CROSS.apply {
 
 val closeItem = MenuHeads.CROSS.apply {
     displayName {
-        protectColored("Schließen".toSmallCaps(), TextDecoration.BOLD)
+        protectColored("Schließen", TextDecoration.BOLD)
     }
 
     buildLore {
