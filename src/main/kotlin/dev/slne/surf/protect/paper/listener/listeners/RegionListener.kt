@@ -2,13 +2,15 @@ package dev.slne.surf.protect.paper.listener.listeners
 
 import com.sk89q.worldguard.protection.flags.Flags
 import com.sk89q.worldguard.protection.flags.StateFlag
+import dev.slne.surf.protect.paper.region.flags.EditableProtectionFlags
 import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry
 import dev.slne.surf.protect.paper.util.getProtectedRegions
 import dev.slne.surf.protect.paper.util.isGlobalRegion
 import org.bukkit.Location
 import org.bukkit.Tag
-import org.bukkit.block.Block
+import org.bukkit.block.*
 import org.bukkit.entity.FallingBlock
+import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -18,6 +20,7 @@ import org.bukkit.event.block.BlockIgniteEvent
 import org.bukkit.event.block.BlockIgniteEvent.IgniteCause
 import org.bukkit.event.entity.EntityChangeBlockEvent
 import org.bukkit.event.entity.EntityExplodeEvent
+import org.bukkit.event.inventory.InventoryMoveItemEvent
 
 
 object RegionListener : Listener {
@@ -79,6 +82,27 @@ object RegionListener : Listener {
 
         if (gravityDeniedAt(event.block.location)) {
             event.isCancelled = true
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    fun onInvMove(event: InventoryMoveItemEvent) {
+        if (event.source.holder is Player) {
+            return
+        }
+
+        val inventory = event.destination
+        val holder = inventory.holder ?: return
+
+        if (holder !is Chest && holder !is Barrel && holder !is Hopper && holder !is ShulkerBox) {
+            return
+        }
+
+        val location = holder.location
+        val region = location.getProtectedRegions(false).firstOrNull() ?: return
+
+        if (region.getFlag(EditableProtectionFlags.CHEST_ACCESS.flag) == StateFlag.State.ALLOW) {
+            event.isCancelled = false
         }
     }
 
