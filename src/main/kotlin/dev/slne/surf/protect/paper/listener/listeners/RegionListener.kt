@@ -8,7 +8,8 @@ import dev.slne.surf.protect.paper.util.getProtectedRegions
 import dev.slne.surf.protect.paper.util.isGlobalRegion
 import org.bukkit.Location
 import org.bukkit.Tag
-import org.bukkit.block.*
+import org.bukkit.block.Block
+import org.bukkit.block.BlockState
 import org.bukkit.entity.FallingBlock
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -94,7 +95,7 @@ object RegionListener : Listener {
         val inventory = event.destination
         val holder = inventory.holder ?: return
 
-        if (holder !is Chest && holder !is Barrel && holder !is Hopper && holder !is ShulkerBox) {
+        if (holder !is BlockState) {
             return
         }
 
