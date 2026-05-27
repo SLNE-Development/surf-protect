@@ -1,17 +1,17 @@
 package dev.slne.surf.protect.paper.listener.listeners
 
+import com.jeff_media.morepersistentdatatypes.DataType
 import com.sk89q.worldguard.protection.flags.Flags
 import com.sk89q.worldguard.protection.flags.StateFlag
-import dev.slne.surf.protect.paper.region.flags.EditableProtectionFlags
+import dev.slne.surf.api.paper.util.namespacedKey
 import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry
 import dev.slne.surf.protect.paper.util.getProtectedRegions
 import dev.slne.surf.protect.paper.util.isGlobalRegion
 import org.bukkit.Location
 import org.bukkit.Tag
 import org.bukkit.block.Block
-import org.bukkit.block.BlockState
 import org.bukkit.entity.FallingBlock
-import org.bukkit.entity.Player
+import org.bukkit.entity.minecart.HopperMinecart
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -21,6 +21,7 @@ import org.bukkit.event.block.BlockIgniteEvent
 import org.bukkit.event.block.BlockIgniteEvent.IgniteCause
 import org.bukkit.event.entity.EntityChangeBlockEvent
 import org.bukkit.event.entity.EntityExplodeEvent
+import org.bukkit.event.entity.EntityPlaceEvent
 import org.bukkit.event.inventory.InventoryMoveItemEvent
 
 
@@ -86,24 +87,43 @@ object RegionListener : Listener {
         }
     }
 
+    private val creator = namespacedKey("creator")
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    fun onMinecartPlace(event: EntityPlaceEvent) {
+        val vehicle = event.entity
+        if (vehicle !is HopperMinecart) return
+
+        val player = event.player ?: return
+
+        vehicle.persistentDataContainer.set(
+            creator,
+            DataType.UUID,
+            player.uniqueId
+        )
+    }
+
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
     fun onInvMove(event: InventoryMoveItemEvent) {
-        if (event.source.holder is Player) {
-            return
-        }
+        val sourceHolder = event.source.holder
+        val destHolder = event.destination.holder
 
-        val inventory = event.destination
-        val holder = inventory.holder ?: return
+        val minecart = sourceHolder as? HopperMinecart ?: destHolder as? HopperMinecart ?: return
 
-        if (holder !is BlockState) {
-            return
-        }
+        val protection = (event.destination.location ?: event.source.location)
+            ?.getProtectedRegions()
+            ?.firstOrNull()
+            ?: return
 
-        val location = holder.location
-        val region = location.getProtectedRegions(false).firstOrNull() ?: return
+        val ownerUuid =
+            minecart.persistentDataContainer.get(creator, DataType.UUID) ?: return
 
-        if (region.getFlag(EditableProtectionFlags.CHEST_ACCESS.flag) == StateFlag.State.ALLOW) {
-            event.isCancelled = false
+        val allowed =
+            protection.members.contains(ownerUuid) ||
+                    protection.owners.contains(ownerUuid)
+
+        if (!allowed) {
+            event.isCancelled = true
         }
     }
 
