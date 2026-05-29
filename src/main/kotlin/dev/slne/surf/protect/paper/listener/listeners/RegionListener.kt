@@ -57,7 +57,7 @@ object RegionListener : Listener {
         if (!Tag.CONCRETE_POWDER.isTagged(block.type)) return
 
         if (block.location.isGlobalRegion()) {
-            return  // Allow
+            return
         }
 
         val regions = block.location.getProtectedRegions()
@@ -103,7 +103,7 @@ object RegionListener : Listener {
         )
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    @EventHandler(priority = EventPriority.HIGH)
     fun onInvMove(event: InventoryMoveItemEvent) {
         val sourceHolder = event.source.holder
         val destHolder = event.destination.holder
@@ -122,9 +122,7 @@ object RegionListener : Listener {
             protection.members.contains(ownerUuid) ||
                     protection.owners.contains(ownerUuid)
 
-        if (!allowed) {
-            event.isCancelled = true
-        }
+        event.isCancelled = !allowed
     }
 
     private fun gravityDeniedAt(location: Location) = location.getProtectedRegions().any {
