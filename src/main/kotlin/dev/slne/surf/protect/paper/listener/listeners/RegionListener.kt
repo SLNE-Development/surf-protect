@@ -122,7 +122,7 @@ object RegionListener : Listener {
             protection.members.contains(ownerUuid) ||
                     protection.owners.contains(ownerUuid)
 
-        event.isCancelled = allowed
+        event.isCancelled = !allowed
     }
 
     private fun gravityDeniedAt(location: Location) = location.getProtectedRegions().any {
