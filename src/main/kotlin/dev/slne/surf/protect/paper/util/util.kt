@@ -222,6 +222,10 @@ fun Location.isGlobalRegion(): Boolean {
 val WorldEditLocation.world: WorldEditWorld
     get() = this.extent as? WorldEditWorld ?: error("Extent is not a World: $extent")
 
+val WorldEditLocation.bukkitWorld
+    get() = Bukkit.getWorld(world.name)
+        ?: error("Bukkit world not found for WorldEdit world: ${world.name}")
+
 /**
  * Checks if the player is currently standing in the specified protected region.
  *
