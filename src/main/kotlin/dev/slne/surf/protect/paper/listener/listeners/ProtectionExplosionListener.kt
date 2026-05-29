@@ -16,13 +16,13 @@ object ProtectionExplosionListener : Listener {
             return
         }
 
-        val canExplode = event.location
-            .getProtectedRegions()
-            .all { region ->
-                region.getFlag(ProtectionFlagsRegistry.TNT_EXPLODE) == StateFlag.State.ALLOW
-            }
+        val regions = event.location.getProtectedRegions()
+        if (regions.isEmpty()) return
+
+        val canExplode = regions.all { region ->
+            region.getFlag(ProtectionFlagsRegistry.TNT_EXPLODE) == StateFlag.State.ALLOW
+        }
 
         event.isCancelled = !canExplode
-        println("Explosion at ${event.location} cancelled: ${!canExplode}, blockListSize: ${event.blockList().size}")
     }
 }
