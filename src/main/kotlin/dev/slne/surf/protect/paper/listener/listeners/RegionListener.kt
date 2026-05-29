@@ -103,7 +103,7 @@ object RegionListener : Listener {
         )
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    @EventHandler(priority = EventPriority.HIGH)
     fun onInvMove(event: InventoryMoveItemEvent) {
         val sourceHolder = event.source.holder
         val destHolder = event.destination.holder
