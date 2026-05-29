@@ -52,6 +52,12 @@ object ProtectionFlagsRegistry {
     @JvmField
     val SURF_BLOCK_GRAVITY = StateFlag("apply-gravity", true)
 
+    /**
+     * Overrides the default explosion flag, allowing TNT to explode in regions where explosions are otherwise disabled.
+     */
+    @JvmField
+    val TNT_EXPLODE = StateFlag("tnt-explode", false)
+
     fun registerFlags() = with(WorldGuard.getInstance().flagRegistry) {
         register(SURF_PROTECT)
         register(SURF_PROTECT_FLAG)
@@ -61,5 +67,6 @@ object ProtectionFlagsRegistry {
         register(SURF_PROTECTION)
         register(CONCRETE_FORM)
         register(SURF_BLOCK_GRAVITY)
+        register(TNT_EXPLODE)
     }
 }

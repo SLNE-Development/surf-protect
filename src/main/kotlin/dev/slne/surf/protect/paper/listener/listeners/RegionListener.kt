@@ -134,7 +134,17 @@ object RegionListener : Listener {
 
     private fun performBlockRemove(blocks: MutableList<Block>) {
         blocks.removeIf { block ->
-            block.location.getProtectedRegions().any {
+            val regions = block.location.getProtectedRegions()
+
+            val allowTnt = regions.all {
+                it.getFlag(ProtectionFlagsRegistry.TNT_EXPLODE) == StateFlag.State.ALLOW
+            }
+
+            if (allowTnt) {
+                return@removeIf false
+            }
+
+            regions.any {
                 (it.getFlag(Flags.OTHER_EXPLOSION) ?: StateFlag.State.DENY) == StateFlag.State.DENY
             }
         }

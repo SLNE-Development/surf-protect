@@ -98,7 +98,7 @@ enum class EditableProtectionFlags(
     OTHER_EXPLOSION(
         icon = ItemType.END_CRYSTAL,
         displayName = "Explosionsschaden",
-        description = "Legt fest, ob Explosionen auf dem Grundstück Schaden verursachen dürfen.",
+        description = "Legt fest, ob Explosionen auf dem Grundstück Schaden verursachen dürfen. (TNT-Flag kann diese Flag überschreiben!)",
         flag = Flags.OTHER_EXPLOSION,
         initialState = StateFlag.State.DENY
     ),
@@ -108,6 +108,13 @@ enum class EditableProtectionFlags(
         description = "Legt fest, ob Endermänner Blöcke aufnehmen oder platzieren dürfen.",
         flag = Flags.ENDER_BUILD,
         initialState = StateFlag.State.DENY
+    ),
+    MOB_DAMAGE(
+        icon = ItemType.ZOMBIE_SPAWN_EGG,
+        displayName = "Mob-Schaden",
+        description = "Legt fest, ob Mobs auf dem Grundstück Schaden verursachen dürfen.",
+        flag = Flags.MOB_DAMAGE,
+        initialState = StateFlag.State.ALLOW
     ),
     FIRE_SPREAD(
         icon = ItemType.FLINT_AND_STEEL,
@@ -119,8 +126,8 @@ enum class EditableProtectionFlags(
     TNT(
         icon = ItemType.TNT,
         displayName = "TNT-Schaden",
-        description = "Legt fest, ob TNT auf dem Grundstück Schaden verursachen darf.",
-        flag = Flags.TNT,
+        description = "Legt fest, ob TNT auf dem Grundstück Schaden verursachen darf. (Überschreibt Explosionsschaden-Flag!)",
+        flag = ProtectionFlagsRegistry.TNT_EXPLODE,
         initialState = StateFlag.State.DENY
     ),
     LEAF_DECAY(
