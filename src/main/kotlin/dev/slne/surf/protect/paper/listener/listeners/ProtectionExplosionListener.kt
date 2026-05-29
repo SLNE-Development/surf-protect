@@ -23,5 +23,6 @@ object ProtectionExplosionListener : Listener {
             }
 
         event.isCancelled = !canExplode
+        println("Explosion at ${event.location} cancelled: ${!canExplode}, blockListSize: ${event.blockList().size}")
     }
 }
