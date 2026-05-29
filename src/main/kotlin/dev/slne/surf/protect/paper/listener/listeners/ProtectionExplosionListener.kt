@@ -10,7 +10,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityExplodeEvent
 
 object ProtectionExplosionListener : Listener {
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     fun onEntityExplode(event: EntityExplodeEvent) {
         if (event.entityType != EntityType.TNT) {
             return
