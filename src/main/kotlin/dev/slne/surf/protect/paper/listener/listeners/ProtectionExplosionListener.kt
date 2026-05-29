@@ -10,22 +10,17 @@ import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityExplodeEvent
 
 object ProtectionExplosionListener : Listener {
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
-    fun onBlockExplode(event: EntityExplodeEvent) {
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    fun onEntityExplode(event: EntityExplodeEvent) {
         if (event.entityType != EntityType.TNT) {
             return
         }
 
-        val location = event.location
-        val regions = location.getProtectedRegions(false)
-
-        if (regions.isEmpty()) {
-            return
-        }
-
-        val canExplode = regions.all { region ->
-            region.getFlag(ProtectionFlagsRegistry.TNT_EXPLODE) == StateFlag.State.ALLOW
-        }
+        val canExplode = event.location
+            .getProtectedRegions()
+            .all { region ->
+                region.getFlag(ProtectionFlagsRegistry.TNT_EXPLODE) == StateFlag.State.ALLOW
+            }
 
         event.isCancelled = !canExplode
     }
