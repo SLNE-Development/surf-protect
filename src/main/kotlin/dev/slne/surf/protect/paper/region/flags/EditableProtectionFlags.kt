@@ -109,6 +109,13 @@ enum class EditableProtectionFlags(
         flag = Flags.ENDER_BUILD,
         initialState = StateFlag.State.DENY
     ),
+    MOB_DAMAGE(
+        icon = ItemType.ZOMBIE_SPAWN_EGG,
+        displayName = "Mob-Schaden",
+        description = "Legt fest, ob Mobs auf dem Grundstück Schaden verursachen dürfen.",
+        flag = Flags.MOB_DAMAGE,
+        initialState = StateFlag.State.ALLOW
+    ),
     FIRE_SPREAD(
         icon = ItemType.FLINT_AND_STEEL,
         displayName = "Feuerausbreitung",
