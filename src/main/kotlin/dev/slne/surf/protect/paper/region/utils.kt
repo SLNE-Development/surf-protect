@@ -5,61 +5,47 @@ import dev.slne.surf.protect.paper.config
 import dev.slne.surf.protect.paper.math.Mth
 import dev.slne.surf.protect.paper.util.bukkitWorld
 import org.bukkit.World
-import org.bukkit.util.Vector
+import org.spongepowered.math.vector.Vector2i
+
+private val spawnPositionsByEnvironment = mapOf(
+    World.Environment.NETHER to listOf(
+        Vector2i(0, 0),
+        Vector2i(0, -3125),
+        Vector2i(3125, -3125),
+        Vector2i(-3125, -3125),
+        Vector2i(0, 3125),
+        Vector2i(3125, 3125),
+        Vector2i(-3125, 3125),
+        Vector2i(3125, 0),
+        Vector2i(-3125, 0)
+    ),
+    World.Environment.THE_END to listOf(Vector2i.ZERO),
+    World.Environment.NORMAL to listOf(
+        Vector2i(0, 0),
+        Vector2i(0, -25000),
+        Vector2i(25000, -25000),
+        Vector2i(-25000, -25000),
+        Vector2i(0, 25000),
+        Vector2i(25000, 25000),
+        Vector2i(-25000, 25000),
+        Vector2i(25000, 0),
+        Vector2i(-25000, 0)
+    )
+)
 
 fun Location.getProtectionPricePerBlock(): PricePerBlockResult {
-    val spawns = when (this.bukkitWorld.environment) {
-        World.Environment.NETHER -> {
-            listOf(
-                Vector(0.0, 0.0, 0.0),
-                Vector(0.0, 0.0, -3125.0),
-                Vector(3125.0, 0.0, -3125.0),
-                Vector(-3125.0, 0.0, -3125.0),
-                Vector(0.0, 0.0, 3125.0),
-                Vector(3125.0, 0.0, 3125.0),
-                Vector(-3125.0, 0.0, 3125.0),
-                Vector(3125.0, 0.0, 0.0),
-                Vector(-3125.0, 0.0, 0.0)
-            )
-        }
+    val environment = this.bukkitWorld.environment
+    val spawns = spawnPositionsByEnvironment[environment] ?: return PricePerBlockResult.EMPTY
+    val pos = Vector2i(blockX, blockZ)
 
-        World.Environment.THE_END -> {
-            listOf(
-                Vector(0.0, 0.0, 0.0)
-            )
-        }
-
-        else -> {
-            listOf(
-                Vector(0.0, 0.0, 0.0),
-                Vector(0.0, 0.0, -25000.0),
-                Vector(25000.0, 0.0, -25000.0),
-                Vector(-25000.0, 0.0, -25000.0),
-                Vector(0.0, 0.0, 25000.0),
-                Vector(25000.0, 0.0, 25000.0),
-                Vector(-25000.0, 0.0, 25000.0),
-                Vector(25000.0, 0.0, 0.0),
-                Vector(-25000.0, 0.0, 0.0)
-            )
-        }
-    }
-
-    val pos = Vector(blockX.toDouble(), 0.0, blockZ.toDouble())
-
-    val nearestSpawn = spawns.minBy {
-        pos.distance(it)
-    }
-
+    val nearestSpawn = spawns.minBy { pos.distanceSquared(it) }
     val distance = pos.distance(nearestSpawn)
 
     if (distance < config.pricing.spawnProtectionPerBlock) {
         return PricePerBlockResult(Double.MAX_VALUE, distance)
     }
 
-    val multiplier = when (this.bukkitWorld.environment) {
-        World.Environment.NORMAL -> 1.0
-        else -> 2.5
-    }
+    val multiplier = config.pricing.environmentMultiplier[environment] ?: 1.0
 
     return PricePerBlockResult(
         Mth.calculatePricePerBlock(distance) * multiplier,
@@ -69,5 +55,9 @@ fun Location.getProtectionPricePerBlock(): PricePerBlockResult {
 
 data class PricePerBlockResult(
     val pricePerBlock: Double,
-    val spawnDistance: Double
-)
+    val spawnDistance: Float
+) {
+    companion object {
+        val EMPTY = PricePerBlockResult(Double.MAX_VALUE, Float.MAX_VALUE)
+    }
+}

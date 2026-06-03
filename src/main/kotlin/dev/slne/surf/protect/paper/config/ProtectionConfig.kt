@@ -3,6 +3,7 @@ package dev.slne.surf.protect.paper.config
 import dev.slne.surf.api.paper.extensions.server
 import dev.slne.surf.transaction.api.currency.Currency
 import org.bukkit.Location
+import org.bukkit.World
 import org.bukkit.block.BlockType
 import org.bukkit.block.data.BlockData
 import org.bukkit.inventory.ItemStack
@@ -73,7 +74,11 @@ data class ProtectionConfig(
     data class PricingSettings(
         val minPerBlock: Double = 4.0,
         val spawnProtectionPerBlock: Double = 200.0,
-        val discountPercent: Int = 20
+        val discountPercent: Int = 20,
+        val environmentMultiplier: Map<World.Environment, Double> = mapOf(
+            World.Environment.NORMAL to 1.0,
+            World.Environment.NETHER to 2.5,
+        )
     ) {
         val discountModifier: Double
             get() = 1.0 - (discountPercent / 100.0)

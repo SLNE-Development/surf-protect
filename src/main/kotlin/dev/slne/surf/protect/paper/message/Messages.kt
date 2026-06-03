@@ -231,7 +231,7 @@ object Messages {
             effectiveCost: Double,
             currency: Currency,
             pricePerBlock: Double,
-            distanceToSpawn: Double,
+            distanceToSpawn: Float,
             discountFactor: Double = 1.0
         ) = buildText {
             val distanceToSpawn = (distanceToSpawn * 100).roundToInt() / 100.0
