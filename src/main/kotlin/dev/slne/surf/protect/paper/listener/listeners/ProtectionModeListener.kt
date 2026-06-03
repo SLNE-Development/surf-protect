@@ -196,7 +196,7 @@ object ProtectionModeListener : Listener {
         .contains("SHULKER_BOX")
         .contains("BARREL")
         .contains("BEACON")
-        .contains("BED")
+        .contains("BED").not(Material.BEDROCK) // BEDROCK is not a bed
         .contains("CAULDRON")
         .contains("COMPARATOR")
         .contains("DAYLIGHT_DETECTOR")
