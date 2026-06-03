@@ -197,6 +197,11 @@ object Messages {
             error("Bitte gedulde dich einen Moment.")
         }
 
+        val canOnlyProtectAboveNetherRoofInNether = buildText { // TODO: better message
+            appendErrorPrefix()
+            error("Du kannst nur über dem Nether-Dach schützen.")
+        }
+
         /**
          * Generates a message indicating how many more markers need to be placed to meet the minimum required amount.
          *
@@ -231,7 +236,7 @@ object Messages {
             effectiveCost: Double,
             currency: Currency,
             pricePerBlock: Double,
-            distanceToSpawn: Double,
+            distanceToSpawn: Float,
             discountFactor: Double = 1.0
         ) = buildText {
             val distanceToSpawn = (distanceToSpawn * 100).roundToInt() / 100.0
