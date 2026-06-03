@@ -211,5 +211,6 @@ object ProtectionModeListener : Listener {
         .add(Material.REPEATER)
         .add(Material.OBSERVER)
         .add(Material.CHISELED_BOOKSHELF)
+        .add(Material.CRAFTER)
         .lock()
 }

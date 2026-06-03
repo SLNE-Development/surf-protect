@@ -31,7 +31,8 @@ data class ProtectionConfig(
     data class ProtectionSettings(
         val maxDistanceFromStart: Double = 100.0,
         val retailPercent: Int = 65,
-        val renamePrice: Int = 2_500
+        val renamePrice: Int = 2_500,
+        val protectOnlyAboveNetherRoofInNether: Boolean = true,
     ) {
         val retailModifier: Double
             get() = retailPercent / 100.0

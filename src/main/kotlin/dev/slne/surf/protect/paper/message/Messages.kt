@@ -197,6 +197,11 @@ object Messages {
             error("Bitte gedulde dich einen Moment.")
         }
 
+        val canOnlyProtectAboveNetherRoofInNether = buildText { // TODO: better message
+            appendErrorPrefix()
+            error("Du kannst nur über dem Nether-Dach schützen.")
+        }
+
         /**
          * Generates a message indicating how many more markers need to be placed to meet the minimum required amount.
          *
