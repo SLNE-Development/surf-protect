@@ -212,7 +212,7 @@ class ProtectionRegion(
             region = ProtectedPolygonalRegion(
                 name,
                 vectors,
-                if (config.protection.protectOnlyAboveNetherRoofInNether) world.logicalHeight else world.minHeight,
+                if (world.environment == World.Environment.NETHER && config.protection.protectOnlyAboveNetherRoofInNether) world.logicalHeight else world.minHeight,
                 world.maxHeight - 1
             )
             region.owners.addPlayer(protectionUser.localPlayer)
