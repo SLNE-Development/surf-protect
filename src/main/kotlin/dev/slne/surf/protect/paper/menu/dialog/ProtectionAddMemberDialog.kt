@@ -1,92 +1,87 @@
 package dev.slne.surf.protect.paper.menu.dialog
 
 import dev.slne.surf.api.core.messages.adventure.sendText
-import dev.slne.surf.api.paper.dialog.search.searchDialog
-import dev.slne.surf.api.paper.inventory.framework.viewFrame
+import dev.slne.surf.api.paper.dialog.base
+import dev.slne.surf.api.paper.dialog.dialog
+import dev.slne.surf.api.paper.dialog.type
 import dev.slne.surf.protect.paper.menu.util.protectColored
-import dev.slne.surf.protect.paper.menu.view.members.ProtectionMemberListView
 import dev.slne.surf.protect.paper.region.info.RegionInfo
 import dev.slne.surf.protect.paper.region.visual.visualizer.ProtectionVisualizerManager
+import io.papermc.paper.registry.data.dialog.DialogBase
 import org.bukkit.Bukkit
-import org.bukkit.entity.Player
+
 
 @Suppress("UnstableApiUsage")
-fun protectionAddMemberDialog(protection: RegionInfo) = searchDialog(
-    title = {
-        protectColored("Spieler hinzufügen...")
-    },
-    searchInput = {
-
-    },
-    body = {
-        plainMessage {
-            protectColored("Gib den Namen des Spielers ein, den du hinzufügen möchtest.")
-            appendNewline()
-            error("Der Spieler muss bereits einmal auf diesem Server gespielt haben, damit er hinzugefügt werden kann.")
+fun protectionAddMemberDialog(protection: RegionInfo, afterAdd: () -> Unit) = dialog {
+    base {
+        afterAction(DialogBase.DialogAfterAction.CLOSE)
+        title {
+            protectColored("Spieler hinzufügen...")
         }
-    },
-    onSearch = { player, query ->
-        handleAdd(player, query, protection)
-    },
-    onClose = { player, query ->
-        handleAdd(player, query, protection)
-    }
-)
 
-private fun handleAdd(player: Player, playerName: String, protection: RegionInfo) {
-    if (playerName.isEmpty() || playerName.isBlank() || playerName.length > 16) {
-        player.sendText {
-            appendErrorPrefix()
-            error("Der Spielername ist ungültig.")
+        body {
+            plainMessage {
+                protectColored("Gib den Namen des Spielers ein, den du hinzufügen möchtest.")
+                appendNewline()
+                error("Der Spieler muss bereits einmal auf diesem Server gespielt haben, damit er hinzugefügt werden kann.")
+            }
         }
-        player.closeDialog()
-        viewFrame.open(
-            ProtectionMemberListView::class.java,
-            player,
-            mapOf("protection" to protection)
-        )
-        return
-    }
 
-
-    val target = Bukkit.getOfflinePlayer(playerName)
-
-    if (!target.hasPlayedBefore()) {
-        player.sendText {
-            appendErrorPrefix()
-            error("Der Spieler wurde nicht gefunden.")
+        input {
+            text("player_name") {
+                label { text("Spielername") }
+                maxLength(16)
+            }
         }
-        player.closeDialog()
-        viewFrame.open(
-            ProtectionMemberListView::class.java,
-            player,
-            mapOf("protection" to protection)
-        )
-        return
     }
 
-    if (protection.members.map { it.uniqueId }.contains(target.uniqueId)) {
-        player.sendText {
-            appendErrorPrefix()
-            error("Der Spieler ist bereits Mitglied dieses Grundstücks.")
+    type {
+        confirmation {
+            no {
+                label { error("Abbrechen") }
+            }
+            yes {
+                label { success("Hinzufügen") }
+                action {
+                    customClick { context, audience ->
+                        val playerName = context.getText("player_name") ?: ""
+
+                        if (playerName.isEmpty() || playerName.isBlank() || playerName.length > 16) {
+                            audience.sendText {
+                                appendErrorPrefix()
+                                error("Der Spielername ist ungültig.")
+                            }
+                            return@customClick
+                        }
+
+                        val offlinePlayer = Bukkit.getOfflinePlayer(playerName)
+                        if (!offlinePlayer.hasPlayedBefore()) {
+                            audience.sendText {
+                                appendErrorPrefix()
+                                error("Der Spieler wurde nicht gefunden.")
+                            }
+                            return@customClick
+                        }
+
+                        if (protection.region.members.contains(offlinePlayer.uniqueId)) {
+                            audience.sendText {
+                                appendErrorPrefix()
+                                error("Der Spieler ist bereits Mitglied dieses Grundstücks.")
+                            }
+                            return@customClick
+                        }
+
+                        protection.region.members.addPlayer(offlinePlayer.uniqueId)
+                        ProtectionVisualizerManager.onRegionMemberChange(protection.region)
+
+                        audience.sendText {
+                            appendSuccessPrefix()
+                            success("Der Spieler wurde erfolgreich als Mitglied hinzugefügt.")
+                        }
+                        afterAdd()
+                    }
+                }
+            }
         }
-        player.closeDialog()
-        viewFrame.open(
-            ProtectionMemberListView::class.java,
-            player,
-            mapOf("protection" to protection)
-        )
-        return
     }
-
-    protection.region.members.addPlayer(target.uniqueId)
-    ProtectionVisualizerManager.onRegionMemberChange(protection.region)
-
-    player.sendText {
-        appendSuccessPrefix()
-        success("Der Spieler wurde erfolgreich als Mitglied hinzugefügt.")
-    }
-
-    player.closeDialog()
-    viewFrame.open(ProtectionMemberListView::class.java, player, mapOf("protection" to protection))
 }

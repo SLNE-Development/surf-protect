@@ -4,20 +4,17 @@ import com.github.shynixn.mccoroutine.folia.SuspendingJavaPlugin
 import com.github.shynixn.mccoroutine.folia.launch
 import com.github.shynixn.mccoroutine.folia.regionDispatcher
 import dev.slne.surf.api.paper.hook.papi.SurfPaperPAPIHook
-import dev.slne.surf.api.paper.inventory.framework.viewFrame
+import dev.slne.surf.api.paper.inventory.framework.register
 import dev.slne.surf.api.paper.util.chunkX
 import dev.slne.surf.api.paper.util.chunkZ
 import dev.slne.surf.protect.paper.command.CommandManager
 import dev.slne.surf.protect.paper.config.ProtectionConfigManager
 import dev.slne.surf.protect.paper.listener.ListenerManager
-import dev.slne.surf.protect.paper.menu.view.ProtectionInfoView
-import dev.slne.surf.protect.paper.menu.view.ProtectionMainView
-import dev.slne.surf.protect.paper.menu.view.flags.ProtectionEditFlagsViewA
-import dev.slne.surf.protect.paper.menu.view.flags.ProtectionEditFlagsViewB
-import dev.slne.surf.protect.paper.menu.view.list.ProtectionListView
-import dev.slne.surf.protect.paper.menu.view.members.ProtectionMemberListView
-import dev.slne.surf.protect.paper.menu.view.members.ProtectionMemberRemoveConfirmView
-import dev.slne.surf.protect.paper.menu.view.sell.ProtectionSellConfirmView
+import dev.slne.surf.protect.paper.menu.view.flags.protectionEditFlagsView
+import dev.slne.surf.protect.paper.menu.view.list.protectionListView
+import dev.slne.surf.protect.paper.menu.view.members.protectionMemberListView
+import dev.slne.surf.protect.paper.menu.view.protectionInfoView
+import dev.slne.surf.protect.paper.menu.view.protectionMainView
 import dev.slne.surf.protect.paper.papi.PapiExpansion
 import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry
 import dev.slne.surf.protect.paper.user.ProtectionUserManager
@@ -30,14 +27,11 @@ class PaperMain : SuspendingJavaPlugin() {
     override suspend fun onLoadAsync() {
         ProtectionFlagsRegistry.registerFlags()
 
-        viewFrame.with(ProtectionEditFlagsViewA)
-        viewFrame.with(ProtectionEditFlagsViewB)
-        viewFrame.with(ProtectionListView)
-        viewFrame.with(ProtectionMemberListView)
-        viewFrame.with(ProtectionMemberRemoveConfirmView)
-        viewFrame.with(ProtectionSellConfirmView)
-        viewFrame.with(ProtectionInfoView)
-        viewFrame.with(ProtectionMainView)
+        protectionMainView.register()
+        protectionInfoView.register()
+        protectionEditFlagsView.register()
+        protectionListView.register()
+        protectionMemberListView.register()
     }
 
     override suspend fun onEnableAsync() {
