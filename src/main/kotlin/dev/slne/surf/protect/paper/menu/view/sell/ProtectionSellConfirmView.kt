@@ -122,7 +122,7 @@ fun protectionSellConfirmationDialog(regionInfo: RegionInfo, afterSell: () -> Un
                                         }
                                         body {
                                             plainMessage {
-                                                success("Du hast dein Gründstück erfolgreich für ")
+                                                success("Du hast dein Grundstück erfolgreich für ")
                                                 append(result.transaction.currency.format(result.transaction.amount))
                                                 success(" verkauft!")
                                             }
