@@ -130,7 +130,7 @@ private fun handleRename(player: Player, newName: String, protection: RegionInfo
 
         val result = transactionUser.withdraw(
             config.protection.renamePrice.toBigDecimal(),
-            Currency.default()
+            config.currency.currency
         )
 
         when (result) {

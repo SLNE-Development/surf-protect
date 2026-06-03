@@ -9,6 +9,7 @@ import dev.slne.surf.api.core.messages.adventure.appendNewline
 import dev.slne.surf.api.core.messages.adventure.text
 import dev.slne.surf.api.paper.dialog.*
 import dev.slne.surf.api.paper.nms.NmsUseWithCaution
+import dev.slne.surf.protect.paper.config
 import dev.slne.surf.protect.paper.menu.util.playYesSound
 import dev.slne.surf.protect.paper.menu.util.protectColored
 import dev.slne.surf.protect.paper.menu.util.renderRegionInformation
@@ -90,7 +91,7 @@ fun protectionSellConfirmationDialog(regionInfo: RegionInfo, afterSell: () -> Un
                                 .transactionUser
                                 .deposit(
                                     regionInfo.retailPrice.roundToInt().toBigDecimal(),
-                                    Currency.default()
+                                    config.currency.currency
                                 )
 
                             if (!result.success) {
