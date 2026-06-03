@@ -1,8 +1,10 @@
 package dev.slne.surf.protect.paper.config
 
+import dev.slne.surf.api.core.config.constraints.Range
 import dev.slne.surf.api.paper.extensions.server
 import dev.slne.surf.transaction.api.currency.Currency
 import org.bukkit.Location
+import org.bukkit.World
 import org.bukkit.block.BlockType
 import org.bukkit.block.data.BlockData
 import org.bukkit.inventory.ItemStack
@@ -30,7 +32,8 @@ data class ProtectionConfig(
     data class ProtectionSettings(
         val maxDistanceFromStart: Double = 100.0,
         val retailPercent: Int = 65,
-        val renamePrice: Int = 2_500
+        val renamePrice: Int = 2_500,
+        val protectOnlyAboveNetherRoofInNether: Boolean = true,
     ) {
         val retailModifier: Double
             get() = retailPercent / 100.0
@@ -73,21 +76,24 @@ data class ProtectionConfig(
     data class PricingSettings(
         val minPerBlock: Double = 4.0,
         val spawnProtectionPerBlock: Double = 200.0,
-        val discountPercent: Int = 20
+
+        @Range(min = 0.0, max = 100.0)
+        val discountPercent: Int = 20,
+
+        val environmentMultiplier: Map<World.Environment, Double> = mapOf(
+            World.Environment.NORMAL to 1.0,
+            World.Environment.NETHER to 2.5,
+        )
     ) {
         val discountModifier: Double
             get() = 1.0 - (discountPercent / 100.0)
-
-        init {
-            require(discountPercent in 0..100) { "Discount percent must be between 0 and 100" }
-        }
     }
 
     @ConfigSerializable
     data class CurrencyConfig(
         val name: String = "CastCoin"
     ) {
-        val currency: Currency = Currency[name] ?: error("Currency with name '$name' not found")
+        val currency: Currency get() = Currency[name] ?: error("Currency with name '$name' not found")
     }
 
     @ConfigSerializable

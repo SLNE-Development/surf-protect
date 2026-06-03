@@ -44,6 +44,7 @@ import kotlinx.coroutines.withContext
 import org.apache.commons.lang3.RandomStringUtils
 import org.bukkit.Chunk
 import org.bukkit.ChunkSnapshot
+import org.bukkit.World
 import org.bukkit.block.data.BlockData
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -119,7 +120,15 @@ class ProtectionRegion(
     }
 
     fun createMarker(pos: BlockPosition, previousData: BlockData, isExpanding: Boolean): Marker? {
-        val candidate = Marker(WeakReference(player.world), this, pos, previousData)
+        val world = player.world
+        if (world.environment == World.Environment.NETHER && config.protection.protectOnlyAboveNetherRoofInNether) {
+            if (pos.y() < world.logicalHeight) {
+                player.sendMessage(Messages.Protecting.canOnlyProtectAboveNetherRoofInNether)
+                return null
+            }
+        }
+
+        val candidate = Marker(WeakReference(world), this, pos, previousData)
         if (!updateHullPreview(candidate)) return null
 
         // Check overlap state when not expanding
@@ -191,8 +200,8 @@ class ProtectionRegion(
             region = ProtectedPolygonalRegion(
                 expandingProtection.id,
                 vectors,
-                world.minHeight,
-                world.maxHeight - 1
+                expandingProtection.minimumPoint.y(),
+                expandingProtection.maximumPoint.y()
             )
             region.copyFrom(expandingProtection)
         } else {
@@ -203,7 +212,7 @@ class ProtectionRegion(
             region = ProtectedPolygonalRegion(
                 name,
                 vectors,
-                world.minHeight,
+                if (world.environment == World.Environment.NETHER && config.protection.protectOnlyAboveNetherRoofInNether) world.logicalHeight else world.minHeight,
                 world.maxHeight - 1
             )
             region.owners.addPlayer(protectionUser.localPlayer)

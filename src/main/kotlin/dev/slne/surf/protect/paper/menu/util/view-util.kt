@@ -123,6 +123,12 @@ fun createRegionItem(protection: RegionInfo, showMoreInfo: Boolean = true) =
             line {
                 appendBlob()
                 appendSpace()
+                white("Welt: ".toSmallCaps())
+                variableValue(protection.world?.key()?.asMinimalString()?.toSmallCaps() ?: "Unbekannt".toSmallCaps())
+            }
+            line {
+                appendBlob()
+                appendSpace()
                 white("Fläche: ".toSmallCaps())
                 variableValue("${blockFormat.format(protection.volume)} Blöcke".toSmallCaps())
             }
