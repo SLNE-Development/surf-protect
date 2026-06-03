@@ -6,7 +6,6 @@ import com.sk89q.worldguard.protection.flags.StateFlag
 import dev.slne.surf.api.core.font.toSmallCaps
 import dev.slne.surf.api.core.messages.Colors
 import dev.slne.surf.api.core.messages.adventure.appendNewline
-import dev.slne.surf.api.core.messages.adventure.sendText
 import dev.slne.surf.api.core.messages.adventure.text
 import dev.slne.surf.api.paper.dialog.*
 import dev.slne.surf.api.paper.nms.NmsUseWithCaution
@@ -19,6 +18,7 @@ import dev.slne.surf.protect.paper.region.info.RegionInfo
 import dev.slne.surf.protect.paper.region.visual.visualizer.ProtectionVisualizerManager
 import dev.slne.surf.protect.paper.user.protectionUser
 import dev.slne.surf.transaction.api.currency.Currency
+import dev.slne.surf.transaction.api.transaction.TransactionResult
 import io.papermc.paper.registry.data.dialog.DialogBase
 import kotlinx.coroutines.withContext
 import net.kyori.adventure.text.Component
@@ -64,20 +64,24 @@ fun protectionSellConfirmationDialog(regionInfo: RegionInfo, afterSell: () -> Un
                         val canSell = canSellState == StateFlag.State.ALLOW || canSellState == null
 
                         if (!canSell) {
-                            player.sendText {
-                                appendErrorPrefix()
-                                error("Dieses Grundstück kann nicht verkauft werden!")
-                            }
+                            player.showDialog(
+                                noticeDialog(
+                                    title = text("Verkauf nicht möglich", Colors.ERROR),
+                                    notice = text("Dieses Grundstück kann nicht verkauft werden!", Colors.ERROR)
+                                )
+                            )
                             return@playerCallback
                         }
 
                         val regionManager = regionInfo.regionManager
 
                         if (regionManager == null) {
-                            player.sendText {
-                                appendErrorPrefix()
-                                error("Dieses Grundstück existiert nicht mehr!")
-                            }
+                            player.showDialog(
+                                noticeDialog(
+                                    title = text("Fehler", Colors.ERROR),
+                                    notice = text("Dieses Grundstück existiert nicht mehr!", Colors.ERROR)
+                                )
+                            )
                             return@playerCallback
                         }
 
@@ -105,10 +109,36 @@ fun protectionSellConfirmationDialog(regionInfo: RegionInfo, afterSell: () -> Un
                             regionManager.removeRegion(region.id)
                             ProtectionVisualizerManager.onRegionDeletion(region)
 
+                            if (result !is TransactionResult.Success) return@launch
+
                             withContext(plugin.entityDispatcher(player)) {
                                 player.playYesSound()
-                                player.clearDialogs(true)
-                                afterSell()
+                                player.showDialog(dialog {
+                                    base {
+                                        afterAction(DialogBase.DialogAfterAction.CLOSE)
+                                        preventClosingWithEscape()
+                                        title {
+                                            success("Grundstück verkauft!")
+                                        }
+                                        body {
+                                            plainMessage {
+                                                success("Du hast dein Gründstück erfolgreich für ")
+                                                append(result.transaction.currency.format(result.transaction.amount))
+                                                success(" verkauft!")
+                                            }
+                                        }
+                                    }
+                                    type {
+                                        notice {
+                                            label { translatable("gui.ok") }
+                                            action {
+                                                playerCallback {
+                                                    afterSell()
+                                                }
+                                            }
+                                        }
+                                    }
+                                })
                             }
                         }
                     }

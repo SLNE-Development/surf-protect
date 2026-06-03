@@ -5,7 +5,6 @@ import dev.slne.surf.api.paper.builder.buildLore
 import dev.slne.surf.api.paper.builder.displayName
 import dev.slne.surf.api.paper.extensions.server
 import dev.slne.surf.api.paper.inventory.framework.dsl.onItemClick
-import dev.slne.surf.api.paper.inventory.framework.dsl.renderWith
 import dev.slne.surf.api.paper.inventory.framework.dsl.slot
 import dev.slne.surf.api.paper.inventory.framework.dsl.withItem
 import dev.slne.surf.api.paper.inventory.framework.view.icon.ViewIconColor
@@ -57,7 +56,7 @@ val protectionMemberListView = paginatedSurfView("Mitglieder") {
                 }
             }
 
-            renderWith(ItemType.PLAYER_HEAD) {
+            withItem(ItemType.PLAYER_HEAD) {
                 displayName {
                     protectColored(profile.name ?: uuid.toString())
                 }
