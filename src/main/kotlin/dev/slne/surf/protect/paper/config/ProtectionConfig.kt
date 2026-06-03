@@ -1,5 +1,6 @@
 package dev.slne.surf.protect.paper.config
 
+import dev.slne.surf.api.core.config.constraints.PositiveNumber
 import dev.slne.surf.api.core.config.constraints.Range
 import dev.slne.surf.api.paper.extensions.server
 import dev.slne.surf.transaction.api.currency.Currency
@@ -33,6 +34,10 @@ data class ProtectionConfig(
         val maxDistanceFromStart: Double = 100.0,
         val retailPercent: Int = 65,
         val renamePrice: Int = 2_500,
+        @PositiveNumber
+        val minNameLength: Int = 3,
+        @PositiveNumber
+        val maxNameLength: Int = 22,
         val protectOnlyAboveNetherRoofInNether: Boolean = true,
     ) {
         val retailModifier: Double

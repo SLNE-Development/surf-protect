@@ -3,7 +3,6 @@ package dev.slne.surf.protect.paper.menu.dialog
 import com.github.shynixn.mccoroutine.folia.entityDispatcher
 import com.github.shynixn.mccoroutine.folia.launch
 import dev.slne.surf.api.core.messages.Colors
-import dev.slne.surf.api.core.messages.adventure.sendText
 import dev.slne.surf.api.core.messages.adventure.text
 import dev.slne.surf.api.core.util.toCharSet
 import dev.slne.surf.api.paper.dialog.*
@@ -38,13 +37,13 @@ fun protectionRenameDialog(protection: RegionInfo, afterRename: () -> Unit) = di
                     warning("!")
                 }
                 appendNewline {
-                    warning("Der Name darf maximal 22 Zeichen lang sein!")
+                    warning("Der Name muss zwischen ${config.protection.minNameLength} und ${config.protection.maxNameLength} Zeichen lang sein!")
                 }
             }
             input {
                 text("new_name") {
                     label { text("Neuer Name") }
-                    maxLength(22)
+                    maxLength(config.protection.maxNameLength)
                     initial(protection.name)
                 }
             }
@@ -77,11 +76,27 @@ private val chars = (('a'..'z') + ('A'..'Z') + ('0'..'9') + listOf(' ', '_', '-'
 @Suppress("UnstableApiUsage")
 @OptIn(NmsUseWithCaution::class)
 private fun handleRename(player: Player, newName: String, protection: RegionInfo, afterRename: () -> Unit) {
-    if (newName.length > 22) {
+    if (newName.length < config.protection.minNameLength) {
         player.showDialog(
             noticeDialog(
                 title = text("Ungültiger Name", Colors.ERROR),
-                notice = text("Der Name darf maximal 22 Zeichen lang sein!", Colors.ERROR)
+                notice = text(
+                    "Der Name muss mindestens ${config.protection.minNameLength} Zeichen lang sein!",
+                    Colors.ERROR
+                )
+            )
+        )
+        return
+    }
+
+    if (newName.length > config.protection.maxNameLength) {
+        player.showDialog(
+            noticeDialog(
+                title = text("Ungültiger Name", Colors.ERROR),
+                notice = text(
+                    "Der Name darf maximal ${config.protection.maxNameLength} Zeichen lang sein!",
+                    Colors.ERROR
+                )
             )
         )
         return
