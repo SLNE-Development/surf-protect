@@ -4,119 +4,146 @@ import com.github.shynixn.mccoroutine.folia.entityDispatcher
 import com.github.shynixn.mccoroutine.folia.launch
 import com.sk89q.worldguard.protection.flags.StateFlag
 import dev.slne.surf.api.core.font.toSmallCaps
-import dev.slne.surf.api.core.messages.adventure.sendText
-import dev.slne.surf.api.paper.builder.buildItem
-import dev.slne.surf.api.paper.builder.buildLore
-import dev.slne.surf.api.paper.builder.displayName
-import dev.slne.surf.api.paper.inventory.framework.titleBuilder
-import dev.slne.surf.protect.paper.menu.util.*
-import dev.slne.surf.protect.paper.menu.view.ProtectionInfoView
+import dev.slne.surf.api.core.messages.Colors
+import dev.slne.surf.api.core.messages.adventure.appendNewline
+import dev.slne.surf.api.core.messages.adventure.text
+import dev.slne.surf.api.paper.dialog.*
+import dev.slne.surf.api.paper.nms.NmsUseWithCaution
+import dev.slne.surf.protect.paper.config
+import dev.slne.surf.protect.paper.menu.util.playYesSound
+import dev.slne.surf.protect.paper.menu.util.protectColored
+import dev.slne.surf.protect.paper.menu.util.renderRegionInformation
 import dev.slne.surf.protect.paper.plugin
 import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry
 import dev.slne.surf.protect.paper.region.info.RegionInfo
 import dev.slne.surf.protect.paper.region.visual.visualizer.ProtectionVisualizerManager
 import dev.slne.surf.protect.paper.user.protectionUser
 import dev.slne.surf.transaction.api.currency.Currency
+import dev.slne.surf.transaction.api.transaction.TransactionResult
+import io.papermc.paper.registry.data.dialog.DialogBase
 import kotlinx.coroutines.withContext
-import me.devnatan.inventoryframework.View
-import me.devnatan.inventoryframework.ViewConfigBuilder
-import me.devnatan.inventoryframework.context.RenderContext
-import me.devnatan.inventoryframework.state.State
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.JoinConfiguration
 import net.kyori.adventure.text.format.TextDecoration
-import org.bukkit.Material
 import kotlin.math.roundToInt
 
 @Suppress("UnstableApiUsage")
-object ProtectionSellConfirmView : View() {
-    val protectionState: State<RegionInfo> = initialState("protection")
-
-    override fun onInit(config: ViewConfigBuilder) {
-        config
-            .titleBuilder {
-                protectColored("Grundstück - Verkaufen".toSmallCaps(), TextDecoration.BOLD)
-            }
-            .size(3)
-            .layout(
-                "OOOOOOOOO",
-                "ORCRIRYRO",
-                "OOOOOOOOO"
-            )
-            .cancelInteractions()
-    }
-
-    override fun onFirstRender(render: RenderContext) {
-        render.layoutSlot('O', outlineItem)
-        render.layoutSlot('I', createRegionItem(protectionState.get(render), false))
-        render.layoutSlot('C', cancelItem).onClick { click ->
-            click.playGeneralClickSound()
-            click.openForPlayer(
-                ProtectionInfoView::class.java,
-                mapOf("protection" to protectionState.get(render))
-            )
+@OptIn(NmsUseWithCaution::class)
+fun protectionSellConfirmationDialog(regionInfo: RegionInfo, afterSell: () -> Unit) = dialog {
+    base {
+        afterAction(DialogBase.DialogAfterAction.WAIT_FOR_RESPONSE)
+        title {
+            protectColored("Grundstück — Verkaufen".toSmallCaps(), TextDecoration.BOLD)
         }
-        render.layoutSlot('Y', confirmItem).onClick { click ->
-            click.playGeneralClickSound()
-            val protection = protectionState.get(click)
-
-            val region = protection.region
-            val canSellState = region.getFlag(ProtectionFlagsRegistry.SURF_CAN_SELL_FLAG)
-            val canSell = canSellState == StateFlag.State.ALLOW || canSellState == null
-
-            if (!canSell) {
-                click.player.sendText {
-                    appendErrorPrefix()
-                    error("Dieses Grundstück kann nicht verkauft werden!")
-                }
-                return@onClick
-            }
-
-            val regionManager = protection.regionManager
-
-            if (regionManager == null) {
-                click.player.sendText {
-                    appendErrorPrefix()
-                    error("Dieses Grundstück existiert nicht mehr!")
-                }
-                return@onClick
-            }
-
-            plugin.launch {
-                click.player.protectionUser().transactionUser.deposit(
-                    protection.retailPrice.roundToInt().toBigDecimal(),
-                    Currency.default()
-                )
-
-                regionManager.removeRegion(region.id)
-                ProtectionVisualizerManager.onRegionDeletion(region)
-
-                withContext(plugin.entityDispatcher(click.player)) {
-                    click.closeForPlayer()
-                    click.playYesSound()
-                }
+        body {
+            plainMessage {
+                warning("Bist du dir sicher, dass du das Grundstück ")
+                variableValue(regionInfo.name)
+                warning(" verkaufen willst?")
+                appendNewline(2)
+                append(Component.join(JoinConfiguration.newlines(), renderRegionInformation(regionInfo, false)))
             }
         }
     }
 
-    private val cancelItem = buildItem(Material.RED_STAINED_GLASS_PANE) {
-        displayName {
-            error("Abbrechen".toSmallCaps(), TextDecoration.BOLD)
-        }
-
-        buildLore {
-            line {
-                darkSpacer("Klicke, um den Verkauf abzubrechen".toSmallCaps())
+    type {
+        confirmation {
+            no {
+                label { error("Abbrechen") }
+                action {
+                    playerCallback {
+                        it.clearDialogs(true)
+                    }
+                }
             }
-        }
-    }
+            yes {
+                label { success("Verkaufen") }
+                action {
+                    playerCallback { player ->
+                        val region = regionInfo.region
+                        val canSellState = region.getFlag(ProtectionFlagsRegistry.SURF_CAN_SELL_FLAG)
+                        val canSell = canSellState == StateFlag.State.ALLOW || canSellState == null
 
-    private val confirmItem = buildItem(Material.GREEN_STAINED_GLASS_PANE) {
-        displayName {
-            success("Bestätigen".toSmallCaps(), TextDecoration.BOLD)
-        }
+                        if (!canSell) {
+                            player.showDialog(
+                                noticeDialog(
+                                    title = text("Verkauf nicht möglich", Colors.ERROR),
+                                    notice = text("Dieses Grundstück kann nicht verkauft werden!", Colors.ERROR)
+                                )
+                            )
+                            return@playerCallback
+                        }
 
-        buildLore {
-            line {
-                darkSpacer("Klicke, um das Grundstück zu verkaufen".toSmallCaps())
+                        val regionManager = regionInfo.regionManager
+
+                        if (regionManager == null) {
+                            player.showDialog(
+                                noticeDialog(
+                                    title = text("Fehler", Colors.ERROR),
+                                    notice = text("Dieses Grundstück existiert nicht mehr!", Colors.ERROR)
+                                )
+                            )
+                            return@playerCallback
+                        }
+
+                        plugin.launch {
+                            val result = player.protectionUser()
+                                .transactionUser
+                                .deposit(
+                                    regionInfo.retailPrice.roundToInt().toBigDecimal(),
+                                    config.currency.currency
+                                )
+
+                            if (!result.success) {
+                                player.showDialog(
+                                    noticeDialog(
+                                        text("Ein Fehler ist aufgetreten", Colors.ERROR),
+                                        text(
+                                            "Bei dem Verkauf des Grundstücks ist ein Fehler aufgetreten!",
+                                            Colors.ERROR
+                                        )
+                                    )
+                                )
+                                return@launch
+                            }
+
+                            regionManager.removeRegion(region.id)
+                            ProtectionVisualizerManager.onRegionDeletion(region)
+
+                            if (result !is TransactionResult.Success) return@launch
+
+                            withContext(plugin.entityDispatcher(player)) {
+                                player.playYesSound()
+                                player.showDialog(dialog {
+                                    base {
+                                        afterAction(DialogBase.DialogAfterAction.CLOSE)
+                                        preventClosingWithEscape()
+                                        title {
+                                            success("Grundstück verkauft!")
+                                        }
+                                        body {
+                                            plainMessage {
+                                                success("Du hast dein Grundstück erfolgreich für ")
+                                                append(result.transaction.currency.format(result.transaction.amount))
+                                                success(" verkauft!")
+                                            }
+                                        }
+                                    }
+                                    type {
+                                        notice {
+                                            label { translatable("gui.ok") }
+                                            action {
+                                                playerCallback {
+                                                    afterSell()
+                                                }
+                                            }
+                                        }
+                                    }
+                                })
+                            }
+                        }
+                    }
+                }
             }
         }
     }
