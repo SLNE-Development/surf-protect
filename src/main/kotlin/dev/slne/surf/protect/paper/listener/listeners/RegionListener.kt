@@ -115,8 +115,10 @@ object RegionListener : Listener {
             ?.firstOrNull()
             ?: return
 
-        val ownerUuid =
-            minecart.persistentDataContainer.get(creator, DataType.UUID) ?: return
+        val ownerUuid = minecart.persistentDataContainer.get(creator, DataType.UUID) ?: run {
+            event.isCancelled = false
+            return
+        }
 
         val allowed =
             protection.members.contains(ownerUuid) ||
