@@ -8,6 +8,8 @@ import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry
 import dev.slne.surf.protect.paper.util.fixedVolume
 import dev.slne.surf.protect.paper.util.getRegionManagerOrNull
 import dev.slne.surf.protect.paper.util.toLocalPlayer
+import org.bukkit.Bukkit
+import org.bukkit.World
 
 
 data class RegionInfo(val region: ProtectedRegion) {
@@ -21,6 +23,7 @@ data class RegionInfo(val region: ProtectedRegion) {
     val regionManager get() = region.getRegionManagerOrNull()
     val owners get() = region.owners.uniqueIds.mapTo(mutableObjectListOf()) { it.toLocalPlayer() }
     val members get() = region.members.uniqueIds.mapTo(mutableObjectListOf()) { it.toLocalPlayer() }
+    val world: World? get() = regionManager?.name?.let { Bukkit.getWorld(it) }
 
     init {
         val flagInfo = region.getFlag(ProtectionFlagsRegistry.SURF_PROTECT_FLAG)

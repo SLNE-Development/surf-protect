@@ -1,96 +1,35 @@
 package dev.slne.surf.protect.paper.menu.view.list
 
-import dev.slne.surf.api.core.font.toSmallCaps
-import dev.slne.surf.api.paper.inventory.framework.titleBuilder
-import dev.slne.surf.protect.paper.menu.util.*
-import dev.slne.surf.protect.paper.menu.view.ProtectionInfoView
-import dev.slne.surf.protect.paper.menu.view.ProtectionMainView
+import dev.slne.surf.api.paper.inventory.framework.dsl.onItemClick
+import dev.slne.surf.api.paper.inventory.framework.dsl.openForPlayer
+import dev.slne.surf.api.paper.inventory.framework.view.icon.ViewIconType
+import dev.slne.surf.api.paper.inventory.framework.view.layoutTarget
+import dev.slne.surf.api.paper.inventory.framework.view.paginatedSurfView
+import dev.slne.surf.api.paper.inventory.framework.view.pagination.pagination
+import dev.slne.surf.api.paper.inventory.framework.view.settings
+import dev.slne.surf.api.paper.inventory.framework.view.settings.PaginationViewRows
+import dev.slne.surf.protect.paper.menu.util.createRegionItem
+import dev.slne.surf.protect.paper.menu.util.playGeneralClickSound
+import dev.slne.surf.protect.paper.menu.view.ProtectionViewConstants
+import dev.slne.surf.protect.paper.menu.view.protectionInfoView
 import dev.slne.surf.protect.paper.region.info.RegionInfo
 import dev.slne.surf.protect.paper.user.protectionUser
 import dev.slne.surf.protect.paper.util.allRegions
-import me.devnatan.inventoryframework.View
-import me.devnatan.inventoryframework.ViewConfigBuilder
-import me.devnatan.inventoryframework.component.Pagination
-import me.devnatan.inventoryframework.context.RenderContext
-import me.devnatan.inventoryframework.state.State
-import net.kyori.adventure.text.format.TextDecoration
 
-@Suppress("UnstableApiUsage")
-object ProtectionListView : View() {
-    private val paginationState: State<Pagination> =
-        buildLazyPaginationState { context ->
-            context.player.protectionUser().localPlayer.allRegions()
-                .map { RegionInfo(it) }.toMutableList()
-        }.elementFactory { _, builder, _, protection ->
-            builder.renderWith {
-                createRegionItem(protection)
-            }
-                .onClick { context ->
-                    context.playGeneralClickSound()
-                    context.openForPlayer(
-                        ProtectionInfoView::class.java,
-                        mapOf("protection" to protection)
-                    )
-                }
-        }.layoutTarget('R').build()
-
-    override fun onInit(config: ViewConfigBuilder) {
-        config
-            .titleBuilder {
-                protectColored("Deine Grundstücke".toSmallCaps(), TextDecoration.BOLD)
-            }
-            .size(5)
-            .layout(
-                "OOOOOOOOO",
-                "ORRRRRRRO",
-                "ORRRRRRRO",
-                "ORRRRRRRO",
-                "OOPOBONOO"
-            )
-            .cancelInteractions()
+val protectionListView = paginatedSurfView("Grundstuecke") {
+    settings {
+        paginationViewRows(PaginationViewRows.THREE)
     }
 
-    override fun onFirstRender(render: RenderContext) {
-        val pagination = paginationState.get(render)
-
-        render.layoutSlot('B', backItem).onClick { context ->
-            context.openForPlayer(ProtectionMainView::class.java)
+    layoutTarget('R')
+    pagination {
+        lazySource { it.player.protectionUser().localPlayer.allRegions().map(::RegionInfo) }
+        itemFactory { regionInfo ->
+            withItem(createRegionItem(regionInfo))
+            onItemClick {
+                playGeneralClickSound()
+                openForPlayer(protectionInfoView, mapOf(ProtectionViewConstants.REGION_INFO_STATE to regionInfo))
+            }
         }
-
-        render.layoutSlot('O', outlineItem)
-
-        render
-            .layoutSlot('P')
-            .watch(paginationState)
-            .renderWith {
-                if (pagination.canBack()) {
-                    backItem
-                } else {
-                    outlineItem
-                }
-            }
-            .onClick { context ->
-                if (pagination.canBack()) {
-                    pagination.back()
-                    context.playNewPageSound()
-                }
-            }
-
-        render
-            .layoutSlot('N')
-            .watch(paginationState)
-            .renderWith {
-                if (pagination.canAdvance()) {
-                    nextItem
-                } else {
-                    outlineItem
-                }
-            }
-            .onClick { context ->
-                if (pagination.canAdvance()) {
-                    pagination.advance()
-                    context.playNewPageSound()
-                }
-            }
     }
 }
