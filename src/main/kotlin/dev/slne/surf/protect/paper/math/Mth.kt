@@ -48,7 +48,7 @@ object Mth {
     }
 
     @JvmStatic
-    fun calculatePricePerBlock(distance: Float): Double {
+    fun calculatePricePerBlock(distance: Double): Double {
         val raw = PRICE_GRADIENT * distance + PRICE_INTERCEPT
         val rounded = (raw * 100.0).roundToInt() / 100.0
         return max(config.pricing.minPerBlock, rounded)
@@ -105,7 +105,7 @@ object Mth {
     data class EffectiveCostResult(
         val effectiveCost: Double,
         val pricePerBlock: Double,
-        val spawnDistance: Float,
+        val spawnDistance: Double,
         val discountFactor: Double = 1.0
     ) {
         val hasDiscount: Boolean get() = discountFactor < 1.0

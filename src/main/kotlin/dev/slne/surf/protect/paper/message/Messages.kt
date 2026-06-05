@@ -9,8 +9,8 @@ import dev.slne.surf.protect.paper.util.castCoinFormat
 import dev.slne.surf.transaction.api.currency.Currency
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextDecoration
+import java.util.*
 import kotlin.math.roundToInt
-import java.util.Locale
 
 /**
  * The Messages object serves as a container for various predefined message and text utilities.
@@ -236,7 +236,7 @@ object Messages {
             effectiveCost: Double,
             currency: Currency,
             pricePerBlock: Double,
-            distanceToSpawn: Float,
+            distanceToSpawn: Double,
             discountFactor: Double = 1.0
         ) = buildText {
             val distanceToSpawn = (distanceToSpawn * 100).roundToInt() / 100.0

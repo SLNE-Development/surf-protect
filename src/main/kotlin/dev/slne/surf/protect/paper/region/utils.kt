@@ -5,41 +5,45 @@ import dev.slne.surf.protect.paper.config
 import dev.slne.surf.protect.paper.math.Mth
 import dev.slne.surf.protect.paper.util.bukkitWorld
 import org.bukkit.World
-import org.spongepowered.math.vector.Vector2i
+import org.spongepowered.math.vector.Vector2l
 
 private val spawnPositionsByEnvironment = mapOf(
     World.Environment.NETHER to listOf(
-        Vector2i(0, 0),
-        Vector2i(0, -3125),
-        Vector2i(3125, -3125),
-        Vector2i(-3125, -3125),
-        Vector2i(0, 3125),
-        Vector2i(3125, 3125),
-        Vector2i(-3125, 3125),
-        Vector2i(3125, 0),
-        Vector2i(-3125, 0)
+        Vector2l(0, 0),
+        Vector2l(0, -3125),
+        Vector2l(3125, -3125),
+        Vector2l(-3125, -3125),
+        Vector2l(0, 3125),
+        Vector2l(3125, 3125),
+        Vector2l(-3125, 3125),
+        Vector2l(3125, 0),
+        Vector2l(-3125, 0)
     ),
-    World.Environment.THE_END to listOf(Vector2i.ZERO),
+    World.Environment.THE_END to listOf(Vector2l.ZERO),
     World.Environment.NORMAL to listOf(
-        Vector2i(0, 0),
-        Vector2i(0, -25000),
-        Vector2i(25000, -25000),
-        Vector2i(-25000, -25000),
-        Vector2i(0, 25000),
-        Vector2i(25000, 25000),
-        Vector2i(-25000, 25000),
-        Vector2i(25000, 0),
-        Vector2i(-25000, 0)
+        Vector2l(0, 0),
+        Vector2l(0, -25000),
+        Vector2l(25000, -25000),
+        Vector2l(-25000, -25000),
+        Vector2l(0, 25000),
+        Vector2l(25000, 25000),
+        Vector2l(-25000, 25000),
+        Vector2l(25000, 0),
+        Vector2l(-25000, 0)
     )
 )
 
 fun Location.getProtectionPricePerBlock(): PricePerBlockResult {
     val environment = this.bukkitWorld.environment
     val spawns = spawnPositionsByEnvironment[environment] ?: return PricePerBlockResult.EMPTY
-    val pos = Vector2i(blockX, blockZ)
+    val pos = Vector2l(blockX.toLong(), blockZ.toLong())
 
     val nearestSpawn = spawns.minBy { pos.distanceSquared(it) }
     val distance = pos.distance(nearestSpawn)
+
+    if (!distance.isFinite()) {
+        return PricePerBlockResult.EMPTY
+    }
 
     if (distance < config.pricing.spawnProtectionPerBlock) {
         return PricePerBlockResult(Double.MAX_VALUE, distance)
@@ -55,9 +59,9 @@ fun Location.getProtectionPricePerBlock(): PricePerBlockResult {
 
 data class PricePerBlockResult(
     val pricePerBlock: Double,
-    val spawnDistance: Float
+    val spawnDistance: Double
 ) {
     companion object {
-        val EMPTY = PricePerBlockResult(Double.MAX_VALUE, Float.MAX_VALUE)
+        val EMPTY = PricePerBlockResult(Double.MAX_VALUE, Double.MAX_VALUE)
     }
 }
