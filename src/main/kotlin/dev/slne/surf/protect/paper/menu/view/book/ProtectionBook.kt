@@ -18,7 +18,7 @@ object ProtectionBook {
                     primary("Willkommen im Protection System!")
                     appendNewline()
                     appendNewline()
-                    darkSpacer("Wenn du den ProtectionMode betrittst, erhältst du vorübergehend Fly um dein Grundstück besser definieren zu können.")
+                    darkSpacer("Wenn du den Protection-Mode betrittst, erhältst du vorübergehend Fly um dein Grundstück besser definieren zu können.")
                 },
                 buildText {
                     darkSpacer("Du definierst dein Grundstück indem du bis zu ")

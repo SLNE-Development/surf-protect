@@ -9,6 +9,8 @@ import com.github.shynixn.mccoroutine.folia.launch
 import com.sk89q.worldedit.math.BlockVector2
 import com.sk89q.worldguard.LocalPlayer
 import com.sk89q.worldguard.protection.regions.ProtectedRegion
+import dev.slne.surf.api.core.messages.Colors
+import dev.slne.surf.api.core.messages.CommonComponents
 import dev.slne.surf.api.core.messages.adventure.sendText
 import dev.slne.surf.api.paper.extensions.server
 import dev.slne.surf.protect.paper.config
@@ -27,12 +29,12 @@ import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.OfflinePlayer
+import org.bukkit.World
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import java.util.*
 import kotlin.math.abs
 import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.DurationUnit
 
 class ProtectionUser(val uuid: UUID) {
 
@@ -60,7 +62,7 @@ class ProtectionUser(val uuid: UUID) {
             isCreatingRegion -> {
                 player.sendText {
                     appendErrorPrefix()
-                    error("Du befindest dich bereits im ProtectionMode.")
+                    error("Du befindest dich bereits im Protection-Mode.")
                 }
                 return false
             }
@@ -68,7 +70,7 @@ class ProtectionUser(val uuid: UUID) {
             !player.location.isInProtectionRegion() -> {
                 player.sendText {
                     appendErrorPrefix()
-                    error("Du kannst hier keinen ProtectionMode starten.")
+                    error("Du kannst den Protection-Mode hier nicht betreten.")
                 }
                 return false
             }
@@ -77,13 +79,40 @@ class ProtectionUser(val uuid: UUID) {
                 val left = protectionModeCooldown.timeLeft.milliseconds
                 player.sendText {
                     appendErrorPrefix()
-                    error("Du kannst den ProtectionMode erst wieder in ")
-                    variableValue(left.toString(DurationUnit.SECONDS))
-                    error(" verwenden.")
+                    error("Du kannst den Protection-Mode erst wieder in ")
+                    append(
+                        CommonComponents.formatTime(
+                            left,
+                            showSeconds = true,
+                            shortForms = false,
+                            separator = Component.text(", ", Colors.VARIABLE_VALUE)
+                        )
+                    )
+                    error(" betreten.")
+                }
+                return false
+            }
+
+            !config.protection.canEnterProtectionModeBelowNetherRoofInNether
+                    && player.world.environment == World.Environment.NETHER
+                    && player.y < player.world.logicalHeight -> {
+                player.sendText {
+                    appendErrorPrefix()
+                    error("Du kannst den Protection-Mode nicht unterhalb der Netherdecke betreten.")
+                }
+                return false
+            }
+
+            @Suppress("DEPRECATION")
+            !player.isOnGround -> {
+                player.sendText {
+                    appendErrorPrefix()
+                    error("Du musst auf dem Boden sein, um den Protection-Mode zu betreten.")
                 }
                 return false
             }
         }
+
 
         val worldBorder = server.createWorldBorder()
         val (centerPos, size) = computeWorldBorderParams(player, newRegion)
