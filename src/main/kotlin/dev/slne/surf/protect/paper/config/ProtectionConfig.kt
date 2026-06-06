@@ -39,6 +39,7 @@ data class ProtectionConfig(
         @PositiveNumber
         val maxNameLength: Int = 22,
         val protectOnlyAboveNetherRoofInNether: Boolean = true,
+        val canEnterProtectionModeBelowNetherRoofInNether: Boolean = false,
     ) {
         val retailModifier: Double
             get() = retailPercent / 100.0
@@ -87,7 +88,7 @@ data class ProtectionConfig(
 
         val environmentMultiplier: Map<World.Environment, Double> = mapOf(
             World.Environment.NORMAL to 1.0,
-            World.Environment.NETHER to 2.5,
+            World.Environment.NETHER to 2.0,
         )
     ) {
         val discountModifier: Double
