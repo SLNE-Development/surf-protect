@@ -7,6 +7,7 @@ import dev.slne.surf.api.paper.builder.LoreBuilder
 import dev.slne.surf.api.paper.builder.buildItem
 import dev.slne.surf.api.paper.builder.buildLore
 import dev.slne.surf.api.paper.builder.displayName
+import dev.slne.surf.protect.paper.config
 import dev.slne.surf.protect.paper.region.info.RegionInfo
 import dev.slne.surf.protect.paper.util.blockFormat
 import dev.slne.surf.protect.paper.util.castCoinFormat
@@ -106,14 +107,19 @@ val closeItem = MenuHeads.CROSS.apply {
 @Suppress("UnstableApiUsage")
 fun createRegionItem(
     protection: RegionInfo,
-    baseItemStack: ItemStack = ItemType.DIRT.createItemStack(),
+    baseItemStack: ItemStack? = null,
     showMoreInfo: Boolean = true
-) = baseItemStack.apply {
-    displayName {
-        variableValue(protection.name)
-    }
+): ItemStack {
+    val item = baseItemStack ?: (protection.world?.environment?.let { config.protection.iconByEnvironment[it] }
+        ?: ItemType.GRASS_BLOCK).createItemStack()
 
-    lore(renderRegionInformation(protection, showMoreInfo))
+    return item.apply {
+        displayName {
+            variableValue(protection.name)
+        }
+
+        lore(renderRegionInformation(protection, showMoreInfo))
+    }
 }
 
 fun renderRegionInformation(

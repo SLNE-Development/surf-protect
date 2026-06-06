@@ -126,7 +126,7 @@ val protectionMainView = surfView("Grundstuecke") {
     }
 }
 
-private val protectListItem = buildItem(ItemType.DIRT) {
+private val protectListItem = buildItem(ItemType.GRASS_BLOCK) {
     displayName {
         protectColored("Meine Grundstücke".toSmallCaps(), TextDecoration.BOLD)
     }
