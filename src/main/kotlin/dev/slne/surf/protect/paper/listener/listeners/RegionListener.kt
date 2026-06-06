@@ -3,6 +3,7 @@ package dev.slne.surf.protect.paper.listener.listeners
 import com.jeff_media.morepersistentdatatypes.DataType
 import com.sk89q.worldguard.protection.flags.Flags
 import com.sk89q.worldguard.protection.flags.StateFlag
+import dev.slne.surf.api.paper.event.cancel
 import dev.slne.surf.api.paper.util.namespacedKey
 import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry
 import dev.slne.surf.protect.paper.util.getProtectedRegions
@@ -21,11 +22,13 @@ import org.bukkit.event.block.BlockIgniteEvent
 import org.bukkit.event.block.BlockIgniteEvent.IgniteCause
 import org.bukkit.event.entity.EntityChangeBlockEvent
 import org.bukkit.event.entity.EntityExplodeEvent
-import org.bukkit.event.entity.EntityPlaceEvent
 import org.bukkit.event.inventory.InventoryMoveItemEvent
+import org.bukkit.event.vehicle.VehicleCreateEvent
 
 
 object RegionListener : Listener {
+
+    private val regionIdKey = namespacedKey("associated_region_id")
 
     @EventHandler(priority = EventPriority.LOWEST)
     fun onIgnite(event: BlockIgniteEvent) {
@@ -87,19 +90,16 @@ object RegionListener : Listener {
         }
     }
 
-    private val creator = namespacedKey("creator")
-
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
-    fun onMinecartPlace(event: EntityPlaceEvent) {
-        val vehicle = event.entity
-        if (vehicle !is HopperMinecart) return
-
-        val player = event.player ?: return
+    fun onVehicleCreate(event: VehicleCreateEvent) {
+        val vehicle = event.vehicle as? HopperMinecart ?: return
+        val vehicleLocation = vehicle.location
+        val vehicleRegion = vehicleLocation.getProtectedRegions().firstOrNull() ?: return
 
         vehicle.persistentDataContainer.set(
-            creator,
-            DataType.UUID,
-            player.uniqueId
+            regionIdKey,
+            DataType.STRING,
+            vehicleRegion.id
         )
     }
 
@@ -109,20 +109,12 @@ object RegionListener : Listener {
         val destHolder = event.destination.holder
 
         val minecart = sourceHolder as? HopperMinecart ?: destHolder as? HopperMinecart ?: return
+        val currentRegion = minecart.location.getProtectedRegions().firstOrNull() ?: return
+        val savedRegionIdInPdc = minecart.persistentDataContainer.get(regionIdKey, DataType.STRING) ?: return event.cancel()
 
-        val protection = (event.destination.location ?: event.source.location)
-            ?.getProtectedRegions()
-            ?.firstOrNull()
-            ?: return
-
-        val ownerUuid =
-            minecart.persistentDataContainer.get(creator, DataType.UUID) ?: return
-
-        val allowed =
-            protection.members.contains(ownerUuid) ||
-                    protection.owners.contains(ownerUuid)
-
-        event.isCancelled = !allowed
+        if (savedRegionIdInPdc != currentRegion.id) {
+            event.isCancelled = true
+        }
     }
 
     private fun gravityDeniedAt(location: Location) = location.getProtectedRegions().any {
