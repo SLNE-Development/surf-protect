@@ -9,6 +9,7 @@ import org.bukkit.World
 import org.bukkit.block.BlockType
 import org.bukkit.block.data.BlockData
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.ItemType
 import org.spongepowered.configurate.objectmapping.ConfigSerializable
 import pl.allegro.finance.tradukisto.ValueConverters
 import java.io.ByteArrayInputStream
@@ -40,6 +41,12 @@ data class ProtectionConfig(
         val maxNameLength: Int = 22,
         val protectOnlyAboveNetherRoofInNether: Boolean = true,
         val canEnterProtectionModeBelowNetherRoofInNether: Boolean = false,
+
+        val iconByEnvironment: Map<World.Environment, ItemType> = mapOf(
+            World.Environment.NORMAL to ItemType.GRASS_BLOCK,
+            World.Environment.NETHER to ItemType.CRIMSON_NYLIUM,
+            World.Environment.THE_END to ItemType.END_STONE,
+        )
     ) {
         val retailModifier: Double
             get() = retailPercent / 100.0
