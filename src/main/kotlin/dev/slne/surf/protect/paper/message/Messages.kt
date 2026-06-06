@@ -197,9 +197,9 @@ object Messages {
             error("Bitte gedulde dich einen Moment.")
         }
 
-        val canOnlyProtectAboveNetherRoofInNether = buildText { // TODO: better message
+        val canOnlyProtectAboveNetherRoofInNether = buildText {
             appendErrorPrefix()
-            error("Du kannst nur über dem Nether-Dach schützen.")
+            error("Du kannst nur auf der Netherdecke ein Grundstück erstellen.")
         }
 
         /**

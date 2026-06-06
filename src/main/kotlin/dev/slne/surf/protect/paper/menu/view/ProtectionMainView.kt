@@ -12,7 +12,6 @@ import dev.slne.surf.api.paper.builder.displayName
 import dev.slne.surf.api.paper.inventory.framework.dsl.onItemClick
 import dev.slne.surf.api.paper.inventory.framework.dsl.openForPlayer
 import dev.slne.surf.api.paper.inventory.framework.dsl.slot
-import dev.slne.surf.api.paper.inventory.framework.open
 import dev.slne.surf.api.paper.inventory.framework.view.container.dsl.blockRow
 import dev.slne.surf.api.paper.inventory.framework.view.containerDefaults
 import dev.slne.surf.api.paper.inventory.framework.view.icon.ViewIconColor
@@ -22,6 +21,7 @@ import dev.slne.surf.api.paper.inventory.framework.view.onFirstRender
 import dev.slne.surf.api.paper.inventory.framework.view.settings
 import dev.slne.surf.api.paper.inventory.framework.view.surfView
 import dev.slne.surf.protect.paper.menu.util.playGeneralClickSound
+import dev.slne.surf.protect.paper.menu.util.playNoSound
 import dev.slne.surf.protect.paper.menu.util.protectColored
 import dev.slne.surf.protect.paper.menu.view.list.protectionListView
 import dev.slne.surf.protect.paper.plugin
@@ -73,10 +73,7 @@ val protectionMainView = surfView("Grundstuecke") {
                             success("Du befindest dich nun im Protection-Mode.")
                         }
                     } else {
-                        player.sendText {
-                            appendErrorPrefix()
-                            error("Es ist ein Fehler aufgetreten. Versuche es später erneut.")
-                        }
+                        playNoSound()
                     }
                 }
             }
