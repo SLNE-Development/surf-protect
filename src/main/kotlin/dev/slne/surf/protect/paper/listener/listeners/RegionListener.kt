@@ -3,6 +3,7 @@ package dev.slne.surf.protect.paper.listener.listeners
 import com.jeff_media.morepersistentdatatypes.DataType
 import com.sk89q.worldguard.protection.flags.Flags
 import com.sk89q.worldguard.protection.flags.StateFlag
+import dev.slne.surf.api.paper.event.cancel
 import dev.slne.surf.api.paper.util.namespacedKey
 import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry
 import dev.slne.surf.protect.paper.util.getProtectedRegions
@@ -109,7 +110,7 @@ object RegionListener : Listener {
 
         val minecart = sourceHolder as? HopperMinecart ?: destHolder as? HopperMinecart ?: return
         val currentRegion = minecart.location.getProtectedRegions().firstOrNull() ?: return
-        val savedRegionIdInPdc = minecart.persistentDataContainer.get(regionIdKey, DataType.STRING) ?: return
+        val savedRegionIdInPdc = minecart.persistentDataContainer.get(regionIdKey, DataType.STRING) ?: return event.cancel()
 
         if (savedRegionIdInPdc != currentRegion.id) {
             event.isCancelled = true
