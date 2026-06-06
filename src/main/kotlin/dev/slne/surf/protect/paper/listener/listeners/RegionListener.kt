@@ -109,7 +109,8 @@ object RegionListener : Listener {
 
         val minecart = sourceHolder as? HopperMinecart ?: destHolder as? HopperMinecart ?: return
         val currentRegion = minecart.location.getProtectedRegions().firstOrNull() ?: return
-        val savedRegionIdInPdc = minecart.persistentDataContainer.get(regionIdKey, DataType.STRING) ?: return
+
+        val savedRegionIdInPdc = minecart.persistentDataContainer.get(regionIdKey, DataType.STRING)
 
         if (savedRegionIdInPdc != currentRegion.id) {
             event.isCancelled = true
