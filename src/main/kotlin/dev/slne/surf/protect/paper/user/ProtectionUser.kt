@@ -35,7 +35,6 @@ import org.bukkit.inventory.ItemStack
 import java.util.*
 import kotlin.math.abs
 import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.DurationUnit
 
 class ProtectionUser(val uuid: UUID) {
 
@@ -89,7 +88,6 @@ class ProtectionUser(val uuid: UUID) {
                             separator = Component.text(", ", Colors.VARIABLE_VALUE)
                         )
                     )
-                    variableValue(left.toString(DurationUnit.SECONDS))
                     error(" betreten.")
                 }
                 return false
