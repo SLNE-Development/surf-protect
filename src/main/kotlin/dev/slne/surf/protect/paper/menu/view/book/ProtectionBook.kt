@@ -12,7 +12,7 @@ object ProtectionBook {
         buildText {
             primary("SLNE DEVELOPMENT TEAM")
         },
-        buildText {
+        listOf(buildText {
             listOf(
                 buildText {
                     primary("Willkommen im Protection System!")
@@ -28,6 +28,6 @@ object ProtectionBook {
                     darkSpacer("Mit dem roten Block kannst du die Protection jederzeit abbrechen und zu deinem Ausgangspunkt zurückkehren.")
                 }
             )
-        }
+        })
     )
 }
