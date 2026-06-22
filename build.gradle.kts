@@ -1,7 +1,7 @@
 import dev.slne.surf.api.gradle.util.registerRequired
 
 plugins {
-    id("dev.slne.surf.api.gradle.paper-plugin") version "+"
+    id("dev.slne.surf.api.gradle.paper-plugin")
 }
 
 surfPaperPluginApi {
@@ -25,7 +25,7 @@ dependencies {
         exclude("it.unimi.dsi", "fastutil")
     }
     compileOnly("dev.slne.surf.transaction:surf-transaction-api:+")
-    paperLibrary("pl.allegro.finance:tradukisto:4.1.0")
+    paperLibrary("pl.allegro.finance:tradukisto:4.3.3")
 }
 
 group = "dev.slne.surf.protect"
