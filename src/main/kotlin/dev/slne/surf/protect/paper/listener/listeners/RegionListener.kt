@@ -109,12 +109,11 @@ object RegionListener : Listener {
         val destHolder = event.destination.holder
 
         val minecart = sourceHolder as? HopperMinecart ?: destHolder as? HopperMinecart ?: return
-        val currentRegion = minecart.location.getProtectedRegions().firstOrNull() ?: return
+        val currentRegions = minecart.location.getProtectedRegions()
+        if (currentRegions.isEmpty()) return
         val savedRegionIdInPdc = minecart.persistentDataContainer.get(regionIdKey, DataType.STRING) ?: return event.cancel()
 
-        if (savedRegionIdInPdc != currentRegion.id) {
-            event.isCancelled = true
-        }
+        event.isCancelled = currentRegions.none { it.id == savedRegionIdInPdc }
     }
 
     private fun gravityDeniedAt(location: Location) = location.getProtectedRegions().any {
