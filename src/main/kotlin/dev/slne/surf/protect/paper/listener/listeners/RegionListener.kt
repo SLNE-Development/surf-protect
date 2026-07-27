@@ -112,8 +112,7 @@ object RegionListener : Listener {
         }
 
         val anyHasSurfProtectFlag = regions.any { region ->
-            (region.getFlag(ProtectionFlagsRegistry.SURF_PROTECT)
-                ?: StateFlag.State.DENY) == StateFlag.State.ALLOW
+            region.getFlag(ProtectionFlagsRegistry.SURF_PROTECT) == StateFlag.State.ALLOW
         }
 
         if (anyHasSurfProtectFlag) {
