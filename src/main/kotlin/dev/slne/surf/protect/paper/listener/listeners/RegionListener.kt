@@ -3,7 +3,6 @@ package dev.slne.surf.protect.paper.listener.listeners
 import com.jeff_media.morepersistentdatatypes.DataType
 import com.sk89q.worldguard.protection.flags.Flags
 import com.sk89q.worldguard.protection.flags.StateFlag
-import dev.slne.surf.api.paper.event.cancel
 import dev.slne.surf.api.paper.util.namespacedKey
 import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry
 import dev.slne.surf.protect.paper.util.getProtectedRegions
@@ -57,7 +56,7 @@ object RegionListener : Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     fun onBlockForm(event: BlockFormEvent) {
         val block = event.block
-        if (!Tag.CONCRETE_POWDER.isTagged(block.type)) return
+        if (!Tag.CONCRETE_POWDERS.isTagged(block.type)) return
 
         if (block.location.isGlobalRegion()) {
             return
@@ -105,15 +104,21 @@ object RegionListener : Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     fun onInvMove(event: InventoryMoveItemEvent) {
-        val sourceHolder = event.source.holder
-        val destHolder = event.destination.holder
+        val location = event.destination.location ?: return
+        val regions = location.getProtectedRegions()
 
-        val minecart = sourceHolder as? HopperMinecart ?: destHolder as? HopperMinecart ?: return
-        val currentRegions = minecart.location.getProtectedRegions()
-        if (currentRegions.isEmpty()) return
-        val savedRegionIdInPdc = minecart.persistentDataContainer.get(regionIdKey, DataType.STRING) ?: return event.cancel()
+        if (regions.isEmpty()) {
+            return
+        }
 
-        event.isCancelled = currentRegions.none { it.id == savedRegionIdInPdc }
+        val anyHasSurfProtectFlag = regions.any { region ->
+            (region.getFlag(ProtectionFlagsRegistry.SURF_PROTECT)
+                ?: StateFlag.State.DENY) == StateFlag.State.ALLOW
+        }
+
+        if (anyHasSurfProtectFlag) {
+            event.isCancelled = false
+        }
     }
 
     private fun gravityDeniedAt(location: Location) = location.getProtectedRegions().any {
