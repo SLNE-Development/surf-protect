@@ -24,6 +24,7 @@ import dev.slne.surf.protect.paper.util.isInProtectionRegion
 import dev.slne.surf.protect.paper.util.toLocalPlayer
 import dev.slne.surf.transaction.api.user.TransactionUser
 import io.papermc.paper.math.Position
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
@@ -117,7 +118,9 @@ class ProtectionUser(val uuid: UUID) {
         val worldBorder = server.createWorldBorder()
         val (centerPos, size) = computeWorldBorderParams(player, newRegion)
 
-        saveAwaitingProtectionMode(newRegion)
+        withContext(Dispatchers.IO) {
+            saveAwaitingProtectionMode(newRegion)
+        }
 
         worldBorder.setCenter(centerPos.x(), centerPos.z())
         worldBorder.size = size * 2 // diameter
