@@ -3,8 +3,8 @@ package dev.slne.surf.protect.paper.listener.listeners
 import com.destroystokyo.paper.MaterialSetTag
 import dev.slne.surf.api.paper.util.namespacedKey
 import dev.slne.surf.protect.paper.config
-import dev.slne.surf.protect.paper.configManager
 import dev.slne.surf.protect.paper.items.ProtectionItems
+import dev.slne.surf.protect.paper.plugin
 import dev.slne.surf.protect.paper.user.protectionUser
 import io.papermc.paper.event.player.PlayerItemFrameChangeEvent
 import io.papermc.paper.event.player.PrePlayerAttackEntityEvent
@@ -40,12 +40,11 @@ object ProtectionModeListener : Listener {
         val protectionUser = player.protectionUser()
 
         protectionUser.restorePlayerProperties(player, awaitingProtectionMode.inventory)
+        protectionUser.removeAwaitingProtectionMode()
 
-        configManager.edit {
-            awaitingProtectionModes.remove(awaitingProtectionMode)
-        }
-
-        player.teleportAsync(awaitingProtectionMode.startLocation)
+        player.scheduler.runDelayed(plugin, {
+            player.teleportAsync(awaitingProtectionMode.startLocation)
+        }, {}, 1L)
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
