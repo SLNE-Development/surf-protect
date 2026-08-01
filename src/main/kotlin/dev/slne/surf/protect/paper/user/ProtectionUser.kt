@@ -24,6 +24,7 @@ import dev.slne.surf.protect.paper.util.isInProtectionRegion
 import dev.slne.surf.protect.paper.util.toLocalPlayer
 import dev.slne.surf.transaction.api.user.TransactionUser
 import io.papermc.paper.math.Position
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
@@ -117,6 +118,10 @@ class ProtectionUser(val uuid: UUID) {
         val worldBorder = server.createWorldBorder()
         val (centerPos, size) = computeWorldBorderParams(player, newRegion)
 
+        withContext(Dispatchers.IO) {
+            saveAwaitingProtectionMode(newRegion)
+        }
+
         worldBorder.setCenter(centerPos.x(), centerPos.z())
         worldBorder.size = size * 2 // diameter
         worldBorder.warningDistance = 0
@@ -158,26 +163,39 @@ class ProtectionUser(val uuid: UUID) {
             protectionModeCooldown.reset()
         }
 
-        if (shutdown) {
-            configManager.edit {
-                awaitingProtectionModes.add(
-                    ProtectionConfig.AwaitingProtectionModeConfig.create(
-                        playerUuid = uuid,
-                        inventory = creation.startingInventoryContent,
-                        location = creation.startLocation
-                    )
-                )
-            }
-        } else {
-            val player = this.bukkitPlayer ?: return
-            withContext(plugin.entityDispatcher(player)) {
-                restorePlayerProperties(
-                    player,
-                    creation.startingInventoryContent.map { it ?: ItemStack.empty() }.toTypedArray()
-                )
-            }
+        if (shutdown) return
 
-            player.teleportAsync(creation.startLocation)
+        removeAwaitingProtectionMode()
+
+        val player = this.bukkitPlayer ?: return
+        withContext(plugin.entityDispatcher(player)) {
+            restorePlayerProperties(
+                player,
+                creation.startingInventoryContent.map { it ?: ItemStack.empty() }.toTypedArray()
+            )
+        }
+
+        player.teleportAsync(creation.startLocation)
+    }
+
+    private fun saveAwaitingProtectionMode(region: ProtectionRegion) {
+        configManager.edit {
+            awaitingProtectionModes.removeIf { it.playerUuid == uuid }
+            awaitingProtectionModes.add(
+                ProtectionConfig.AwaitingProtectionModeConfig.create(
+                    playerUuid = uuid,
+                    inventory = region.startingInventoryContent,
+                    location = region.startLocation
+                )
+            )
+        }
+    }
+
+    fun removeAwaitingProtectionMode() {
+        if (config.awaitingProtectionModes.none { it.playerUuid == uuid }) return
+
+        configManager.edit {
+            awaitingProtectionModes.removeIf { it.playerUuid == uuid }
         }
     }
 
@@ -234,6 +252,7 @@ class ProtectionUser(val uuid: UUID) {
     fun handleQuit(player: Player) {
         val regionCreation = regionCreation
         if (regionCreation != null) {
+            removeAwaitingProtectionMode()
             restorePlayerProperties(
                 player,
                 regionCreation.startingInventoryContent.map { it ?: ItemStack.empty() }
