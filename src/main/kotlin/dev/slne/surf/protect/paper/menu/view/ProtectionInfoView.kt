@@ -50,7 +50,7 @@ val protectionInfoView = surfView("Grundstück") {
 
     onOpen {
         modifyConfig {
-            title("Grundstück - ${regionInfoState[this@onOpen].name}")
+            title(regionInfoState[this@onOpen].name)
         }
     }
 

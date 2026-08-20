@@ -86,7 +86,7 @@ val protectionMemberListView = paginatedSurfView("Grundstück - Mitglieder") {
 
     onOpen {
         modifyConfig {
-            title("${regionInfoState[this@onOpen].name} - Mitglieder")
+            title("Grundstück - Mitglieder")
         }
     }
 

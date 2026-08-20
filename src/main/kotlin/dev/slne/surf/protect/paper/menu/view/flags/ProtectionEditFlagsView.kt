@@ -54,7 +54,7 @@ val protectionEditFlagsView = paginatedSurfView("Grundstück - Flags") {
 
     onOpen {
         modifyConfig {
-            title("${regionInfoState[this@onOpen].name} - Flags")
+            title("Grundstück - Flags")
         }
     }
 }
