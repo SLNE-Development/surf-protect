@@ -15,7 +15,7 @@ import dev.slne.surf.protect.paper.region.info.RegionInfo
 import dev.slne.surf.protect.paper.user.protectionUser
 import dev.slne.surf.protect.paper.util.allRegions
 
-val protectionListView = paginatedSurfView("Deine Grundstücke") {
+val protectionListView = paginatedSurfView("Meine Grundstücke") {
     settings {
         paginationViewRows(PaginationViewRows.THREE)
     }
