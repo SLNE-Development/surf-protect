@@ -25,6 +25,7 @@ import dev.slne.surf.protect.paper.menu.view.ProtectionViewConstants
 import dev.slne.surf.protect.paper.region.info.RegionInfo
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.ResolvableProfile
+import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.inventory.ItemType
 
@@ -43,7 +44,8 @@ val protectionMemberListView = paginatedSurfView("Mitglieder") {
             regionInfoState[context]
                 .members
                 .map { member ->
-                    server.createProfile(member.uniqueId, member.name).also { it.completeFromCache() }
+                    server.createProfile(member.uniqueId, member.name)
+                        .also { it.completeFromCache() }
                 }
         }
 
@@ -85,11 +87,15 @@ val protectionMemberListView = paginatedSurfView("Mitglieder") {
     }
 
     onFirstRender {
-        slot(1, 5) {
+        slot(4, 9) {
             withItem(
                 viewIcon(ViewIconType.PLUS, ViewIconColor.GREEN) {
                     displayName {
-                        protectColored("Mitglied hinzufügen".toSmallCaps(), TextDecoration.BOLD)
+                        text(
+                            "Mitglied hinzufügen".toSmallCaps(),
+                            TextColor.fromHexString("#91CE22"),
+                            TextDecoration.BOLD
+                        )
                     }
 
                     buildLore {
