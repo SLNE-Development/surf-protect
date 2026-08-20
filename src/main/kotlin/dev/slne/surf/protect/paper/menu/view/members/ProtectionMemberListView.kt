@@ -31,7 +31,7 @@ import org.bukkit.inventory.ItemType
 
 
 @Suppress("UnstableApiUsage")
-val protectionMemberListView = paginatedSurfView("Mitglieder") {
+val protectionMemberListView = paginatedSurfView("Grundstück - Mitglieder") {
     settings {
         paginationViewRows(PaginationViewRows.THREE)
     }
@@ -87,6 +87,7 @@ val protectionMemberListView = paginatedSurfView("Mitglieder") {
     }
 
     onFirstRender {
+        updateTitleForPlayer("${regionInfoState[this].name} - Mitglieder")
         slot(4, 9) {
             withItem(
                 viewIcon(ViewIconType.PLUS, ViewIconColor.GREEN) {

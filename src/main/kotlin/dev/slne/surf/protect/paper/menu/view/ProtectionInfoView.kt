@@ -36,7 +36,7 @@ import kotlinx.coroutines.withContext
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.inventory.ItemType
 
-val protectionInfoView = surfView("Info") {
+val protectionInfoView = surfView("Grundstück") {
     settings {
         rows(4)
     }
@@ -51,6 +51,7 @@ val protectionInfoView = surfView("Info") {
     val regionInfoState = initialState<RegionInfo>(ProtectionViewConstants.REGION_INFO_STATE)
     onFirstRender {
         val regionInfo = regionInfoState[this]
+        updateTitleForPlayer("Grundstück - ${regionInfo.name}")
 
         slot(1, 5) {
             renderWith {

@@ -10,6 +10,7 @@ import dev.slne.surf.api.paper.builder.displayName
 import dev.slne.surf.api.paper.inventory.framework.dsl.onItemClick
 import dev.slne.surf.api.paper.inventory.framework.dsl.renderWith
 import dev.slne.surf.api.paper.inventory.framework.view.layoutTarget
+import dev.slne.surf.api.paper.inventory.framework.view.onFirstRender
 import dev.slne.surf.api.paper.inventory.framework.view.paginatedSurfView
 import dev.slne.surf.api.paper.inventory.framework.view.pagination.pagination
 import dev.slne.surf.api.paper.inventory.framework.view.settings
@@ -26,7 +27,7 @@ import me.devnatan.inventoryframework.context.SlotClickContext
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.inventory.ItemStack
 
-val protectionEditFlagsView = paginatedSurfView("Flags") {
+val protectionEditFlagsView = paginatedSurfView("Grundstück - Flags") {
     settings {
         paginationViewRows(PaginationViewRows.THREE)
         navigateBackOnOutsideClick()
@@ -48,6 +49,10 @@ val protectionEditFlagsView = paginatedSurfView("Flags") {
                 renderFlagItem(regionInfo, flag)
             }
         }
+    }
+
+    onFirstRender {
+        updateTitleForPlayer("${regionInfoState[this].name} - Flags")
     }
 }
 

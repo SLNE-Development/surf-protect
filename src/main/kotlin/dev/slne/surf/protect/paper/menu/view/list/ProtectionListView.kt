@@ -2,7 +2,6 @@ package dev.slne.surf.protect.paper.menu.view.list
 
 import dev.slne.surf.api.paper.inventory.framework.dsl.onItemClick
 import dev.slne.surf.api.paper.inventory.framework.dsl.openForPlayer
-import dev.slne.surf.api.paper.inventory.framework.view.icon.ViewIconType
 import dev.slne.surf.api.paper.inventory.framework.view.layoutTarget
 import dev.slne.surf.api.paper.inventory.framework.view.paginatedSurfView
 import dev.slne.surf.api.paper.inventory.framework.view.pagination.pagination
@@ -16,7 +15,7 @@ import dev.slne.surf.protect.paper.region.info.RegionInfo
 import dev.slne.surf.protect.paper.user.protectionUser
 import dev.slne.surf.protect.paper.util.allRegions
 
-val protectionListView = paginatedSurfView("Grundstuecke") {
+val protectionListView = paginatedSurfView("Deine Grundstücke") {
     settings {
         paginationViewRows(PaginationViewRows.THREE)
     }
@@ -28,7 +27,10 @@ val protectionListView = paginatedSurfView("Grundstuecke") {
             withItem(createRegionItem(regionInfo))
             onItemClick {
                 playGeneralClickSound()
-                openForPlayer(protectionInfoView, mapOf(ProtectionViewConstants.REGION_INFO_STATE to regionInfo))
+                openForPlayer(
+                    protectionInfoView,
+                    mapOf(ProtectionViewConstants.REGION_INFO_STATE to regionInfo)
+                )
             }
         }
     }
