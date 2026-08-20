@@ -7,14 +7,12 @@ import dev.slne.surf.api.paper.extensions.server
 import dev.slne.surf.api.paper.inventory.framework.dsl.onItemClick
 import dev.slne.surf.api.paper.inventory.framework.dsl.slot
 import dev.slne.surf.api.paper.inventory.framework.dsl.withItem
+import dev.slne.surf.api.paper.inventory.framework.modifyConfig
+import dev.slne.surf.api.paper.inventory.framework.view.*
 import dev.slne.surf.api.paper.inventory.framework.view.icon.ViewIconColor
 import dev.slne.surf.api.paper.inventory.framework.view.icon.ViewIconType
 import dev.slne.surf.api.paper.inventory.framework.view.icon.viewIcon
-import dev.slne.surf.api.paper.inventory.framework.view.layoutTarget
-import dev.slne.surf.api.paper.inventory.framework.view.onFirstRender
-import dev.slne.surf.api.paper.inventory.framework.view.paginatedSurfView
 import dev.slne.surf.api.paper.inventory.framework.view.pagination.pagination
-import dev.slne.surf.api.paper.inventory.framework.view.settings
 import dev.slne.surf.api.paper.inventory.framework.view.settings.PaginationViewRows
 import dev.slne.surf.api.paper.inventory.framework.view.state.get
 import dev.slne.surf.api.paper.inventory.framework.view.state.initialState
@@ -86,8 +84,13 @@ val protectionMemberListView = paginatedSurfView("Grundstück - Mitglieder") {
         }
     }
 
+    onOpen {
+        modifyConfig {
+            title("${regionInfoState[this@onOpen].name} - Mitglieder")
+        }
+    }
+
     onFirstRender {
-        updateTitleForPlayer("${regionInfoState[this].name} - Mitglieder")
         slot(4, 9) {
             withItem(
                 viewIcon(ViewIconType.PLUS, ViewIconColor.GREEN) {

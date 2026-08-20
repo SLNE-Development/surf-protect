@@ -9,8 +9,9 @@ import dev.slne.surf.api.paper.builder.buildLore
 import dev.slne.surf.api.paper.builder.displayName
 import dev.slne.surf.api.paper.inventory.framework.dsl.onItemClick
 import dev.slne.surf.api.paper.inventory.framework.dsl.renderWith
+import dev.slne.surf.api.paper.inventory.framework.modifyConfig
 import dev.slne.surf.api.paper.inventory.framework.view.layoutTarget
-import dev.slne.surf.api.paper.inventory.framework.view.onFirstRender
+import dev.slne.surf.api.paper.inventory.framework.view.onOpen
 import dev.slne.surf.api.paper.inventory.framework.view.paginatedSurfView
 import dev.slne.surf.api.paper.inventory.framework.view.pagination.pagination
 import dev.slne.surf.api.paper.inventory.framework.view.settings
@@ -51,8 +52,10 @@ val protectionEditFlagsView = paginatedSurfView("Grundstück - Flags") {
         }
     }
 
-    onFirstRender {
-        updateTitleForPlayer("${regionInfoState[this].name} - Flags")
+    onOpen {
+        modifyConfig {
+            title("${regionInfoState[this@onOpen].name} - Flags")
+        }
     }
 }
 
