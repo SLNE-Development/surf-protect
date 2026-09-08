@@ -9,8 +9,13 @@ import dev.slne.surf.api.paper.builder.buildLore
 import dev.slne.surf.api.paper.builder.displayName
 import dev.slne.surf.api.paper.inventory.framework.dsl.onItemClick
 import dev.slne.surf.api.paper.inventory.framework.dsl.renderWith
+import dev.slne.surf.api.paper.inventory.framework.view.icon.ViewIcon
+import dev.slne.surf.api.paper.inventory.framework.view.icon.ViewIconColor
+import dev.slne.surf.api.paper.inventory.framework.view.icon.ViewIconType
 import dev.slne.surf.api.paper.inventory.framework.view.layoutTarget
+import dev.slne.surf.api.paper.inventory.framework.view.onFirstRender
 import dev.slne.surf.api.paper.inventory.framework.view.paginatedSurfView
+import dev.slne.surf.api.paper.inventory.framework.view.pagination.AbstractPaginatedSurfView
 import dev.slne.surf.api.paper.inventory.framework.view.pagination.pagination
 import dev.slne.surf.api.paper.inventory.framework.view.settings
 import dev.slne.surf.api.paper.inventory.framework.view.settings.PaginationViewRows
@@ -20,17 +25,19 @@ import dev.slne.surf.protect.paper.menu.util.appendBlob
 import dev.slne.surf.protect.paper.menu.util.playGeneralClickSound
 import dev.slne.surf.protect.paper.menu.util.protectColored
 import dev.slne.surf.protect.paper.menu.view.ProtectionViewConstants
+import dev.slne.surf.protect.paper.menu.view.protectionInfoView
 import dev.slne.surf.protect.paper.region.flags.EditableProtectionFlags
 import dev.slne.surf.protect.paper.region.info.RegionInfo
 import me.devnatan.inventoryframework.context.SlotClickContext
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.inventory.ItemStack
 
-val protectionEditFlagsView = paginatedSurfView("Grundstück - Flags") {
+val protectionEditFlagsView: AbstractPaginatedSurfView = paginatedSurfView("Grundstück - Flags") {
     settings {
         paginationViewRows(PaginationViewRows.THREE)
         navigateBackOnOutsideClick()
     }
+
     layoutTarget('F')
 
     val regionInfoState = initialState<RegionInfo>(ProtectionViewConstants.REGION_INFO_STATE)
@@ -47,6 +54,19 @@ val protectionEditFlagsView = paginatedSurfView("Grundstück - Flags") {
                 val regionInfo = regionInfoState[context]
                 renderFlagItem(regionInfo, flag)
             }
+        }
+    }
+
+    onFirstRender {
+        slot(4, 1, ViewIcon(ViewIconType.CROSS, ViewIconColor.RED).build {
+            displayName {
+                error("Zurück")
+            }
+        }).onClick { click ->
+            click.openForPlayer(
+                protectionInfoView::class.java,
+                mapOf(ProtectionViewConstants.REGION_INFO_STATE to regionInfoState[click])
+            )
         }
     }
 }
