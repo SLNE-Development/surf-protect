@@ -26,7 +26,7 @@ import me.devnatan.inventoryframework.context.SlotClickContext
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.inventory.ItemStack
 
-val protectionEditFlagsView = paginatedSurfView("Flags") {
+val protectionEditFlagsView = paginatedSurfView("Grundstück - Flags") {
     settings {
         paginationViewRows(PaginationViewRows.THREE)
         navigateBackOnOutsideClick()

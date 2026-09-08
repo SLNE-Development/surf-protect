@@ -39,7 +39,7 @@ private val visualizerCooldown = Caffeine.newBuilder()
     .expireAfterWrite(1.seconds)
     .build<UUID, Unit>()
 
-val protectionMainView = surfView("Grundstuecke") {
+val protectionMainView = surfView("Grundstücke") {
     settings {
         rows(3)
         navigateBackOnOutsideClick(false)
@@ -83,7 +83,8 @@ val protectionMainView = surfView("Grundstuecke") {
             onItemClick {
                 playGeneralClickSound()
 
-                val onCooldown = visualizerCooldown.asMap().putIfAbsent(player.uniqueId, Unit) != null
+                val onCooldown =
+                    visualizerCooldown.asMap().putIfAbsent(player.uniqueId, Unit) != null
                 if (onCooldown) {
                     player.sendText {
                         appendErrorPrefix()

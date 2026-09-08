@@ -9,16 +9,14 @@ import dev.slne.surf.api.paper.builder.displayName
 import dev.slne.surf.api.paper.inventory.framework.dsl.onItemClick
 import dev.slne.surf.api.paper.inventory.framework.dsl.openForPlayer
 import dev.slne.surf.api.paper.inventory.framework.dsl.slot
+import dev.slne.surf.api.paper.inventory.framework.modifyConfig
+import dev.slne.surf.api.paper.inventory.framework.view.*
 import dev.slne.surf.api.paper.inventory.framework.view.container.dsl.blockRow
-import dev.slne.surf.api.paper.inventory.framework.view.containerDefaults
 import dev.slne.surf.api.paper.inventory.framework.view.icon.ViewIconColor
 import dev.slne.surf.api.paper.inventory.framework.view.icon.ViewIconType
 import dev.slne.surf.api.paper.inventory.framework.view.icon.viewIcon
-import dev.slne.surf.api.paper.inventory.framework.view.onFirstRender
-import dev.slne.surf.api.paper.inventory.framework.view.settings
 import dev.slne.surf.api.paper.inventory.framework.view.state.get
 import dev.slne.surf.api.paper.inventory.framework.view.state.initialState
-import dev.slne.surf.api.paper.inventory.framework.view.surfView
 import dev.slne.surf.protect.paper.menu.dialog.protectionRenameDialog
 import dev.slne.surf.protect.paper.menu.util.createRegionItem
 import dev.slne.surf.protect.paper.menu.util.playGeneralClickSound
@@ -36,7 +34,7 @@ import kotlinx.coroutines.withContext
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.inventory.ItemType
 
-val protectionInfoView = surfView("Info") {
+val protectionInfoView = surfView("Grundstück") {
     settings {
         rows(4)
     }
@@ -49,6 +47,13 @@ val protectionInfoView = surfView("Info") {
     }
 
     val regionInfoState = initialState<RegionInfo>(ProtectionViewConstants.REGION_INFO_STATE)
+
+    onOpen {
+        modifyConfig {
+            title(regionInfoState[this@onOpen].name)
+        }
+    }
+
     onFirstRender {
         val regionInfo = regionInfoState[this]
 
