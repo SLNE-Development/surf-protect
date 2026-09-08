@@ -12,6 +12,7 @@ import dev.slne.surf.api.paper.inventory.framework.dsl.slot
 import dev.slne.surf.api.paper.inventory.framework.modifyConfig
 import dev.slne.surf.api.paper.inventory.framework.view.*
 import dev.slne.surf.api.paper.inventory.framework.view.container.dsl.blockRow
+import dev.slne.surf.api.paper.inventory.framework.view.icon.ViewIcon
 import dev.slne.surf.api.paper.inventory.framework.view.icon.ViewIconColor
 import dev.slne.surf.api.paper.inventory.framework.view.icon.ViewIconType
 import dev.slne.surf.api.paper.inventory.framework.view.icon.viewIcon
@@ -23,6 +24,7 @@ import dev.slne.surf.protect.paper.menu.util.playGeneralClickSound
 import dev.slne.surf.protect.paper.menu.util.playNoSound
 import dev.slne.surf.protect.paper.menu.util.protectColored
 import dev.slne.surf.protect.paper.menu.view.flags.protectionEditFlagsView
+import dev.slne.surf.protect.paper.menu.view.list.protectionListView
 import dev.slne.surf.protect.paper.menu.view.members.protectionMemberListView
 import dev.slne.surf.protect.paper.menu.view.sell.protectionSellConfirmationDialog
 import dev.slne.surf.protect.paper.plugin
@@ -34,7 +36,7 @@ import kotlinx.coroutines.withContext
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.inventory.ItemType
 
-val protectionInfoView = surfView("Grundstück") {
+val protectionInfoView: AbstractSurfView = surfView("Grundstück") {
     settings {
         rows(4)
     }
@@ -68,6 +70,16 @@ val protectionInfoView = surfView("Grundstück") {
                     showMoreInfo = false
                 )
             }
+        }
+
+        slot(4, 5, ViewIcon(ViewIconType.CROSS, ViewIconColor.RED).build {
+            displayName {
+                error("Zurück")
+            }
+        }).onClick { click ->
+            click.openForPlayer(
+                protectionListView::class.java
+            )
         }
 
         slot(3, 2) {
