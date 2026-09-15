@@ -94,6 +94,14 @@ enum class EditableProtectionFlags(
         initialState = StateFlag.State.DENY,
         isPlayerRelated = true
     ),
+    CANDLE_INTERACT(
+        icon = ItemType.CANDLE,
+        displayName = "Kerzen",
+        description = "Legt fest, ob fremde Spieler Kerzen platzieren, abbauen und benutzen dürfen.",
+        flag = ProtectionFlagsRegistry.SURF_CANDLE_INTERACT,
+        initialState = StateFlag.State.DENY,
+        isPlayerRelated = true
+    ),
 
     OTHER_EXPLOSION(
         icon = ItemType.END_CRYSTAL,

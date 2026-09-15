@@ -52,6 +52,12 @@ object ProtectionFlagsRegistry {
     @JvmField
     val SURF_BLOCK_GRAVITY = StateFlag("apply-gravity", true)
 
+    /**
+     * Controls who may place, break and use candles inside this region.
+     */
+    @JvmField
+    val SURF_CANDLE_INTERACT = StateFlag("surf-candle-interact", false)
+
     fun registerFlags() = with(WorldGuard.getInstance().flagRegistry) {
         register(SURF_PROTECT)
         register(SURF_PROTECT_FLAG)
@@ -61,5 +67,6 @@ object ProtectionFlagsRegistry {
         register(SURF_PROTECTION)
         register(CONCRETE_FORM)
         register(SURF_BLOCK_GRAVITY)
+        register(SURF_CANDLE_INTERACT)
     }
 }

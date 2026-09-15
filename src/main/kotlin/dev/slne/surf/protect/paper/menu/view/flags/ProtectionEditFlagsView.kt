@@ -143,6 +143,10 @@ private fun getCurrentState(
     flag: EditableProtectionFlags
 ): StateFlag.State {
     return if (flag.isPlayerRelated) {
+        if (region.getFlag(flag.flag) == null) {
+            return flag.initialState ?: StateFlag.State.ALLOW
+        }
+
         val group = region.getFlag(flag.flag.regionGroupFlag)
         if (group == RegionGroup.MEMBERS) StateFlag.State.DENY else StateFlag.State.ALLOW
     } else {
