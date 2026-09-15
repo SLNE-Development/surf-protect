@@ -7,6 +7,7 @@ import dev.slne.surf.api.paper.extensions.server
 import dev.slne.surf.api.paper.inventory.framework.dsl.onItemClick
 import dev.slne.surf.api.paper.inventory.framework.dsl.slot
 import dev.slne.surf.api.paper.inventory.framework.dsl.withItem
+import dev.slne.surf.api.paper.inventory.framework.view.icon.ViewIcon
 import dev.slne.surf.api.paper.inventory.framework.view.icon.ViewIconColor
 import dev.slne.surf.api.paper.inventory.framework.view.icon.ViewIconType
 import dev.slne.surf.api.paper.inventory.framework.view.icon.viewIcon
@@ -22,6 +23,7 @@ import dev.slne.surf.protect.paper.menu.dialog.protectionAddMemberDialog
 import dev.slne.surf.protect.paper.menu.util.playGeneralClickSound
 import dev.slne.surf.protect.paper.menu.util.protectColored
 import dev.slne.surf.protect.paper.menu.view.ProtectionViewConstants
+import dev.slne.surf.protect.paper.menu.view.protectionInfoView
 import dev.slne.surf.protect.paper.region.info.RegionInfo
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.datacomponent.item.ResolvableProfile
@@ -87,6 +89,17 @@ val protectionMemberListView = paginatedSurfView("Grundstück - Mitglieder") {
     }
 
     onFirstRender {
+        slot(4, 1, ViewIcon(ViewIconType.CROSS, ViewIconColor.RED).build {
+            displayName {
+                error("Zurück")
+            }
+        }).onClick { click ->
+            click.openForPlayer(
+                protectionInfoView::class.java,
+                mapOf(ProtectionViewConstants.REGION_INFO_STATE to regionInfoState[click])
+            )
+        }
+
         slot(4, 9) {
             withItem(
                 viewIcon(ViewIconType.PLUS, ViewIconColor.GREEN) {
