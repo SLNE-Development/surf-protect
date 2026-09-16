@@ -3,6 +3,7 @@ package dev.slne.surf.protect.paper.listener
 import com.sk89q.worldguard.WorldGuard
 import dev.slne.surf.api.paper.event.register
 import dev.slne.surf.protect.paper.listener.listeners.BorderCrossingHandler
+import dev.slne.surf.protect.paper.listener.listeners.CandleListener
 import dev.slne.surf.protect.paper.listener.listeners.ProtectionHotbarListener
 import dev.slne.surf.protect.paper.listener.listeners.ProtectionModeListener
 import dev.slne.surf.protect.paper.listener.listeners.RegionListener
@@ -13,6 +14,7 @@ object ListenerManager {
         ProtectionModeListener.register()
         ProtectionHotbarListener.register()
         RegionListener.register()
+        CandleListener.register()
 
         val sessionManager = WorldGuard.getInstance().platform.sessionManager
         sessionManager.registerHandler(BorderCrossingHandler.Factory, null)
