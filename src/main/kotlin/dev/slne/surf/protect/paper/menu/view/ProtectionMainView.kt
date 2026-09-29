@@ -5,6 +5,7 @@ import com.github.shynixn.mccoroutine.folia.entityDispatcher
 import com.github.shynixn.mccoroutine.folia.launch
 import com.sksamuel.aedile.core.expireAfterWrite
 import dev.slne.surf.api.core.font.toSmallCaps
+import dev.slne.surf.api.core.messages.adventure.buildText
 import dev.slne.surf.api.core.messages.adventure.sendText
 import dev.slne.surf.api.paper.builder.buildItem
 import dev.slne.surf.api.paper.builder.buildLore
@@ -71,6 +72,13 @@ val protectionMainView = surfView("Grundstücke") {
                         player.sendText {
                             appendSuccessPrefix()
                             success("Du befindest dich nun im Protection-Mode.")
+                            appendNewInfoPrefixedLine()
+                            append(buildText {
+                                info("Du kannst jetzt fliegen, um dein Grundstück zu erstellen.")
+                                hoverEvent(buildText {
+                                    warning("Der Flugmodus dient nur zur Grundstückserstellung. Missbrauch wird bestraft.")
+                                })
+                            })
                         }
                     } else {
                         playNoSound()
