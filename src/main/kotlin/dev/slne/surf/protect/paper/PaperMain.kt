@@ -51,7 +51,7 @@ class PaperMain : SuspendingJavaPlugin() {
             restoreMarkers()
         }
 
-        if(hudAvailable) {
+        if (hudAvailable) {
             HudListener.register()
         }
 
