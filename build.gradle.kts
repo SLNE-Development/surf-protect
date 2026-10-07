@@ -1,4 +1,5 @@
 import dev.slne.surf.api.gradle.util.registerRequired
+import dev.slne.surf.api.gradle.util.registerSoft
 
 plugins {
     id("dev.slne.surf.api.gradle.paper-plugin")
@@ -14,6 +15,7 @@ surfPaperPluginApi {
     serverDependencies {
         registerRequired("surf-transaction-paper")
         registerRequired("WorldGuard")
+        registerSoft("surf-hud-paper")
     }
 }
 
@@ -26,6 +28,7 @@ dependencies {
     }
     compileOnly("dev.slne.surf.transaction:surf-transaction-api:+")
     paperLibrary("pl.allegro.finance:tradukisto:4.3.3")
+    compileOnly("dev.slne.surf.hud:surf-hud-api:1.0.1")
 }
 
 group = "dev.slne.surf.protect"

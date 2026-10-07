@@ -5,12 +5,14 @@ import com.github.shynixn.mccoroutine.folia.launch
 import com.github.shynixn.mccoroutine.folia.regionDispatcher
 import com.sk89q.worldguard.protection.flags.StateFlag
 import dev.slne.surf.api.paper.api.metrics.Metrics
+import dev.slne.surf.api.paper.event.register
 import dev.slne.surf.api.paper.hook.papi.SurfPaperPAPIHook
 import dev.slne.surf.api.paper.inventory.framework.register
 import dev.slne.surf.api.paper.util.chunkX
 import dev.slne.surf.api.paper.util.chunkZ
 import dev.slne.surf.protect.paper.command.CommandManager
 import dev.slne.surf.protect.paper.config.ProtectionConfigManager
+import dev.slne.surf.protect.paper.hud.HudListener
 import dev.slne.surf.protect.paper.listener.ListenerManager
 import dev.slne.surf.protect.paper.menu.view.flags.protectionEditFlagsView
 import dev.slne.surf.protect.paper.menu.view.list.protectionListView
@@ -23,6 +25,7 @@ import dev.slne.surf.protect.paper.user.ProtectionUserManager
 import dev.slne.surf.protect.paper.util.getRegionManagerOrNull
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.withContext
+import org.bukkit.Bukkit
 import org.bukkit.plugin.java.JavaPlugin
 
 class PaperMain : SuspendingJavaPlugin() {
@@ -46,6 +49,10 @@ class PaperMain : SuspendingJavaPlugin() {
 
         plugin.launch {
             restoreMarkers()
+        }
+
+        if(hudAvailable) {
+            HudListener.register()
         }
 
         SurfPaperPAPIHook.register(PapiExpansion)
@@ -100,6 +107,8 @@ class PaperMain : SuspendingJavaPlugin() {
             plugin.logger.info("Finished restoring dirty markers.")
         }
     }
+
+    val hudAvailable get() = Bukkit.getPluginManager().isPluginEnabled("surf-hud-paper")
 }
 
 val configManager = ProtectionConfigManager()

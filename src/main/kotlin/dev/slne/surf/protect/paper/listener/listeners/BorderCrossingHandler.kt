@@ -9,9 +9,12 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion
 import com.sk89q.worldguard.session.MoveType
 import com.sk89q.worldguard.session.Session
 import com.sk89q.worldguard.session.handler.Handler
+import dev.slne.surf.protect.paper.hud.HudManager
 import dev.slne.surf.protect.paper.message.Messages
+import dev.slne.surf.protect.paper.plugin
 import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry
 import dev.slne.surf.protect.paper.util.hasBorderCrossingMessagesEnabled
+import org.bukkit.Bukkit
 
 class BorderCrossingHandler(session: Session) : Handler(session) {
     override fun onCrossBoundary(
@@ -29,6 +32,10 @@ class BorderCrossingHandler(session: Session) : Handler(session) {
 
         for (region in exited) {
             handleMessage(player, region, entered = false)
+        }
+
+        if (plugin.hudAvailable && (entered.isNotEmpty() || exited.isNotEmpty())) {
+            Bukkit.getPlayer(player.uniqueId)?.let { HudManager.show(it) }
         }
 
         return true
