@@ -34,8 +34,10 @@ class BorderCrossingHandler(session: Session) : Handler(session) {
             handleMessage(player, region, entered = false)
         }
 
-        if (plugin.hudAvailable && (entered.isNotEmpty() || exited.isNotEmpty())) {
-            Bukkit.getPlayer(player.uniqueId)?.let { HudManager.show(it) }
+        if (plugin.hudAvailable) {
+            Bukkit.getPlayer(player.uniqueId)?.let {
+                HudManager.show(it, toSet?.regions?.firstOrNull())
+            }
         }
 
         return true
