@@ -59,7 +59,9 @@ object ProtectionModeListener : Listener {
             val worldBorder = player.worldBorder
 
             if (worldBorder != null && !worldBorder.isInside(event.to)) {
-                player.teleportAsync(protectionModeLocation)
+                player.scheduler.runDelayed(plugin, {
+                    player.teleportAsync(protectionModeLocation)
+                }, {}, 1L)
             }
         }
     }
