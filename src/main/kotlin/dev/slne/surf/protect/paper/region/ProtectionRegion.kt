@@ -479,6 +479,19 @@ class ProtectionRegion(
         if (offerVersion.get() != version) return // the region changed while calculating
 
         val costResult = offer.cost
+        if (costResult.pricePerBlock == Double.MAX_VALUE) {
+            protectionUser.sendMessage(buildText {
+                appendErrorPrefix()
+                error("Das Grundstück liegt zu nah am Spawn.")
+            })
+            return
+        }
+
+        if (costResult.effectiveCost <= 0) {
+            protectionUser.sendMessage(Messages.Protecting.areaTooSmall)
+            return
+        }
+
         if (offeredCost != costResult.effectiveCost) {
             if (offeredCost != null) {
                 protectionUser.sendMessage(Messages.Protecting.offerChanged)
@@ -490,14 +503,6 @@ class ProtectionRegion(
         val cost = costResult.effectiveCost.roundToInt()
         val costBD = (-cost).toBigDecimal()
         val currency = config.currency.currency
-
-        if (costResult.pricePerBlock == Double.MAX_VALUE) {
-            protectionUser.sendMessage(buildText {
-                appendErrorPrefix()
-                error("Das Grundstück liegt zu nah am Spawn.")
-            })
-            return
-        }
 
         if (!isProcessingTransaction.compareAndSet(false, true)) {
             protectionUser.sendMessage(Messages.Protecting.alreadyProcessingTransaction)
