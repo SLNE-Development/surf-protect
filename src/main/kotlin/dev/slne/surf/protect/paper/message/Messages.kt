@@ -202,6 +202,22 @@ object Messages {
             error("Bitte gedulde dich einen Moment.")
         }
 
+        /**
+         * Sent when the price was recalculated before buying and differs from the last offer.
+         */
+        val offerChanged = buildText {
+            appendInfoPrefix()
+            info("Der Preis hat sich geändert. Bitte bestätige den Kauf erneut.")
+        }
+
+        /**
+         * Sent when the offer could not be calculated, e.g. because a chunk could not be loaded.
+         */
+        val offerCalculationFailed = buildText {
+            appendErrorPrefix()
+            error("Der Preis konnte nicht berechnet werden. Bitte versuche es erneut.")
+        }
+
         val canOnlyProtectAboveNetherRoofInNether = buildText {
             appendErrorPrefix()
             error("Du kannst nur auf der Netherdecke ein Grundstück erstellen.")

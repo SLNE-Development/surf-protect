@@ -34,6 +34,7 @@ import org.bukkit.World
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import java.util.*
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.abs
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -51,10 +52,24 @@ class ProtectionUser(val uuid: UUID) {
     val bukkitPlayer get() = Bukkit.getPlayer(uuid)
 
     private val protectionModeCooldown = ProtectionCooldownTracker()
+    private val isStartingRegionCreation = AtomicBoolean(false)
 
     val transactionUser get() = TransactionUser[uuid]
 
     suspend fun startRegionCreation(
+        newRegion: ProtectionRegion
+    ): Boolean {
+        // isCreatingRegion is only set at the very end, so block a second start in the meantime
+        if (!isStartingRegionCreation.compareAndSet(false, true)) return false
+
+        try {
+            return doStartRegionCreation(newRegion)
+        } finally {
+            isStartingRegionCreation.set(false)
+        }
+    }
+
+    private suspend fun doStartRegionCreation(
         newRegion: ProtectionRegion
     ): Boolean {
         val player = this.bukkitPlayer ?: return false
@@ -117,7 +132,6 @@ class ProtectionUser(val uuid: UUID) {
 
         val worldBorder = server.createWorldBorder()
         val (centerPos, size) = computeWorldBorderParams(player, newRegion)
-        newRegion.loadStructureFootprint(centerPos.blockX(), centerPos.blockZ(), size)
 
         withContext(Dispatchers.IO) {
             saveAwaitingProtectionMode(newRegion)
