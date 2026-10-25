@@ -1,13 +1,13 @@
 package dev.slne.surf.protect.paper.region.structure
 
 import com.github.shynixn.mccoroutine.folia.regionDispatcher
-import com.sk89q.worldedit.math.BlockVector2
 import com.sk89q.worldguard.protection.regions.ProtectedRegion
 import dev.slne.surf.api.core.util.mapAsync
 import dev.slne.surf.api.core.util.mutableLong2ObjectMapOf
 import dev.slne.surf.api.core.util.mutableObjectListOf
 import dev.slne.surf.protect.paper.plugin
 import dev.slne.surf.protect.paper.structureSurchargeConfig
+import dev.slne.surf.protect.paper.util.fixedVolume
 import io.papermc.paper.registry.RegistryAccess
 import io.papermc.paper.registry.RegistryKey
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap
@@ -42,28 +42,53 @@ class StructureFootprint private constructor(
     ): StructureSurcharge {
         if (columns.isEmpty()) return StructureSurcharge.NONE
 
+        val polygon = RegionPolygon(region)
+        val paidPolygon = alreadyPaid?.let { RegionPolygon(it) }
+
         val blocksByStructure = Object2LongOpenHashMap<String>()
         val it = Long2ObjectMaps.fastIterator(columns)
         while (it.hasNext()) {
             val entry = it.next()
-            val column = BlockVector2.at(columnX(entry.longKey), columnZ(entry.longKey))
-            if (!region.contains(column)) continue
-            if (alreadyPaid != null && alreadyPaid.contains(column)) continue
+            val x = columnX(entry.longKey)
+            val z = columnZ(entry.longKey)
+            if (!polygon.containsColumn(x, z)) continue
+            if (paidPolygon != null && paidPolygon.containsColumn(x, z)) continue
 
             blocksByStructure.addTo(entry.value, 1)
         }
 
         if (blocksByStructure.isEmpty()) return StructureSurcharge.NONE
 
-        val parts = blocksByStructure.object2LongEntrySet().map { entry ->
-            StructureSurcharge.Part(
-                entry.key,
-                entry.longValue,
-                surcharges.getValue(entry.key)
-            )
-        }.sortedByDescending { it.cost }
+        val chargedArea = region.fixedVolume() - (alreadyPaid?.fixedVolume() ?: 0)
+        capToArea(blocksByStructure, chargedArea)
+
+        val parts = blocksByStructure.object2LongEntrySet()
+            .filter { it.longValue > 0 }
+            .map { entry ->
+                StructureSurcharge.Part(
+                    entry.key,
+                    entry.longValue,
+                    surcharges.getValue(entry.key)
+                )
+            }.sortedByDescending { it.cost }
 
         return StructureSurcharge(parts)
+    }
+
+    /**
+     * Counting column centers can differ from the measured area by a few blocks on diagonal edges.
+     * Removes the excess from the cheapest structures, so the structure blocks never exceed the area.
+     */
+    private fun capToArea(blocksByStructure: Object2LongOpenHashMap<String>, area: Long) {
+        var excess = blocksByStructure.values.sum() - area
+        if (excess <= 0) return
+
+        for (key in blocksByStructure.keys.sortedBy { surcharges.getValue(it) }) {
+            val removed = min(excess, blocksByStructure.getLong(key))
+            blocksByStructure.addTo(key, -removed)
+            excess -= removed
+            if (excess <= 0) return
+        }
     }
 
     companion object {
@@ -86,6 +111,8 @@ class StructureFootprint private constructor(
             val surcharges = structureSurchargeConfig.pricedStructures
             if (surcharges.isEmpty()) return EMPTY
 
+            val paidPolygon = alreadyPaid?.let { RegionPolygon(it) }
+
             val minX = centerX - radius
             val maxX = centerX + radius
             val minZ = centerZ - radius
@@ -94,7 +121,7 @@ class StructureFootprint private constructor(
             val chunks = mutableObjectListOf<Pair<Int, Int>>()
             for (chunkX in (minX shr 4)..(maxX shr 4)) {
                 for (chunkZ in (minZ shr 4)..(maxZ shr 4)) {
-                    if (alreadyPaid != null && isChunkInside(alreadyPaid, chunkX, chunkZ)) continue
+                    if (paidPolygon != null && isChunkInside(paidPolygon, chunkX, chunkZ)) continue
                     chunks.add(chunkX to chunkZ)
                 }
             }
@@ -134,17 +161,17 @@ class StructureFootprint private constructor(
          * Checks if every column of the chunk lies inside [region].
          * Checking the chunk border is enough, as regions have no holes.
          */
-        private fun isChunkInside(region: ProtectedRegion, chunkX: Int, chunkZ: Int): Boolean {
+        private fun isChunkInside(polygon: RegionPolygon, chunkX: Int, chunkZ: Int): Boolean {
             val minX = chunkX shl 4
             val minZ = chunkZ shl 4
             val maxX = minX + 15
             val maxZ = minZ + 15
 
             for (i in 0..15) {
-                if (!region.contains(BlockVector2.at(minX + i, minZ))) return false
-                if (!region.contains(BlockVector2.at(minX + i, maxZ))) return false
-                if (!region.contains(BlockVector2.at(minX, minZ + i))) return false
-                if (!region.contains(BlockVector2.at(maxX, minZ + i))) return false
+                if (!polygon.containsColumn(minX + i, minZ)) return false
+                if (!polygon.containsColumn(minX + i, maxZ)) return false
+                if (!polygon.containsColumn(minX, minZ + i)) return false
+                if (!polygon.containsColumn(maxX, minZ + i)) return false
             }
 
             return true
