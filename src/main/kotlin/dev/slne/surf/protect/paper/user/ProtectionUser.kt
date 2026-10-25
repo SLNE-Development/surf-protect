@@ -117,6 +117,7 @@ class ProtectionUser(val uuid: UUID) {
 
         val worldBorder = server.createWorldBorder()
         val (centerPos, size) = computeWorldBorderParams(player, newRegion)
+        newRegion.loadStructureFootprint(centerPos.blockX(), centerPos.blockZ(), size)
 
         withContext(Dispatchers.IO) {
             saveAwaitingProtectionMode(newRegion)

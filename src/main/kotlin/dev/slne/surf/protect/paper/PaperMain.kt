@@ -12,6 +12,7 @@ import dev.slne.surf.api.paper.util.chunkX
 import dev.slne.surf.api.paper.util.chunkZ
 import dev.slne.surf.protect.paper.command.CommandManager
 import dev.slne.surf.protect.paper.config.ProtectionConfigManager
+import dev.slne.surf.protect.paper.config.StructureSurchargeConfigManager
 import dev.slne.surf.protect.paper.hud.HudListener
 import dev.slne.surf.protect.paper.listener.ListenerManager
 import dev.slne.surf.protect.paper.menu.view.flags.protectionEditFlagsView
@@ -44,6 +45,8 @@ class PaperMain : SuspendingJavaPlugin() {
     }
 
     override suspend fun onEnableAsync() {
+        structureSurchargeConfigManager // load and sync with the structure registry
+
         ListenerManager.registerListeners()
         CommandManager.registerCommands()
 
@@ -113,5 +116,8 @@ class PaperMain : SuspendingJavaPlugin() {
 
 val configManager = ProtectionConfigManager()
 val config get() = configManager.protectionConfig
+
+val structureSurchargeConfigManager by lazy { StructureSurchargeConfigManager() }
+val structureSurchargeConfig get() = structureSurchargeConfigManager.structureSurchargeConfig
 
 val plugin get() = JavaPlugin.getPlugin(PaperMain::class.java)

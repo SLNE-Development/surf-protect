@@ -27,6 +27,7 @@ import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry
 import dev.slne.surf.protect.paper.region.info.RegionCreationState
 import dev.slne.surf.protect.paper.region.info.RegionInfo
 import dev.slne.surf.protect.paper.region.settings.ProtectionSettings
+import dev.slne.surf.protect.paper.region.structure.StructureFootprint
 import dev.slne.surf.protect.paper.region.visual.Marker
 import dev.slne.surf.protect.paper.region.visual.QuickHull
 import dev.slne.surf.protect.paper.region.visual.Trail
@@ -50,6 +51,7 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import java.lang.ref.WeakReference
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.math.ceil
 import kotlin.math.min
 import kotlin.math.roundToInt
 
@@ -69,6 +71,7 @@ class ProtectionRegion(
 
     private val tmpBuffer = mutableObjectListOf<Marker>()
     private var tempRegion: TempProtectionRegion? = null
+    private var structureFootprint = StructureFootprint.EMPTY
 
     private val isProcessingTransaction = AtomicBoolean(false)
 
@@ -76,6 +79,23 @@ class ProtectionRegion(
     val maxMarkerCount: Int
         get() = config.markers.amount + (expandingProtection?.points?.size ?: 0)
     val currentMarkerCount: Int get() = markers.size
+
+    /**
+     * Loads the footprints of all structures with a surcharge inside the area
+     * the protection can be created in.
+     */
+    suspend fun loadStructureFootprint(centerX: Int, centerZ: Int, radius: Double) {
+        structureFootprint = StructureFootprint.load(
+            player.world,
+            centerX,
+            centerZ,
+            ceil(radius).toInt(),
+            expandingProtection
+        )
+    }
+
+    private fun calculateStructureSurcharge(region: ProtectedRegion) =
+        structureFootprint.calculateSurcharge(region, expandingProtection)
 
     suspend fun setCornerMarkers() {
         val region = expandingProtection ?: return
@@ -276,10 +296,12 @@ class ProtectionRegion(
             else -> {
                 val currency = config.currency
                 val discountFactor = getDiscountFactor()
+                val structureSurcharge = calculateStructureSurcharge(region)
                 val (effectiveCost, pricePerBlock, spawnDistance) = Mth.calculateEffectiveCost(
                     centerLoc,
                     tmpRegion,
-                    discountFactor
+                    discountFactor,
+                    structureSurcharge.totalCost
                 )
 
                 if (effectiveCost <= 0) {
@@ -301,7 +323,9 @@ class ProtectionRegion(
                             currency.currency,
                             pricePerBlock,
                             spawnDistance,
-                            discountFactor
+                            discountFactor,
+                            structureSurcharge,
+                            tmpRegion.effectiveVolume
                         )
                     )
                     RegionCreationState.SUCCESS
@@ -383,7 +407,13 @@ class ProtectionRegion(
         }
 
         val discountFactor = getDiscountFactor()
-        val costResult = Mth.calculateEffectiveCost(centerLoc, tempRegion, discountFactor)
+        val structureSurcharge = calculateStructureSurcharge(tempRegion.region)
+        val costResult = Mth.calculateEffectiveCost(
+            centerLoc,
+            tempRegion,
+            discountFactor,
+            structureSurcharge.totalCost
+        )
         val cost = costResult.effectiveCost.roundToInt()
         val costBD = (-cost).toBigDecimal()
         val currency = config.currency.currency

@@ -1,15 +1,20 @@
 package dev.slne.surf.protect.paper.message
 
+import dev.slne.surf.api.core.font.toSmallCaps
 import dev.slne.surf.api.core.messages.Colors
 import dev.slne.surf.api.core.messages.adventure.buildText
+import dev.slne.surf.api.core.messages.builder.SurfComponentBuilder
+import dev.slne.surf.api.paper.inventory.framework.view.util.shift
 import dev.slne.surf.protect.paper.config
+import dev.slne.surf.protect.paper.menu.util.appendBlob
+import dev.slne.surf.protect.paper.menu.util.protectColored
 import dev.slne.surf.protect.paper.region.info.RegionInfo
+import dev.slne.surf.protect.paper.region.structure.StructureSurcharge
 import dev.slne.surf.protect.paper.util.blockFormat
 import dev.slne.surf.protect.paper.util.castCoinFormat
 import dev.slne.surf.transaction.api.currency.Currency
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextDecoration
-import java.util.*
 import kotlin.math.roundToInt
 
 /**
@@ -230,6 +235,8 @@ object Messages {
          * @param currency the currency in which the property is priced
          * @param pricePerBlock the price per individual block of the property
          * @param distanceToSpawn the distance of the property from the spawn location
+         * @param structureSurcharge the surcharge for structures inside the property
+         * @param chargedArea the area that has to be paid for, which is smaller than [area] when expanding
          */
         fun offer(
             area: Long,
@@ -237,10 +244,12 @@ object Messages {
             currency: Currency,
             pricePerBlock: Double,
             distanceToSpawn: Double,
-            discountFactor: Double = 1.0
+            discountFactor: Double = 1.0,
+            structureSurcharge: StructureSurcharge = StructureSurcharge.NONE,
+            chargedArea: Long = area
         ) = buildText {
-            val distanceToSpawn = (distanceToSpawn * 100).roundToInt() / 100.0
-            val distanceToSpawnFormatted = String.format(Locale.GERMANY, "%,.2f", distanceToSpawn)
+            val isExpanding = chargedArea != area
+            val areaCost = chargedArea * pricePerBlock
 
             appendInfoPrefix()
             appendNewInfoPrefixedLine()
@@ -249,41 +258,144 @@ object Messages {
             appendNewInfoPrefixedLine()
             appendNewInfoPrefixedLine()
             variableKey("Fläche: ")
-            variableValue(blockFormat.format(area))
-            variableValue(" Blöcke²")
+            variableValue("${blockFormat.format(area)} Blöcke²")
+            if (isExpanding) {
+                spacer(" (+${blockFormat.format(chargedArea)} Blöcke²)")
+            }
+
+            val hasDiscount = discountFactor < 1.0
+            val showPremiumHint = !hasDiscount && config.pricing.discountPercent > 0
 
             appendNewInfoPrefixedLine()
-            variableKey("Preis pro Block: ")
-            variableValue(castCoinFormat.format(pricePerBlock))
-            appendNewInfoPrefixedLine()
-            variableKey("Distanz zum Spawn: ")
-            variableValue(distanceToSpawnFormatted)
-            variableValue(" Blöcke")
-
             appendNewInfoPrefixedLine()
             variableKey("Gesamtkosten: ")
-            if (discountFactor < 1.0) {
-                val originalCost = effectiveCost / discountFactor
+            variableValue(castCoinFormat.format(effectiveCost))
+
+            appendNewInfoPrefixedLine()
+            append(buildText {
+                appendTreeBranch(isLast = false)
+                variableKey("Grundpreis: ")
+                variableValue(castCoinFormat.format(areaCost))
+                appendHoverHint()
+
+                hoverEvent(buildText {
+                    appendHoverTitle("Grundpreis")
+                    appendHoverRow("Entfernung zum Spawn", "${blockFormat.format(distanceToSpawn)} Blöcke")
+                    appendHoverRow("Preis pro Block", castCoinFormat.format(pricePerBlock))
+                    appendHoverRow(
+                        if (isExpanding) "Neue Fläche" else "Fläche",
+                        "${blockFormat.format(chargedArea)} Blöcke²"
+                    )
+                    appendHoverRow("Rechnung", calculation(chargedArea, pricePerBlock, areaCost))
+
+                    if (isExpanding) {
+                        appendNewline()
+                        appendNewline()
+                        spacer("Bei einer Erweiterung zahlst du nur die neue Fläche.".toSmallCaps())
+                    }
+                })
+            })
+
+            appendNewInfoPrefixedLine()
+            append(buildText {
+                appendTreeBranch(isLast = !hasDiscount && !showPremiumHint)
+                variableKey("Strukturzuschlag: ")
+                variableValue(castCoinFormat.format(structureSurcharge.totalCost))
+                appendHoverHint()
+
+                hoverEvent(buildText {
+                    appendHoverTitle("Strukturzuschlag")
+
+                    if (structureSurcharge.parts.isEmpty()) {
+                        appendNewline()
+                        spacer("Im Grundstück liegt keine Struktur mit Zuschlag.".toSmallCaps())
+                        return@buildText
+                    }
+
+                    for (part in structureSurcharge.parts) {
+                        appendHoverRow(part.displayName, calculation(part.blocks, part.pricePerBlock, part.cost))
+                    }
+                    appendNewline()
+                    appendNewline()
+                    warning("Den Strukturzuschlag erhältst du beim Verkauf nicht zurück.".toSmallCaps())
+                })
+            })
+
+            if (hasDiscount) {
+                val originalCost = areaCost + structureSurcharge.totalCost
                 val discountPercent = ((1.0 - discountFactor) * 100).roundToInt()
-                append(
-                    Component.text(castCoinFormat.format(originalCost), Colors.VARIABLE_VALUE)
-                        .decoration(TextDecoration.STRIKETHROUGH, true)
-                )
-                appendSpace()
-                success(castCoinFormat.format(effectiveCost))
-                appendSpace()
-                success("(-${discountPercent}%)")
-            } else {
-                variableValue(castCoinFormat.format(effectiveCost))
+
+                appendNewInfoPrefixedLine()
+                appendTreeBranch(isLast = true)
+                variableKey("Premium-Rabatt (${discountPercent}%): ")
+                success("-${castCoinFormat.format(originalCost - effectiveCost)}")
+            }
+
+            if (showPremiumHint) {
+                val originalCost = areaCost + structureSurcharge.totalCost
+                val premiumCost = (originalCost * config.pricing.discountModifier).roundToInt()
+
+                appendNewInfoPrefixedLine()
+                append(buildText {
+                    appendTreeBranch(isLast = true)
+                    spacer("Mit ")
+                    append(config.pricing.premiumPrefixComponent)
+                    spacer(
+                        "${shift(HALF_SPACE_WIDTH)}sparst du ${castCoinFormat.format(effectiveCost - premiumCost)} " +
+                                "(${config.pricing.discountPercent}%)"
+                    )
+                    appendHoverHint()
+                    clickOpensUrl(config.pricing.premiumShopUrl)
+
+                    hoverEvent(buildText {
+                        appendHoverTitle("Premium")
+                        appendNewline()
+                        spacer("Klicke, um zum Shop zu gelangen.".toSmallCaps())
+                    })
+                })
             }
 
             appendNewInfoPrefixedLine()
             appendNewInfoPrefixedLine()
-            info("Wenn du das Grundstück kaufen möchtest,")
-
-            appendNewInfoPrefixedLine()
-            info("nutze den Bestätigungsknopf in deiner Hotbar.")
+            info("Bestätige den Kauf mit dem Knopf in deiner Hotbar.")
 
         }
     }
+
+    /**
+     * Appends a small icon to show players that the text has a hover.
+     */
+    private fun SurfComponentBuilder.appendHoverHint() = info(" ℹ")
+
+    /** Half the width of a space in pixels, used after the premium prefix which already ends with some spacing. */
+    private const val HALF_SPACE_WIDTH = 2
+
+    /**
+     * Appends a tree branch to show that the line is part of the line above.
+     */
+    private fun SurfComponentBuilder.appendTreeBranch(isLast: Boolean) =
+        spacer(if (isLast) "└ " else "├ ")
+
+    /**
+     * Appends the title of a hover, styled like the region information lore.
+     */
+    private fun SurfComponentBuilder.appendHoverTitle(title: String) =
+        protectColored(title.toSmallCaps(), TextDecoration.BOLD)
+
+    /**
+     * Appends a `▪ Key: Value` row to a hover, styled like the region information lore.
+     */
+    private fun SurfComponentBuilder.appendHoverRow(key: String, value: String) {
+        appendNewline()
+        appendBlob()
+        appendSpace()
+        white("$key: ".toSmallCaps())
+        variableValue(value)
+    }
+
+    /**
+     * Formats a price calculation like `441 Blöcke² × 20 CC = 8.820 CC`.
+     */
+    private fun calculation(blocks: Long, pricePerBlock: Double, cost: Double) =
+        "${blockFormat.format(blocks)} Blöcke² × ${castCoinFormat.format(pricePerBlock)} = ${castCoinFormat.format(cost)}"
 }
