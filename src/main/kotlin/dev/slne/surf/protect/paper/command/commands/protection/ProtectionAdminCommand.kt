@@ -8,6 +8,7 @@ import dev.slne.surf.api.core.messages.adventure.sendText
 import dev.slne.surf.protect.paper.command.commands.protection.argument.protectionArgument
 import dev.slne.surf.protect.paper.configManager
 import dev.slne.surf.protect.paper.permission.ProtectPermissionRegistry
+import dev.slne.surf.protect.paper.structureSurchargeConfigManager
 import dev.slne.surf.protect.paper.util.getRegionManagerOrNull
 
 fun protectionAdminCommand() = commandTree("protectionadmin") {
@@ -66,6 +67,7 @@ fun protectionAdminCommand() = commandTree("protectionadmin") {
         withPermission(ProtectPermissionRegistry.PROTECTION_ADMIN_RELOAD)
         anyExecutor { executor, _ ->
             configManager.reload()
+            structureSurchargeConfigManager.reload()
 
             executor.sendText {
                 appendSuccessPrefix()

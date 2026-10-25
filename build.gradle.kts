@@ -15,6 +15,7 @@ surfPaperPluginApi {
     serverDependencies {
         registerRequired("surf-transaction-paper")
         registerRequired("WorldGuard")
+        registerRequired("LuckPerms")
         registerSoft("surf-hud-paper")
     }
 }
@@ -29,6 +30,7 @@ dependencies {
     compileOnly("dev.slne.surf.transaction:surf-transaction-api:+")
     paperLibrary("pl.allegro.finance:tradukisto:4.3.3")
     compileOnly("dev.slne.surf.hud:surf-hud-api:1.0.1")
+    compileOnly("net.luckperms:api:5.5")
 }
 
 group = "dev.slne.surf.protect"

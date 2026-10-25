@@ -33,10 +33,11 @@ object Mth {
     fun calculateEffectiveCost(
         center: Location,
         temporaryRegion: TempProtectionRegion,
-        discountFactor: Double = 1.0
+        discountFactor: Double = 1.0,
+        structureSurcharge: Double = 0.0
     ): EffectiveCostResult {
         val (pricePerBlock, spawnDistance) = center.getProtectionPricePerBlock()
-        val rawCost = calculateProtectionPrice(temporaryRegion, pricePerBlock)
+        val rawCost = calculateProtectionPrice(temporaryRegion, pricePerBlock) + structureSurcharge
         val discountedCost = rawCost * discountFactor
 
         return EffectiveCostResult(

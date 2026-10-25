@@ -23,6 +23,8 @@ import org.bukkit.block.data.BlockData
 import org.bukkit.entity.Player
 import java.util.*
 import kotlin.math.abs
+import kotlin.math.roundToLong
+import kotlin.math.sign
 import com.sk89q.worldedit.util.Location as WorldEditLocation
 import com.sk89q.worldedit.world.World as WorldEditWorld
 
@@ -151,6 +153,84 @@ fun ProtectedRegion.fixedVolume(flat: Boolean = true): Long {
         val height = (maximumPoint.y() - minimumPoint.y() + 1).toLong()
         baseArea * height
     }
+}
+
+/**
+ * Calculates the area of this region that is not covered by [previous], e.g. the area that has to be
+ * paid for when [previous] is expanded to this region.
+ *
+ * If this region keeps the whole outline of [previous], this is the difference of both areas.
+ * If parts of [previous] were given up, only the area that is actually new counts, instead of
+ * just the net growth.
+ *
+ * This region must be convex, which every region created from the marker hull is.
+ */
+fun ProtectedRegion.addedArea(previous: ProtectedRegion): Long {
+    val area = fixedVolume()
+    val outline = points.map { Point2(it.x().toDouble(), it.z().toDouble()) }
+    val previousOutline = previous.points.map { Point2(it.x().toDouble(), it.z().toDouble()) }
+
+    val orientation = sign(twiceSignedArea(outline))
+    if (orientation == 0.0) return 0
+
+    if (previousOutline.all { isInsideConvex(outline, orientation, it) }) {
+        return (area - previous.fixedVolume()).coerceAtLeast(0)
+    }
+
+    val overlap = abs(twiceSignedArea(clipToConvex(previousOutline, outline, orientation))) / 2
+    return (area - overlap.roundToLong()).coerceAtLeast(0)
+}
+
+private data class Point2(val x: Double, val z: Double)
+
+private fun cross(a: Point2, b: Point2, p: Point2) = (b.x - a.x) * (p.z - a.z) - (b.z - a.z) * (p.x - a.x)
+
+private fun twiceSignedArea(outline: List<Point2>): Double {
+    var twiceArea = 0.0
+    for (i in outline.indices) {
+        val a = outline[i]
+        val b = outline[(i + 1) % outline.size]
+        twiceArea += a.x * b.z - b.x * a.z
+    }
+    return twiceArea
+}
+
+private fun isInsideConvex(outline: List<Point2>, orientation: Double, point: Point2): Boolean =
+    outline.indices.all { i -> cross(outline[i], outline[(i + 1) % outline.size], point) * orientation >= 0 }
+
+/**
+ * Clips [subject] to the convex [clip] outline (Sutherland–Hodgman).
+ * The subject may be concave, the area of the result is still correct.
+ */
+private fun clipToConvex(subject: List<Point2>, clip: List<Point2>, orientation: Double): List<Point2> {
+    var output = subject
+    for (i in clip.indices) {
+        if (output.isEmpty()) break
+        val a = clip[i]
+        val b = clip[(i + 1) % clip.size]
+        val input = output
+        output = ArrayList(input.size + 1)
+
+        for (j in input.indices) {
+            val current = input[j]
+            val previous = input[(j + input.size - 1) % input.size]
+            val currentSide = cross(a, b, current) * orientation
+            val previousSide = cross(a, b, previous) * orientation
+
+            if (currentSide >= 0) {
+                if (previousSide < 0) output.add(intersection(previous, current, previousSide, currentSide))
+                output.add(current)
+            } else if (previousSide >= 0) {
+                output.add(intersection(previous, current, previousSide, currentSide))
+            }
+        }
+    }
+    return output
+}
+
+private fun intersection(from: Point2, to: Point2, fromSide: Double, toSide: Double): Point2 {
+    val t = fromSide / (fromSide - toSide)
+    return Point2(from.x + (to.x - from.x) * t, from.z + (to.z - from.z) * t)
 }
 
 /**
