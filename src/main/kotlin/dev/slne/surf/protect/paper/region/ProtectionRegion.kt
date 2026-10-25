@@ -282,7 +282,7 @@ class ProtectionRegion(
         val tmpRegion = TempProtectionRegion(world, region, manager).also { tempRegion = it }
         val tmpVolume = tmpRegion.volume
         if (expandingProtection != null) {
-            tmpRegion.effectiveVolume = tmpVolume - expandingProtection.fixedVolume()
+            tmpRegion.effectiveVolume = region.addedArea(expandingProtection)
         }
 
         return when {
