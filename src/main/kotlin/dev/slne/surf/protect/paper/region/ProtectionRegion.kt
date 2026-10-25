@@ -459,6 +459,15 @@ class ProtectionRegion(
             return
         }
 
+        // Saving would bring back a protection that was sold or deleted in the meantime
+        if (expandingProtection != null && !tempRegion.manager.hasRegion(expandingProtection.id)) {
+            protectionUser.sendMessage(buildText {
+                appendErrorPrefix()
+                error("Das Grundstück, das du erweiterst, existiert nicht mehr.")
+            })
+            return
+        }
+
         val centerLoc = tempRegion.region.getFlag(Flags.TELE_LOC) ?: return run {
             protectionUser.sendMessage(Messages.Protecting.noTpPointFound)
         }
