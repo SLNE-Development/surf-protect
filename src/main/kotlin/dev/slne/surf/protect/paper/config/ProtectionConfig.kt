@@ -3,7 +3,10 @@ package dev.slne.surf.protect.paper.config
 import dev.slne.surf.api.core.config.constraints.PositiveNumber
 import dev.slne.surf.api.core.config.constraints.Range
 import dev.slne.surf.api.paper.extensions.server
+import dev.slne.surf.protect.paper.util.getGroupPrefix
 import dev.slne.surf.transaction.api.currency.Currency
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.block.BlockType
@@ -92,6 +95,11 @@ data class ProtectionConfig(
 
         @Range(min = 0.0, max = 100.0)
         val discountPercent: Int = 20,
+        val premiumShopUrl: String = "https://server.castcrafter.de/shop",
+        /** LuckPerms group whose prefix is shown in the premium hint */
+        val premiumGroup: String = "premium",
+        /** MiniMessage, shown when [premiumGroup] does not exist or has no prefix */
+        val premiumPrefix: String = "<#E79F42>Premium</#E79F42>",
 
         val environmentMultiplier: Map<World.Environment, Double> = mapOf(
             World.Environment.NORMAL to 1.0,
@@ -100,6 +108,9 @@ data class ProtectionConfig(
     ) {
         val discountModifier: Double
             get() = 1.0 - (discountPercent / 100.0)
+
+        val premiumPrefixComponent: Component
+            get() = MiniMessage.miniMessage().deserialize(getGroupPrefix(premiumGroup) ?: premiumPrefix)
     }
 
     @ConfigSerializable

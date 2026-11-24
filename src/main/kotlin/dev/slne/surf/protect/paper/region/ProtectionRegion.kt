@@ -27,6 +27,8 @@ import dev.slne.surf.protect.paper.region.flags.ProtectionFlagsRegistry
 import dev.slne.surf.protect.paper.region.info.RegionCreationState
 import dev.slne.surf.protect.paper.region.info.RegionInfo
 import dev.slne.surf.protect.paper.region.settings.ProtectionSettings
+import dev.slne.surf.protect.paper.region.structure.StructureFootprint
+import dev.slne.surf.protect.paper.region.structure.StructureSurcharge
 import dev.slne.surf.protect.paper.region.visual.Marker
 import dev.slne.surf.protect.paper.region.visual.QuickHull
 import dev.slne.surf.protect.paper.region.visual.Trail
@@ -50,8 +52,12 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import java.lang.ref.WeakReference
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.logging.Level
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.math.min
 import kotlin.math.roundToInt
+import com.sk89q.worldedit.util.Location as WorldEditLocation
 
 class ProtectionRegion(
     val protectionUser: ProtectionUser,
@@ -71,6 +77,22 @@ class ProtectionRegion(
     private var tempRegion: TempProtectionRegion? = null
 
     private val isProcessingTransaction = AtomicBoolean(false)
+
+    private val regionMinY: Int = expandingProtection?.minimumPoint?.y() ?: player.world.let { world ->
+        if (world.environment == World.Environment.NETHER && config.protection.protectOnlyAboveNetherRoofInNether) {
+            world.logicalHeight
+        } else {
+            world.minHeight
+        }
+    }
+    private val regionMaxY: Int = expandingProtection?.maximumPoint?.y() ?: (player.world.maxHeight - 1)
+    private val structureFootprint = StructureFootprint(player.world, regionMinY, regionMaxY)
+
+    /** Increased whenever the region changes, so offers calculated for an outdated region are dropped. */
+    private val offerVersion = AtomicInteger()
+
+    @Volatile
+    private var lastOffer: OfferedCost? = null
 
     val markerCountLeft: Int get() = maxMarkerCount - currentMarkerCount
     val maxMarkerCount: Int
@@ -181,6 +203,9 @@ class ProtectionRegion(
     }
 
     private fun offerAccepting(): RegionCreationState {
+        offerVersion.incrementAndGet()
+        lastOffer = null
+
         if (hull.size < config.markers.minAmount) {
             protectionUser.sendMessage(Messages.Protecting.moreMarkers(hull.size))
             tempRegion = null
@@ -200,8 +225,8 @@ class ProtectionRegion(
             region = ProtectedPolygonalRegion(
                 expandingProtection.id,
                 vectors,
-                expandingProtection.minimumPoint.y(),
-                expandingProtection.maximumPoint.y()
+                regionMinY,
+                regionMaxY
             )
             region.copyFrom(expandingProtection)
         } else {
@@ -212,8 +237,8 @@ class ProtectionRegion(
             region = ProtectedPolygonalRegion(
                 name,
                 vectors,
-                if (world.environment == World.Environment.NETHER && config.protection.protectOnlyAboveNetherRoofInNether) world.logicalHeight else world.minHeight,
-                world.maxHeight - 1
+                regionMinY,
+                regionMaxY
             )
             region.owners.addPlayer(protectionUser.localPlayer)
 
@@ -257,7 +282,7 @@ class ProtectionRegion(
         val tmpRegion = TempProtectionRegion(world, region, manager).also { tempRegion = it }
         val tmpVolume = tmpRegion.volume
         if (expandingProtection != null) {
-            tmpRegion.effectiveVolume = tmpVolume - expandingProtection.fixedVolume()
+            tmpRegion.effectiveVolume = region.addedArea(expandingProtection)
         }
 
         return when {
@@ -274,15 +299,14 @@ class ProtectionRegion(
             }
 
             else -> {
-                val currency = config.currency
-                val discountFactor = getDiscountFactor()
-                val (effectiveCost, pricePerBlock, spawnDistance) = Mth.calculateEffectiveCost(
+                // The structure surcharge needs chunks to be loaded, so it is added in sendOfferAsync
+                val (baseCost, _, spawnDistance) = Mth.calculateEffectiveCost(
                     centerLoc,
                     tmpRegion,
-                    discountFactor
+                    getDiscountFactor()
                 )
 
-                if (effectiveCost <= 0) {
+                if (baseCost <= 0) {
                     protectionUser.sendMessage(Messages.Protecting.areaTooSmall)
                     RegionCreationState.TOO_SMALL
                 } else {
@@ -294,21 +318,78 @@ class ProtectionRegion(
                         return RegionCreationState.TOO_NEAR_FROM_SPAWN
                     }
 
-                    protectionUser.sendMessage(
-                        Messages.Protecting.offer(
-                            tmpVolume,
-                            effectiveCost,
-                            currency.currency,
-                            pricePerBlock,
-                            spawnDistance,
-                            discountFactor
-                        )
-                    )
+                    sendOfferAsync(tmpRegion, centerLoc)
                     RegionCreationState.SUCCESS
                 }
             }
         }
     }
+
+    /**
+     * Calculates the offer including the structure surcharge and sends it, unless the region
+     * changed in the meantime.
+     */
+    private fun sendOfferAsync(tmpRegion: TempProtectionRegion, centerLoc: WorldEditLocation) {
+        val version = offerVersion.get()
+        plugin.launch {
+            val offer = calculateOfferOrNull(tmpRegion, centerLoc) ?: return@launch
+            if (offerVersion.get() != version) return@launch
+            sendOffer(offer, version)
+        }
+    }
+
+    private fun sendOffer(offer: Offer, version: Int) {
+        val (effectiveCost, pricePerBlock, spawnDistance, discountFactor) = offer.cost
+        lastOffer = OfferedCost(version, effectiveCost)
+
+        protectionUser.sendMessage(
+            Messages.Protecting.offer(
+                offer.region.volume,
+                effectiveCost,
+                config.currency.currency,
+                pricePerBlock,
+                spawnDistance,
+                discountFactor,
+                offer.structureSurcharge,
+                offer.region.effectiveVolume
+            )
+        )
+    }
+
+    private suspend fun calculateOffer(tmpRegion: TempProtectionRegion, centerLoc: WorldEditLocation): Offer {
+        val structureSurcharge = structureFootprint.calculateSurcharge(tmpRegion.region, expandingProtection)
+        val cost = Mth.calculateEffectiveCost(
+            centerLoc,
+            tmpRegion,
+            getDiscountFactor(),
+            structureSurcharge.totalCost
+        )
+
+        return Offer(tmpRegion, cost, structureSurcharge)
+    }
+
+    /**
+     * Calculates the offer, or tells the player that it failed, e.g. because a chunk could not be loaded.
+     */
+    private suspend fun calculateOfferOrNull(tmpRegion: TempProtectionRegion, centerLoc: WorldEditLocation): Offer? {
+        return try {
+            calculateOffer(tmpRegion, centerLoc)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            plugin.logger.log(Level.WARNING, "Failed to calculate the protection offer for ${player.name}", e)
+            protectionUser.sendMessage(Messages.Protecting.offerCalculationFailed)
+            null
+        }
+    }
+
+    private class Offer(
+        val region: TempProtectionRegion,
+        val cost: Mth.EffectiveCostResult,
+        val structureSurcharge: StructureSurcharge
+    )
+
+    private data class OfferedCost(val version: Int, val cost: Double)
 
     /**
      * Handles removal of marker
@@ -378,16 +459,26 @@ class ProtectionRegion(
             return
         }
 
+        // Saving would bring back a protection that was sold or deleted in the meantime
+        if (expandingProtection != null && !tempRegion.manager.hasRegion(expandingProtection.id)) {
+            protectionUser.sendMessage(buildText {
+                appendErrorPrefix()
+                error("Das Grundstück, das du erweiterst, existiert nicht mehr.")
+            })
+            return
+        }
+
         val centerLoc = tempRegion.region.getFlag(Flags.TELE_LOC) ?: return run {
             protectionUser.sendMessage(Messages.Protecting.noTpPointFound)
         }
 
-        val discountFactor = getDiscountFactor()
-        val costResult = Mth.calculateEffectiveCost(centerLoc, tempRegion, discountFactor)
-        val cost = costResult.effectiveCost.roundToInt()
-        val costBD = (-cost).toBigDecimal()
-        val currency = config.currency.currency
+        // Recalculate before paying, so the player never pays a price that differs from the last offer
+        val version = offerVersion.get()
+        val offeredCost = lastOffer?.takeIf { it.version == version }?.cost
+        val offer = calculateOfferOrNull(tempRegion, centerLoc) ?: return
+        if (offerVersion.get() != version) return // the region changed while calculating
 
+        val costResult = offer.cost
         if (costResult.pricePerBlock == Double.MAX_VALUE) {
             protectionUser.sendMessage(buildText {
                 appendErrorPrefix()
@@ -395,6 +486,23 @@ class ProtectionRegion(
             })
             return
         }
+
+        if (costResult.effectiveCost <= 0) {
+            protectionUser.sendMessage(Messages.Protecting.areaTooSmall)
+            return
+        }
+
+        if (offeredCost != costResult.effectiveCost) {
+            if (offeredCost != null) {
+                protectionUser.sendMessage(Messages.Protecting.offerChanged)
+            }
+            sendOffer(offer, version)
+            return
+        }
+
+        val cost = costResult.effectiveCost.roundToInt()
+        val costBD = (-cost).toBigDecimal()
+        val currency = config.currency.currency
 
         if (!isProcessingTransaction.compareAndSet(false, true)) {
             protectionUser.sendMessage(Messages.Protecting.alreadyProcessingTransaction)
